@@ -21,8 +21,8 @@ class YouTubeJson(object):
         try:
             self._json = json.loads(data)
             return self._json
-        except Exception as e:
-            logging.critical(e, exc_info=True)
+        except ValueError as E:
+            logging.critical(E, exc_info=True)
 
     def write(self, file_name, force=True):
         file_dir = os.path.split(file_name)[0]

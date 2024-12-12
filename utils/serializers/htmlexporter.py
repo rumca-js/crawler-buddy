@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from ..basictypes import fix_path_for_os
-from webtools import Url, YouTubeVideoHandler, InputContent
+from rsshistory.webtools import Url, YouTubeVideoHandler, InputContent
 
 
 def fix_entry_link_name(link):
@@ -51,7 +51,7 @@ class HtmlEntryExporter(object):
         try:
             with open(file_name, "w", encoding="utf-8") as fh:
                 fh.write(text)
-        except Exception as E:
+        except OSError as E:
             print(
                 "Cannot write file:{} len:{}\n{}".format(
                     str(file_name), len(str(file_name)), str(E)

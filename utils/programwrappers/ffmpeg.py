@@ -3,15 +3,17 @@ import os
 
 
 class FFmpeg(object):
-    def __init__(self, name, timeout_s=60 * 60):
+    def __init__(self, name, cwd=None, timeout_s=60 * 60):
         self.name = name
         self.timeout_s = timeout_s
+        self.cwd = cwd
 
     def convert_to_mp3(self, mp3_name):
         data = subprocess.run(
             ["ffmpeg", "-y", "-i", self.name, "-vn", mp3_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            cwd=self.cwd,
             timeout=self.timeout_s,
         )
 
@@ -29,7 +31,7 @@ class FFmpeg(object):
                 ["ffmpeg"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                timeout=self.timeout_s,
+                timeout=10,
             )
         except:
             return False
@@ -45,6 +47,7 @@ class Vlc(object):
             ["vlc", self.name, "vlc://quit"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            cwd=self.cwd,
             timeout=self.timeout_s,
         )
 
@@ -55,7 +58,7 @@ class Vlc(object):
                 ["vlc"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                timeout=self.timeout_s,
+                timeout=10,
             )
         except:
             return False

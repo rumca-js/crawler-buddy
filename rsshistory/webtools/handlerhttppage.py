@@ -1,6 +1,7 @@
 import subprocess
 import json
 import os
+import traceback
 from pathlib import Path
 
 from urllib3.exceptions import InsecureRequestWarning
@@ -8,21 +9,21 @@ from urllib3 import disable_warnings
 from datetime import timedelta
 
 from utils.dateutils import DateUtils
-from utils.basictypes import fix_path_for_os
 
 from .webtools import (
     WebLogger,
     PageRequestObject,
     PageResponseObject,
     PageOptions,
-    DomainAwarePage,
     lazy_load_content,
     HTTP_STATUS_CODE_EXCEPTION,
     HTTP_STATUS_CODE_CONNECTION_ERROR,
     HTTP_STATUS_CODE_TIMEOUT,
     HTTP_STATUS_CODE_FILE_TOO_BIG,
     HTTP_STATUS_CODE_PAGE_UNSUPPORTED,
+    HTTP_STATUS_CODE_SERVER_ERROR,
 )
+from .urllocation import UrlLocation
 from .pages import (
     ContentInterface,
     DefaultContentPage,
@@ -30,6 +31,8 @@ from .pages import (
     HtmlPage,
     RssPage,
 )
+from .handlerinterface import HandlerInterface
+from .webconfig import WebConfig
 
 
 class HttpRequestBuilder(object):
@@ -41,9 +44,8 @@ class HttpRequestBuilder(object):
     """
 
     # use headers from https://www.supermonitoring.com/blog/check-browser-http-headers/
-    get_contents_function = None
 
-    def __init__(self, url=None, options=None, page_object=None, request=None):
+    def __init__(self, url=None, options=None, page_object=None, request=None, url_builder=None):
         """
         @param url URL
         @param contents URL page contents
@@ -92,9 +94,6 @@ class HttpRequestBuilder(object):
         if not self.user_agent:
             self.user_agent = HttpPageHandler.user_agent
 
-        if HttpRequestBuilder.get_contents_function is None:
-            self.get_contents_function = self.get_contents_internal
-
         self.headers = None
         if request:
             if request.headers:
@@ -140,67 +139,65 @@ class HttpRequestBuilder(object):
 
         First configured thing provides return value
         """
-        from .webconfig import (
-            WebConfig,
-        )
         if self.options:
             request.ssl_verify = self.options.ssl_verify
         if self.options:
             request.ping = self.options.ping
 
-        if self.options.use_basic_crawler():
-            # up to 20
-            request.timeout_s = min(request.timeout_s, 20)
-            # at least 10
-            request.timeout_s = max(request.timeout_s, 10)
-
-            for crawler_data in WebConfig.browser_mapping["standard"]:
-                crawler = crawler_data["crawler"]
-                settings = crawler_data["settings"]
-                WebLogger.debug("Running crawler {}".format(crawler))
-                c = crawler(request=request, settings=settings)
-                c.run()
-                response = c.get_response()
-                c.close()
-                if response:
-                    return response
-
-        elif self.options.use_headless_browser:
-            # up to 30
-            request.timeout_s = min(request.timeout_s, 30)
-            # at least 20
-            request.timeout_s = max(request.timeout_s, 20)
-
-            for crawler_data in WebConfig.browser_mapping["headless"]:
-                crawler = crawler_data["crawler"]
-                settings = crawler_data["settings"]
-                WebLogger.debug("Running crawler {}".format(crawler))
-                c = crawler(request=request, settings=settings)
-                c.run()
-                response = c.get_response()
-                c.close()
-                if response:
-                    return response
-
-        elif self.options.use_full_browser:
-            # up to 40
-            request.timeout_s = min(request.timeout_s, 40)
-            # at least 30
-            request.timeout_s = max(request.timeout_s, 30)
-
-            for crawler_data in WebConfig.browser_mapping["full"]:
-                crawler = crawler_data["crawler"]
-                settings = crawler_data["settings"]
-                WebLogger.debug("Running crawler {}".format(crawler))
-                c = crawler(request=request, settings=settings)
-                c.run()
-                response = c.get_response()
-                c.close()
-                if response:
-                    return response
+        if self.options:
+            mode_mapping = self.options.mode_mapping
         else:
+            mode_mapping = WebConfig.get_init_crawler_config()
+
+        request.timeout_s = self.options.get_timeout(request.timeout_s)
+
+        if not mode_mapping or len(mode_mapping) == 0:
             self.dead = True
-            raise NotImplementedError("Could not identify method of page capture")
+            WebLogger.error(
+                "Url:{} Could not identify method of page capture".format(request.url)
+            )
+            WebLogger.error("Could not identify method of page capture")
+
+            self.response = PageResponseObject(
+                request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_SERVER_ERROR,
+                request_url=request.url,
+            )
+            return self.response
+
+        for crawler_data in mode_mapping:
+            crawler = WebConfig.get_crawler_from_mapping(request, crawler_data)
+            if not crawler:
+                WebLogger.debug(
+                    "Cannot find crawler in WebConfig:{}".format(
+                        crawler_data["crawler"]
+                    )
+                )
+                continue
+
+            WebLogger.debug(
+                "Url:{}: Running crawler {}".format(request.url, type(crawler))
+            )
+            crawler.run()
+            response = crawler.get_response()
+            crawler.close()
+            if response:
+                return response
+
+        self.dead = True
+        WebLogger.error(
+            "Url:{} No response from crawler".format(request.url)
+        )
+
+        self.response = PageResponseObject(
+            request.url,
+            text=None,
+            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
+            request_url=request.url,
+        )
+        return self.response
+
 
     def ping(self, timeout_s=5):
         url = self.url
@@ -219,14 +216,9 @@ class HttpRequestBuilder(object):
             ping=True,
         )
 
-        try:
-            response = self.get_contents_function(request=o)
+        response = self.get_contents_internal(request=o)
 
-            return response is not None and response.is_valid()
-
-        except Exception as E:
-            WebLogger.exc(E, "Url:{}. Ping error\n".format(url))
-            return False
+        return response and response.is_valid()
 
     def get_headers_response(self, timeout_s=5):
         url = self.url
@@ -246,7 +238,7 @@ class HttpRequestBuilder(object):
                 ping=True,
             )
 
-            response = self.get_contents_function(request=o)
+            response = self.get_contents_internal(request=o)
             if response and response.is_valid():
                 return response
 
@@ -276,26 +268,21 @@ class HttpRequestBuilder(object):
             self.dead = True
             return None
 
-        try:
-            WebLogger.info("[R] Url:{}. Options:{}".format(self.url, self.options))
+        WebLogger.info("[R] Url:{}. Options:{}".format(self.url, self.options))
 
-            request = PageRequestObject(
-                url=self.url,
-                headers=self.headers,
-                timeout_s=self.timeout_s,
+        request = PageRequestObject(
+            url=self.url,
+            headers=self.headers,
+            timeout_s=self.timeout_s,
+        )
+
+        self.response = self.get_contents_internal(request=request)
+
+        WebLogger.info(
+            "Url:{}. Options:{} Requesting page: DONE".format(
+                self.url, self.options
             )
-
-            self.response = self.get_contents_function(request=request)
-
-            WebLogger.info(
-                "Url:{}. Options:{} Requesting page: DONE".format(
-                    self.url, self.options
-                )
-            )
-
-        except Exception as E:
-            self.dead = True
-            WebLogger.exc(E, "Url:{}".format(self.url))
+        )
 
         return self.response
 
@@ -313,7 +300,7 @@ class HttpRequestBuilder(object):
         if self.url == None:
             return False
 
-        p = DomainAwarePage(self.url)
+        p = UrlLocation(self.url)
         if not p.is_web_link():
             return False
 
@@ -332,19 +319,15 @@ class HttpRequestBuilder(object):
         return status_code >= 200 and status_code < 300
 
 
-class HttpPageHandler(ContentInterface):
+class HttpPageHandler(HandlerInterface):
     user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"
-    ssl_verify = True
 
-    def __init__(self, url=None, page_options=None):
-        super().__init__(url=url, contents=None)
-        self.p = None  # page contents object, HtmlPage, RssPage, or whathver
+    def __init__(self, url=None, contents=None, page_options=None, url_builder=None):
+        super().__init__(url=url, contents=contents, page_options=page_options, url_builder =url_builder)
+        self.p = None
         self.response = None
         self.options = page_options
-
-    def disable_ssl_warnings():
-        HttpPageHandler.ssl_verify = False
-        disable_warnings(InsecureRequestWarning)
+        self.url_builder = url_builder
 
     def is_handled_by(url):
         if url.startswith("https") or url.startswith("http"):
@@ -352,22 +335,43 @@ class HttpPageHandler(ContentInterface):
         return False
 
     def get_contents(self):
+        """
+        Obtains only contents
+        """
         if self.response and self.response.get_text():
             return self.response.get_text()
 
-        return self.get_contents_implementation()
+        self.get_response_implementation()
+
+        if self.response and self.response.get_text():
+            return self.response.get_text()
 
     def get_response(self):
+        """
+        Obtains response, analyzes structure, etc
+        """
         if self.response:
             return self.response
 
-        self.get_contents_implementation()
+        self.get_response_implementation()
+
+        self.p = self.get_page_handler()
 
         if self.response:
             return self.response
 
-    def get_contents_implementation(self):
-        self.p = self.get_page_handler_simple()
+    def get_response_implementation(self):
+        self.get_response_once()
+
+        if not self.options:
+            WebLogger.error("No options passed")
+            return
+
+        original_mapping = self.options.mode_mapping
+
+        if len(self.options.mode_mapping) < 2:
+            return
+
 
         if (
             self.options.use_browser_promotions
@@ -376,29 +380,32 @@ class HttpPageHandler(ContentInterface):
             # we warn, because if that happens too often, it is easy just to
             # define EntryRule for that domain
             WebLogger.error(
-                "Url:{}. Trying to workaround with headless browser".format(self.url)
+                "Url:{}. Retrying with different browser {}".format(
+                    self.url,
+                    self.options.mode_mapping[0],
+                )
             )
-            self.options.use_headless_browser = True
-            self.p = self.get_page_handler_simple()
 
-        if self.response:
-            return self.response.get_text()
+            self.options.mode_mapping = self.options.mode_mapping[1:]
 
-    def get_page_handler_simple(self):
+            self.get_response_once()
+
+            self.options.mode_mapping = original_mapping
+
+    def get_response_once(self):
         url = self.url
 
-        dap = DomainAwarePage(url)
+        dap = UrlLocation(url)
 
         if url.startswith("https") or url.startswith("http"):
             if not dap.is_media():
-                p = HttpRequestBuilder(url=url, options=self.options)
-                self.response = p.get_response()
+                builder = HttpRequestBuilder(url=url, options=self.options)
+                self.response = builder.get_response()
+
                 if not self.response:
                     return
 
-                contents = self.response.get_text()
-
-                if not p.is_valid():
+                if not builder.is_valid():
                     return
 
         else:
@@ -406,53 +413,22 @@ class HttpPageHandler(ContentInterface):
             # there is no request, there is no response
             pass
 
-        if contents:
-            """ """
+    def get_page_handler(self):
+        """
+        Note: some servers might return text/html for RSS sources.
+              We must manually check what kind of data it is.
+              For speed - we check first what is suggested by content-type
+        """
+        contents = None
+        if self.response and self.response.get_text():
+            contents = self.response.get_text()
 
-            if self.is_html():
-                p = HtmlPage(url, contents)
-                if p.is_valid():
-                    return p
+        if not contents:
+            return
 
-                # some servers might return text/html for RSS sources
-                # we verify if content type is valid
+        url = self.url
 
-                p = RssPage(url, contents)
-                if p.is_valid():
-                    return p
-
-                p = JsonPage(url, contents)
-                if p.is_valid():
-                    return p
-
-            if self.is_rss():
-                p = RssPage(url, contents)
-                if p.is_valid():
-                    return p
-
-                p = HtmlPage(url, contents)
-                if p.is_valid():
-                    return p
-
-                p = JsonPage(url, contents)
-                if p.is_valid():
-                    return p
-
-            if self.is_json():
-                p = JsonPage(url, contents)
-                if p.is_valid():
-                    return p
-
-                p = RssPage(url, contents)
-                if p.is_valid():
-                    return p
-
-                p = HtmlPage(url, contents)
-                if p.is_valid():
-                    return p
-
-            # we do not know what it is. Guess
-
+        if self.is_html():
             p = HtmlPage(url, contents)
             if p.is_valid():
                 return p
@@ -465,22 +441,65 @@ class HttpPageHandler(ContentInterface):
             if p.is_valid():
                 return p
 
-            # TODO
-            # p = XmlPage(url, contents)
-            # if p.is_valid():
-            #    return p
+        if self.is_rss():
+            p = RssPage(url, contents)
+            if p.is_valid():
+                return p
 
+            p = HtmlPage(url, contents)
+            if p.is_valid():
+                return p
+
+            p = JsonPage(url, contents)
+            if p.is_valid():
+                return p
+
+        if self.is_json():
+            p = JsonPage(url, contents)
+            if p.is_valid():
+                return p
+
+            p = RssPage(url, contents)
+            if p.is_valid():
+                return p
+
+            p = HtmlPage(url, contents)
+            if p.is_valid():
+                return p
+
+        if self.is_text():
             p = DefaultContentPage(url, contents)
             return p
 
-        if self.response and self.response.is_valid():
-            p = DefaultContentPage(url, contents)
+        # we do not know what it is. Guess
+
+        p = HtmlPage(url, contents)
+        if p.is_valid():
             return p
+
+        p = RssPage(url, contents)
+        if p.is_valid():
+            return p
+
+        p = JsonPage(url, contents)
+        if p.is_valid():
+            return p
+
+        # TODO
+        # p = XmlPage(url, contents)
+        # if p.is_valid():
+        #    return p
+
+        p = DefaultContentPage(url, contents)
+        return p
 
     def is_advanced_processing_possible(self):
         """
         If we do not have data, but we think we can do better
         """
+        if self.options.mode_mapping is None:
+            return False
+
         if not self.response:
             return True
 
@@ -494,25 +513,14 @@ class HttpPageHandler(ContentInterface):
             return False
 
         if status_code < 200 or status_code > 404:
-            if self.options.use_basic_crawler():
-                return True
-            else:
-                return False
-
-        if not self.options.use_basic_crawler():
-            return False
-
-        if not self.p:
             return True
 
-        if self.p and self.p.is_cloudflare_protected():
-            text = self.response.get_text()
-            print(text)
-            return True
+        # if not self.p:
+        #    return True
 
-        if not self.p.is_valid():
-            # if we have response, but it is invalid, we may try obtaining contents with more advanced processing
-            return True
+        # if not self.p.is_valid():
+        #    # if we have response, but it is invalid, we may try obtaining contents with more advanced processing
+        #    return True
 
         text = self.response.get_text()
 
@@ -545,6 +553,14 @@ class HttpPageHandler(ContentInterface):
             self.response
             and self.response.get_content_type() is not None
             and self.response.is_content_json()
+        ):
+            return True
+
+    def is_text(self):
+        if (
+            self.response
+            and self.response.get_content_type() is not None
+            and self.response.get_content_type().find("text") >= 0
         ):
             return True
 
@@ -655,10 +671,12 @@ class HttpPageHandler(ContentInterface):
         if self.p:
             if type(self.p) is RssPage:
                 return self.p.get_entries()
+        return []
 
     def get_feeds(self):
         # TODO ugly import
         from .handlers import RedditChannelHandler
+
         result = []
         url = self.url
 
@@ -667,6 +685,9 @@ class HttpPageHandler(ContentInterface):
             feeds = h.get_feeds()
             if feeds and len(feeds) > 0:
                 result.extend(feeds)
+
+        if not self.p:
+            return result
 
         if type(self.p) is RssPage:
             # we do not add ourselve
@@ -678,3 +699,7 @@ class HttpPageHandler(ContentInterface):
                 result.extend(feeds)
 
         return result
+
+    def ping(self, timeout_s = 120):
+        builder = HttpRequestBuilder(url=self.url, options=self.options)
+        return builder.ping()

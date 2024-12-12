@@ -6,13 +6,14 @@ from datetime import datetime
 from dateutil import parser
 import html
 
-from webtools import (
-  DomainAwarePage,
-  calculate_hash,
-  WebLogger,
-  date_str_to_date,
-)
 from utils.dateutils import DateUtils
+
+from .webtools import (
+    calculate_hash,
+    WebLogger,
+    date_str_to_date,
+)
+from .urllocation import  UrlLocation
 from .feedreader import FeedReader
 
 
@@ -45,6 +46,9 @@ class ContentInterface(object):
     def get_tags(self):
         raise NotImplementedError
 
+    def get_url(self):
+        return self.url
+
     def get_page_rating(self):
         """
         Default behavior
@@ -66,7 +70,10 @@ class ContentInterface(object):
 
         page_rating = (float(page_rating) * 100.0) / float(max_page_rating)
 
-        return int(page_rating)
+        try:
+            return int(page_rating)
+        except ValueError:
+            return 0
 
     def get_page_rating_vector(self):
         """
@@ -157,7 +164,11 @@ class ContentInterface(object):
         content = content.lower()
 
         # Get the current year
-        current_year = int(datetime.now().year)
+        try:
+            current_year = int(datetime.now().year)
+        except ValueError:
+            # TODO fix this
+            current_year = 2024
 
         # Define regular expressions
         current_year_pattern = re.compile(rf"\b{current_year}\b")
@@ -170,7 +181,12 @@ class ContentInterface(object):
         scope = None
 
         if match_current_year:
-            year = int(current_year)
+            try:
+                year = int(current_year)
+            except ValueError:
+                # TODO fix this
+                year = 2024
+
             # Limit the scope to a specific portion before and after year
             scope = content[
                 max(0, match_current_year.start() - 15) : match_current_year.start()
@@ -179,14 +195,19 @@ class ContentInterface(object):
         else:
             match_four_digit_number = four_digit_number_pattern.search(content)
             if match_four_digit_number:
-                year = int(match_four_digit_number.group(0))
-                # Limit the scope to a specific portion before and after year
-                scope = content[
-                    max(
-                        0, match_four_digit_number.start() - 15
-                    ) : match_four_digit_number.start()
-                    + 20
-                ]
+
+                try:
+                    year = int(match_four_digit_number.group(0))
+
+                    # Limit the scope to a specific portion before and after year
+                    scope = content[
+                        max(
+                            0, match_four_digit_number.start() - 15
+                        ) : match_four_digit_number.start()
+                        + 20
+                    ]
+                except ValueError:
+                    return
 
         if scope:
             return self.guess_by_scope(scope, year)
@@ -259,13 +280,12 @@ class ContentInterface(object):
         return date_object
 
     def format_date(self, year, month, day):
-
         month_number = None
 
         try:
             month_number = int(month)
             month_number = month
-        except Exception as E:
+        except ValueError as E:
             WebLogger.debug("Error:{}".format(str(E)))
 
         if not month_number:
@@ -345,7 +365,7 @@ class ContentInterface(object):
         else:
             rating.append([0, 1])
 
-        p = DomainAwarePage(self.url)
+        p = UrlLocation(self.url)
         if p.is_domain():
             rating.append([1, 1])
 
@@ -415,7 +435,7 @@ class JsonPage(ContentInterface):
         try:
             contents = self.get_contents()
             self.json_obj = json.loads(contents)
-        except Exception as e:
+        except ValueError:
             # to be expected
             WebLogger.debug("Invalid json:{}".format(contents))
 
@@ -598,13 +618,13 @@ class RssPageEntry(ContentInterface):
                     utc = DateUtils.to_utc_date(dt)
                     return utc
 
-                except Exception as e:
+                except Exception as E:
                     WebLogger.error(
                         "RSS parser {} datetime invalid feed datetime:{};\nFeed DateTime:{};\nExc:{}\n".format(
                             self.url,
                             self.feed_entry.published,
                             self.feed_entry.published,
-                            str(e),
+                            str(E),
                         )
                     )
                 return DateUtils.get_datetime_now_utc()
@@ -654,8 +674,8 @@ class RssPage(ContentInterface):
 
         try:
             self.feed = FeedReader.parse(contents)
-            if not self.feed.entries or len(self.feed.entries) == 0:
-                WebLogger.error("Feed does not have any entries {}".format(self.url))
+            # if not self.feed.entries or len(self.feed.entries) == 0:
+            #    WebLogger.error("Feed does not have any entries {}".format(self.url))
 
             return self.feed
 
@@ -760,6 +780,9 @@ class RssPage(ContentInterface):
 
         image = None
         if "image" in self.feed.feed:
+            if self.feed.feed.image == {}:
+                return
+
             if "href" in self.feed.feed.image:
                 try:
                     image = self.feed.feed.image["href"]
@@ -779,16 +802,7 @@ class RssPage(ContentInterface):
             elif "links" in self.feed.feed.image:
                 links = self.feed.feed.image["links"]
                 if len(links) > 0:
-                    if "type" in links[0]:
-                        if links[0]["type"] == "text/html":
-                            pass
-                            # normal scenario, no worries
-                        else:
-                            WebLogger.error(
-                                '<a href="{}">{}</a> Unsupported image type for feed. Image:{}'.format(
-                                    self.url, self.url, str(self.feed.feed.image)
-                                )
-                            )
+                    WebLogger.error("I do not know how to process links {}".format(str(links)))
             else:
                 WebLogger.error(
                     '<a href="{}">{}</a> Unsupported image type for feed. Image:{}'.format(
@@ -802,7 +816,7 @@ class RssPage(ContentInterface):
         #        image = self.get_thumbnail_manual_from_youtube()
 
         if image and image.lower().find("https://") == -1:
-            image = DomainAwarePage.get_url_full(self.url, image)
+            image = UrlLocation.get_url_full(self.url, image)
 
         return image
 
@@ -884,7 +898,7 @@ class ContentLinkParser(ContentInterface):
 
     def __init__(self, url, contents):
         super().__init__(url=url, contents=contents)
-        self.url = DomainAwarePage(url).get_clean_url()
+        self.url = UrlLocation(url).get_clean_url()
 
     def get_links(self):
         links = set()
@@ -894,6 +908,32 @@ class ContentLinkParser(ContentInterface):
         links.update(self.get_links_https("http"))
         links.update(self.get_links_https_encoded("http"))
         links.update(self.get_links_href())
+
+        # TODO - maybe this thing below could be made more clean, or refactored
+        result = set()
+        for item in links:
+            wh = item.find('"')
+            if wh != -1:
+                item = item[:wh]
+            wh = item.find('<')
+            if wh != -1:
+                item = item[:wh]
+            wh = item.find('>')
+            if wh != -1:
+                item = item[:wh]
+            wh = item.find('&quot;')
+            if wh != -1:
+                item = item[:wh]
+            wh = item.find('&gt;')
+            if wh != -1:
+                item = item[:wh]
+            wh = item.find('&lt;')
+            if wh != -1:
+                item = item[:wh]
+
+            result.add(item.strip())
+
+        links = result
 
         # This is most probably redundant
         if None in links:
@@ -911,7 +951,7 @@ class ContentLinkParser(ContentInterface):
 
         result = set()
         for link in links:
-            if DomainAwarePage(link).is_web_link():
+            if UrlLocation(link).is_web_link():
                 result.add(link)
 
         return links
@@ -935,7 +975,8 @@ class ContentLinkParser(ContentInterface):
         # links cannot end with "."
         all_matches = [link.rstrip(".") for link in all_matches]
         all_matches = [ContentLinkParser.decode_url(link) for link in all_matches]
-        return set(all_matches)
+
+        return all_matches
 
     def join_url_parts(self, partone, parttwo):
         if not partone.endswith("/"):
@@ -952,7 +993,7 @@ class ContentLinkParser(ContentInterface):
         links = set()
 
         url = self.url
-        domain = DomainAwarePage(self.url).get_domain()
+        domain = UrlLocation(self.url).get_domain()
 
         cont = str(self.get_contents())
 
@@ -1008,7 +1049,7 @@ class ContentLinkParser(ContentInterface):
     def filter_link_html(links):
         result = set()
         for link in links:
-            p = DomainAwarePage(link)
+            p = UrlLocation(link)
             if p.is_link():
                 result.add(link)
 
@@ -1053,8 +1094,15 @@ class ContentLinkParser(ContentInterface):
     def filter_domains(links):
         result = set()
         for link in links:
-            p = DomainAwarePage(link)
+            p = UrlLocation(link)
             new_link = p.get_domain()
+            if new_link == "https://" or new_link == "http://":
+                WebLogger.error("Incorrect link to add: {}".format(new_link), stack=True)
+                continue
+
+            if not p.is_web_link():
+                continue
+
             if new_link:
                 result.add(new_link)
 
@@ -1063,13 +1111,28 @@ class ContentLinkParser(ContentInterface):
     def get_domains(self):
         links = self.get_links()
         links = ContentLinkParser.filter_domains(links)
+
+        # TODO This is most probably redundant
+        if None in links:
+            links.remove(None)
+        if "" in links:
+            links.remove("")
+        if "http" in links:
+            links.remove("http")
+        if "https" in links:
+            links.remove("https")
+        if "http://" in links:
+            links.remove("http://")
+        if "https://" in links:
+            links.remove("https://")
+
         return links
 
     def get_links_inner(self):
         links = self.get_links()
         links = ContentLinkParser.filter_link_html(links)
         return ContentLinkParser.filter_link_in_domain(
-            links, DomainAwarePage(self.url).get_domain()
+            links, UrlLocation(self.url).get_domain()
         )
 
     def get_links_outer(self):
@@ -1077,7 +1140,7 @@ class ContentLinkParser(ContentInterface):
         links = ContentLinkParser.filter_link_html(links)
 
         in_domain = ContentLinkParser.filter_link_in_domain(
-            links, DomainAwarePage(self.url).get_domain()
+            links, UrlLocation(self.url).get_domain()
         )
         return links - in_domain
 
@@ -1296,11 +1359,14 @@ class HtmlPage(ContentInterface):
         if not image:
             image = self.get_schema_field("thumbnailUrl")
 
+        if not image:
+            image = self.get_schema_field("image")
+
         # do not return favicon here.
         # we use thumbnails in <img, but icons do not work correctly there
 
         if image and image.lower().find("https://") == -1:
-            image = DomainAwarePage.get_url_full(self.url, image)
+            image = UrlLocation.get_url_full(self.url, image)
 
         return image
 
@@ -1368,7 +1434,7 @@ class HtmlPage(ContentInterface):
                 full_favicon = link_find["href"]
                 if full_favicon.strip() == "":
                     continue
-                full_favicon = DomainAwarePage.get_url_full(self.url, full_favicon)
+                full_favicon = UrlLocation.get_url_full(self.url, full_favicon)
                 if "sizes" in link_find:
                     favicons[full_favicon] = link_find["sizes"]
                 else:
@@ -1381,13 +1447,18 @@ class HtmlPage(ContentInterface):
                 full_favicon = link_find["href"]
                 if full_favicon.strip() == "":
                     continue
-                full_favicon = DomainAwarePage.get_url_full(self.url, full_favicon)
+                full_favicon = UrlLocation.get_url_full(self.url, full_favicon)
                 if "sizes" in link_find:
                     favicons[full_favicon] = link_find["sizes"]
                 else:
                     favicons[full_favicon] = ""
 
         return favicons
+
+    def get_favicon(self):
+        favicons = self.get_favicons()
+        for favicon in favicons:
+            return favicon
 
     def get_tags(self):
         if not self.contents:
@@ -1423,7 +1494,7 @@ class HtmlPage(ContentInterface):
             "application/atom+xml"
         )
 
-        #if not rss_links:
+        # if not rss_links:
         #    links = self.get_links_inner()
         #    rss_links.extend(
         #        link
@@ -1432,7 +1503,7 @@ class HtmlPage(ContentInterface):
         #    )
 
         return (
-            [DomainAwarePage.get_url_full(self.url, rss_url) for rss_url in rss_links]
+            [UrlLocation.get_url_full(self.url, rss_url) for rss_url in rss_links]
             if rss_links
             else []
         )
@@ -1495,9 +1566,9 @@ class HtmlPage(ContentInterface):
         props["rss_urls"] = self.get_rss_urls()
         # props["status_code"] = self.status_code
 
-        # if DomainAwarePage(self.url).is_domain():
+        # if UrlLocation(self.url).is_domain():
         #    if self.is_robots_txt():
-        #        props["robots_txt_url"] = DomainAwarePage(self.url).get_robots_txt_url()
+        #        props["robots_txt_url"] = UrlLocation(self.url).get_robots_txt_url()
         #        props["site_maps_urls"] = self.get_site_maps()
 
         props["links"] = self.get_links()

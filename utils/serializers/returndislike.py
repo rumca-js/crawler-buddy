@@ -24,8 +24,8 @@ class ReturnDislike(object):
         try:
             self._json = json.loads(data)
             return self._json
-        except Exception as e:
-            logging.critical(e, exc_info=True)
+        except ValueError as E:
+            logging.critical(E, exc_info=True)
             self._json = {}
 
     def get_json(self):

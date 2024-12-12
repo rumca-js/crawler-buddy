@@ -1,24 +1,26 @@
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 
+from utils.dateutils import DateUtils
+
 from .webtools import PageResponseObject, WebLogger
+from .urllocation import UrlLocation
 from .pages import HtmlPage, ContentInterface
 from .defaulturlhandler import DefaultUrlHandler
 
 
 class YouTubeVideoHandler(DefaultUrlHandler):
-    def __init__(self, url=None, contents=None, page_options=None):
-        super().__init__(url, contents=contents, page_options=page_options)
+    def __init__(self, url=None, contents=None, page_options=None, url_builder=None):
+        super().__init__(url, contents=contents, page_options=page_options, url_builder=url_builder)
 
         self.url = self.input2url(url)
+        self.code = self.input2code(url)
 
     def is_handled_by(self):
-        from .url import Url
-
         if not self.url:
             return False
 
-        protocol_less = Url.get_protololless(self.url)
+        protocol_less = UrlLocation(self.url).get_protocolless()
 
         return (
             protocol_less.startswith("www.youtube.com/watch")
@@ -31,17 +33,17 @@ class YouTubeVideoHandler(DefaultUrlHandler):
         )
 
     def get_video_code(self):
-        return YouTubeVideoHandler.input2code(self.url)
+        return self.input2code(self.url)
 
     def input2url(self, item):
-        code = YouTubeVideoHandler.input2code(item)
-        return YouTubeVideoHandler.code2url(code)
+        code = self.input2code(item)
+        return self.code2url(code)
 
-    def code2url(code):
+    def code2url(self, code):
         if code:
             return "https://www.youtube.com/watch?v={0}".format(code)
 
-    def input2code(url):
+    def input2code(self, url):
         if not url:
             return
 
@@ -107,13 +109,11 @@ class YouTubeHtmlHandler(HtmlPage, YouTubeVideoHandler):
         # invalid_text = '{"simpleText":"GO TO HOME"}'
         # contents = self.h.get_contents()
         # if contents and contents.find(invalid_text) >= 0:
-        #    print("It is invalid:{} - invalid text found".format(self.url))
         #    return False
 
         if block_live_videos:
             live_field = self.h.get_meta_custom_field("itemprop", "isLiveBroadcast")
             if live_field and live_field.lower() == "true":
-                # print("It is invalid:{} - live".format(self.url))
                 return False
 
         return True
@@ -129,11 +129,11 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
     TODO Use if above in youtube.h
     """
 
-    def __init__(self, url, page_options=None):
+    def __init__(self, url, page_options=None, url_builder=None):
         """
         TODO We should , most probably call the parnet constructor
         """
-        super().__init__(url=url, page_options=page_options)
+        super().__init__(url=url, page_options=page_options, url_builder=url_builder)
 
         self.yt_text = None
         self.yt_ob = None
@@ -174,6 +174,10 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
                 status = True
                 WebLogger.info("YouTube video handler: {} DONE".format(self.url))
+            else:
+                WebLogger.error("Url:{} Cannot load youtube details".format(self.url))
+        else:
+            WebLogger.error("Url:{} Cannot download youtube details".format(self.url))
 
         self.response = response
         self.contents = self.response.get_text()
@@ -207,10 +211,12 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             from datetime import datetime
             from pytz import timezone
 
+
             date_string = self.yt_ob.get_date_published()
             date = datetime.strptime(date_string, "%Y%m%d")
             dt = datetime.combine(date, datetime.min.time())
-            dt = dt.replace(tzinfo=timezone("UTC"))
+
+            dt = DateUtils.to_utc_date(dt)
 
             return dt
 
@@ -248,6 +254,10 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
     def get_channel_name(self):
         if self.get_contents():
             return self.yt_ob.get_channel_name()
+
+    def get_channel_url(self):
+        if self.get_contents():
+            return self.yt_ob.get_channel_url()
 
     def get_link_url(self):
         if self.get_contents():

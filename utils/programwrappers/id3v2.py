@@ -4,10 +4,11 @@ import os
 
 
 class Id3v2(object):
-    def __init__(self, file_name, data=None, timeout_s=60 * 60):
+    def __init__(self, file_name, data=None, cwd=None, timeout_s=60 * 60):
         self.file_name = file_name
         self.timeout_s = timeout_s
         self.data = data
+        self.cwd = cwd
 
     def tag(self):
         if not os.path.splitext(self.file_name)[1] == ".mp3":
@@ -35,18 +36,23 @@ class Id3v2(object):
                     str(self._track),
                     self.file_name,
                 ],
+                cwd=self.cwd,
                 timeout=self.timeout_s,
             )
         else:
             subprocess.run(
-                ["id3v2", "-t", song, "-a", artist, "-A", album, self.file_name]
+                ["id3v2", "-t", song, "-a", artist, "-A", album, self.file_name],
+                cwd=self.cwd,
+                timeout=self.timeout_s,
             )
 
     @staticmethod
     def validate():
         try:
             proc = subprocess.run(
-                ["id3v2"], stdout=subprocess.PIPE, timeout=self.timeout_s
+                ["id3v2"],
+                stdout=subprocess.PIPE,
+                timeout=10,
             )
         except:
             return False

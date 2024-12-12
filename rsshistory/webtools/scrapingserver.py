@@ -32,11 +32,12 @@ import json
 
 from pathlib import Path
 import shutil
-import webtools
+from .webconfig import WebConfig
+from .webtools import PageRequestObject, PageResponseObject, get_response_to_bytes
+from .ipc import SocketConnection, DEFAULT_PORT
 import subprocess
 import traceback
 from datetime import datetime, timedelta
-from webtools import WebConfig
 
 
 max_transaction_timeout_s = 40
@@ -48,7 +49,7 @@ max_transaction_timeout_s = 40
 #
 
 
-requests = []  # date, connection, request
+requests = []  # {date, connection, request}
 
 
 def run_script(script, request, port):
@@ -64,6 +65,10 @@ def run_script(script, request, port):
 
     try:
         p = subprocess.run(script, shell=True, timeout=request.timeout_s + 3)
+    except TimeoutExpired:
+        print(str(E))
+        print("Could not finish command")
+        return
     except Exception as E:
         print(str(E))
         print("Could not finish command")
@@ -76,8 +81,10 @@ def delete_connection(c):
 
         if c == connection:
             del requests[index]
-            c.close()
-            break
+    try:
+        c.close()
+    except Exception as E:
+        print(str(E))
 
 
 def delete_request_connection(url):
@@ -90,10 +97,16 @@ def delete_request_connection(url):
 
 
 def permanent_error(string_error):
-    error_text = traceback.format_exc()
+    """
+    Access from multiple thread. Exception can occur
+    """
+    try:
+        error_text = traceback.format_exc()
 
-    with open("server_errors.txt", "w") as fh:
-        fh.write("Error:{}\n{}".format(string_error, error_text))
+        with open("server_errors.txt", "a") as fh:
+            fh.write("Error:{}\n{}".format(string_error, error_text))
+    except Exception as E:
+        print(str(E))
 
 
 def handle_connection_inner(c, address, port):
@@ -128,12 +141,15 @@ def handle_connection_inner(c, address, port):
         elif command[0] == "PageRequestObject.url":
             print("Received request url")
             url = command[1].decode()
-            request = webtools.PageRequestObject(url=url)
+            request = PageRequestObject(url=url)
 
         elif command[0] == "PageRequestObject.timeout":
-            timeout_s = int(command[1].decode())
-            print("Set timeout:{}".format(timeout_s))
-            request.timeout_s = timeout_s
+            try:
+                timeout_s = int(command[1].decode())
+                print("Set timeout:{}".format(timeout_s))
+                request.timeout_s = timeout_s
+            except ValueError:
+                pass
 
         elif command[0] == "PageRequestObject.script":
             script = command[1].decode()
@@ -141,7 +157,10 @@ def handle_connection_inner(c, address, port):
 
         elif command[0] == "PageRequestObject.headers":
             print("{} is not yet supported".format(command[0]))
-            request.headers = json.loads(command[1].decode())
+            try:
+                request.headers = json.loads(command[1].decode())
+            except ValueError:
+                pass
 
         elif command[0] == "PageRequestObject.user_agent":
             print("{} is not yet supported".format(command[0]))
@@ -183,19 +202,26 @@ def handle_connection_inner(c, address, port):
             print("Received response init")
 
         elif command[0] == "PageResponseObject.url":
-            response = webtools.PageResponseObject(command[1].decode())
+            response = PageResponseObject(command[1].decode())
             print("Received response url")
 
         elif command[0] == "PageResponseObject.status_code":
-            response.status_code = int(command[1].decode())
-            print("Received response status_code")
+            try:
+                response.status_code = int(command[1].decode())
+                print("Received response status_code")
+            except ValueError:
+                pass
 
         elif command[0] == "PageResponseObject.text":
             response.text = command[1].decode()
             print("Received response text")
 
         elif command[0] == "PageResponseObject.headers":
-            response.headers = json.loads(command[1].decode())
+            try:
+                response.headers = json.loads(command[1].decode())
+            except ValueError:
+                pass
+
             print("Received response headers")
 
         elif command[0] == "PageResponseObject.request_url":
@@ -205,7 +231,7 @@ def handle_connection_inner(c, address, port):
         elif command[0] == "PageResponseObject.__del__":
             print("Received response complete")
 
-            all_bytes = webtools.get_response_to_bytes(response)
+            all_bytes = get_response_to_bytes(response)
 
             to_delete = []
             for index, request_data in enumerate(requests):
@@ -231,7 +257,7 @@ def handle_connection_inner(c, address, port):
         # Other commands handling
         elif command[0] == "commands.debug":
             print("Requests:{}".format(len(requests)))
-            
+
             c.send_command_string("debug.__init__", "OK")
             c.send_command_string("debug.requests", str(len(requests)))
             c.send_command_string("debug.__del__", "OK")
@@ -255,7 +281,7 @@ def remove_stale_connections():
 
         diff = datetime.now() - dt
 
-        if diff.total_seconds() > 40:
+        if diff.total_seconds() > request.timeout_s + 10:
             to_delete.append(connection)
 
     for connection in to_delete:
@@ -274,43 +300,53 @@ def remove_temporary_files():
 
 
 def handle_connection(conn, address, port):
-    now = datetime.now()
-    print(
-        "[{}] Handling connection from:{}. Requests len:{}".format(
-            now, str(address), len(requests)
-        )
-    )
-
-    c = webtools.ipc.SocketConnection(conn)
     try:
-        handle_connection_inner(c, address, port)
-    except Exception as E:
-        error_text = "Exception during handling command:{}".format(str(E))
-        permanent_error(error_text)
-
-        delete_connection(c)
-
-    c.close()
-
-    now = datetime.now()
-    print(
-        "[{}] Handling connection from:{} DONE. Requests len:{}.".format(
-            now, str(address), len(requests)
+        now = datetime.now()
+        print(
+            "[{}] Handling connection from:{}. Requests len:{}".format(
+                now, str(address), len(requests)
+            )
         )
-    )
+
+        c = SocketConnection(conn)
+        try:
+            handle_connection_inner(c, address, port)
+        except Exception as E:
+            error_text = "Exception during handling command:{}".format(str(E))
+            permanent_error(error_text)
+
+            delete_connection(c)
+
+        c.close()
+
+        now = datetime.now()
+        print(
+            "[{}] Handling connection from:{} DONE. Requests len:{}.".format(
+                now, str(address), len(requests)
+            )
+        )
+    except Exception as E:
+        error_text = traceback.format_exc()
+        print(error_text)
+        permanent_error(str(E))
+        permanent_error(error_text)
 
 
 class ScrapingServer(object):
     def __init__(self, host=None, port=None):
+        p = Path("server_errors.txt")
+        if p.exists():
+            p.unlink()
+
         if host:
             self.host = host
         else:
-            self.host = webtools.ipc.SocketConnection.gethostname()
+            self.host = SocketConnection.gethostname()
 
         if port:
             self.port = port
         else:
-            self.port = webtools.ipc.DEFAULT_PORT
+            self.port = DEFAULT_PORT
 
         self.close_request = False
 
@@ -366,9 +402,19 @@ class ScrapingServer(object):
             print(str(E))
             error_text = traceback.format_exc()
             print(error_text)
+            permanent_error(str(E))
+            permanent_error(error_text)
 
-        print("Closing")
-        server_socket.close()
+        try:
+            print("Closing")
+            server_socket.close()
+
+        except Exception as E:
+            print(str(E))
+            error_text = traceback.format_exc()
+            print(error_text)
+            permanent_error(str(E))
+            permanent_error(error_text)
 
     def close(self):
         self.close_request = True
@@ -395,7 +441,7 @@ class ScrapingServerParser(object):
         if "port" in self.args and self.args.port:
             self.port = self.args.port
         else:
-            self.port = webtools.ipc.DEFAULT_PORT
+            self.port = DEFAULT_PORT
 
     def is_valid(self):
         return True

@@ -1,38 +1,18 @@
 import traceback
 
-class Logger(object):
-    """
-    Logging interface
-    """
 
-    app_logger = None
+loggers = {}
 
-    def info(info_text, detail_text="", user=None, stack=False):
-        if Logger.app_logger:
-            Logger.app_logger.info(info_text, detail_text, user, stack)
 
-    def debug(info_text, detail_text="", user=None, stack=False):
-        if Logger.app_logger:
-            Logger.app_logger.debug(info_text, detail_text, user, stack)
+def get_logger(name):
+    if name not in loggers:
+        loggers[name] = PrintLogger()
 
-    def warning(info_text, detail_text="", user=None, stack=False):
-        if Logger.app_logger:
-            Logger.app_logger.warning(info_text, detail_text, user, stack)
+    return loggers[name]
 
-    def error(info_text, detail_text="", user=None, stack=False):
-        if Logger.app_logger:
-            Logger.app_logger.error(info_text, detail_text, user, stack)
 
-    def notify(info_text, detail_text="", user=None):
-        if Logger.app_logger:
-            Logger.app_logger.notify(info_text, detail_text, user, stack)
-
-    def exc(exception_object, info_text=None, user=None):
-        if Logger.app_logger:
-            Logger.app_logger.exc(exception_object, info_text)
-
-    def use_print_logging():
-        Logger.app_logger = PrintLogger
+def set_logger(name, logger):
+    loggers[name] = logger
 
 
 class PrintLogger(object):
@@ -40,32 +20,32 @@ class PrintLogger(object):
     Implementation of weblogger that only prints to std out
     """
 
-    def info(info_text, detail_text="", user=None, stack=False):
+    def info(self, info_text, detail_text="", user=None, stack=False):
         print(info_text)
         if detail_text:
             print(detail_text)
 
-    def debug(info_text, detail_text="", user=None, stack=False):
+    def debug(self, info_text, detail_text="", user=None, stack=False):
         print(info_text)
         if detail_text:
             print(detail_text)
 
-    def warning(info_text, detail_text="", user=None, stack=False):
+    def warning(self, info_text, detail_text="", user=None, stack=False):
         print(info_text)
         if detail_text:
             print(detail_text)
 
-    def error(info_text, detail_text="", user=None, stack=False):
+    def error(self, info_text, detail_text="", user=None, stack=False):
         print(info_text)
         if detail_text:
             print(detail_text)
 
-    def notify(info_text, detail_text="", user=None):
+    def notify(self, info_text, detail_text="", user=None):
         print(info_text)
         if detail_text:
             print(detail_text)
 
-    def exc(exception_object, info_text=None, user=None):
+    def exc(self, exception_object, info_text=None, user=None):
         print(str(exception_object))
 
         error_text = traceback.format_exc()

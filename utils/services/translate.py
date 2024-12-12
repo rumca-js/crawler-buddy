@@ -1,4 +1,4 @@
-from webtools import DomainAwarePage
+from rsshistory.webtools import UrlLocation
 
 
 class TranslatePage(object):
@@ -14,7 +14,7 @@ class GoogleTranslate(TranslatePage):
         super().__init__(url)
 
     def get_translate_url(self):
-        p = DomainAwarePage(self.url)
+        p = UrlLocation(self.url)
         parts = p.parse_url()
         parts[2] = parts[2].replace("-", "--")
         parts[2] = parts[2].replace(".", "-")

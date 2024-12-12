@@ -20,7 +20,19 @@ class FeedObject(object):
     def get_prop(self, aproperty):
         aproperty_value = self.root.find(aproperty, self.ns)
         if aproperty_value is not None:
-            return aproperty_value.text
+            if len(aproperty_value) == 0:  # No child elements
+                return aproperty_value.text.strip() if aproperty_value.text else None
+
+            parts = []
+            for child in aproperty_value:
+                if child.text:
+                    parts.append(child.text)
+                parts.append(ET.tostring(child, encoding='unicode', method='html'))
+                if child.tail:
+                    parts.append(child.tail)
+
+            inner_content = ''.join(parts).strip()
+            return inner_content
 
     def get_prop_attribute(self, aproperty, attribute):
         aproperty_value = self.root.find(aproperty, self.ns)
@@ -39,6 +51,7 @@ class FeedReaderEntry(FeedObject):
             return
 
         self.link = self.try_to_get_attribute("link", "href")
+
         self.title = self.try_to_get_field("title")
         self.subtitle = self.try_to_get_field("subtitle")
         self.description = self.try_to_get_field("description")
@@ -107,7 +120,7 @@ class FeedReaderEntry(FeedObject):
         return value
 
     def try_to_get_attribute(self, field, attribute):
-        value = self.get_prop("./" + field)
+        value = self.get_prop(".//" + field)
         if not value:
             value = self.get_prop_attribute(field, attribute)
         if not value:
@@ -194,6 +207,8 @@ class FeedReaderFeed(FeedObject):
 
         self.title = self.try_to_get_field("title")
         self.link = self.try_to_get_field("link")
+        if not self.link:
+            self.link = self.try_to_get_attribute("link", "href")
         self.subtitle = self.try_to_get_field("subtitle")
         self.description = self.try_to_get_field("description")
         self.language = self.try_to_get_field("language")
@@ -286,26 +301,30 @@ class FeedReader(object):
     def process_html(self):
         # TODO what if we have < html?
         html_wh = self.contents.strip().find("<html")
-        rss_wh = self.contents.strip().find("<rss")
 
-        if html_wh != -1 and rss_wh != -1:
-            if self.process_html_raw():
-                return True
+        if html_wh != -1:
+            rss_wh = self.contents.strip().find("<rss")
+            if rss_wh != -1:
+                if self.process_html_raw("rss"):
+                    return True
 
-        rss_wh = self.contents.strip().find("&gt;rss")
-        if rss_wh != -1:
-            if self.process_html_encoded():
-                return True
+            feed_wh = self.contents.strip().find("<feed")
+            if feed_wh != -1:
+                if self.process_html_raw("feed"):
+                    return True
 
-    def process_html_raw(self):
-        wh = self.contents.find("<rss")
+            rss_wh = self.contents.strip().find("&gt;rss")
+            if rss_wh != -1:
+                if self.process_html_encoded():
+                    return True
+
+    def process_html_raw(self, tag):
+        wh = self.contents.find("<" + tag)
         if wh == -1:
-            self.contents = None
             return False
 
-        last_wh = self.contents.rfind("</rss>")
+        last_wh = self.contents.rfind("</{}>".format(tag))
         if last_wh == -1:
-            self.contents = None
             return False
 
         # +4 to compensate for &gt; text
@@ -316,12 +335,10 @@ class FeedReader(object):
     def process_html_encoded(self):
         wh = self.contents.find("&lt;")
         if wh == -1:
-            self.contents = None
             return False
 
         last_wh = self.contents.rfind("&gt;")
         if last_wh == -1:
-            self.contents = None
             return False
 
         # +4 to compensate for &gt; text

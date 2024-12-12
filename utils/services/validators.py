@@ -1,6 +1,6 @@
 import urllib.parse
 
-from webtools import DomainAwarePage
+from rsshistory.webtools import UrlLocation
 
 
 class Validator(object):
@@ -22,7 +22,7 @@ class WhoIs(Validator):
         self.url = url
 
     def get_validate_url(self):
-        p = DomainAwarePage(self.url)
+        p = UrlLocation(self.url)
         return "https://who.is/whois/" + p.get_domain_only()
 
 

@@ -5,7 +5,7 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from pathlib import Path
 
 from utils.dateutils import DateUtils
-from utils.logger import Logger
+from utils.logger import get_logger
 
 from utils.sqlmodel import (
     SqlModel,
@@ -20,6 +20,7 @@ from utils.sqlmodel import (
 from utils.controllers import (
     SourceDataBuilder,
     EntryDataBuilder,
+    EntryWrapper,
 )
 
 
@@ -31,12 +32,19 @@ class MapImporter(object):
 
         if self.user is not None:
             self.user = self.get_normal_user(user)
-        else:
-            self.user = self.get_superuser()
 
         self.import_settings = import_settings
         if self.import_settings is None:
             self.import_settings = {}
+            self.import_settings["import_entries"] = True
+            self.import_settings["import_sources"] = True
+            self.import_settings["import_title"] = True
+            self.import_settings["import_description"] = True
+            self.import_settings["import_tags"] = True
+            self.import_settings["import_comments"] = True
+            self.import_settings["import_votes"] = True
+            self.import_settings["import_bookmarks"] = True
+            self.import_settings["import_ids"] = False
 
         if "import_entries" not in self.import_settings:
             self.import_settings["import_entries"] = True
@@ -60,19 +68,14 @@ class MapImporter(object):
     def import_from_data(self, json_data):
         if "links" in json_data:
             return self.import_from_links(json_data["links"])
-
         elif "sources" in json_data:
             return self.import_from_sources(json_data["sources"])
-
         elif "link" in json_data:
             return self.import_from_link(json_data["link"])
-
         elif "source" in json_data:
             return self.import_from_source(json_data["source"])
-
         elif len(json_data) > 0:
             return self.import_from_list(json_data)
-
         else:
             raise NotImplementedError()
 
@@ -88,24 +91,26 @@ class MapImporter(object):
         return False
 
     def import_from_links(self, json_data):
-        Logger.debug("Import from links")
+        logger = get_logger("utils")
+
+        logger.debug("Import from links")
 
         for link_data in json_data:
             try:
                 self.import_from_link(link_data)
             except Exception as E:
-                Logger.exc(E, "Cannot import link data {}".format(link_data))
+                logger.exc(E, "Cannot import link data {}".format(link_data))
 
         return True
 
     def import_from_sources(self, json_data):
-        Logger.debug("Import from sources")
+        logger = get_logger("utils")
 
         for source_data in json_data:
             try:
                 self.import_from_source(source_data)
             except Exception as E:
-                Logger.exc(E, "Cannot import source data {}".format(source_data))
+                logger.exc(E, "Cannot import source data {}".format(source_data))
 
         return True
 
@@ -143,24 +148,15 @@ class MapImporter(object):
 
         entry = None
 
-        entries = LinkDataController.objects.filter(link=clean_data["link"])
-        if entries.count() == 0:
-            if self.import_settings and self.import_settings["import_entries"]:
-                # This instance can have their own settings for import, may decide what is
-                # accepted and not. Let the builder deal with it
-                LinkDatabase.info("Importing link:{}".format(clean_data["link"]))
+        if self.import_settings and self.import_settings["import_entries"]:
+            # This instance can have their own settings for import, may decide what is
+            # accepted and not. Let the builder deal with it
+            # Logger.info("Importing link:{}".format(clean_data["link"]))
 
-                b = self.entry_builder.build(link_data=clean_data, source_is_auto=True)
-                entry = b.result
-
-                if entry and entry.is_archive_entry():
-                    entry = EntryWrapper.move_from_archive(entry)
-
-                    self.copy_props(entry, clean_data)
-        else:
-            entry = entries[0]
-
-            self.copy_props(entry, clean_data)
+            b = self.entry_builder.import_entry(
+                link_data=clean_data, source_is_auto=True
+            )
+            entry = b.result
 
         if entry:
             if self.import_settings and self.import_settings["import_bookmarks"]:
@@ -201,13 +197,10 @@ class MapImporter(object):
 
     def import_from_source(self, json_data):
         clean_data = self.get_clean_source_data(json_data)
+        clean_data["enabled"] = False
 
-        c = SourcesTableController(self.conn)
-        if not c.is_source(url = clean_data["url"]):
-            clean_data["enabled"] = False
-
-            b = self.source_builder.build(link_data=clean_data)
-            b.add_from_props()
+        b = self.source_builder
+        b.import_source(link_data=clean_data)
 
         # TODO cleanup
         # else:
@@ -245,7 +238,7 @@ class MapImporter(object):
         return clean_data
 
     def get_clean_entry_data(self, input_data):
-        clean_data = LinkDataController.get_clean_data(input_data)
+        clean_data = EntryWrapper.get_clean_data(input_data)
         clean_data = self.drop_entry_instance_internal_data(clean_data)
 
         if "date_published" in clean_data:
@@ -262,7 +255,6 @@ class MapImporter(object):
     def get_normal_user(self, username):
         # TODO we do not have users in sqlalchemy
         pass
-
 
 
 def get_list_files(directory):
@@ -282,20 +274,22 @@ def read_file_contents(file_path):
 
 
 class JsonImporter(object):
-    def __init__(self, conn, path=None, user=None, verbose = False):
-        Logger.info("Importing from a file")
+    def __init__(self, conn, path=None, user=None, verbose=False):
+        logger = get_logger("utils")
+        logger.info("Importing from a file")
         self.user = user
         self.path = path
         self.conn = conn
         self.verbose = verbose
 
         if self.path is None:
-            Logger.error("Directory was not specified")
+            logger.error("Directory was not specified")
             return
 
     def import_all(self):
+        logger = get_logger("utils")
         if self.path is None:
-            Logger.error("Directory was not specified")
+            logger.error("Directory was not specified")
             return
 
         path = Path(self.path)
@@ -316,8 +310,13 @@ class JsonImporter(object):
             data = json.loads(contents)
 
             settings = {"verbose": False}
-            source_builder = SourceDataBuilder(conn = self.conn)
+            source_builder = SourceDataBuilder(conn=self.conn)
             entry_builder = EntryDataBuilder(conn=self.conn)
-            return MapImporter(source_builder=source_builder, entry_builder=entry_builder, user = self.user, import_settings = settings).import_from_data(data)
+            return MapImporter(
+                source_builder=source_builder,
+                entry_builder=entry_builder,
+                user=self.user,
+                import_settings=settings,
+            ).import_from_data(data)
 
         return False

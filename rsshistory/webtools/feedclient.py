@@ -1,6 +1,7 @@
 """
 This is example script about how to use this project as a simple RSS reader
 """
+
 import argparse
 import sys
 import asyncio
@@ -20,13 +21,12 @@ from utils.sqlmodel import (
 )
 from datetime import timedelta, datetime, timezone
 
-from webtools import (
-    PageOptions,
-    WebConfig,
-    Url,
-    RssPage,
-    HttpPageHandler,
-)
+from .webtools import PageOptions
+from .webconfig import WebConfig
+from .pages import RssPage
+from .url import Url
+from .handlerhttppage import HttpPageHandler
+
 from utils.dateutils import DateUtils
 from utils.serializers import HtmlExporter, JsonImporter
 from utils.controllers import GenericEntryController
@@ -64,11 +64,7 @@ def read_source(db, source):
     source_title = source.title
     source_id = source.id
 
-    options = PageOptions()
-    options.use_headless_browser = False
-    options.use_full_browser = False
-
-    url = Url(url=source_url, page_options=options)
+    url = Url(url=source_url)
     handler = url.get_handler()
     response = url.get_response()
 
@@ -262,7 +258,7 @@ class FeedClientParser(object):
             "--unbookmark", action="store_true", help="unbookmarks entry"
         )
         self.parser.add_argument(
-            "-m" ,"--mark-read", action="store_true", help="Marks entries as read"
+            "-m", "--mark-read", action="store_true", help="Marks entries as read"
         )
         self.parser.add_argument("--entry", help="Select entry by ID")
         self.parser.add_argument("--source", help="Select source by ID")
@@ -281,11 +277,17 @@ class FeedClientParser(object):
         )
         self.parser.add_argument("--follow", help="Follows specific source")
         self.parser.add_argument("--unfollow", help="Unfollows specific source")
-        self.parser.add_argument("--unfollow-all", action="store_true", help="Unfollows all sources")
+        self.parser.add_argument(
+            "--unfollow-all", action="store_true", help="Unfollows all sources"
+        )
         self.parser.add_argument("--enable", help="Enables specific source")
         self.parser.add_argument("--disable", help="Disables specific source")
-        self.parser.add_argument("--enable-all", action="store_true", help="Enables all sources")
-        self.parser.add_argument("--disable-all", action="store_true", help="Disables all sources")
+        self.parser.add_argument(
+            "--enable-all", action="store_true", help="Enables all sources"
+        )
+        self.parser.add_argument(
+            "--disable-all", action="store_true", help="Disables all sources"
+        )
         self.parser.add_argument(
             "--list-bookmarks", action="store_true", help="Prints bookmarks to stdout"
         )
@@ -323,8 +325,7 @@ class SearchResultHandler(AlchemyRowHandler):
         print_entry(row)
 
 
-def get_entries(db, source_id=None, ascending = True):
-
+def get_entries(db, source_id=None, ascending=True):
     Session = db.get_session()
 
     with Session() as session:
@@ -448,7 +449,11 @@ class FeedClient(object):
             date_limit = None
             Session = db.get_session()
             with Session() as session:
-                read_marker = session.query(ReadMarkers).filter(ReadMarkers.source_object == None).first()
+                read_marker = (
+                    session.query(ReadMarkers)
+                    .filter(ReadMarkers.source_object == None)
+                    .first()
+                )
                 if read_marker:
                     date_limit = read_marker.read_date
 
@@ -459,9 +464,7 @@ class FeedClient(object):
         Session = db.get_session()
 
         with Session() as session:
-            sources = (
-                session.query(SourcesTable).all()
-            )
+            sources = session.query(SourcesTable).all()
             for source in sources:
                 source.enabled = True
                 session.commit()
@@ -476,9 +479,7 @@ class FeedClient(object):
         Session = db.get_session()
 
         with Session() as session:
-            sources = (
-                session.query(SourcesTable).all()
-            )
+            sources = session.query(SourcesTable).all()
             for source in sources:
                 source.enabled = False
                 session.commit()
@@ -492,10 +493,16 @@ class FeedClient(object):
     def enable_source(self, db, source_id):
         Session = db.get_session()
 
+        try:
+            source_id_int = int(source_id)
+        except ValueError:
+            print("Cannot find such source:{}".format(source_id))
+            return False
+
         with Session() as session:
             source = (
                 session.query(SourcesTable)
-                .filter(SourcesTable.id == int(source_id))
+                .filter(SourcesTable.id == source_id_int)
                 .first()
             )
             if source:
@@ -513,10 +520,16 @@ class FeedClient(object):
     def disable_source(self, db, source_id):
         Session = db.get_session()
 
+        try:
+            source_id_int = int(source_id)
+        except ValueError:
+            print("Cannot find such source:{}".format(source_id))
+            return False
+
         with Session() as session:
             source = (
                 session.query(SourcesTable)
-                .filter(SourcesTable.id == int(source_id))
+                .filter(SourcesTable.id == source_id_int)
                 .first()
             )
 
@@ -564,6 +577,7 @@ class FeedClient(object):
         url = Url.find_rss_url(u)
         if not url:
             print("That does not seem to be a correct RSS source:{}".format(page_url))
+            return
 
         response = url.get_response()
         title = url.get_title()
@@ -686,10 +700,16 @@ class FeedClient(object):
         return True
 
     def make_bookmarked(self, db, entry_id):
+        try:
+            entry_id_int = int(entry_id)
+        except ValueError:
+            print("Cannot bookmark")
+            return False
+
         Session = db.get_session()
         with Session() as session:
             entries = session.query(EntriesTable).filter(
-                EntriesTable.id == int(entry_id)
+                EntriesTable.id == entry_id_int
             )
 
             if entries.count() == 0:
@@ -705,10 +725,16 @@ class FeedClient(object):
         return True
 
     def make_not_bookmarked(self, db, entry_id):
+        try:
+            entry_id_int = int(entry_id)
+        except ValueError:
+            print("Cannot bookmark")
+            return False
+
         Session = db.get_session()
         with Session() as session:
             entries = session.query(EntriesTable).filter(
-                EntriesTable.id == int(entry_id)
+                EntriesTable.id == entry_id_int
             )
 
             if entries.count() == 0:

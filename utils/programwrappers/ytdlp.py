@@ -7,17 +7,16 @@ from .ytdownloader import YouTubeDownloader
 
 
 class YTDLP(YouTubeDownloader):
-
     """
     yt-dlp Wrapper class
     https://github.com/yt-dlp/yt-dlp
     """
 
-    def __init__(self, url=None, path=None, timeout_s=60 * 60):
+    def __init__(self, url=None, cwd=None, timeout_s=60 * 60):
         """
         Default timeout 1 hour
         """
-        super().__init__(url, path)
+        super().__init__(url, cwd)
         self.timeout_s = timeout_s
 
     def download_audio(self, file_name):
@@ -37,7 +36,7 @@ class YTDLP(YouTubeDownloader):
         ]
 
         proc = subprocess.run(
-            cmds, cwd=self._path, capture_output=True, timeout=self.timeout_s
+            cmds, cwd=self._cwd, capture_output=True, timeout=self.timeout_s
         )
 
         if proc.returncode != 0:
@@ -51,7 +50,7 @@ class YTDLP(YouTubeDownloader):
         cmds = ["yt-dlp", "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4", self._url]
 
         proc = subprocess.run(
-            cmds, cwd=self._path, capture_output=True, timeout=self.timeout_s
+            cmds, cwd=self._cwd, capture_output=True, timeout=self.timeout_s
         )
 
         if proc.returncode != 0:
@@ -139,7 +138,7 @@ class YTDLP(YouTubeDownloader):
                 ["yt-dlp"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                timeout=self.timeout_s,
+                timeout=10,
             )
         except:
             return False

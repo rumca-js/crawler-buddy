@@ -1,4 +1,4 @@
-from webtools import Url
+from rsshistory.webtools import Url
 
 from utils.sqlmodel import (
     SqlModel,
@@ -11,6 +11,24 @@ from utils.sqlmodel import (
 )
 
 
+class EntryWrapper(object):
+    def __init__(self, entry=None, link=None):
+        self.entry = entry
+        self.link = link
+
+    def get(self):
+        pass
+
+    def move_from_archive(self, entry):
+        pass
+
+    def move_to_archive(self, entry):
+        pass
+
+    def get_clean_data(data):
+        return data
+
+
 class EntryDataBuilder(object):
     def __init__(
         self,
@@ -19,8 +37,8 @@ class EntryDataBuilder(object):
         link_data=None,
         manual_entry=False,
         allow_recursion=True,
-        ignore_errors=False):
-
+        ignore_errors=False,
+    ):
         self.conn = conn
         self.link = link
         self.link_data = link_data
@@ -28,13 +46,14 @@ class EntryDataBuilder(object):
     def get_session(self):
         return self.conn.get_session()
 
-    def build(self,
+    def build(
+        self,
         link=None,
         link_data=None,
         manual_entry=False,
         allow_recursion=True,
-        ignore_errors=False):
-
+        ignore_errors=False,
+    ):
         if link:
             self.link = link
         if link_data:
@@ -66,3 +85,10 @@ class EntryDataBuilder(object):
 
             session.add(table)
             session.commit()
+
+    def import_entry(self, link_data=None, source_is_auto=False):
+        """
+        importing might be different than building from scratch
+        """
+        pass
+        print("test")

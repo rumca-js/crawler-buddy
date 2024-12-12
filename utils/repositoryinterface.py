@@ -1,9 +1,11 @@
 from pathlib import Path
 import shutil
 
-class RepositoryInterface(object):
 
-    def __init__(self, export_data, timeout_s=60 * 60, operating_dir=None, data_source_dir=None):
+class RepositoryInterface(object):
+    def __init__(
+        self, export_data, timeout_s=60 * 60, operating_dir=None, data_source_dir=None
+    ):
         self.export_data = export_data
         self.timeout_s = timeout_s
         if not operating_dir:
@@ -46,4 +48,5 @@ class RepositoryInterface(object):
         expected_dir = self.get_local_dir()
         data_dir = self.data_source_directory
 
-        shutil.copytree(data_dir, expected_dir, dirs_exist_ok=True)
+        if expected_dir != self.data_source_directory:
+            shutil.copytree(data_dir, expected_dir, dirs_exist_ok=True)

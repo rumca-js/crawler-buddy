@@ -7,19 +7,20 @@ license = "GPL3"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8.5"
+python = "^3.9"
 feedparser = "^6.0.10"
-requests = "^2.25.1"
 python-dateutil = "^2.8.2"
-yt-dlp = "^2023.12.30"
+yt-dlp = "^2024.12.6"
 waybackpy = "^3.0.6"
-celery = "^5.3.6"
-sqlalchemy = "^2.0.23"
-tldextract = "5.1.2"
-sympy = "^1.12"
-beautifulsoup4 = "^4.12.2"
-spacy = "^3.7.2"
+sqlalchemy = "^2.0.34"
+tldextract = "^5.1.2"
+beautifulsoup4 = "^4.12.3"
+sympy = "^1.13.2"
+spacy = "3.7.5"
 lxml = "5.3.0"
+# [optional] - at least one of methods need to be running
+# example: crawlerrequests.py
+requests = "^2.32.3"
 
 #  use things below if you want to use selenium
 selenium="*"
@@ -37,7 +38,7 @@ undetected-chromedriver = "^3.5.5"
 # lxml="5.2.2"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.3.0"
+black = "^24.10.0"
 
 [build-system]
 requires = ["poetry-core"]

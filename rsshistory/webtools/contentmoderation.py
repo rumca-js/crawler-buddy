@@ -1,4 +1,5 @@
-from utils.logger import Logger
+from .webtools import WebLogger
+
 
 class UrlContentsModerator(object):
     def __init__(self, page_object=None, properties=None, blocked_keywords=None):
@@ -106,7 +107,7 @@ class UrlPropertyValidator(UrlContentsModerator):
         )
 
         if is_title_invalid:
-            Logger.debug("Title is invalid {}".format(title))
+            WebLogger.debug("Title is invalid {}".format(title))
             return True
 
     def is_porn_blocked(self):

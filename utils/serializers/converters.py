@@ -1,6 +1,6 @@
 import logging
 import traceback
-from utils.logger import Logger
+from utils.logger import get_logger
 
 
 class PageSystem(object):
@@ -10,6 +10,12 @@ class PageSystem(object):
     https://nextlinklabs.com/resources/insights/django-big-data-iteration
 
     paginator resides in django. We do not want to be dependent on django.
+
+    @note objects need to be fetched and sliced inside of iteration, because
+    otherwise queryset will fetch all of the data!
+
+    There is also other solution - to keep, and use IDs only
+    https://stackoverflow.com/questions/44206636/how-to-bulk-fetch-model-objects-from-database-handled-by-django-sqlalchemy
     """
 
     def __init__(self, no_entries, no_entries_per_page):
@@ -118,7 +124,7 @@ class JsonConverter(ItemConverterFabric):
         # if keys are not sorted, then order of keys in maps will be random
         # this can result in unnecessary export commit operations
 
-        return json.dumps(item_data, sort_keys=True)
+        return json.dumps(item_data, sort_keys=True, indent=4)
 
     def from_text(self, text):
         import json
@@ -183,8 +189,9 @@ class MarkDownConverter(ItemConverterFabric):
         try:
             t = Template(self.item_template)
             return t.safe_substitute(map_data)
-        except Exception as E:
-            Logger.exc(
+        except KeyError:
+            logger = get_logger("utils")
+            logger.exc(
                 "Template exception {0} {1}".format(
                     self.item_template,
                     str(map_data),
@@ -242,8 +249,10 @@ class MarkDownConverter(ItemConverterFabric):
         try:
             t = Template(self.item_template)
             return t.safe_substitute(map_data)
-        except Exception as E:
-            Logger.exc(
+        except KeyError:
+            logger = get_logger("utils")
+
+            logger.exc(
                 E,
                 "Template exception {0} {1}".format(
                     self.item_template,
@@ -277,8 +286,9 @@ class MarkDownSourceConverter(object):
         try:
             t = Template(self.item_template)
             return t.safe_substitute(map_data)
-        except Exception as E:
-            Logger.exc(
+        except KeyError:
+            logger = get_logger("utils")
+            logger.exc(
                 E,
                 "Template exception {0} {1}".format(
                     self.item_template,

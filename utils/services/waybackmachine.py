@@ -4,8 +4,8 @@ from datetime import datetime, date, timedelta
 
 from waybackpy import WaybackMachineCDXServerAPI, WaybackMachineSaveAPI
 
-from webtools import DomainAwarePage, HttpRequestBuilder, HttpPageHandler
-from utils.logger import Logger
+from rsshistory.webtools import UrlLocation, HttpRequestBuilder, HttpPageHandler
+from utils.logger import get_logger
 
 
 class WaybackMachine(object):
@@ -43,8 +43,9 @@ class WaybackMachine(object):
         time_text = self.get_formatted_date(time)
 
         if not archive_timestamp.startswith(time_text):
-            Logger.debug(archive_timestamp)
-            Logger.debug(time_text)
+            logger = get_logger("utils")
+            logger.debug(archive_timestamp)
+            logger.debug(time_text)
             return
 
         return_url = self.get_archive_url_with_overlay(
@@ -72,12 +73,13 @@ class WaybackMachine(object):
         user_agent = HttpPageHandler.user_agent
 
         save_api = WaybackMachineSaveAPI(url, user_agent)
-        Logger.info("Save url {0}".format(url))
+        logger = get_logger("utils")
+        logger.info("Save url {0}".format(url))
         try:
             val = save_api.save()
             return val
-        except Exception as E:
-            Logger.exc("WaybackMachine: save url: {0}".format(url))
+        except waybackpy.exceptions.WaybackError as E:
+            logger.exc("WaybackMachine: save url: {0}".format(url))
             time.sleep(5)  # wait 5 seconds. Ain't nobody got time for that
 
     def save(self, url):
@@ -88,7 +90,7 @@ class WaybackMachine(object):
             return ret
 
     def is_saved(self, url):
-        p = DomainAwarePage(url)
+        p = UrlLocation(url)
         if p.is_youtube():
             return False
 
@@ -103,10 +105,11 @@ class WaybackMachine(object):
         return True
 
     def debug_handle(self, handle):
-        Logger.debug(handle)
-        Logger.debug(handle.archive_url)
-        Logger.debug(handle.original)
-        Logger.debug(handle.urlkey)
-        Logger.debug(handle.datetime_timestamp)
-        Logger.debug(handle.statuscode)
-        Logger.debug(handle.mimetype)
+        logger = get_logger("utils")
+        logger.debug(handle)
+        logger.debug(handle.archive_url)
+        logger.debug(handle.original)
+        logger.debug(handle.urlkey)
+        logger.debug(handle.datetime_timestamp)
+        logger.debug(handle.statuscode)
+        logger.debug(handle.mimetype)

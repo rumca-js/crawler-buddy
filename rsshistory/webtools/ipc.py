@@ -1,6 +1,7 @@
 """
 Inter process communication. Communication between scraping/crawl server
 """
+
 import json
 import pickle
 import socket

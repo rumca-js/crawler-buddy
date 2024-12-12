@@ -1,5 +1,3 @@
-from utils.logger import Logger
-
 from utils.sqlmodel import (
     SqlModel,
     EntriesTable,
@@ -46,7 +44,7 @@ class GenericEntryController(object):
                 text += "|"
             text += "{}".format(votes)
 
-        #if contents:
+        # if contents:
         #    if text != "":
         #        text += "|"
         #    text += "{} ".format(contents)
@@ -77,8 +75,7 @@ class GenericEntryController(object):
 
 
 class EntryDataBuilder(object):
-    """
-    """
+    """ """
 
     def __init__(
         self,
@@ -107,13 +104,14 @@ class EntryDataBuilder(object):
         if self.link_data:
             self.build_from_props(ignore_errors=self.ignore_errors)
 
-    def build(self,
+    def build(
+        self,
         link=None,
         link_data=None,
         source_is_auto=True,
         allow_recursion=True,
-        ignore_errors=False):
-
+        ignore_errors=False,
+    ):
         self.link = link
         self.link_data = link_data
 
@@ -127,7 +125,8 @@ class EntryDataBuilder(object):
         """
         TODO extract this to a separate class?
         """
-        from webtools import Url, UrlPropertyValidator
+        from rsshistory.webtools import Url, UrlPropertyValidator
+
         self.ignore_errors = ignore_errors
         self.link = Url.get_cleaned_link(self.link)
         if not self.link:
@@ -138,7 +137,8 @@ class EntryDataBuilder(object):
         self.build_from_props()
 
     def build_from_props(self, ignore_errors=False):
-        from webtools import Url, UrlPropertyValidator
+        from rsshistory.webtools import Url, UrlPropertyValidator
+
         self.ignore_errors = ignore_errors
 
         url = self.link_data["link"]

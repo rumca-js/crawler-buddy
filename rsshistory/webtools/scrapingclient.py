@@ -1,12 +1,14 @@
 """
 Script that can be used for debuggin server, checking connection
 """
+
 import socket
 import argparse
 import json
 from datetime import datetime, timedelta
 
-from webtools import ipc, PageRequestObject, PageResponseObject, get_request_to_bytes
+from .webtools import PageRequestObject, PageResponseObject, get_request_to_bytes
+from .ipc import SocketConnection, DEFAULT_PORT
 
 
 max_transaction_timeout_s = 40
@@ -24,12 +26,12 @@ class ScrapingClient(object):
         if host:
             self.host = host
         else:
-            self.host = ipc.SocketConnection.gethostname()
+            self.host = SocketConnection.gethostname()
 
         if port:
             self.port = port
         else:
-            self.port = ipc.DEFAULT_PORT
+            self.port = DEFAULT_PORT
 
         if scraping_script:
             self.scraping_script = scraping_script
@@ -45,8 +47,8 @@ class ScrapingClient(object):
         self.scraping_script = script
 
     def connect(self):
-        self.c = ipc.SocketConnection()
-        if not self.c.connect(ipc.SocketConnection.gethostname(), self.port):
+        self.c = SocketConnection()
+        if not self.c.connect(SocketConnection.gethostname(), self.port):
             return False
         else:
             return True
@@ -95,7 +97,6 @@ class ScrapingClient(object):
                 if command_data[0] == "debug.__del__":
                     return
 
-
     def send_request(self, request):
         response = PageResponseObject()
         time_start = datetime.now()
@@ -115,13 +116,13 @@ class ScrapingClient(object):
                 elif command_data[0] == "PageResponseObject.headers":
                     try:
                         response.headers = json.loads(command_data[1].decode())
-                    except Exception as E:
+                    except ValueError as E:
                         print(str(E))
 
                 elif command_data[0] == "PageResponseObject.status_code":
                     try:
                         response.status_code = int(command_data[1].decode())
-                    except Exception as E:
+                    except ValueError as E:
                         print(str(E))
 
                 elif command_data[0] == "PageResponseObject.text":
@@ -171,7 +172,7 @@ class ScrapingClientParser(object):
         if "port" in self.args and self.args.port:
             self.port = self.args.port
         else:
-            self.port = ipc.DEFAULT_PORT
+            self.port = DEFAULT_PORT
 
     def is_valid(self):
         return True

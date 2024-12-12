@@ -1,5 +1,5 @@
 from .defaulturlhandler import DefaultUrlHandler, DefaultChannelHandler
-from .webtools import DomainAwarePage
+from .urllocation import UrlLocation
 from .pages import RssPage
 
 
@@ -24,7 +24,7 @@ class RedditChannelHandler(DefaultChannelHandler):
             return True
 
     def input2code(self, input_string):
-        p = DomainAwarePage(input_string)
+        p = UrlLocation(input_string)
         if p.get_domain_only().find("reddit.com") >= 0:
             parts = p.split()
             if len(parts) >= 4 and parts[3] == "r":
