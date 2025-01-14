@@ -18,7 +18,7 @@ import sys
 import os
 from datetime import timedelta
 import json
-import webtools
+from rsshistory import webtools
 import traceback
 import shutil
 
@@ -42,7 +42,6 @@ try:
         BeautifulSoupCrawlingContext,
     )
     from crawlee.basic_crawler import BasicCrawler
-    from crawlee.basic_crawler.types import BasicCrawlingContext
     from crawlee.playwright_crawler import PlaywrightCrawler, PlaywrightCrawlingContext
 except Exception as E:
     print(str(E))

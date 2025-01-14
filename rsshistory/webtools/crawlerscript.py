@@ -17,7 +17,7 @@ class ScriptCrawlerParser(object):
             "--timeout", default=10, type=int, help="Timeout expressed in seconds"
         )
         self.parser.add_argument("--ping", default=False, help="Ping only")
-        self.parser.add_argument("--port", type=int, help="Port")
+        self.parser.add_argument("--remote-server", help="Remote server")
         self.parser.add_argument("--ssl-verify", default=False, help="SSL verify")
 
         # TODO implement
@@ -58,4 +58,8 @@ class ScriptCrawlerInterface(CrawlerInterface):
     """
 
     def __init__(self, parser, request):
-        super().__init__(request, parser.args.output_file, parser.args.port)
+        settings = None
+        if parser.args.remote_server:
+            settings = {"remote_server" : parser.args.remote_server}
+
+        super().__init__(request, response_file = parser.args.output_file, settings = settings)

@@ -11,8 +11,19 @@ from utils.services import OpenRss
 
 
 class PageDisplay(object):
-    def __init__(self, url, verbose=False):
-        u = Url(url)
+    def __init__(self, url, parser=False):
+        if parser:
+            verbose = parser.args.verbose
+        else:
+            verbose = False
+
+        page_url = Url(url)
+        options = page_url.get_init_page_options()
+
+        if parser.args.remote_server:
+            options.mode_mapping = WebConfig.get_init_crawler_config(remote_server = parser.args.remote_server)
+
+        u = Url(url, page_options = options)
         u.get_response()
 
         properties = u.get_properties(full=True)
@@ -72,6 +83,7 @@ class PageDisplayParser(object):
             "--port", type=int, default=0, help="Port, if using web scraping server"
         )
         self.parser.add_argument("--url", help="Url to fetch")
+        self.parser.add_argument("--remote-server", help="Remote crawling server")
         self.parser.add_argument(
             "-v",
             "--verbose",

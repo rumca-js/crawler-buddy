@@ -88,11 +88,23 @@ class YouTubeChannelHandler(DefaultChannelHandler):
             return self.input2code_feeds(url)
 
     def input2code_handle(self, url):
-        html_url = self.get_html_url()
+        from .webtools import WebLogger
 
-        if html_url:
-            if html_url.p:
-                return html_url.p.get_schema_field("identifier")
+        from utils.programwrappers import ytdlp
+        yt = ytdlp.YTDLP(url)
+        self.yt_text = yt.download_data()
+
+        if self.yt_text is None:
+            WebLogger.error("Cannot obtain text data for url:{}".format(url))
+            return
+
+        from utils.serializers import YouTubeJson
+        self.yt_ob = YouTubeJson()
+        if not self.yt_ob.loads(self.yt_text):
+            WebLogger.error("Cannot obtain read json data url:{}\ndata:{}".format(url, self.yt_text))
+            return
+
+        return self.yt_ob.get_channel_code()
 
     def input2code_channel(self, url):
         wh = url.rfind("/")

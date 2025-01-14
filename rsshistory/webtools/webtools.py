@@ -354,9 +354,6 @@ class PageResponseObject(object):
         if "content-type" in self.headers:
             return self.headers["content-type"]
 
-    def get_headers(self):
-        return self.headers
-
     def get_last_modified(self):
         date = None
 
@@ -488,6 +485,13 @@ class PageResponseObject(object):
 
     def get_binary(self):
         return self.content
+
+    def get_headers(self):
+        self.headers["Content-Type"] = self.get_content_type()
+        self.headers["Content-Length"] = self.get_content_length()
+        self.headers["Charset"] = self.get_content_type_charset()
+
+        return self.headers
 
     def set_text(self, text, encoding=None):
         if encoding:

@@ -21,6 +21,7 @@ from .crawlers import (
     ServerCrawler,
     SeleniumBase,
     StealthRequestsCrawler,
+    RemoteServerCrawler,
 )
 
 
@@ -47,6 +48,7 @@ class WebConfig(object):
             ServerCrawler,  # requires script & port
             SeleniumBase,
             StealthRequestsCrawler,
+            RemoteServerCrawler,
         ]
 
         return browsers
@@ -78,7 +80,7 @@ class WebConfig(object):
         if c.is_valid():
             return c
 
-    def get_init_crawler_config(headless_script=None, full_script=None, port=None):
+    def get_init_crawler_config(headless_script=None, full_script=None, port=None, remote_server=None):
         """
         Caller may provide scripts
         """
@@ -124,6 +126,24 @@ class WebConfig(object):
         mapping.append(WebConfig.get_seleniumfull())
 
         mapping.append(WebConfig.get_default_browser_setup(StealthRequestsCrawler))
+
+        # convert to remote server requests
+
+        if remote_server:
+            result = []
+            for amap in mapping:
+                original_name = amap["name"]
+                original_crawler = amap["crawler"]
+
+                amap["name"] = "RemoteServerCrawler"
+                amap["crawler"] = RemoteServerCrawler
+                amap["settings"]["name"] = original_name
+                amap["settings"]["crawler"] = original_crawler
+                amap["settings"]["server_url"] = remote_server
+
+                result.append(amap)
+
+            mapping = result
 
         return mapping
 
@@ -244,6 +264,16 @@ class WebConfig(object):
             "name"      : "SeleniumBase",
             "crawler"   : SeleniumBase,
             "settings"  : {
+            },
+        }
+
+    def get_flaskserver():
+        return {
+            "enabled"   : False,
+            "name"      : "RemoteServerCrawler",
+            "crawler"   : RemoteServerCrawler,
+            "settings"  : {
+                "server_url" : "",
             },
         }
 

@@ -11,14 +11,6 @@ import time
 DEFAULT_PORT = 5007
 
 
-def object_to_bytes(input_object):
-    return pickle.dumps(input_object, protocol=pickle.HIGHEST_PROTOCOL)
-
-
-def object_from_bytes(all_bytes):
-    return pickle.loads(all_bytes)
-
-
 def object_to_command(command_string, input_object):
     """
     TODO: All three functions are not currently used
@@ -96,6 +88,9 @@ class SocketConnection(object):
         self.read_message = bytearray()
         self.closed = False
 
+    def __del__(self):
+        self.close()
+
     def gethostname():
         return socket.gethostname()
 
@@ -121,85 +116,6 @@ class SocketConnection(object):
             self.closed = True
             return False
 
-    def send(self, bytes):
-        if self.is_closed():
-            return False
-
-        try:
-            self.conn.sendall(bytes)
-            return True
-        except Exception as E:
-            self.closed = True
-            return False
-
-    def send_command_bytes(self, command_string, bytes):
-        bytes = bytes_to_command(command_string, bytes)
-        self.send(bytes)
-
-    def send_command_string(self, command_string, string):
-        bytes = string_to_command(command_string, string)
-        self.send(bytes)
-
-    def get_command_bytes(self):
-        while True:
-            wh = self.read_message.find(b"\x00")
-
-            if wh >= 0:
-                command = self.read_message[:wh]
-                self.read_message = self.read_message[wh + 1 :]
-
-                return command
-
-            if self.is_closed():
-                return
-
-            bytes = None
-            try:
-                if self.is_data():
-                    bytes = self.conn.recv(1024)
-                else:
-                    time.sleep(1)
-
-            except socket.timeout:
-                return
-
-            except Exception as E:
-                self.closed = True
-                return
-
-            if not bytes:
-                return
-
-            if len(bytes) == 0:
-                return
-
-            if bytes:
-                self.read_message.extend(bytearray(bytes))
-
-            wh = self.read_message.find(b"\x00")
-
-            if wh >= 0:
-                command = self.read_message[:wh]
-                self.read_message = self.read_message[wh + 1 :]
-
-                return command
-
-    def get_command_and_data(self):
-        command = self.get_command_bytes()
-
-        if not command:
-            return
-
-        wh = command.find(b"\x3A")
-        if not wh:
-            print("Cannot find ':' in response")
-            return
-
-        else:
-            command_string = command[:wh].decode()
-            data = command[wh + 1 :]
-            return [command_string, data]
-
     def close(self):
         if not self.is_closed():
             try:
@@ -208,16 +124,6 @@ class SocketConnection(object):
                 pass
 
             self.closed = True
-
-    def is_data(self):
-        try:
-            bytes = self.conn.recv(1024, socket.MSG_DONTWAIT | socket.MSG_PEEK)
-            if bytes:
-                return len(bytes) > 0
-            else:
-                return False
-        except Exception as E:
-            return False
 
     def is_closed(self):
         return self.closed

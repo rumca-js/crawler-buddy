@@ -57,6 +57,14 @@ class Url(ContentInterface):
     odysee_video_handler = OdyseeVideoHandler
     odysee_channel_handler = OdyseeChannelHandler
 
+    handlers = [
+            YouTubeJsonHandler,
+            YouTubeChannelHandler,
+            OdyseeVideoHandler,
+            OdyseeChannelHandler,
+            HttpPageHandler,
+            ]
+
     def __init__(
         self, url=None, page_options=None, handler_class=None, url_builder=None
     ):
@@ -83,12 +91,10 @@ class Url(ContentInterface):
             self.url_builder = Url
 
     def get_handlers():
-        return [
-            Url.youtube_video_handler,
-            Url.youtube_channel_handler,
-            Url.odysee_video_handler,
-            Url.odysee_channel_handler,
-        ]
+        return Url.handlers
+
+    def register(handler):
+        Url.handlers.append(handler)
 
     def get_handler(self):
         """
@@ -121,17 +127,20 @@ class Url(ContentInterface):
         handlers = Url.get_handlers()
         for handler in handlers:
             if handler(url).is_handled_by():
+                if handler == HttpPageHandler:
+                    page_type = UrlLocation(url).get_type()
+
+                    # TODO this should return HttpPageHandler?
+
+                    if page_type == URL_TYPE_HTML:
+                        return HtmlPage(url, "")
+
+                    if page_type == URL_TYPE_RSS:
+                        return RssPage(url, "")
+
+                    return
+
                 return handler(url)
-
-        page_type = UrlLocation(url).get_type()
-
-        # TODO this should return HttpPageHandler?
-
-        if page_type == URL_TYPE_HTML:
-            return HtmlPage(url, "")
-
-        if page_type == URL_TYPE_RSS:
-            return RssPage(url, "")
 
     def get_contents(self):
         """

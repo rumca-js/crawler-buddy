@@ -37,6 +37,8 @@ undetected-chromedriver = "^3.5.5"
 # playwright="*"
 # lxml="5.2.2"
 
+flask="*"
+
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"
 

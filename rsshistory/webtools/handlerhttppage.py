@@ -177,8 +177,9 @@ class HttpRequestBuilder(object):
                 continue
 
             WebLogger.debug(
-                "Url:{}: Running crawler {}".format(request.url, type(crawler))
+                "Url:{}: Running crawler {}\n{}".format(request.url, type(crawler), crawler_data)
             )
+
             crawler.run()
             response = crawler.get_response()
             crawler.close()
@@ -186,7 +187,7 @@ class HttpRequestBuilder(object):
                 return response
 
         self.dead = True
-        WebLogger.error(
+        WebLogger.debug(
             "Url:{} No response from crawler".format(request.url)
         )
 
@@ -197,7 +198,6 @@ class HttpRequestBuilder(object):
             request_url=request.url,
         )
         return self.response
-
 
     def ping(self, timeout_s=5):
         url = self.url
@@ -268,7 +268,7 @@ class HttpRequestBuilder(object):
             self.dead = True
             return None
 
-        WebLogger.info("[R] Url:{}. Options:{}".format(self.url, self.options))
+        WebLogger.debug("[R] Url:{}. Options:{}".format(self.url, self.options))
 
         request = PageRequestObject(
             url=self.url,
@@ -278,7 +278,7 @@ class HttpRequestBuilder(object):
 
         self.response = self.get_contents_internal(request=request)
 
-        WebLogger.info(
+        WebLogger.debug(
             "Url:{}. Options:{} Requesting page: DONE".format(
                 self.url, self.options
             )
@@ -329,7 +329,9 @@ class HttpPageHandler(HandlerInterface):
         self.options = page_options
         self.url_builder = url_builder
 
-    def is_handled_by(url):
+    def is_handled_by(self):
+        url = self.url
+
         if url.startswith("https") or url.startswith("http"):
             return True
         return False

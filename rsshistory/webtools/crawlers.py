@@ -9,6 +9,7 @@ import traceback
 from pathlib import Path
 import os
 import subprocess
+import threading
 
 from utils.dateutils import DateUtils
 from utils.basictypes import fix_path_for_os
@@ -33,7 +34,6 @@ from .pages import (
 
 from .ipc import (
     string_to_command,
-    SocketConnection,
 )
 
 selenium_feataure_enabled = True
@@ -50,16 +50,14 @@ except Exception as E:
 
 
 class CrawlerInterface(object):
-    def __init__(self, request, response_file=None, response_port=None, settings=None):
+    def __init__(self, request, response_file=None, settings=None):
         """
         @param response_file If set, response is stored in a file
-        @param response_port If set, response is sent through port
         @param settings passed settings
         """
         self.request = request
         self.response = None
         self.response_file = response_file
-        self.response_port = response_port
         self.settings = settings
 
         if self.request.timeout_s and settings and "timeout_s" in settings:
@@ -136,22 +134,51 @@ class CrawlerInterface(object):
         all_bytes = self.response_to_bytes()
 
         if self.response_file:
-            path = Path(self.response_file)
-            if not path.parent.exists():
-                path.parent.mkdir(parents=True, exist_ok=True)
+            self.save_response_file(self.response_file)
 
-            with open(self.response_file, "wb") as fh:
-                fh.write(all_bytes)
-
-        elif self.response_port:
-            con = SocketConnection()
-            con.connect(SocketConnection.gethostname(), self.response_port)
-            con.send(all_bytes)
-
-        else:
-            response = self.get_response()
+        if "remote_server" in self.settings:
+            self.save_response_remote(self.settings["remote_server"])
 
         return True
+
+    def save_response_file(self, file_name):
+        if not self.file_name:
+            return
+
+        path = Path(self.response_file)
+        if not path.parent.exists():
+            path.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(self.response_file, "wb") as fh:
+            fh.write(all_bytes)
+
+    def save_response_remote(self, remote_server):
+        import requests
+
+        if not self.response:
+            return
+
+        payload = {}
+        payload["url"] = self.response.url
+        payload["request_url"] = self.response.request_url
+        payload["Contents"] = self.response.get_text()
+        payload["Headers"] = self.response.get_headers()
+        payload["status_code"] = self.response.status_code
+
+        try:
+            response = requests.post(remote_server, json=payload)
+
+            if response.status_code == 200:
+                print("Response successfully sent to the remote server.")
+                return response.json()  # Assuming the server responds with JSON
+            else:
+                print(f"Failed to send response. Status code: {response.status_code}")
+                print(f"Response text: {response.text}")
+                return None
+        except requests.RequestException as e:
+            # Handle any exceptions raised by the requests library
+            print(f"An error occurred while sending the response: {e}")
+            return None
 
     def is_valid(self):
         return False
@@ -169,6 +196,14 @@ class RequestsCrawler(CrawlerInterface):
     """
     Python requests
     """
+    default_headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Charset": "utf-8,ISO-8859-1;q=0.7,*;q=0.3",
+        "Accept-Encoding": "none",
+        "Accept-Language": "en-US,en;q=0.8",
+        "Connection": "keep-alive",
+    }
 
     def run(self):
         if not self.is_valid():
@@ -193,6 +228,9 @@ class RequestsCrawler(CrawlerInterface):
         try:
             request_result = self.build_requests()
 
+            if not request_result:
+                return self.response
+
             self.response = PageResponseObject(
                 url=request_result.url,
                 text="",
@@ -200,7 +238,6 @@ class RequestsCrawler(CrawlerInterface):
                 headers=dict(request_result.headers),
                 request_url=self.request.url,
             )
-
             if not self.response.is_valid():
                 return self.response
 
@@ -242,6 +279,15 @@ class RequestsCrawler(CrawlerInterface):
             )
 
         except requests.Timeout:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_TIMEOUT,
+                request_url=self.request.url,
+            )
+            self.response.add_error("Url:{} Page timeout".format(self.request.url))
+
+        except TimeoutException:
             self.response = PageResponseObject(
                 self.request.url,
                 text=None,
@@ -311,18 +357,163 @@ class RequestsCrawler(CrawlerInterface):
     def build_requests(self):
         """
         stream argument - will fetch page contents, when we access contents of page.
+
+        Note - sometimes timeout can not work
+        https://stackoverflow.com/questions/21965484/timeout-for-python-requests-get-entire-response
+        https://stackoverflow.com/questions/53242211/python-requests-timeout-not-working-properly
         """
         import requests
 
-        request_result = requests.get(
-            self.request.url,
-            headers=self.request.headers,
-            timeout=self.timeout_s,
-            verify=self.request.ssl_verify,
+        def request_with_timeout(url, headers, timeout, verify, stream, result):
+            try:
+                result['response'] = requests.get(
+                    url,
+                    headers=headers,
+                    timeout=timeout,
+                    verify=verify,
+                    stream=stream,
+                )
+            except Exception as e:
+                result['exception'] = e
+
+        def make_request_with_threading(url, headers, timeout_s, ssl_verify, stream):
+            result = {'response': None, 'exception': None}
+
+            thread = threading.Thread(
+                target=request_with_timeout,
+                args=(url, headers, timeout_s, ssl_verify, stream, result),
+            )
+            thread.start()
+            thread.join(timeout_s)
+            
+            if thread.is_alive():
+                raise TimeoutException("Request timed out")
+            if result['exception']:
+                raise result['exception']
+            return result['response']
+
+        headers = self.request.headers
+        if not headers:
+            headers = RequestsCrawler.default_headers
+
+        response = make_request_with_threading(
+            url=self.request.url,
+            headers=headers,
+            timeout_s=self.timeout_s,
+            ssl_verify=self.request.ssl_verify,
             stream=True,
         )
+        if response:
+            return response
 
-        return request_result
+    def is_valid(self):
+        try:
+            import requests
+
+            return True
+        except Exception as E:
+            print(str(E))
+            return False
+
+
+class RemoteServerCrawler(CrawlerInterface):
+    """
+    Server that accepts GET and POST requests, runs requests and returns data via JSON response
+    """
+    def run(self):
+        import requests
+
+        if not self.is_valid():
+            return
+
+        server_url = self.settings["remote_server"]
+        self.settings["crawler"] = self.settings["crawler"]
+
+        crawler_data = {
+                "crawler" : self.settings["crawler"],
+                "name" : self.settings["name"],
+                "timeout" : self.request.timeout_s,
+                "settings" : self.settings,
+        }
+
+        crawler_data = json.dumps(crawler_data)
+
+        try:
+            link = "{}?url={}&crawler_data={}".format(server_url, self.request.url, crawler_data)
+            print(link)
+
+            response = requests.get(
+                link,
+                timeout=self.request.timeout_s,
+                verify=False,
+                stream=True,
+            )
+
+            json_data = self.unpack_data(response.text)
+
+            self.response = PageResponseObject(
+                self.request.url,
+                text=json_data["contents"],
+                status_code=json_data["status_code"],
+                request_url=self.request.url,
+            )
+
+        except requests.Timeout:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_TIMEOUT,
+                request_url=self.request.url,
+            )
+            self.response.add_error("Url:{} Page timeout".format(self.request.url))
+
+        except TimeoutException:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_TIMEOUT,
+                request_url=self.request.url,
+            )
+            self.response.add_error("Url:{} Page timeout".format(self.request.url))
+
+        except requests.exceptions.ConnectionError:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
+                request_url=self.request.url,
+            )
+            self.response.add_error("Url:{} Connection error".format(self.request.url))
+
+        except Exception as E:
+            WebLogger.exc(E, "Url:{} General exception".format(self.request.url))
+
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_EXCEPTION,
+                request_url=self.request.url,
+            )
+            self.response.add_error("General page exception")
+
+        return self.response
+
+    def unpack_data(self, input_data):
+        json_data = {}
+
+        data = json.loads(input_data)
+
+        # TODO make it cleaner
+        if data and len(data) > 2 and "data" in data[3]:
+            json_data["status_code"] = data[3]["data"]["status_code"]
+        if data and len(data) > 1 and "data" in data[1]:
+            json_data["contents"] = data[1]["data"]["Contents"]
+        if data and len(data) > 3 and "data" in data[3]:
+            json_data["Content-Length"] = data[3]["data"]["Content-Length"]
+        if data and len(data) > 3 and "data" in data[3]:
+            json_data["Content-Type"] = data[3]["data"]["Content-Type"]
+
+        return json_data
 
     def is_valid(self):
         try:
@@ -402,7 +593,6 @@ class SeleniumDriver(CrawlerInterface):
         self,
         request,
         response_file=None,
-        response_port=None,
         driver_executable=None,
         settings=None,
     ):
@@ -416,7 +606,6 @@ class SeleniumDriver(CrawlerInterface):
         super().__init__(
             request,
             response_file=response_file,
-            response_port=response_port,
             settings=settings,
         )
         self.driver = None
@@ -693,8 +882,10 @@ class SeleniumChromeFull(SeleniumDriver):
             options = webdriver.ChromeOptions()
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
-            # options.add_argument("--headless")
             options.add_argument("--lang={}".format("en-US"))
+
+            # path = "./linklibrary/rsshistory/static/extensions/chrome/ublock_1.61.2_0.crx"
+            # options.add_extension(path)
 
             options.add_argument("start-maximized")
             options.add_argument("disable-infobars")
@@ -883,7 +1074,6 @@ class ScriptCrawler(CrawlerInterface):
         self,
         request,
         response_file=None,
-        response_port=None,
         cwd=None,
         script=None,
         settings=None,
@@ -894,7 +1084,6 @@ class ScriptCrawler(CrawlerInterface):
         super().__init__(
             request=request,
             response_file=response_file,
-            response_port=response_port,
             settings=settings,
         )
         self.cwd = cwd
@@ -958,7 +1147,7 @@ class ScriptCrawler(CrawlerInterface):
                 timeout=self.timeout_s + 10,  # add more time for closing browser, etc
             )
         except subprocess.TimeoutExpired as E:
-            WebLogger.exc(E, "Timeout on running script")
+            WebLogger.debug(E, "Timeout on running script")
 
             self.response = PageResponseObject(
                 self.request.url,
@@ -966,6 +1155,7 @@ class ScriptCrawler(CrawlerInterface):
                 status_code=HTTP_STATUS_CODE_TIMEOUT,
                 request_url=self.request.url,
             )
+            return self.response
         except ValueError as E:
             WebLogger.exc(E, "Incorrect script call {}".format(script))
             return self.response
@@ -1074,19 +1264,15 @@ class ServerCrawler(CrawlerInterface):
         self,
         request,
         response_file=None,
-        response_port=None,
         settings=None,
         script=None,
     ):
         if settings and "script" in settings and settings["script"]:
             script = settings["script"]
-        if settings and "port" in settings and settings["port"]:
-            response_port = settings["port"]
 
         super().__init__(
             request=request,
             response_file=response_file,
-            response_port=response_port,
             settings=settings,
         )
         self.script = script
@@ -1105,92 +1291,11 @@ class ServerCrawler(CrawlerInterface):
 
         script_time_start = DateUtils.get_datetime_now_utc()
 
-        self.connection = SocketConnection()
-        try:
-            if not self.connection.connect(
-                SocketConnection.gethostname(), self.response_port
-            ):
-                WebLogger.error("Cannot connect to port{}".format(self.response_port))
-
-                self.response = PageResponseObject(
-                    self.request.url,
-                    text=None,
-                    status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
-                    request_url=self.request.url,
-                )
-                return self.response
-        except Exception as E:
-            WebLogger.exc(E, "Cannot connect to port{}".format(self.response_port))
-            return
-
-        bytes = get_request_to_bytes(self.request, self.script)
-        self.connection.send(bytes)
+        # TODO implement
 
         response = PageResponseObject(self.request.url)
         response.status_code = HTTP_STATUS_CODE_TIMEOUT
         response.request_url = self.request.url
-
-        while True:
-            command_data = self.connection.get_command_and_data()
-
-            if command_data:
-                if command_data[0] == "PageResponseObject.__init__":
-                    pass
-
-                elif command_data[0] == "PageResponseObject.url":
-                    response.url = command_data[1].decode()
-
-                elif command_data[0] == "PageResponseObject.headers":
-                    try:
-                        response.headers = json.loads(command_data[1].decode())
-                    except ValueError as E:
-                        WebLogger.exc(
-                            E, "Cannot load response headers from crawling server"
-                        )
-
-                elif command_data[0] == "PageResponseObject.status_code":
-                    try:
-                        response.status_code = int(command_data[1].decode())
-                    except ValueError as E:
-                        WebLogger.exc(E, "Cannot load status_code from crawling server")
-
-                elif command_data[0] == "PageResponseObject.text":
-                    response.set_text(command_data[1].decode())
-
-                elif command_data[0] == "PageResponseObject.request_url":
-                    response.request_url = command_data[1].decode()
-
-                elif command_data[0] == "PageResponseObject.__del__":
-                    break
-
-                elif command[0] == "commands.debug":
-                    pass
-
-                elif command[0] == "debug.requests":
-                    pass
-
-                else:
-                    WebLogger.error("Unsupported command:{}".format(command_data[0]))
-                    break
-
-            if self.connection.is_closed():
-                break
-
-            diff = DateUtils.get_datetime_now_utc() - script_time_start
-            if diff.total_seconds() > self.timeout_s + 10:
-                WebLogger.error(
-                    "Url:{} Timeout on socket connection:{}/{}".format(
-                        self.request.url, diff.total_seconds(), self.timeout_s
-                    )
-                )
-
-                response = PageResponseObject(
-                    self.request.url,
-                    text=None,
-                    status_code=HTTP_STATUS_CODE_TIMEOUT,
-                    request_url=self.request.url,
-                )
-                break
 
         self.response = response
 
@@ -1202,9 +1307,6 @@ class ServerCrawler(CrawlerInterface):
 
     def is_valid(self):
         if not self.script:
-            return False
-
-        if self.response_port == 0 or self.response_port is None:
             return False
 
         return True
@@ -1219,14 +1321,12 @@ class SeleniumBase(CrawlerInterface):
         self,
         request,
         response_file=None,
-        response_port=None,
         driver_executable=None,
         settings=None,
     ):
         super().__init__(
             request=request,
             response_file=response_file,
-            response_port=response_port,
             settings=settings,
         )
 
@@ -1234,10 +1334,17 @@ class SeleniumBase(CrawlerInterface):
         if not self.is_valid():
             return
 
+        self.response = PageResponseObject(
+            self.request.url,
+            text=None,
+            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            request_url=self.request.url,
+        )
+
         try:
             from seleniumbase import SB
         except Exception as E:
-            return
+            return self.response
 
         with SB() as sb:
             sb.open(request.url)

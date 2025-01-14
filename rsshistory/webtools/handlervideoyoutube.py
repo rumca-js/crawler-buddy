@@ -321,7 +321,6 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
     def load_details(self):
         from utils.serializers import YouTubeJson
-
         self.yt_ob = YouTubeJson()
 
         if self.yt_text and not self.yt_ob.loads(self.yt_text):

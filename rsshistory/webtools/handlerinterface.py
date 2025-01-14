@@ -111,3 +111,30 @@ class HandlerInterface(DefaultContentPage):
         @param timeout_s 0 is unlimited
         """
         raise NotImplementedError
+
+    def get_view_count(self):
+        """
+        """
+        return
+
+    def get_thumbs_up(self):
+        return
+
+    def get_thumbs_down(self):
+        return
+
+    def get_upvote_ratio(self):
+        thumbs_up = self.get_thumbs_up()
+        thumbs_down = self.get_thumbs_down()
+
+        if thumbs_up and thumbs_down:
+            all = thumbs_down + thumbs_up
+
+            return thumbs_up / all
+
+    def get_upvote_view_ratio(self):
+        thumbs_up = self.get_thumbs_up()
+        views = self.get_view_count()
+
+        if thumbs_up and views:
+            return thumbs_up / views

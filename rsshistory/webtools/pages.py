@@ -858,10 +858,15 @@ class RssPage(ContentInterface):
         if self.feed and len(self.feed.entries) > 0:
             return True
 
+        if self.get_contents().find("<feed") >= 0:
+            return True
+        if self.get_contents().find("<rss") >= 0:
+            return True
+
         # if not self.is_contents_rss():
         #     return False
 
-        return True
+        return False
 
     def is_contents_rss(self):
         """
@@ -889,6 +894,31 @@ class RssPage(ContentInterface):
 
         if self.contents.find("encoding") >= 0:
             return "utf-8"
+
+
+class RssContentReader(object):
+    def __init__(self, url, contents):
+        self.contents = contents
+        self.process()
+
+    def process(self):
+        wh_html = self.contents.find("html")
+        wh_lt = self.contents.find("&lt;")
+
+        if wh_html == -1:
+            return
+        if wh_lt == -1:
+            return
+
+        if wh_html > wh_lt:
+            return
+
+        wh_gt = self.contents.rfind("&gt;")
+        if wh_gt == -1:
+            return
+
+        self.contents = self.contents[wh_lt : wh_gt + len("&gt;")]
+        self.contents = html.unescape(self.contents)
 
 
 class ContentLinkParser(ContentInterface):

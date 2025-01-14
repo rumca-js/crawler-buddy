@@ -12,6 +12,9 @@ class UrlLocation(object):
         self.url = url
 
     def is_web_link(self):
+        """
+        Hosts may redefine addresses, but these are NOT real web links
+        """
         if (
             self.url.startswith("http://")
             or self.url.startswith("https://")
@@ -22,6 +25,15 @@ class UrlLocation(object):
         ):
             # https://mailto is not a good link
             if self.url.find(".") == -1:
+                return False
+
+            # no funny chars
+            domain_only = self.get_domain_only()
+            if not domain_only:
+                return False
+            if domain_only.find("&") >= 0:
+                return False
+            if domain_only.find("?") >= 0:
                 return False
 
             return True
