@@ -1,3 +1,8 @@
+This repository provides programs:
+ - yafr - RSS feed reader
+ - page\_props - page properties script
+ - script\_server - HTTP crawling server
+
 # yafr
 
 Yet another feed reader
@@ -97,7 +102,7 @@ find interesting page, and try to follow it. if page contains valid RSS link thi
 
 # Page properties
 
-Page properties can be obtained via commandline by means of page\_props.py program.
+This program allows to display page properties.
 
 ```
 usage: page_props.py [-h] [--timeout TIMEOUT] [--port PORT] [--url URL] [--remote-server REMOTE_SERVER] [-v]
@@ -116,6 +121,13 @@ options:
 
 # Scraping server
 
+This program can be used to crawl web pages. Provides HTTP web server.
+
+Urls that can be used:
+
+ - http://IP:port - GET method. Provides information about web server crawling history
+ - http://IP:port/run?url=... - GET request. crawl a page. As a response returns JSON with properties
+
 ```
 usage: script_server.py [-h] [--port PORT] [-l HISTORY_LENGTH] [--host HOST]
 
@@ -133,4 +145,4 @@ options:
 
 Repository contains various crawling scripts. All start with 'crawl' prefix.
 
-They can be used to scrape information about a site.
+They can be manually called to see if crawling method works at all.

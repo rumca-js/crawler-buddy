@@ -1,0 +1,13 @@
+version: '3.7'
+services:
+  djangolinkarchive:
+    image: rozbujnik/crawler-buddy
+    container_name: crawlerbuddy
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    environment:
+      # could be localhost
+      ALLOWED_IP: "192.168.0.1"
