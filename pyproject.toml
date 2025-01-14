@@ -33,9 +33,8 @@ pyvirtualdisplay = "^3.0"
 undetected-chromedriver = "^3.5.5"
 
 #  use things below if you want to use crawlee
-# crawlee="0.1.1"
-# playwright="*"
-# lxml="5.2.2"
+crawlee="0.1.1"
+playwright="*"
 
 flask="*"
 

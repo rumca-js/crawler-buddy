@@ -136,13 +136,13 @@ class CrawlerInterface(object):
         if self.response_file:
             self.save_response_file(self.response_file)
 
-        if "remote_server" in self.settings:
+        if self.settings and "remote_server" in self.settings:
             self.save_response_remote(self.settings["remote_server"])
 
         return True
 
     def save_response_file(self, file_name):
-        if not self.file_name:
+        if file_name:
             return
 
         path = Path(self.response_file)
