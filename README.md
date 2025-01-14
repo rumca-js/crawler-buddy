@@ -1,4 +1,5 @@
 # yafr
+
 Yet another feed reader
 
 ```
@@ -47,7 +48,7 @@ optional arguments:
   --db DB               SQLite database file name
 ```
 
-# Alternative software
+## Alternative software
 
  - https://newsboat.org/index.html
  - https://github.com/guyfedwards/nom
@@ -55,7 +56,7 @@ optional arguments:
  - https://feed2exec.readthedocs.io
  - https://github.com/kpman/newsroom
 
-# Alternative software - GUI
+## Alternative software - GUI
 
  - https://github.com/FreshRSS/FreshRSS
  - https://github.com/yang991178/fluent-reader
@@ -66,7 +67,7 @@ optional arguments:
  - https://github.com/nkanaev/yarr
  - ...and more...
 
-# where to find feed urls
+## where to find feed urls
 
 First, try [OpenRss](https://openrss.org/usage)
 
@@ -87,9 +88,49 @@ Other places to find interesting blogs / places:
  - https://aboutideasnow.com/
  - https://neocities.org/
 
-# Other things
+## Other things
 
  - https://github.com/AboutRSS/ALL-about-RSS
  - https://github.com/voidfiles/awesome-rss standards
  
 find interesting page, and try to follow it. if page contains valid RSS link this software should be able to follow it
+
+# Page properties
+
+Page properties can be obtained via commandline by means of page\_props.py program.
+
+```
+usage: page_props.py [-h] [--timeout TIMEOUT] [--port PORT] [--url URL] [--remote-server REMOTE_SERVER] [-v]
+
+Page properties
+
+options:
+  -h, --help            show this help message and exit
+  --timeout TIMEOUT     Timeout expressed in seconds
+  --port PORT           Port, if using web scraping server
+  --url URL             Url to fetch
+  --remote-server REMOTE_SERVER
+                        Remote crawling server
+  -v, --verbose         Verbose. For example: displays full contents
+```
+
+# Scraping server
+
+```
+usage: script_server.py [-h] [--port PORT] [-l HISTORY_LENGTH] [--host HOST]
+
+Remote server options
+
+options:
+  -h, --help            show this help message and exit
+  --port PORT           Port number to be used
+  -l HISTORY_LENGTH, --history-length HISTORY_LENGTH
+                        Length of history
+  --host HOST           Host
+```
+
+# Crawling
+
+Repository contains various crawling scripts. All start with 'crawl' prefix.
+
+They can be used to scrape information about a site.

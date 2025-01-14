@@ -15,7 +15,6 @@ from rsshistory.webtools import (
    fetch_url,
    fetch_all_urls,
    WebConfig,
-   ScrapingClient,
 )
 from utils.serializers import PageDisplay, PageDisplayParser
 
