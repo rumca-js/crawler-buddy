@@ -1,67 +1,45 @@
 #
-# If you want to kill docker.
-#  - ps auxw | grep runserver
-#  - kill -9 xxx the server
+# Assuming: you have python poetry installed
+# sudo apt install python3-poetry
 #
-# postgres
-#  https://stackoverflow.com/questions/60420940/how-to-fix-error-error-database-is-uninitialized-and-superuser-password-is-not
+# if poetry install takes too long
+# export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring
+#
+# yt-dlp needs to be callable from path https://github.com/yt-dlp/yt-dlp/wiki/Installation
+#
+.PHONY: install installsysdeps
+.PHONY: run-server
+.PHONY: reformat
+.PHONY: backfiles
 
+CP = cp
+PROJECT_NAME = crawler-buddy
+PORT=3000
+APP_NAME = rsshistory
+# Edit companion app if necessary
+COMPANION_APP = catalog
 
-APP_NAME=crawler-buddy
-
-
-build:
-	# poetry lock -> to write lock file
-	docker build -t $(USER_NAME)/$(APP_NAME) .
-
-build-clean:
-	# poetry lock -> to write lock file
-	docker build --no-cache -t $(USER_NAME)/$(APP_NAME) .
-
-run:
-	# docker run -p 3000:3000 $(USER_NAME)/$(APP_NAME)
-	docker compose up
-
-list:
-	docker ps -a
-	# docker images
-
-stop:
-	docker stop container_id
-
-remove:
-	# if poetry complains do poetry update
-	docker container rm container_id
+# Assumptions:
+#  - python poetry is in your path
 
 install:
-	sudo apt install docker.io -y
-	sudo systemctl start docker
-	sudo usermod -aG docker $USER
-	#
-	# installation as in https://www.linuxtechi.com/how-to-install-docker-on-linux-mint/#6_Test_Docker_Installation
-	#
-	#sudo apt install -y apt-transport-https ca-certificates curl gnupg
-	#curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/dockerce.gpg
-	#echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/dockerce.gpg] https://download.docker.com/linux/ubuntu jammy stable" | sudo tee /etc/apt/sources.list.d/dockerce.list > /dev/null
-	#sudo apt update
-	#sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-	#sudo usermod -aG docker $USER
-	#newgrp docker
-	#
-	echo Installation successful, please reboot computer
+	poetry install
+	poetry run python -m spacy download en_core_web_sm
+	poetry run playwright install
 
-install-portainer:
-	docker pull portainer/portainer-ce:latest
-	docker run -d -p 9000:9000 --restart always -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer-ce:latest
+installsysdeps:
+	apt -y install wget id3v2 chromium-chromedriver xvfb
 
-push:
-	# docker login --username $(USER_NAME) --password $(USER_PASSWORD)
-	# docker image tag local-image:INIT new-repo:tagname
-	docker push $(USER_NAME)/$(APP_NAME)
+run-server:
+	rm -rf storage
+	poetry run python script_server.py &
 
-refresh:
-	docker exec -d container_id poetry run celery call app.tasks.process_all_jobs -a '["rsshistory.threadhandlers.OneTaskProcessor"]'
+# Assumptions:
+#  - python black is in your path
+# Black should use gitignore files to ignore refactoring
+reformat:
+	poetry run black $(APP_NAME)
+	poetry run black utils
 
-
-compose-refresh:
-	docker compose up --build $(USER_NAME)/$(APP_NAME)
+backfiles:
+	find . -type f -name "*.bak" -exec rm -f {} +
