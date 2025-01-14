@@ -131,8 +131,6 @@ class CrawlerInterface(object):
                 WebLogger.error("Have not received response")
             return False
 
-        all_bytes = self.response_to_bytes()
-
         if self.response_file:
             self.save_response_file(self.response_file)
 
@@ -142,8 +140,10 @@ class CrawlerInterface(object):
         return True
 
     def save_response_file(self, file_name):
-        if file_name:
+        if not file_name:
             return
+
+        all_bytes = self.response_to_bytes()
 
         path = Path(self.response_file)
         if not path.parent.exists():
