@@ -1,0 +1,67 @@
+#
+# If you want to kill docker.
+#  - ps auxw | grep runserver
+#  - kill -9 xxx the server
+#
+# postgres
+#  https://stackoverflow.com/questions/60420940/how-to-fix-error-error-database-is-uninitialized-and-superuser-password-is-not
+
+
+APP_NAME=crawler-buddy
+
+
+build:
+	# poetry lock -> to write lock file
+	docker build -t $(USER_NAME)/$(APP_NAME) .
+
+build-clean:
+	# poetry lock -> to write lock file
+	docker build --no-cache -t $(USER_NAME)/$(APP_NAME) .
+
+run:
+	# docker run -p 3000:3000 $(USER_NAME)/$(APP_NAME)
+	docker compose up
+
+list:
+	docker ps -a
+	# docker images
+
+stop:
+	docker stop container_id
+
+remove:
+	# if poetry complains do poetry update
+	docker container rm container_id
+
+install:
+	sudo apt install docker.io -y
+	sudo systemctl start docker
+	sudo usermod -aG docker $USER
+	#
+	# installation as in https://www.linuxtechi.com/how-to-install-docker-on-linux-mint/#6_Test_Docker_Installation
+	#
+	#sudo apt install -y apt-transport-https ca-certificates curl gnupg
+	#curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/dockerce.gpg
+	#echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/dockerce.gpg] https://download.docker.com/linux/ubuntu jammy stable" | sudo tee /etc/apt/sources.list.d/dockerce.list > /dev/null
+	#sudo apt update
+	#sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+	#sudo usermod -aG docker $USER
+	#newgrp docker
+	#
+	echo Installation successful, please reboot computer
+
+install-portainer:
+	docker pull portainer/portainer-ce:latest
+	docker run -d -p 9000:9000 --restart always -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer-ce:latest
+
+push:
+	# docker login --username $(USER_NAME) --password $(USER_PASSWORD)
+	# docker image tag local-image:INIT new-repo:tagname
+	docker push $(USER_NAME)/$(APP_NAME)
+
+refresh:
+	docker exec -d container_id poetry run celery call app.tasks.process_all_jobs -a '["rsshistory.threadhandlers.OneTaskProcessor"]'
+
+
+compose-refresh:
+	docker compose up --build $(USER_NAME)/$(APP_NAME)
