@@ -347,7 +347,7 @@ def run_command():
     if crawler:
         parsed_crawler_data["crawler"] = crawler
     if name:
-        parsed_crawler_data["name"] = crawler
+        parsed_crawler_data["name"] = name
 
     if "settings" not in parsed_crawler_data:
         parsed_crawler_data["settings"] = {}
@@ -356,7 +356,7 @@ def run_command():
 
     parsed_crawler_data["settings"]["remote_server"] = remote_server
 
-    print("Running:{}, with:{} at:{}".format(url, crawler_data, remote_server))
+    print("Running:{}, with:{} at:{}".format(url, parsed_crawler_data, remote_server))
 
     all_properties = run_webtools_url(url, remote_server, parsed_crawler_data, full)
     #all_properties = None
