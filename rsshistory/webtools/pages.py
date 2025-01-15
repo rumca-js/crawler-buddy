@@ -1766,3 +1766,85 @@ class XmlPage(ContentInterface):
         lower = contents.lower()
         if lower.find("<?xml") >= 0:
             return lower.find("<?xml") >= 0
+
+
+class PageFactory(object):
+    def get(response, contents):
+        """
+        Note: some servers might return text/html for RSS sources.
+              We must manually check what kind of data it is.
+              For speed - we check first what is suggested by content-type
+        """
+        contents = None
+        if response and response.get_text():
+            contents = response.get_text()
+
+        if not contents:
+            return
+
+        url = response.request_url
+
+        if response.is_html():
+            p = HtmlPage(url, contents)
+            if p.is_valid():
+                return p
+
+            p = RssPage(url, contents)
+            if p.is_valid():
+                return p
+
+            p = JsonPage(url, contents)
+            if p.is_valid():
+                return p
+
+        if response.is_rss():
+            p = RssPage(url, contents)
+            if p.is_valid():
+                return p
+
+            p = HtmlPage(url, contents)
+            if p.is_valid():
+                return p
+
+            p = JsonPage(url, contents)
+            if p.is_valid():
+                return p
+
+        if response.is_json():
+            p = JsonPage(url, contents)
+            if p.is_valid():
+                return p
+
+            p = RssPage(url, contents)
+            if p.is_valid():
+                return p
+
+            p = HtmlPage(url, contents)
+            if p.is_valid():
+                return p
+
+        if response.is_text():
+            p = DefaultContentPage(url, contents)
+            return p
+
+        # we do not know what it is. Guess
+
+        p = HtmlPage(url, contents)
+        if p.is_valid():
+            return p
+
+        p = RssPage(url, contents)
+        if p.is_valid():
+            return p
+
+        p = JsonPage(url, contents)
+        if p.is_valid():
+            return p
+
+        # TODO
+        # p = XmlPage(url, contents)
+        # if p.is_valid():
+        #    return p
+
+        p = DefaultContentPage(url, contents)
+        return p

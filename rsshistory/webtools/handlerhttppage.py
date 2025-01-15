@@ -25,11 +25,9 @@ from .webtools import (
 )
 from .urllocation import UrlLocation
 from .pages import (
-    ContentInterface,
-    DefaultContentPage,
-    JsonPage,
     HtmlPage,
     RssPage,
+    PageFactory,
 )
 from .handlerinterface import HandlerInterface
 from .webconfig import WebConfig
@@ -430,70 +428,7 @@ class HttpPageHandler(HandlerInterface):
 
         url = self.url
 
-        if self.is_html():
-            p = HtmlPage(url, contents)
-            if p.is_valid():
-                return p
-
-            p = RssPage(url, contents)
-            if p.is_valid():
-                return p
-
-            p = JsonPage(url, contents)
-            if p.is_valid():
-                return p
-
-        if self.is_rss():
-            p = RssPage(url, contents)
-            if p.is_valid():
-                return p
-
-            p = HtmlPage(url, contents)
-            if p.is_valid():
-                return p
-
-            p = JsonPage(url, contents)
-            if p.is_valid():
-                return p
-
-        if self.is_json():
-            p = JsonPage(url, contents)
-            if p.is_valid():
-                return p
-
-            p = RssPage(url, contents)
-            if p.is_valid():
-                return p
-
-            p = HtmlPage(url, contents)
-            if p.is_valid():
-                return p
-
-        if self.is_text():
-            p = DefaultContentPage(url, contents)
-            return p
-
-        # we do not know what it is. Guess
-
-        p = HtmlPage(url, contents)
-        if p.is_valid():
-            return p
-
-        p = RssPage(url, contents)
-        if p.is_valid():
-            return p
-
-        p = JsonPage(url, contents)
-        if p.is_valid():
-            return p
-
-        # TODO
-        # p = XmlPage(url, contents)
-        # if p.is_valid():
-        #    return p
-
-        p = DefaultContentPage(url, contents)
-        return p
+        return PageFactory.get(self.response, contents)
 
     def is_advanced_processing_possible(self):
         """
@@ -530,41 +465,6 @@ class HttpPageHandler(HandlerInterface):
             return True
 
         return False
-
-    def is_status_code_redirect(self, status_code):
-        return (status_code >= 300 and status_code < 400) or status_code == 403
-
-    def is_html(self):
-        if (
-            self.response
-            and self.response.get_content_type() is not None
-            and self.response.is_content_html()
-        ):
-            return True
-
-    def is_rss(self):
-        if (
-            self.response
-            and self.response.get_content_type() is not None
-            and self.response.is_content_rss()
-        ):
-            return True
-
-    def is_json(self):
-        if (
-            self.response
-            and self.response.get_content_type() is not None
-            and self.response.is_content_json()
-        ):
-            return True
-
-    def is_text(self):
-        if (
-            self.response
-            and self.response.get_content_type() is not None
-            and self.response.get_content_type().find("text") >= 0
-        ):
-            return True
 
     def get_title(self):
         if not self.p:

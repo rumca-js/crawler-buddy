@@ -18,7 +18,6 @@ from .crawlers import (
     SeleniumChromeFull,
     SeleniumUndetected,
     ScriptCrawler,
-    ServerCrawler,
     SeleniumBase,
     StealthRequestsCrawler,
     RemoteServerCrawler,
@@ -45,7 +44,6 @@ class WebConfig(object):
             SeleniumChromeFull,  # requires driver location
             SeleniumUndetected,  # requires driver location
             ScriptCrawler,  # requires script
-            ServerCrawler,  # requires script & port
             SeleniumBase,
             StealthRequestsCrawler,
             RemoteServerCrawler,
@@ -117,9 +115,7 @@ class WebConfig(object):
         mapping.append(WebConfig.get_default_browser_setup(RequestsCrawler))
 
         mapping.append(WebConfig.get_scriptcralwer(headless_script, "CrawleeScript"))
-        mapping.append(WebConfig.get_servercralwer(port, headless_script, "CrawleeServer"))
         mapping.append(WebConfig.get_scriptcralwer(full_script, "PlaywrightScript"))
-        mapping.append(WebConfig.get_servercralwer(port, full_script, "PlaywrightServer"))
         mapping.append(WebConfig.get_seleniumundetected())
         mapping.append(WebConfig.get_seleniumbase())
         mapping.append(WebConfig.get_seleniumheadless())
@@ -177,22 +173,6 @@ class WebConfig(object):
                 "name"      : name,
                 "crawler"   : ScriptCrawler,
                 "settings"  : {"script": script, "timeout_s": 40},
-            }
-
-    def get_servercralwer(port, script, name=""):
-        if port and script:
-            return {
-                "enabled"   : False,
-                "name"      : name,
-                "crawler"   : ServerCrawler,
-                "settings"  : {"port": port, "script": script, "timeout_s": 40},
-            }
-        else:
-            return {
-                "enabled"   : False,
-                "name"      : name,
-                "crawler"   : ServerCrawler,
-                "settings"  : {"port": port, "script": script, "timeout_s": 40},
             }
 
     def get_seleniumheadless():

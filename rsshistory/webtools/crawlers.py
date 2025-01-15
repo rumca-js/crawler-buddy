@@ -166,7 +166,7 @@ class CrawlerInterface(object):
         payload["status_code"] = self.response.status_code
 
         try:
-            response = requests.post(remote_server, json=payload)
+            response = requests.post(remote_server + "/set", json=payload)
 
             if response.status_code == 200:
                 print("Response successfully sent to the remote server.")
@@ -1095,6 +1095,9 @@ class ScriptCrawler(CrawlerInterface):
         if not self.cwd:
             self.cwd = self.get_main_path()
 
+        if self.settings and "remote-server" in self.settings:
+            return
+
         if not self.response_file:
             from .webconfig import WebConfig
 
@@ -1111,6 +1114,101 @@ class ScriptCrawler(CrawlerInterface):
         if not self.is_valid():
             return
 
+        if self.settings and "remote-server" in self.settings:
+            return self.run_via_server(self.settings["remote-server"])
+        else:
+            return self.run_via_file()
+
+    def run_via_server(self, remote_server):
+        self.response = PageResponseObject(
+            self.request.url,
+            text=None,
+            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            request_url=self.request.url,
+        )
+
+        script = self.script + ' --url "{}" --remote-server="{}" --timeout={}'.format(
+            self.request.url, remote_server, self.timeout_s
+        )
+
+        # WebLogger.error("Response:{}".format(self.response_file))
+        # WebLogger.error("CWD:{}".format(self.cwd))
+        # WebLogger.error("maintl:{}".format(self.get_main_path()))
+        # WebLogger.error("script:{}".format(script))
+
+        try:
+            p = subprocess.run(
+                script,
+                shell=True,
+                capture_output=True,
+                cwd=self.cwd,
+                timeout=self.timeout_s + 10,  # add more time for closing browser, etc
+            )
+        except subprocess.TimeoutExpired as E:
+            WebLogger.debug(E, "Timeout on running script")
+
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_TIMEOUT,
+                request_url=self.request.url,
+            )
+            return self.response
+        except ValueError as E:
+            WebLogger.exc(E, "Incorrect script call {}".format(script))
+            return self.response
+
+        if p.returncode != 0:
+            if p.stdout:
+                stdout_str = p.stdout.decode()
+                if stdout_str != "":
+                    WebLogger.error(stdout_str)
+
+            if p.stderr:
+                stderr_str = p.stderr.decode()
+                if stderr_str and stderr_str != "":
+                    WebLogger.error("Url:{}. {}".format(self.request.url, stderr_str))
+
+            WebLogger.error(
+                "Url:{}. Script:'{}'. Return code invalid:{}. Path:{}".format(
+                    self.request.url,
+                    script,
+                    p.returncode,
+                    self.cwd,
+                )
+            )
+
+        import requests
+
+        url = f"{remote_server}/find?url={self.request.url}"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                if len(data) > 0:
+                    contents = data[1]["data"]["Contents"]
+                if len(data) > 3:
+                    headers = data[4]["data"]
+
+                self.response = PageResponseObject(url = url, request_url = url, text = contents, headers = headers)
+                return self.response
+
+            except ValueError:
+                print("Response content is not valid JSON.")
+        else:
+            WebLogger.error(
+                f"Url:{self.request.url}: Failed to fetch data. Status code: {response.status_code}"
+            )
+
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_SERVER_ERROR,
+                request_url=self.request.url,
+            )
+
+    def run_via_file(self):
         self.response = PageResponseObject(
             self.request.url,
             text=None,
@@ -1246,64 +1344,6 @@ class ScriptCrawler(CrawlerInterface):
             response_file_location = Path(self.response_file)
             if response_file_location.exists():
                 response_file_location.unlink()
-
-    def is_valid(self):
-        if not self.script:
-            return False
-
-        return True
-
-
-class ServerCrawler(CrawlerInterface):
-    """
-    Used to ask crawling server for URL.
-    Sends request to server, and receives reply
-    """
-
-    def __init__(
-        self,
-        request,
-        response_file=None,
-        settings=None,
-        script=None,
-    ):
-        if settings and "script" in settings and settings["script"]:
-            script = settings["script"]
-
-        super().__init__(
-            request=request,
-            response_file=response_file,
-            settings=settings,
-        )
-        self.script = script
-        self.connection = None
-
-    def run(self):
-        if not self.is_valid():
-            return
-
-        self.response = PageResponseObject(
-            self.request.url,
-            text=None,
-            status_code=HTTP_STATUS_CODE_EXCEPTION,
-            request_url=self.request.url,
-        )
-
-        script_time_start = DateUtils.get_datetime_now_utc()
-
-        # TODO implement
-
-        response = PageResponseObject(self.request.url)
-        response.status_code = HTTP_STATUS_CODE_TIMEOUT
-        response.request_url = self.request.url
-
-        self.response = response
-
-        return self.response
-
-    def close(self):
-        if self.connection:
-            self.connection.close()
 
     def is_valid(self):
         if not self.script:

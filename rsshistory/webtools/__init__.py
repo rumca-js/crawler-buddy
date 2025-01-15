@@ -32,7 +32,6 @@ from .crawlers import (
     SeleniumChromeHeadless,
     SeleniumChromeFull,
     SeleniumUndetected,
-    ServerCrawler,
     ScriptCrawler,
     StealthRequestsCrawler,
     RemoteServerCrawler,

@@ -543,6 +543,34 @@ class PageResponseObject(object):
             has_binary_data,
         )
 
+    def is_html(self):
+        if (
+            self.get_content_type() is not None
+            and self.is_content_html()
+        ):
+            return True
+
+    def is_rss(self):
+        if (
+            self.get_content_type() is not None
+            and self.is_content_rss()
+        ):
+            return True
+
+    def is_json(self):
+        if (
+            self.get_content_type() is not None
+            and self.is_content_json()
+        ):
+            return True
+
+    def is_text(self):
+        if (
+            self.get_content_type() is not None
+            and self.get_content_type().find("text") >= 0
+        ):
+            return True
+
 
 def get_request_to_bytes(request, script):
     from .ipc import string_to_command

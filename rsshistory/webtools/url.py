@@ -591,6 +591,8 @@ class Url(ContentInterface):
             response_data["Charset"] = response.get_content_type_charset()
             all_properties.append({"name" : "Response", "data" : response_data})
 
+            all_properties.append({"name" : "Headers", "data" : response.get_headers()})
+
         index = 0
         for entry in self.get_entries():
             if index == 0:

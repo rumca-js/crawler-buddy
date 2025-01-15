@@ -7,6 +7,8 @@ Access through:
 Examples:
 http://127.0.0.1:3000/run?url=https://google.com&crawler_data={"crawler":"StealthRequestsCrawler","name":"StealthRequestsCrawler","settings": {"timeout_s":20}}
 http://127.0.0.1:3000/run?url=https://google.com&crawler_data={"crawler":"SeleniumChromeFull","name":"SeleniumChromeFull","settings": {"timeout_s":50, "driver_executable" : "/usr/bin/chromedriver"}}
+http://127.0.0.1:3000/run?url=https://google.com&crawler_data={"crawler":"ScriptCrawler","name":"CrawleeScript","settings": {"timeout_s":50, "script" : "poetry run python crawleebeautifulsoup.py"}}
+http://127.0.0.1:3000/run?url=https://google.com&crawler_data={"crawler":"ScriptCrawler","name":"CrawleeScript","settings": {"timeout_s":50, "script" : "poetry run python crawleebeautifulsoup.py", "remote-server" : "http://127.0.0.1:3000"}}
 """
 from pathlib import Path
 from flask import Flask, request, jsonify
@@ -22,28 +24,66 @@ from rsshistory import webtools
 app = Flask(__name__)
 
 
-url_history = []   # contains tuples
+# should contain tuples of datetime, URL, properties
+url_history = []
 history_length = 200
 
 
+def get_crawler_config():
+    path = Path("init_browser_setup.json")
+    if path.exists():
+        print("Reading configuration from file")
+        with path.open("r") as file:
+            config = json.load(file)
+            for index, item in enumerate(config):
+                config[index]["crawler"] = webtools.WebConfig.get_crawler_from_string(item["crawler"])
+
+            return config
+    else:
+        print("Reading configuration from webtools")
+        return webtools.WebConfig.get_init_crawler_config()
+
+
 def find_response(input_url):
-    for datetime, url, all_properties, crawler_data in reversed(url_history):
+    for datetime, url, all_properties in reversed(url_history):
         if input_url == url and all_properties:
             return all_properties
 
 
-def run_webtools_url(url, crawler_data):
+def run_webtools_url(url, remote_server, crawler_data, full):
     page_url = webtools.Url(url)
     options = page_url.get_init_page_options()
 
     if crawler_data:
         if "crawler" in crawler_data:
             crawler_data["crawler"] = webtools.WebConfig.get_crawler_from_string(crawler_data["crawler"])
+
+            if crawler_data["settings"] is None:
+                crawler_data["settings"] = {}
+            crawler_data["settings"]["remote-server"] = remote_server
+
             options.mode_mapping = [crawler_data]
+
+        if "name" in crawler_data:
+            config = get_crawler_config()
+            for item in config:
+                if crawler_data["name"] == item["name"]:
+                    crawler_data = item
+
+                    if crawler_data["settings"] is None:
+                        crawler_data["settings"] = {}
+                    crawler_data["settings"]["remote-server"] = remote_server
+
+                    options.mode_mapping = [crawler_data]
 
     page_url = webtools.Url(url, page_options=options)
     response = page_url.get_response()
     all_properties = page_url.get_properties(full=True)
+
+    if full:
+        page_url = webtools.Url.get_type(url)
+        additional = append_properties(page_url)
+        all_properties.append({"name" : "Social", "data" : additional})
 
     return all_properties
 
@@ -53,11 +93,15 @@ def run_cmd_url(url, remote_server):
 
     remote_server = remote_server + "/set"
 
+    # TODO timeout
+
     command = ["poetry", "run", "python", "crawleebeautifulsoup.py", "--url", url, "--remote-server", remote_server]
     
     try:
+        # Run the command using subprocess
         result = subprocess.run(
             command,
+            #shell=True,
             text=True,
             capture_output=True,
             check=True
@@ -71,6 +115,7 @@ def run_cmd_url(url, remote_server):
             "error": error
         })
     except subprocess.CalledProcessError as e:
+        # Handle command errors
         return jsonify({
             "success": False,
             "output": e.stdout,
@@ -78,10 +123,45 @@ def run_cmd_url(url, remote_server):
             "return_code": e.returncode
         })
     except Exception as e:
+        # Handle general errors
         return jsonify({
             "success": False,
             "error": str(e)
         })
+
+
+@app.route('/info')
+def info():
+    text = """
+    <h1>Crawlers</h1>
+    """
+
+    config = get_crawler_config()
+    for item in config:
+        name = item["name"]
+        crawler = item["crawler"]
+        settings = item["settings"]
+        text += "<div>Name:{} Crawler:{} Settings:{}</div>".format(name, crawler.__name__, settings)
+
+    return text
+
+
+@app.route('/infoj')
+def infoj():
+    text = """
+    <h1>Crawlers</h1>
+    """
+
+    properties = []
+
+    config = get_crawler_config()
+    for item in config:
+        item["crawler"] = item["crawler"].__name__
+
+        properties.append(item)
+
+    return jsonify(properties)
+
 
 
 @app.route('/')
@@ -98,7 +178,31 @@ def home():
         return text
 
     text += "<h1>Url history</h1>"
-    for datetime, url, all_properties, crawler_data in reversed(url_history):
+    for datetime, url, all_properties in url_history:
+        text += "<h2>{} {}</h2>".format(datetime, url)
+
+        contents = all_properties[1]["data"]["Contents"]
+
+        status_code = all_properties[3]["data"]["status_code"]
+        charset = all_properties[3]["data"]["Charset"]
+        content_length = all_properties[3]["data"]["Content-Length"]
+        content_type = all_properties[3]["data"]["Content-Type"]
+
+        text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length{}</div>".format(status_code, charset, content_type, content_length)
+        # text += "<div>{}</div>".format(html.escape(str(all_properties)))
+
+    return text
+
+
+@app.route('/history')
+def history():
+    text = ""
+
+    if len(url_history) == 0:
+        return text
+
+    text += "<h1>Url history</h1>"
+    for datetime, url, all_properties in url_history:
         text += "<h2>{} {}</h2>".format(datetime, url)
 
         contents = all_properties[1]["data"]["Contents"]
@@ -126,6 +230,8 @@ def set_response():
     headers = data['Headers']
     status_code = data['status_code']
 
+    print("Received data about {}".format(url))
+
     response = {}
     if headers and "Charset" in headers:
         response["Charset"] = headers["Charset"]
@@ -147,21 +253,81 @@ def set_response():
     all_properties.append({})
     all_properties.append({"name": "Contents", "data" : {"Contents" : contents}})
     all_properties.append({})
-    all_properties.append({"name" : "Resonse", "data" : response})
+    all_properties.append({"name" : "Response", "data" : response})
+    all_properties.append({"name" : "Headers", "data" : headers})
 
     if len(url_history) > history_length:
         url_history.pop(0)
 
-    url_history.append( (datetime.now(), url, all_properties, None) )
+    url_history.append( (datetime.now(), url, all_properties) )
 
     return jsonify({"success": True, "received": contents})
 
 
+@app.route('/find', methods=['GET'])
+def find_request():
+    url = request.args.get('url')
+
+    all_properties = find_response(url)
+
+    if not all_properties:
+        return jsonify({
+            "success": False,
+            "error": "No properties found"
+        }), 400
+
+    return jsonify(all_properties)
+
+
+def append_properties(handler):
+    json_obj = {}
+
+    if type(handler) == webtools.Url.youtube_video_handler:
+        code = handler.get_video_code()
+        h = webtools.ReturnDislike(code)
+        json_obj["thumbs_up"] = h.get_thumbs_up()
+        json_obj["thumbs_down"] = h.get_thumbs_down()
+        json_obj["view_count"] = h.get_view_count()
+        json_obj["rating"] = h.get_rating()
+        json_obj["upvote_ratio"] = h.get_upvote_ratio()
+        json_obj["upvote_view_ratio"] = h.get_upvote_view_ratio()
+
+    elif type(handler) == webtools.HtmlPage:
+        reddit = webtools.RedditUrlHandler(handler.url)
+        github = webtools.GitHubUrlHandler(handler.url)
+
+        if reddit.is_handled_by():
+            handler_data = reddit.get_json_data()
+            if handler_data and "thumbs_up" in handler_data:
+                json_obj["thumbs_up"] = handler_data["thumbs_up"]
+            if handler_data and "thumbs_down" in handler_data:
+                json_obj["thumbs_down"] = handler_data["thumbs_down"]
+            if handler_data and "upvote_ratio" in handler_data:
+                json_obj["upvote_ratio"] = handler_data["upvote_ratio"]
+            if handler_data and "upvote_view_ratio" in handler_data:
+                json_obj["upvote_view_ratio"] = handler_data["upvote_view_ratio"]
+
+        elif github.is_handled_by():
+            handler_data = github.get_json_data()
+            if handler_data and "thumbs_up" in handler_data:
+                json_obj["thumbs_up"] = handler_data["thumbs_up"]
+            if handler_data and "thumbs_down" in handler_data:
+                json_obj["thumbs_down"] = handler_data["thumbs_down"]
+            if handler_data and "upvote_ratio" in handler_data:
+                json_obj["upvote_ratio"] = handler_data["upvote_ratio"]
+            if handler_data and "upvote_view_ratio" in handler_data:
+                json_obj["upvote_view_ratio"] = handler_data["upvote_view_ratio"]
+
+    return json_obj
+
+
 @app.route('/run', methods=['GET'])
 def run_command():
-    # Retrieve the command from the query parameters
     url = request.args.get('url')
     crawler_data = request.args.get('crawler_data')
+    crawler = request.args.get('crawler')
+    name = request.args.get('name')
+    full = request.args.get('full')
 
     if not url:
         return jsonify({
@@ -179,6 +345,11 @@ def run_command():
     if parsed_crawler_data is None:
         parsed_crawler_data = {}
 
+    if crawler:
+        parsed_crawler_data["crawler"] = crawler
+    if name:
+        parsed_crawler_data["name"] = crawler
+
     if "settings" not in parsed_crawler_data:
         parsed_crawler_data["settings"] = {}
 
@@ -188,15 +359,15 @@ def run_command():
 
     print("Running:{}, with:{} at:{}".format(url, crawler_data, remote_server))
 
-    all_properties = run_webtools_url(url, parsed_crawler_data)
-    # all_properties = None
-    # run_cmd_url(url, remote_server)
+    all_properties = run_webtools_url(url, remote_server, parsed_crawler_data, full)
+    #all_properties = None
+    #run_cmd_url(url, remote_server)
 
     if all_properties:
         if len(url_history) > history_length:
             url_history.pop(0)
 
-        url_history.append( (datetime.now(), url, all_properties, crawler_data) )
+        url_history.append( (datetime.now(), url, all_properties) )
     else:
         all_properties = find_response(url)
 
@@ -207,6 +378,16 @@ def run_command():
             }), 400
 
     return jsonify(all_properties)
+
+
+@app.route('/social', methods=['GET'])
+def get_social():
+    url = request.args.get('url')
+
+    page_url = webtools.Url.get_type(url)
+    additional = append_properties(page_url)
+
+    return jsonify(additional)
 
 
 

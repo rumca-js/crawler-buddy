@@ -246,9 +246,6 @@ class FeedClientParser(object):
         self.parser.add_argument(
             "--timeout", default=10, type=int, help="Timeout expressed in seconds"
         )
-        self.parser.add_argument(
-            "--port", type=int, default=0, help="Port, if using web scraping server"
-        )
         self.parser.add_argument("-o", "--output-dir", help="HTML output directory")
         self.parser.add_argument("--add", help="Adds entry with the specified URL")
         self.parser.add_argument(
@@ -306,6 +303,7 @@ class FeedClientParser(object):
         self.parser.add_argument(
             "--search", help="""Search entries. Example: --search "title=Elon" """
         )
+        self.parser.add_argument("--remote-server", help="Remote crawling server")
         self.parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
         self.parser.add_argument(
             "--db", default="feedclient.db", help="SQLite database file name"

@@ -79,9 +79,6 @@ class PageDisplayParser(object):
         self.parser.add_argument(
             "--timeout", default=10, type=int, help="Timeout expressed in seconds"
         )
-        self.parser.add_argument(
-            "--port", type=int, default=0, help="Port, if using web scraping server"
-        )
         self.parser.add_argument("--url", help="Url to fetch")
         self.parser.add_argument("--remote-server", help="Remote crawling server")
         self.parser.add_argument(
