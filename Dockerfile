@@ -59,7 +59,7 @@ RUN apt-get install -y google-chrome-stable
 
 # Set up Chromedriver Environment variables
 ENV CHROMEDRIVER_VERSION 2.19
-ENV CHROMEDRIVER_DIR /chromedriver
+ENV CHROMEDRIVER_DIR /usr/bin/chromedriver
 RUN mkdir $CHROMEDRIVER_DIR
 
 # Download and install Chromedriver

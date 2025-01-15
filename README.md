@@ -1,14 +1,47 @@
 This repository provides programs:
+ - script\_server - HTTP crawling server
  - yafr - RSS feed reader
  - page\_props - page properties script
- - script\_server - HTTP crawling server
+
+# Scraping server
+
+This program can be used to crawl web pages. Provides HTTP web server.
+
+Urls that can be used:
+
+ - http://IP:port - GET method. Provides information about web server crawling history.
+ - http://IP:port/info - GET request. Prints information about available crawlers. As a response returns JSON with properties.
+ - http://IP:port/infoj - GET request. Returns information about available crawlers in JSON format. As a response returns JSON with properties.
+ - http://IP:port/history - GET request. Prints crawl history.
+ - http://IP:port/run - GET request[url,name,crawler,crawler_data]. Crawls a page. As a response returns JSON with properties.
+ - http://IP:port/find - GET request[url]. Returns last crawl information about URL.
+ - http://IP:port/social - GET request[url]. Returns social, dynamic information about URL.
+ - http://IP:port/set - POST request[data]. Puts result for URL. Data is JSON that has 'request\_url', 'Contents', 'Headers', 'status\_code'
+
+```
+usage: script_server.py [-h] [--port PORT] [-l HISTORY_LENGTH] [--host HOST]
+
+Remote server options
+
+options:
+  -h, --help            show this help message and exit
+  -l HISTORY_LENGTH, --history-length HISTORY_LENGTH
+                        Length of history
+  --host HOST           Host
+```
+
+# Scripts
+
+Repository contains various crawling scripts. All start with 'crawl' prefix.
+
+They can be manually called to see if crawling method works at all.
 
 # yafr
 
 Yet another feed reader
 
 ```
-usage: yafr.py [-h] [--timeout TIMEOUT] [--port PORT] [-o OUTPUT_DIR] [--add ADD] [--bookmark] [--unbookmark] [-m]
+usage: yafr.py [-h] [--timeout TIMEOUT] [-o OUTPUT_DIR] [--add ADD] [--bookmark] [--unbookmark] [-m]
                [--entry ENTRY] [--source SOURCE] [-r] [--force] [--stats] [--cleanup] [--follow FOLLOW]
                [--unfollow UNFOLLOW] [--unfollow-all] [--enable ENABLE] [--disable DISABLE] [--enable-all ENABLE_ALL]
                [--disable-all DISABLE_ALL] [--list-bookmarks] [--list-entries] [--list-sources] [--init-sources]
@@ -19,7 +52,6 @@ RSS feed program.
 optional arguments:
   -h, --help            show this help message and exit
   --timeout TIMEOUT     Timeout expressed in seconds
-  --port PORT           Port, if using web scraping server
   -o OUTPUT_DIR, --output-dir OUTPUT_DIR
                         HTML output directory
   --add ADD             Adds entry with the specified URL
@@ -105,44 +137,16 @@ find interesting page, and try to follow it. if page contains valid RSS link thi
 This program allows to display page properties.
 
 ```
-usage: page_props.py [-h] [--timeout TIMEOUT] [--port PORT] [--url URL] [--remote-server REMOTE_SERVER] [-v]
+usage: page_props.py [-h] [--timeout TIMEOUT] [--url URL] [--remote-server REMOTE_SERVER] [-v]
 
 Page properties
 
 options:
   -h, --help            show this help message and exit
   --timeout TIMEOUT     Timeout expressed in seconds
-  --port PORT           Port, if using web scraping server
   --url URL             Url to fetch
   --remote-server REMOTE_SERVER
                         Remote crawling server
   -v, --verbose         Verbose. For example: displays full contents
 ```
 
-# Scraping server
-
-This program can be used to crawl web pages. Provides HTTP web server.
-
-Urls that can be used:
-
- - http://IP:port - GET method. Provides information about web server crawling history
- - http://IP:port/run?url=... - GET request. crawl a page. As a response returns JSON with properties
-
-```
-usage: script_server.py [-h] [--port PORT] [-l HISTORY_LENGTH] [--host HOST]
-
-Remote server options
-
-options:
-  -h, --help            show this help message and exit
-  --port PORT           Port number to be used
-  -l HISTORY_LENGTH, --history-length HISTORY_LENGTH
-                        Length of history
-  --host HOST           Host
-```
-
-# Crawling
-
-Repository contains various crawling scripts. All start with 'crawl' prefix.
-
-They can be manually called to see if crawling method works at all.
