@@ -36,6 +36,8 @@ undetected-chromedriver = "^3.5.5"
 crawlee="0.1.1"
 playwright="*"
 
+stealth_requests = "*"
+
 flask="*"
 
 [tool.poetry.group.dev.dependencies]
