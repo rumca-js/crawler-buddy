@@ -20,17 +20,17 @@ Available Endpoints:
     - crawler_data (string): Additional data for the crawler.
     - Response: Returns JSON with crawl properties.
  - GET /find - Retrieves the last crawl information for a specified URL.
- -- Query parameter: url (string).
- -- Response: Returns JSON with the last crawl details.
+    - Query parameter: url (string).
+    - Response: Returns JSON with the last crawl details.
  - GET /social Provides social and dynamic information about a specified URL.
- -- Query parameter: url (string).
- -- Response: Returns JSON with social data.
+    - Query parameter: url (string).
+    - Response: Returns JSON with social data.
  - POST /set - Saves custom crawl results for a URL. Accepts a JSON payload with the following fields:
- -- request_url (string): The target URL.
- -- Contents (string): The page content.
- -- Headers (object): HTTP headers.
- -- status_code (integer): The HTTP status code.
- -- Response: Acknowledges successful storage.
+    - request_url (string): The target URL.
+    - Contents (string): The page content.
+    - Headers (object): HTTP headers.
+    - status_code (integer): The HTTP status code.
+    - Response: Acknowledges successful storage.
 
 ```
 usage: script_server.py [-h] [--port PORT] [-l HISTORY_LENGTH] [--host HOST]
