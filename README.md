@@ -14,11 +14,11 @@ Available Endpoints:
  - GET /infoj - Similar to /info, but explicitly returns the information in JSON format.
  - GET /history - Displays the crawl history.
  - GET /run - Crawls a specified page. Accepts the following query parameters:
- -- url (string): The URL to crawl.
- -- name (string): The name of the crawler.
- -- crawler (string): The crawler type.
- -- crawler_data (string): Additional data for the crawler.
- -- Response: Returns JSON with crawl properties.
+    - url (string): The URL to crawl.
+    - name (string): The name of the crawler.
+    - crawler (string): The crawler type.
+    - crawler_data (string): Additional data for the crawler.
+    - Response: Returns JSON with crawl properties.
  - GET /find - Retrieves the last crawl information for a specified URL.
  -- Query parameter: url (string).
  -- Response: Returns JSON with the last crawl details.
