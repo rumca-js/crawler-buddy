@@ -29,6 +29,21 @@ url_history = []
 history_length = 200
 
 
+def get_html(body):
+    html = """<!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+    {}
+    </body>
+    </html>
+    """.format(body)
+
+    return html
+
+
 def get_crawler_config():
     path = Path("init_browser_setup.json")
     if path.exists():
@@ -143,7 +158,7 @@ def info():
         settings = item["settings"]
         text += "<div>Name:{} Crawler:{} Settings:{}</div>".format(name, crawler.__name__, settings)
 
-    return text
+    return get_html(text)
 
 
 @app.route('/infoj')
@@ -167,31 +182,15 @@ def infoj():
 @app.route('/')
 def home():
     text = """
-    <h1>Run Command</h1>
-    <form action="/run" method="get">
-        Command: <input type="text" name="url" required>
-        <button type="submit">Run</button>
-    </form>
+    <h1>Available commands</h1>
+    <div><a href="/info">Info</a></div>
+    <div><a href="/infoj">Info JSON</a></div>
+    <div><a href="/history">History</a></div>
+    <div><a href="/run">Crawl</a></div>
+    <div><a href="/social">Social</a></div>
     """
 
-    if len(url_history) == 0:
-        return text
-
-    text += "<h1>Url history</h1>"
-    for datetime, url, all_properties in url_history:
-        text += "<h2>{} {}</h2>".format(datetime, url)
-
-        contents = all_properties[1]["data"]["Contents"]
-
-        status_code = all_properties[3]["data"]["status_code"]
-        charset = all_properties[3]["data"]["Charset"]
-        content_length = all_properties[3]["data"]["Content-Length"]
-        content_type = all_properties[3]["data"]["Content-Type"]
-
-        text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length{}</div>".format(status_code, charset, content_type, content_length)
-        # text += "<div>{}</div>".format(html.escape(str(all_properties)))
-
-    return text
+    return get_html(text)
 
 
 @app.route('/history')
@@ -199,7 +198,7 @@ def history():
     text = ""
 
     if len(url_history) == 0:
-        return text
+        return "<div>No history yet!</div>"
 
     text += "<h1>Url history</h1>"
     for datetime, url, all_properties in url_history:
@@ -215,7 +214,7 @@ def history():
         text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length{}</div>".format(status_code, charset, content_type, content_length)
         # text += "<div>{}</div>".format(html.escape(str(all_properties)))
 
-    return text
+    return get_html(text)
 
 
 @app.route('/set', methods=['POST'])
@@ -383,6 +382,12 @@ def run_command():
 @app.route('/social', methods=['GET'])
 def get_social():
     url = request.args.get('url')
+
+    if not url:
+        return jsonify({
+            "success": False,
+            "error": "No url provided"
+        }), 400
 
     page_url = webtools.Url.get_type(url)
     additional = append_properties(page_url)
