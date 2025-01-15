@@ -44,6 +44,20 @@ options:
   --host HOST           Host
 ```
 
+## Crawling methods
+
+Please see init_browser_setup.json to know which crawling methods are supported.
+
+For example available are:
+ - python requests
+ - crawlee
+ - selenium full
+ - selenium headless
+ - undetected chromedriver
+ - stealth requests
+
+These methods can be selected for each individual URL for crawling.
+
 # Scripts
 
 Repository contains various crawling scripts. All start with 'crawl' prefix.
