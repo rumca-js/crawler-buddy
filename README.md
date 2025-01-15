@@ -1,22 +1,36 @@
-This repository provides programs:
- - script\_server - HTTP crawling server
- - yafr - RSS feed reader
- - page\_props - page properties script
+This repository provides the following programs:
+ - script\_server: An HTTP crawling server.
+ - yafr: An RSS feed reader
+ - page\_props: A script for retrieving page properties.
 
 # Scraping server
 
-This program can be used to crawl web pages. Provides HTTP web server.
+The Scraping Server is an HTTP-based web crawler. Provides easily accessible data in JSON format.
 
-Urls that can be used:
+Available Endpoints:
 
- - http://IP:port - GET method. Provides information about web server crawling history.
- - http://IP:port/info - GET request. Prints information about available crawlers. As a response returns JSON with properties.
- - http://IP:port/infoj - GET request. Returns information about available crawlers in JSON format. As a response returns JSON with properties.
- - http://IP:port/history - GET request. Prints crawl history.
- - http://IP:port/run - GET request[url,name,crawler,crawler_data]. Crawls a page. As a response returns JSON with properties.
- - http://IP:port/find - GET request[url]. Returns last crawl information about URL.
- - http://IP:port/social - GET request[url]. Returns social, dynamic information about URL.
- - http://IP:port/set - POST request[data]. Puts result for URL. Data is JSON that has 'request\_url', 'Contents', 'Headers', 'status\_code'
+ - GET / - Provides index page
+ - GET /info - Displays information about available crawlers. Returns JSON with crawler properties.
+ - GET /infoj - Similar to /info, but explicitly returns the information in JSON format.
+ - GET /history - Displays the crawl history.
+ - GET /run - Crawls a specified page. Accepts the following query parameters:
+ -- url (string): The URL to crawl.
+ -- name (string): The name of the crawler.
+ -- crawler (string): The crawler type.
+ -- crawler_data (string): Additional data for the crawler.
+ -- Response: Returns JSON with crawl properties.
+ - GET /find - Retrieves the last crawl information for a specified URL.
+ -- Query parameter: url (string).
+ -- Response: Returns JSON with the last crawl details.
+ - GET /social Provides social and dynamic information about a specified URL.
+ -- Query parameter: url (string).
+ -- Response: Returns JSON with social data.
+ - POST /set - Saves custom crawl results for a URL. Accepts a JSON payload with the following fields:
+ -- request_url (string): The target URL.
+ -- Contents (string): The page content.
+ -- Headers (object): HTTP headers.
+ -- status_code (integer): The HTTP status code.
+ -- Response: Acknowledges successful storage.
 
 ```
 usage: script_server.py [-h] [--port PORT] [-l HISTORY_LENGTH] [--host HOST]
