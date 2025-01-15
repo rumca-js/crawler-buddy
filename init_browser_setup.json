@@ -1,0 +1,69 @@
+[
+  {
+    "crawler": "RequestsCrawler",
+    "enabled": true,
+    "name": "RequestsCrawler",
+    "settings": {
+      "timeout_s": 20
+    }
+  },
+  {
+    "crawler": "ScriptCrawler",
+    "enabled": true,
+    "name": "CrawleeScript",
+    "settings": {
+      "script": "poetry run python crawleebeautifulsoup.py",
+      "timeout_s": 40
+    }
+  },
+  {
+    "crawler": "ScriptCrawler",
+    "enabled": true,
+    "name": "PlaywrightScript",
+    "settings": {
+      "script": "poetry run python crawleebeautifulsoup.py",
+      "timeout_s": 40
+    }
+  },
+  {
+    "crawler": "SeleniumUndetected",
+    "enabled": false,
+    "name": "SeleniumUndetected",
+    "settings": {
+      "driver_executable": null,
+      "timeout_s": 40
+    }
+  },
+  {
+    "crawler": "SeleniumBase",
+    "enabled": false,
+    "name": "SeleniumBase",
+    "settings": {}
+  },
+  {
+    "crawler": "SeleniumChromeHeadless",
+    "enabled": true,
+    "name": "SeleniumChromeHeadless",
+    "settings": {
+      "driver_executable": null,
+      "timeout_s": 40
+    }
+  },
+  {
+    "crawler": "SeleniumChromeFull",
+    "enabled": false,
+    "name": "SeleniumChromeFull",
+    "settings": {
+      "driver_executable": null,
+      "timeout_s": 40
+    }
+  },
+  {
+    "crawler": "StealthRequestsCrawler",
+    "enabled": true,
+    "name": "StealthRequestsCrawler",
+    "settings": {
+      "timeout_s": 20
+    }
+  }
+]
