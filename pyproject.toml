@@ -21,12 +21,13 @@ lxml = "5.3.0"
 # [optional] - at least one of methods need to be running
 # example: crawlerrequests.py
 requests = "^2.32.3"
+pytz = "^2024.2"
 
 #  use things below if you want to use selenium
 selenium="*"
 
 chardet = "^5.2.0"
-psycopg2 = "*"
+# psycopg2 = "*"
 pyvirtualdisplay = "^3.0"
 
 # use things below if you want undetected chrome driver
