@@ -72,6 +72,8 @@ def run_webtools_url(url, crawler_data):
     page_url = webtools.Url(url)
     options = page_url.get_init_page_options()
     full = crawler_data["settings"]["full"]
+    request_headers = crawler_data["settings"]["headers"]:
+    request_ping = crawler_data["settings"]["ping"]:
 
     remote_server = crawler_data["settings"]["remote_server"]
 
@@ -99,7 +101,15 @@ def run_webtools_url(url, crawler_data):
 
     page_url = webtools.Url(url, page_options=options)
 
-    if crawler_data["settings"]["headers"]:
+    if request_headers:
+        # TODO implement
+        headers = page_url.get_headers()
+        all_properties = [
+                { "name" : "Headers",
+                  "data" : headers }
+        ]
+    elif request_ping:
+        # TODO implement
         headers = page_url.get_headers()
         all_properties = [
                 { "name" : "Headers",
@@ -398,6 +408,7 @@ def run_command():
 
     crawler_data["settings"]["full"] = full
     crawler_data["settings"]["headers"] = False
+    crawler_data["settings"]["ping"] = False
 
     print("Running:{}, with:{}".format(url, crawler_data))
 
@@ -437,6 +448,7 @@ def run_headers():
 
     crawler_data["settings"]["full"] = full
     crawler_data["settings"]["headers"] = True
+    crawler_data["settings"]["ping"] = False
 
     all_properties = run_webtools_url(url, crawler_data)
     #all_properties = None

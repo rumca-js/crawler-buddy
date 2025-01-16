@@ -31,8 +31,17 @@ Available Endpoints:
     - Headers (object): HTTP headers.
     - status_code (integer): The HTTP status code.
     - Response: Acknowledges successful storage.
+```
+
+## Response JSON
+
+Response contains contents hash that can easily be used to check if page has changed over time.
+To decode contents hash.
 
 ```
+base64.b64decode(encoded_string)
+```
+
 usage: script_server.py [-h] [--port PORT] [-l HISTORY_LENGTH] [--host HOST]
 
 Remote server options
