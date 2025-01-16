@@ -31,17 +31,54 @@ Available Endpoints:
     - Headers (object): HTTP headers.
     - status_code (integer): The HTTP status code.
     - Response: Acknowledges successful storage.
-```
 
-## Response JSON
+## run Response JSON
 
-Response contains contents hash that can easily be used to check if page has changed over time.
+Fields:
+
+ - Properties - general properties, like title, description, thumbnail, language, date\_published
+ - Contents - text contents of page
+ - Response - commonly used response fields Provides Content-Type, Content-Length, status\_code, etc.
+ - Headers - all response headers of page. Provides Content-Type, Content-Length, etc.
+
+Response contains hashes that can easily be used to check if page has changed over time.
 To decode contents hash.
 
 ```
 base64.b64decode(encoded_string)
 ```
 
+# Installation
+
+Please use docker image, as specified by docker-compose.
+
+Docker image is available at: https://hub.docker.com/repository/docker/rozbujnik/crawler-buddy.
+
+## Crawling methods
+
+Please see init_browser_setup.json to know which crawling methods are supported.
+
+For example available are:
+ - RequestsCrawler - python requests
+ - CrawleeScript - crawlee beautifulsoup
+ - PlaywrightScript - crawlee playwright
+ - SeleniumUndetected - selenium undetected
+ - SeleniumChromeHeadless - selenium chrome headless
+ - SeleniumChromeFull - selenium full mode
+ - StealthRequestsCrawler - stealth requests
+ - SeleniumBase - selenium base [disabled]
+
+These methods can be selected for each individual URL for crawling.
+
+# Scripts
+
+Repository contains various crawling scripts. All start with 'crawl' prefix.
+
+They can be manually called to see if crawling method works at all.
+
+# Script server CLI
+
+```
 usage: script_server.py [-h] [--port PORT] [-l HISTORY_LENGTH] [--host HOST]
 
 Remote server options
@@ -53,25 +90,6 @@ options:
   --host HOST           Host
 ```
 
-## Crawling methods
-
-Please see init_browser_setup.json to know which crawling methods are supported.
-
-For example available are:
- - python requests
- - crawlee
- - selenium full
- - selenium headless
- - undetected chromedriver
- - stealth requests
-
-These methods can be selected for each individual URL for crawling.
-
-# Scripts
-
-Repository contains various crawling scripts. All start with 'crawl' prefix.
-
-They can be manually called to see if crawling method works at all.
 
 # yafr
 
