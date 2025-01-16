@@ -238,7 +238,7 @@ def history():
                 content_length = all_properties[3]["data"]["Content-Length"]
                 content_type = all_properties[3]["data"]["Content-Type"]
 
-                text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length{}</div>".format(status_code, charset, content_type, content_length)
+                text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length:{}</div>".format(status_code, charset, content_type, content_length)
             else:
                 text += "<div>Data unavailable</div>".format(status_code, charset, content_type, content_length)
             # text += "<div>{}</div>".format(html.escape(str(all_properties)))

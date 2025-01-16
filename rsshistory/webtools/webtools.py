@@ -423,6 +423,10 @@ class PageResponseObject(object):
         if "Content-Length" in self.headers:
             return int(self.headers["Content-Length"])
 
+        content = self.get_content_type()
+        if content:
+            return len(content)
+
         return 100
 
     def is_content_type_supported(self):
