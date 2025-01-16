@@ -232,12 +232,15 @@ def history():
 
             contents = all_properties[1]["data"]["Contents"]
 
-            status_code = all_properties[3]["data"]["status_code"]
-            charset = all_properties[3]["data"]["Charset"]
-            content_length = all_properties[3]["data"]["Content-Length"]
-            content_type = all_properties[3]["data"]["Content-Type"]
+            if len(all_properties) > 2:
+                status_code = all_properties[3]["data"]["status_code"]
+                charset = all_properties[3]["data"]["Charset"]
+                content_length = all_properties[3]["data"]["Content-Length"]
+                content_type = all_properties[3]["data"]["Content-Type"]
 
-            text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length{}</div>".format(status_code, charset, content_type, content_length)
+                text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length{}</div>".format(status_code, charset, content_type, content_length)
+            else:
+                text += "<div>Data unavailable</div>".format(status_code, charset, content_type, content_length)
             # text += "<div>{}</div>".format(html.escape(str(all_properties)))
 
     return get_html(text)

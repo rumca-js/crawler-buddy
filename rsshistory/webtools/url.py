@@ -594,8 +594,14 @@ class Url(ContentInterface):
             response_data["Content-Type"] = response.get_content_type()
             response_data["Content-Length"] = response.get_content_length()
             response_data["Charset"] = response.get_content_type_charset()
-            response_data["hash"] = base64.b64encode(self.get_contents_hash()).decode("utf-8")
-            response_data["body_hash"] = base64.b64encode(self.get_contents_body_hash()).decode("utf-8")
+            if self.get_contents_hash():
+                response_data["hash"] = base64.b64encode(self.get_contents_hash()).decode("utf-8")
+            else:
+                response_data["hash"] = ""
+            if self.get_contents_body_hash():
+                response_data["body_hash"] = base64.b64encode(self.get_contents_body_hash()).decode("utf-8")
+            else:
+                response_data["body_hash"] = ""
             all_properties.append({"name" : "Response", "data" : response_data})
 
             all_properties.append({"name" : "Headers", "data" : response.get_headers()})
