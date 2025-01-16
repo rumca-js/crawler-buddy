@@ -392,7 +392,7 @@ class RequestsCrawler(CrawlerInterface):
                 raise result['exception']
             return result['response']
 
-        headers = self.request.headers
+        headers = self.request.request_headers
         if not headers:
             headers = RequestsCrawler.default_headers
 

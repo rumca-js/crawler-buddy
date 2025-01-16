@@ -94,8 +94,8 @@ class HttpRequestBuilder(object):
 
         self.headers = None
         if request:
-            if request.headers:
-                self.headers = request.headers
+            if request.request_headers:
+                self.headers = request.request_headers
 
         if not self.headers:
             self.headers = {
@@ -209,7 +209,7 @@ class HttpRequestBuilder(object):
 
         o = PageRequestObject(
             url=url,
-            headers=self.headers,
+            request_headers=self.headers,
             timeout_s=timeout_s,
             ping=True,
         )

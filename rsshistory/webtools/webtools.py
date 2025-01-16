@@ -244,6 +244,7 @@ class PageRequestObject(object):
         url,
         headers=None,
         user_agent=None,
+        request_headers=None,
         timeout_s=10,
         ping=False,
         ssl_verify=True,
@@ -251,13 +252,12 @@ class PageRequestObject(object):
         self.url = url
 
         self.user_agent = user_agent
-        if headers:
-            self.headers = headers
-        else:
-            self.headers = None  # not set, use default
 
         self.timeout_s = timeout_s
-        self.ping = False
+        self.ping = ping
+        self.headers = headers
+        self.request_headers = request_headers
+
         self.ssl_verify = True
 
     def __str__(self):
@@ -586,9 +586,9 @@ def get_request_to_bytes(request, script):
         )
     else:
         bytes4 = bytearray()
-    if request.headers != None:
+    if request.request_headers != None:
         bytes5 = string_to_command(
-            "PageRequestObject.headers", json.dumps(request.headers)
+            "PageRequestObject.request_headers", json.dumps(request.request_headers)
         )
     else:
         bytes5 = bytearray()

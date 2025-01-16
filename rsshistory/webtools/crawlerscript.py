@@ -17,6 +17,7 @@ class ScriptCrawlerParser(object):
             "--timeout", default=10, type=int, help="Timeout expressed in seconds"
         )
         self.parser.add_argument("--ping", default=False, help="Ping only")
+        self.parser.add_argument("--headers", default=False, help="Fetch headers only")
         self.parser.add_argument("--remote-server", help="Remote server")
         self.parser.add_argument("--ssl-verify", default=False, help="SSL verify")
 
@@ -48,6 +49,7 @@ class ScriptCrawlerParser(object):
         r = PageRequestObject(self.args.url)
         r.timeout_s = self.args.timeout
         r.ping = self.args.ping
+        r.headers = self.args.headers
 
         return r
 

@@ -105,6 +105,10 @@ async def main() -> None:
                 on_close(interface, response)
                 return
 
+            if request.headers:
+                on_close(interface, response)
+                return
+
             if response.get_content_length() > webtools.PAGE_TOO_BIG_BYTES:
                 print("Response too big")
 
