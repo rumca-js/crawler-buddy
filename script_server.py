@@ -21,6 +21,9 @@ from datetime import datetime
 from rsshistory import webtools
 
 
+__version__ = "0.0.1"
+
+
 app = Flask(__name__)
 
 
