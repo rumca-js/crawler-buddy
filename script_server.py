@@ -29,7 +29,10 @@ url_history = []
 history_length = 200
 
 
-def get_html(body):
+def get_html(body, index=False):
+    if not index:
+        body = '<a href="/">Back</a>' + body
+
     html = """<!DOCTYPE html>
     <html>
     <head>
@@ -65,9 +68,12 @@ def find_response(input_url):
             return all_properties
 
 
-def run_webtools_url(url, remote_server, crawler_data, full):
+def run_webtools_url(url, crawler_data):
     page_url = webtools.Url(url)
     options = page_url.get_init_page_options()
+    full = crawler_data["settings"]["full"]
+
+    remote_server = crawler_data["settings"]["remote_server"]
 
     if crawler_data:
         if "crawler" in crawler_data:
@@ -92,8 +98,16 @@ def run_webtools_url(url, remote_server, crawler_data, full):
                     options.mode_mapping = [crawler_data]
 
     page_url = webtools.Url(url, page_options=options)
-    response = page_url.get_response()
-    all_properties = page_url.get_properties(full=True)
+
+    if crawler_data["settings"]["headers"]:
+        headers = page_url.get_headers()
+        all_properties = [
+                { "name" : "Headers",
+                  "data" : headers }
+        ]
+    else:
+        response = page_url.get_response()
+        all_properties = page_url.get_properties(full=True)
 
     if full:
         page_url = webtools.Url.get_type(url)
@@ -145,6 +159,21 @@ def run_cmd_url(url, remote_server):
         })
 
 
+@app.route('/')
+def home():
+    text = """
+    <h1>Available commands</h1>
+    <div><a href="/info">Info</a></div>
+    <div><a href="/infoj">Info JSON</a></div>
+    <div><a href="/history">History</a></div>
+    <div><a href="/historyj">History JSON</a></div>
+    <div><a href="/run">Crawl</a></div>
+    <div><a href="/social">Social</a></div>
+    """
+
+    return get_html(text, index=True)
+
+
 @app.route('/info')
 def info():
     text = """
@@ -179,42 +208,46 @@ def infoj():
 
 
 
-@app.route('/')
-def home():
-    text = """
-    <h1>Available commands</h1>
-    <div><a href="/info">Info</a></div>
-    <div><a href="/infoj">Info JSON</a></div>
-    <div><a href="/history">History</a></div>
-    <div><a href="/run">Crawl</a></div>
-    <div><a href="/social">Social</a></div>
-    """
-
-    return get_html(text)
-
-
 @app.route('/history')
 def history():
     text = ""
 
+    text += "<h1>History</h1>"
+
     if len(url_history) == 0:
-        return "<div>No history yet!</div>"
+        text += "<div>No history yet!</div>"
+    else:
+        for datetime, url, all_properties in reversed(url_history):
+            text += "<h2>{} {}</h2>".format(datetime, url)
 
-    text += "<h1>Url history</h1>"
-    for datetime, url, all_properties in url_history:
-        text += "<h2>{} {}</h2>".format(datetime, url)
+            contents = all_properties[1]["data"]["Contents"]
 
-        contents = all_properties[1]["data"]["Contents"]
+            status_code = all_properties[3]["data"]["status_code"]
+            charset = all_properties[3]["data"]["Charset"]
+            content_length = all_properties[3]["data"]["Content-Length"]
+            content_type = all_properties[3]["data"]["Content-Type"]
 
-        status_code = all_properties[3]["data"]["status_code"]
-        charset = all_properties[3]["data"]["Charset"]
-        content_length = all_properties[3]["data"]["Content-Length"]
-        content_type = all_properties[3]["data"]["Content-Type"]
-
-        text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length{}</div>".format(status_code, charset, content_type, content_length)
-        # text += "<div>{}</div>".format(html.escape(str(all_properties)))
+            text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length{}</div>".format(status_code, charset, content_type, content_length)
+            # text += "<div>{}</div>".format(html.escape(str(all_properties)))
 
     return get_html(text)
+
+
+@app.route('/historyj')
+def historyj():
+    json_history = []
+
+    if len(url_history) == 0:
+        return json_history
+
+    for datetime, url, all_properties in reversed(url_history):
+        json_history.append(
+                {"datetime" : datetime,
+                 "url" : url,
+                 "properties" : all_properties }
+                )
+
+    return jsonify(json_history)
 
 
 @app.route('/set', methods=['POST'])
@@ -320,19 +353,10 @@ def append_properties(handler):
     return json_obj
 
 
-@app.route('/run', methods=['GET'])
-def run_command():
-    url = request.args.get('url')
+def get_request_data(request):
     crawler_data = request.args.get('crawler_data')
     crawler = request.args.get('crawler')
     name = request.args.get('name')
-    full = request.args.get('full')
-
-    if not url:
-        return jsonify({
-            "success": False,
-            "error": "No url provided"
-        }), 400
 
     parsed_crawler_data = None
     if crawler_data:
@@ -356,9 +380,65 @@ def run_command():
 
     parsed_crawler_data["settings"]["remote_server"] = remote_server
 
-    print("Running:{}, with:{} at:{}".format(url, parsed_crawler_data, remote_server))
+    return parsed_crawler_data
 
-    all_properties = run_webtools_url(url, remote_server, parsed_crawler_data, full)
+
+@app.route('/run', methods=['GET'])
+def run_command():
+    url = request.args.get('url')
+    full = request.args.get('full')
+
+    if not url:
+        return jsonify({
+            "success": False,
+            "error": "No url provided"
+        }), 400
+
+    crawler_data = get_request_data(request)
+
+    crawler_data["settings"]["full"] = full
+    crawler_data["settings"]["headers"] = False
+
+    print("Running:{}, with:{}".format(url, crawler_data))
+
+    all_properties = run_webtools_url(url, crawler_data)
+    #all_properties = None
+    #run_cmd_url(url, remote_server)
+
+    if all_properties:
+        if len(url_history) > history_length:
+            url_history.pop(0)
+
+        url_history.append( (datetime.now(), url, all_properties) )
+    else:
+        all_properties = find_response(url)
+
+        if not all_properties:
+            return jsonify({
+                "success": False,
+                "error": "No properties found"
+            }), 400
+
+    return jsonify(all_properties)
+
+
+@app.route('/headers', methods=['GET'])
+def run_headers():
+    url = request.args.get('url')
+    full = request.args.get('full')
+
+    if not url:
+        return jsonify({
+            "success": False,
+            "error": "No url provided"
+        }), 400
+
+    crawler_data = get_request_data(request)
+
+    crawler_data["settings"]["full"] = full
+    crawler_data["settings"]["headers"] = True
+
+    all_properties = run_webtools_url(url, crawler_data)
     #all_properties = None
     #run_cmd_url(url, remote_server)
 

@@ -21,32 +21,38 @@ class PrintLogger(object):
     """
 
     def info(self, info_text, detail_text="", user=None, stack=False):
-        print(info_text)
+        if info_text:
+            print(info_text)
         if detail_text:
             print(detail_text)
 
     def debug(self, info_text, detail_text="", user=None, stack=False):
-        print(info_text)
+        if info_text:
+            print(info_text)
         if detail_text:
             print(detail_text)
 
     def warning(self, info_text, detail_text="", user=None, stack=False):
-        print(info_text)
+        if info_text:
+            print(info_text)
         if detail_text:
             print(detail_text)
 
     def error(self, info_text, detail_text="", user=None, stack=False):
-        print(info_text)
+        if info_text:
+            print(info_text)
         if detail_text:
             print(detail_text)
 
     def notify(self, info_text, detail_text="", user=None):
-        print(info_text)
+        if info_text:
+            print(info_text)
         if detail_text:
             print(detail_text)
 
     def exc(self, exception_object, info_text=None, user=None):
-        print(str(exception_object))
+        if exception_object:
+            print(str(exception_object))
 
         error_text = traceback.format_exc()
         print("Exception format")

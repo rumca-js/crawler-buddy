@@ -113,7 +113,6 @@ class SocketConnection(object):
             return True
 
         except Exception as E:
-            self.closed = True
             return False
 
     def close(self):

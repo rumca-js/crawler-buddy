@@ -194,6 +194,10 @@ class Url(ContentInterface):
 
             return self.response
 
+    def get_headers(self):
+        # TODO implement
+        pass
+
     def ping(self, timeout_s=5):
         handler = self.get_handler()
         return handler.ping(timeout_s=timeout_s)

@@ -93,7 +93,8 @@ class WebConfig(object):
             c = SocketConnection()
             if not c.connect(host=SocketConnection.gethostname(), port=port):
                 port = None
-                c.close()
+
+            c.close()
 
         try:
             import os
