@@ -1,11 +1,11 @@
-This repository provides the following programs:
- - script\_server: An HTTP crawling server.
- - yafr: An RSS feed reader
- - page\_props: A script for retrieving page properties.
-
 # Scraping server
 
 The Scraping Server is an HTTP-based web crawler. Provides easily accessible data in JSON format.
+
+ - You do not have to support multiple tools like yt-dlp or Beautiful Soup to extract link metadata any more
+ - All metadata is presented in a consistent structure with standardized fields (e.g., title, description, date_published, etc.)
+ - Eliminates the need to write custom HTTP wrappers for accessing RSS pages, important for pages improperly configured to protect via bots
+ - In many cases, the software can automatically discover RSS feed URLs for websites or YouTube channels
 
 Available Endpoints:
 
@@ -36,7 +36,7 @@ Available Endpoints:
 
 Fields:
 
- - Properties - general properties, like title, description, thumbnail, language, date\_published
+ - Properties - general properties, like title, description, thumbnail, language, date\_published, feed\_url
  - Contents - text contents of page
  - Response - commonly used response fields Provides Content-Type, Content-Length, status\_code, etc.
  - Headers - all response headers of page. Provides Content-Type, Content-Length, etc.
@@ -50,7 +50,7 @@ base64.b64decode(encoded_string)
 
 # Installation
 
-Please use docker image, as specified by docker-compose. I think that running browsers, like selenium could be more safe than running it freely on OS.
+For enhanced safety and ease of use, it's recommended to use the provided Docker image, as specified in the docker-compose configuration. Running browsers like Selenium within a containerized environment helps isolate them from the host operating system, offering an added layer of security.
 
 Docker image is available at: https://hub.docker.com/repository/docker/rozbujnik/crawler-buddy.
 
@@ -75,6 +75,11 @@ These methods can be selected for each individual URL for crawling.
 Repository contains various crawling scripts. All start with 'crawl' prefix.
 
 They can be manually called to see if crawling method works at all.
+
+This repository provides the following programs:
+ - script\_server: An HTTP crawling server.
+ - yafr: An RSS feed reader
+ - page\_props: A script for retrieving page properties.
 
 # Script server CLI
 
