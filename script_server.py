@@ -338,30 +338,24 @@ def append_properties(handler):
         json_obj["upvote_view_ratio"] = h.get_upvote_view_ratio()
 
     elif type(handler) == webtools.HtmlPage:
-        reddit = webtools.RedditUrlHandler(handler.url)
-        github = webtools.GitHubUrlHandler(handler.url)
 
-        if reddit.is_handled_by():
-            handler_data = reddit.get_json_data()
-            if handler_data and "thumbs_up" in handler_data:
-                json_obj["thumbs_up"] = handler_data["thumbs_up"]
-            if handler_data and "thumbs_down" in handler_data:
-                json_obj["thumbs_down"] = handler_data["thumbs_down"]
-            if handler_data and "upvote_ratio" in handler_data:
-                json_obj["upvote_ratio"] = handler_data["upvote_ratio"]
-            if handler_data and "upvote_view_ratio" in handler_data:
-                json_obj["upvote_view_ratio"] = handler_data["upvote_view_ratio"]
+        handlers = [webtools.RedditUrlHandler(handler.url),
+                webtools.GitHubUrlHandler(handler.url),
+                webtools.HackerNewsHandler(handler.url)]
 
-        elif github.is_handled_by():
-            handler_data = github.get_json_data()
-            if handler_data and "thumbs_up" in handler_data:
-                json_obj["thumbs_up"] = handler_data["thumbs_up"]
-            if handler_data and "thumbs_down" in handler_data:
-                json_obj["thumbs_down"] = handler_data["thumbs_down"]
-            if handler_data and "upvote_ratio" in handler_data:
-                json_obj["upvote_ratio"] = handler_data["upvote_ratio"]
-            if handler_data and "upvote_view_ratio" in handler_data:
-                json_obj["upvote_view_ratio"] = handler_data["upvote_view_ratio"]
+        for handler in handlers:
+            if handler.is_handled_by():
+                handler_data = handler.get_json_data()
+                if handler_data and "thumbs_up" in handler_data:
+                    json_obj["thumbs_up"] = handler_data["thumbs_up"]
+                if handler_data and "thumbs_down" in handler_data:
+                    json_obj["thumbs_down"] = handler_data["thumbs_down"]
+                if handler_data and "upvote_ratio" in handler_data:
+                    json_obj["upvote_ratio"] = handler_data["upvote_ratio"]
+                if handler_data and "upvote_view_ratio" in handler_data:
+                    json_obj["upvote_view_ratio"] = handler_data["upvote_view_ratio"]
+
+                break
 
     return json_obj
 

@@ -8,7 +8,7 @@
 # yt-dlp needs to be callable from path https://github.com/yt-dlp/yt-dlp/wiki/Installation
 #
 .PHONY: install installsysdeps
-.PHONY: run-server
+.PHONY: run
 .PHONY: reformat
 .PHONY: backfiles test
 
@@ -30,9 +30,9 @@ install:
 installsysdeps:
 	apt -y install wget id3v2 chromium-chromedriver xvfb
 
-run-server:
+run:
 	rm -rf storage
-	poetry run python script_server.py &
+	poetry run python script_server.py
 
 # Assumptions:
 #  - python black is in your path
@@ -45,5 +45,4 @@ backfiles:
 	find . -type f -name "*.bak" -exec rm -f {} +
 
 test:
-	#poetry run python -m unittest discover -s tests -p "test_*.py"
-	poetry run python -m unittest discover -v2
+	poetry run python -m unittest discover

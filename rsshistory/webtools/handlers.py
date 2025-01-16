@@ -239,3 +239,71 @@ class ReturnDislike(DefaultUrlHandler):
     def get_rating(self):
         if self._json and "rating" in self._json:
             return self._json["rating"]
+
+
+class HackerNewsHandler(DefaultUrlHandler):
+
+    def __init__(self, url=None, contents=None):
+        super().__init__(
+            url,
+            contents=contents,
+        )
+
+    def is_handled_by(self):
+        if not self.url:
+            return False
+
+        code = self.input2code(self.url)
+        if code:
+            return True
+
+    def input2code(self, input_string):
+        p = UrlLocation(input_string)
+        if p.get_domain_only().find("news.ycombinator.com") >= 0:
+            parts = p.split()
+            if len(parts) >= 5:
+                sp = parts[4].split("=")
+                if len(sp) > 1:
+                    return sp[1]
+
+    def get_json_url(self):
+        post_id = self.input2code(self.url)
+        if post_id:
+            return f"https://hacker-news.firebaseio.com/v0/item/{post_id}.json?print=pretty"
+        else:
+            WebLogger.error("Reddit:did not found post id {}".format(self.url))
+
+    def get_json_object(self):
+        """
+        This function loads reddit comment JSON.
+        We cannot load it through python's json loads.
+        This is not a proper JSON that we can load.
+
+        Instead we manually read values.
+        """
+        from .url import Url
+
+        url_link = self.get_json_url()
+        if url_link:
+            url = Url(url_link)
+            contents = url.get_contents()
+
+            if contents:
+                try:
+                    return json.loads(contents)
+                except ValueError:
+                    WebLogger.error("GitHub:Cannot process contents {}".format(url_link))
+            else:
+                WebLogger.error("GitHub:No url link contents {}".format(url_link))
+        else:
+            WebLogger.error("GitHub:no Url link")
+
+    def get_json_data(self):
+        result = {}
+
+        json = self.get_json_object()
+
+        if json:
+            result["upvote_ratio"] = json["score"]
+
+        return result

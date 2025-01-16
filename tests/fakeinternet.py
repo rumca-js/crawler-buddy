@@ -54,6 +54,7 @@ from tests.fake.codeproject import (
 )
 from tests.fake.hackernews import (
     webpage_hackernews_rss,
+    hacker_news_item,
 )
 from tests.fake.warhammercommunity import (
     warhammer_community_rss,
@@ -393,8 +394,11 @@ class TestResponseObject(PageResponseObject):
         if url.startswith("https://hnrss.org"):
             return webpage_hackernews_rss
 
-        if url.startswith("https://news.ycombinator.com/item?id=39940707"):
+        if url.startswith("https://news.ycombinator.com/item?id="):
             return webpage_samtime_youtube_rss
+
+        if url.startswith("https://hacker-news.firebaseio.com/v0/item/"):
+            return hacker_news_item
 
         if url.startswith("https://warhammer-community.com/feed"):
             return warhammer_community_rss

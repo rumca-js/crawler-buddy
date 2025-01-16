@@ -414,3 +414,18 @@ JetMoE: Reaching LLaMA2 performance with 0.1M dollars
 """.replace(
     "{date}", DateUtils.get_datetime_now_iso()
 )
+
+
+hacker_news_item = """
+{
+  "by" : "Aissen",
+  "descendants" : 18,
+  "id" : 42728015,
+  "kids" : [ 42728465, 42729529, 42730235, 42729635, 42729995, 42728975, 42730347, 42728406, 42728327 ],
+  "score" : 93,
+  "time" : 1737047587,
+  "title" : "GitHub Linux ARM64 hosted runners now available for free in public repositories",
+  "type" : "story",
+  "url" : "https://github.blog/changelog/2025-01-16-linux-arm64-hosted-runners-now-available-for-free-in-public-repositories-public-preview/"
+}
+"""

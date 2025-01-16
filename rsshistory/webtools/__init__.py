@@ -24,6 +24,7 @@ from .handlers import (
     RedditUrlHandler,
     GitHubUrlHandler,
     ReturnDislike,
+    HackerNewsHandler,
 )
 
 from .crawlers import (
