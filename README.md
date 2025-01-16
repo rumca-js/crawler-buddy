@@ -32,7 +32,7 @@ Available Endpoints:
     - status_code (integer): The HTTP status code.
     - Response: Acknowledges successful storage.
 
-## run Response JSON
+## Response JSON
 
 Fields:
 
@@ -50,7 +50,7 @@ base64.b64decode(encoded_string)
 
 # Installation
 
-Please use docker image, as specified by docker-compose.
+Please use docker image, as specified by docker-compose. I think that running browsers, like selenium could be more safe than running it freely on OS.
 
 Docker image is available at: https://hub.docker.com/repository/docker/rozbujnik/crawler-buddy.
 
