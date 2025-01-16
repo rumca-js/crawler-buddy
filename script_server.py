@@ -72,8 +72,8 @@ def run_webtools_url(url, crawler_data):
     page_url = webtools.Url(url)
     options = page_url.get_init_page_options()
     full = crawler_data["settings"]["full"]
-    request_headers = crawler_data["settings"]["headers"]:
-    request_ping = crawler_data["settings"]["ping"]:
+    request_headers = crawler_data["settings"]["headers"]
+    request_ping = crawler_data["settings"]["ping"]
 
     remote_server = crawler_data["settings"]["remote_server"]
 
