@@ -83,13 +83,46 @@ def get_crawler(name = None, crawler_name = None):
                 return item
 
 
-def find_response(input_url):
+def read_properties_section(section_name, all_properties):
+    for properties in all_properties:
+        if section_name == properties["name"]:
+            return properties["data"]
+
+
+def find_response(input_url, crawler_name = None, crawler_crawler = None):
     for datetime, url, all_properties in reversed(url_history):
         if input_url == url and all_properties:
+            response = read_properties_section("Response", all_properties)
+
+            if crawler_name and response and "crawler_data" in response and "name" in response["crawler_data"]:
+                if crawler_name != response["crawler_data"]["name"]:
+                    continue
+
+            if crawler_crawler and response and "crawler_data" in response and "crawler" in response["crawler_data"]:
+                if crawler_name != response["crawler_data"]["crawler"]:
+                    continue
+
             return all_properties
 
 
 def run_webtools_url(url, crawler_data = None):
+
+    # what is the definition of madness?
+
+    name = None
+    if "name" in crawler_data:
+        name = crawler_data["name"]
+    crawler = None
+    if "crawler" in crawler_data:
+        crawler = crawler_data["crawler"]
+
+    if name or crawler:
+        all_properties = find_response(url, name, crawler)
+        if all_properties:
+            return all_properties
+
+    # this is something new
+
     page_url = webtools.Url(url)
     options = page_url.get_init_page_options()
 
@@ -244,10 +277,6 @@ def infoj():
 
 
 
-def read_properties_section(section_name, all_properties):
-    for properties in all_properties:
-        if section_name == properties["name"]:
-            return properties["data"]
 
 
 
@@ -361,8 +390,10 @@ def set_response():
 @app.route('/findj', methods=['GET'])
 def findj():
     url = request.args.get('url')
+    name = request.args.get('name')
+    crawler = request.args.get('crawler')
 
-    all_properties = find_response(url)
+    all_properties = find_response(url, name, crawler)
 
     if not all_properties:
         return jsonify({

@@ -1,11 +1,13 @@
 # Scraping server
 
-The Scraping Server is an HTTP-based web crawler. Provides easily accessible data in JSON format.
+The Scraping Server is an HTTP-based web crawler that delivers data in an easily accessible JSON format.
 
- - You do not have to support multiple tools like yt-dlp or Beautiful Soup to extract link metadata any more
- - All metadata is presented in a consistent structure with standardized fields (e.g., title, description, date_published, etc.)
- - Eliminates the need to write custom HTTP wrappers for accessing RSS pages, important for pages improperly configured to protect via bots
- - In many cases, the software can automatically discover RSS feed URLs for websites or YouTube channels
+ - No need to rely on tools like yt-dlp or Beautiful Soup for extracting link metadata.
+ - Metadata is standardized with consistent fields (e.g., title, description, date_published, etc.).
+ - Eliminates the need for custom HTTP wrappers to access RSS pages, even for sites with poorly configured bot protection.
+ - Automatically discovers RSS feed URLs for websites and YouTube channels in many cases.
+ - Simplifies data handling—no more parsing RSS files; just consume JSON!
+ - Offers a unified interface for all metadata.
 
 Available Endpoints:
 
@@ -37,6 +39,7 @@ Fields:
  - Contents - text contents of page
  - Response - commonly used response fields Provides Content-Type, Content-Length, status\_code, etc.
  - Headers - all response headers of page. Provides Content-Type, Content-Length, etc.
+ - Entries - if the link contains subordinate elements, like RSS, this field is populated with their meta data
 
 Response contains hashes that can easily be used to check if page has changed over time.
 To decode contents hash.
