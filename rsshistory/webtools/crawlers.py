@@ -427,19 +427,27 @@ class RemoteServerCrawler(CrawlerInterface):
             return
 
         server_url = self.settings["remote_server"]
-        self.settings["crawler"] = self.settings["crawler"]
 
-        crawler_data = {
-                "crawler" : self.settings["crawler"],
-                "name" : self.settings["name"],
-                "timeout" : self.request.timeout_s,
-                "settings" : self.settings,
-        }
+        crawler_data = {}
+
+        if "crawler" in self.settings:
+            crawler_data["crawler"] = self.settings["crawler"]
+
+        if "name" in self.settings:
+            crawler_data["name"] = self.settings["name"]
+
+        if self.settings:
+            crawler_data["settings"] = self.settings
+
+        if self.request and self.request.timeout_s:
+            if "settings" not in crawler_data:
+                crawler_data["settings"] = {}
+            crawler_data["settings"]["timeout"] = self.request.timeout_s
 
         crawler_data = json.dumps(crawler_data)
 
         try:
-            link = "{}?url={}&crawler_data={}".format(server_url, self.request.url, crawler_data)
+            link = "{}/run?url={}&crawler_data={}".format(server_url, self.request.url, crawler_data)
             print(link)
 
             response = requests.get(
@@ -498,20 +506,27 @@ class RemoteServerCrawler(CrawlerInterface):
 
         return self.response
 
+    def read_properties_section(self, section_name, all_properties):
+        for properties in all_properties:
+            if section_name == properties["name"]:
+                return properties["data"]
+
     def unpack_data(self, input_data):
         json_data = {}
 
         data = json.loads(input_data)
 
-        # TODO make it cleaner
-        if data and len(data) > 2 and "data" in data[3]:
-            json_data["status_code"] = data[3]["data"]["status_code"]
-        if data and len(data) > 1 and "data" in data[1]:
-            json_data["contents"] = data[1]["data"]["Contents"]
-        if data and len(data) > 3 and "data" in data[3]:
-            json_data["Content-Length"] = data[3]["data"]["Content-Length"]
-        if data and len(data) > 3 and "data" in data[3]:
-            json_data["Content-Type"] = data[3]["data"]["Content-Type"]
+        response = self.read_properties_section("Response", data)
+        contents_data = self.read_properties_section("Contents", data)
+
+        if response:
+            json_data["status_code"] = response["status_code"]
+        if contents_data:
+            json_data["contents"] = contents_data["Contents"]
+        if response:
+            json_data["Content-Length"] = response["Content-Length"]
+        if response:
+            json_data["Content-Type"] = response["Content-Type"]
 
         return json_data
 
@@ -547,11 +562,11 @@ class StealthRequestsCrawler(CrawlerInterface):
             self.request.url,
             timeout=self.timeout_s,
             verify=self.request.ssl_verify,
-            stream=True,
+            #stream=True,   # does not work with it
         )
 
-        # text = answer.text_content()
         content = answer.content
+        text = answer.text
 
         if answer and content:
             self.response = PageResponseObject(
@@ -562,6 +577,15 @@ class StealthRequestsCrawler(CrawlerInterface):
             )
 
             return self.response
+
+        elif text:
+            self.response = PageResponseObject(
+                self.request.url,
+                binary=None,
+                text=text,
+                status_code=answer.status_code,
+                request_url=self.request.url,
+            )
 
         elif answer:
             self.response = PageResponseObject(
@@ -587,6 +611,10 @@ class StealthRequestsCrawler(CrawlerInterface):
 class SeleniumDriver(CrawlerInterface):
     """
     Everybody uses selenium
+
+    Note:
+     - how can we make for the driver to be persistent? we do not want to start driver again and again
+     - we could not be running in parallel new drivers
     """
 
     def __init__(
@@ -1095,7 +1123,7 @@ class ScriptCrawler(CrawlerInterface):
         if not self.cwd:
             self.cwd = self.get_main_path()
 
-        if self.settings and "remote-server" in self.settings:
+        if self.settings and "remote_server" in self.settings:
             return
 
         if not self.response_file:
@@ -1114,8 +1142,8 @@ class ScriptCrawler(CrawlerInterface):
         if not self.is_valid():
             return
 
-        if self.settings and "remote-server" in self.settings:
-            return self.run_via_server(self.settings["remote-server"])
+        if self.settings and "remote_server" in self.settings:
+            return self.run_via_server(self.settings["remote_server"])
         else:
             return self.run_via_file()
 

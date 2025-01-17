@@ -602,18 +602,19 @@ class Url(ContentInterface):
                 response_data["body_hash"] = base64.b64encode(self.get_contents_body_hash()).decode("utf-8")
             else:
                 response_data["body_hash"] = ""
+            response_data["crawler_data"] = response.crawler_data
+
             all_properties.append({"name" : "Response", "data" : response_data})
 
             all_properties.append({"name" : "Headers", "data" : response.get_headers()})
 
         index = 0
+        entries = []
         for entry in self.get_entries():
-            if index == 0:
-                entry_properties = {}
-                entry_properties["link"] = entry["link"]
-                entry_properties["title"] = entry["title"]
-                all_properties.append({"name" : "Entries", "data" : entry_properties})
-            break
+            if "feed_entry" in entry:
+                del entry["feed_entry"]
+            entries.append(entry)
+        all_properties.append({"name" : "Entries", "data" : entries})
 
         return all_properties
 

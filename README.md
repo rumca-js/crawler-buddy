@@ -11,26 +11,23 @@ Available Endpoints:
 
  - GET / - Provides index page
  - GET /info - Displays information about available crawlers. Returns JSON with crawler properties.
- - GET /infoj - Similar to /info, but explicitly returns the information in JSON format.
+ - GET /infoj - Similar to /info, but explicitly returns the information, in JSON format.
  - GET /history - Displays the crawl history.
- - GET /run - Crawls a specified page. Accepts the following query parameters:
+ - GET /historyj - Displays the crawl history, in JSON format.
+ - GET /crawlj - Crawls a specified page. Accepts the following query parameters:
     - url (string): The URL to crawl.
     - name (string): The name of the crawler.
     - crawler (string): The crawler type.
     - crawler_data (string): Additional data for the crawler.
     - Response: Returns JSON with crawl properties.
- - GET /find - Retrieves the last crawl information for a specified URL.
+ - GET /findj - Retrieves the last crawl information for a specified URL.
     - Query parameter: url (string).
     - Response: Returns JSON with the last crawl details.
  - GET /social Provides social and dynamic information about a specified URL.
     - Query parameter: url (string).
     - Response: Returns JSON with social data.
- - POST /set - Saves custom crawl results for a URL. Accepts a JSON payload with the following fields:
-    - request_url (string): The target URL.
-    - Contents (string): The page content.
-    - Headers (object): HTTP headers.
-    - status_code (integer): The HTTP status code.
-    - Response: Acknowledges successful storage.
+ - GET /proxy Returns URL data as is, contents, status_code. Useful if you try to access page that is only accessible by selenium, or crawlee
+    - Response: Passes contents of response, and status code as is
 
 ## Response JSON
 
@@ -47,6 +44,11 @@ To decode contents hash.
 ```
 base64.b64decode(encoded_string)
 ```
+
+Notes:
+ - Since some things are ambiguous we try to be consistent. For example: server content-type can be upper, or lower-case. This software always uses one strategy
+ - Some things might be just fixed by project. No Content-Type, but we detected it is text/html, then software provides it in response
+ - To sum up: the strategy is to fix what can be fixed, to make consistent things that are not
 
 # Installation
 
@@ -69,6 +71,14 @@ For example available are:
  - SeleniumBase - selenium base [disabled]
 
 These methods can be selected for each individual URL for crawling.
+
+## Supported platforms
+
+ - YouTube - RSS feed discovery, social media data
+ - HackerNews - social media
+ - GitHub - social media
+ - Reddit - RSS feed discovery, social media data
+ - HTML pages - RSS feed discovery for links
 
 # Scripts
 
@@ -117,6 +127,7 @@ optional arguments:
   --add ADD             Adds entry with the specified URL
   --bookmark            bookmarks entry
   --unbookmark          unbookmarks entry
+  --remote-server REMOTE_SERVER
   -m, --mark-read       Marks entries as read
   --entry ENTRY         Select entry by ID
   --source SOURCE       Select source by ID

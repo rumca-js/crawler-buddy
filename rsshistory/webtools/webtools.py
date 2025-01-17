@@ -288,6 +288,7 @@ class PageResponseObject(object):
         self.url = url
         self.request_url = request_url
         self.status_code = status_code
+        self.crawler_data = None
 
         self.binary = None
         self.text = None
@@ -347,6 +348,10 @@ class PageResponseObject(object):
 
     def is_headers_empty(self):
         return len(self.headers) == 0
+
+    def set_crawler(self, crawler_data):
+        self.crawler_data = dict(crawler_data)
+        self.crawler_data["crawler"] = self.crawler_data["crawler"].__name__
 
     def get_content_type(self):
         if "Content-Type" in self.headers:

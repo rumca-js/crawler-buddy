@@ -21,7 +21,7 @@
     "enabled": true,
     "name": "PlaywrightScript",
     "settings": {
-      "script": "poetry run python crawleebeautifulsoup.py",
+      "script": "poetry run python crawleeplaywright.py",
       "timeout_s": 40
     }
   },
@@ -33,12 +33,6 @@
       "driver_executable": "/usr/bin/chromedriver",
       "timeout_s": 40
     }
-  },
-  {
-    "crawler": "SeleniumBase",
-    "enabled": false,
-    "name": "SeleniumBase",
-    "settings": {}
   },
   {
     "crawler": "SeleniumChromeHeadless",
@@ -65,5 +59,11 @@
     "settings": {
       "timeout_s": 20
     }
+  },
+  {
+    "crawler": "SeleniumBase",
+    "enabled": false,
+    "name": "SeleniumBase",
+    "settings": {}
   }
 ]
