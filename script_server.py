@@ -275,10 +275,14 @@ def history():
                 charset = response["Charset"]
                 content_length = response["Content-Length"]
                 content_type = response["Content-Type"]
-                if "crawler_name" in response:
-                    crawler_name = response["crawler_name"]
+                if "crawler_data" in response and "name" in response["crawler_data"]:
+                    crawler_name = response["crawler_data"]["name"]
                 else:
                     crawler_name = ""
+                if "crawler_data" in response and "crawler" in response["crawler_data"]:
+                    crawler_crawler = response["crawler_data"]["crawler"]
+                else:
+                    crawler_crawler = ""
             else:
                 status_code = ""
                 charset = ""
@@ -286,7 +290,7 @@ def history():
                 content_type = ""
                 crawler_name = ""
 
-            text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length:{} Crawler:{}</div>".format(status_code, charset, content_type, content_length, crawler_name)
+            text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length:{} Crawler name:{} Crawler:{}</div>".format(status_code, charset, content_type, content_length, crawler_name, crawler_crawler)
 
     return get_html(text)
 
