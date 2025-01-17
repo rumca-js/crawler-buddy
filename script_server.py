@@ -28,7 +28,7 @@ from rsshistory import webtools
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 
 app = Flask(__name__)
@@ -275,7 +275,10 @@ def history():
                 charset = response["Charset"]
                 content_length = response["Content-Length"]
                 content_type = response["Content-Type"]
-                crawler_name = response["crawler_name"]
+                if "crawler_name" in response:
+                    crawler_name = response["crawler_name"]
+                else:
+                    crawler_name = ""
             else:
                 status_code = ""
                 charset = ""
