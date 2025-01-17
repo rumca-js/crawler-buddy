@@ -28,7 +28,7 @@ from rsshistory import webtools
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 
 app = Flask(__name__)
@@ -263,13 +263,13 @@ def history():
         for datetime, url, all_properties in reversed(url_history):
             text += "<h2>{} {}</h2>".format(datetime, url)
 
-            contents_data = read_properties_section("Contents")
+            contents_data = read_properties_section("Contents", all_properties)
             if "Contents" in contents_data:
                 contents = contents_data["Contents"]
             else:
                 contents = ""
 
-            response = read_properties_section("Response")
+            response = read_properties_section("Response", all_properties)
             if response:
                 status_code = response["status_code"]
                 charset = response["Charset"]
