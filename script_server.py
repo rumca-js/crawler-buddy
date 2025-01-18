@@ -29,7 +29,7 @@ from utils import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 
 app = Flask(__name__)
@@ -40,7 +40,7 @@ history_length = 200
 url_history = CrawlHistory(history_length)
 
 
-def get_html(body, index=False):
+def get_html(body, title="", index=False):
     if not index:
         body = '<a href="/">Back</a>' + body
 
@@ -48,12 +48,13 @@ def get_html(body, index=False):
     <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{}</title>
     </head>
     <body>
     {}
     </body>
     </html>
-    """.format(body)
+    """.format(title, body)
 
     return html
 
@@ -191,7 +192,7 @@ def run_cmd_url(url, remote_server):
 @app.route('/')
 def home():
     text = """
-    <h1>Available commands</h1>
+    <h1>Commands</h1>
     <div><a href="/info">Info</a> - shows configuration</div>
     <div><a href="/infoj">Info JSON</a> - shows configuration JSON</div>
     <div><a href="/history">History</a> - shows history</div>
@@ -205,7 +206,7 @@ def home():
     </p>
     """.format(__version__)
 
-    return get_html(text, index=True)
+    return get_html(body = text, title = "Crawler Buddy", index=True)
 
 
 @app.route('/info')
@@ -221,7 +222,7 @@ def info():
         settings = item["settings"]
         text += "<div>Name:{} Crawler:{} Settings:{}</div>".format(name, crawler.__name__, settings)
 
-    return get_html(text)
+    return get_html(body = text, title="Configuration")
 
 
 @app.route('/infoj')
@@ -284,7 +285,7 @@ def history():
 
             text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length:{} Crawler name:{} Crawler:{}</div>".format(status_code, charset, content_type, content_length, crawler_name, crawler_crawler)
 
-    return get_html(text)
+    return get_html(body = text, title="History")
 
 
 @app.route('/historyj')
