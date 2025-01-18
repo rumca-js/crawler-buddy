@@ -29,7 +29,7 @@ from utils import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 
 
 app = Flask(__name__)
@@ -636,7 +636,7 @@ class CommandLineParser(object):
             "-l", "--history-length", default=200, type=int, help="Length of history",
         )
         self.parser.add_argument(
-            "-t", "--time-cache-minutes", default=200, type=int, help="Time cache in minutes"
+            "-t", "--time-cache-minutes", default=10, type=int, help="Time cache in minutes"
         )
         self.parser.add_argument("--host", default="0.0.0.0", help="Host")
 

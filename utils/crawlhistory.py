@@ -2,7 +2,7 @@
 TODO:
      - we want to find only entries within mintes of last query
 """
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class CrawlHistory(object):
@@ -43,9 +43,12 @@ class CrawlHistory(object):
         """
         last_found = None
 
-        for datetime, index, things in reversed(self.container):
+        for timestamp, index, things in reversed(self.container):
             container_url = things[0]
             all_properties = things[1]
+
+            if (datetime.now() - timestamp) > timedelta(minutes=10):
+                continue
 
             if url == container_url and all_properties:
                 response = CrawlHistory.read_properties_section("Response", all_properties)
