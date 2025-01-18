@@ -23,20 +23,21 @@ import argparse
 from datetime import datetime
 
 from rsshistory import webtools
+from utils import CrawlHistory
 
 
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 
 app = Flask(__name__)
 
 
-# should contain tuples of datetime, URL, properties
-url_history = []
 history_length = 200
+# should contain tuples of datetime, URL, properties
+url_history = CrawlHistory(history_length)
 
 
 def get_html(body, index=False):
@@ -83,43 +84,7 @@ def get_crawler(name = None, crawler_name = None):
                 return item
 
 
-def read_properties_section(section_name, all_properties):
-    for properties in all_properties:
-        if section_name == properties["name"]:
-            return properties["data"]
-
-
-def find_response(input_url, crawler_name = None, crawler_crawler = None):
-    for datetime, url, all_properties in reversed(url_history):
-        if input_url == url and all_properties:
-            response = read_properties_section("Response", all_properties)
-
-            if crawler_name and response and "crawler_data" in response and "name" in response["crawler_data"]:
-                if crawler_name != response["crawler_data"]["name"]:
-                    continue
-
-            if crawler_crawler and response and "crawler_data" in response and "crawler" in response["crawler_data"]:
-                if crawler_name != response["crawler_data"]["crawler"]:
-                    continue
-
-            return all_properties
-
-
 def run_webtools_url(url, crawler_data = None):
-
-    # what is the definition of madness?
-
-    name = None
-    if "name" in crawler_data:
-        name = crawler_data["name"]
-    crawler = None
-    if "crawler" in crawler_data:
-        crawler = crawler_data["crawler"]
-
-    if name or crawler:
-        all_properties = find_response(url, name, crawler)
-        if all_properties:
-            return all_properties
 
     # this is something new
 
@@ -232,7 +197,7 @@ def home():
     <div><a href="/history">History</a> - shows history</div>
     <div><a href="/historyj">History JSON</a> - shows JSON history</div>
     <div><a href="/findj">find JSON</a> - shows the last crawled result JSON</div>
-    <div><a href="/crawlj">Crawl</a> - crawl a web page</div>
+    <div><a href="/crawlj">Crawlj</a> - crawl a web page</div>
     <div><a href="/socialj">Social</a> - dynamic, social data JSON</div>
     <div><a href="/proxy">Proxy</a> - makes GET request, then passes you the contents, as is</div>
     <p>
@@ -276,29 +241,27 @@ def infoj():
     return jsonify(properties)
 
 
-
-
-
-
 @app.route('/history')
 def history():
     text = ""
 
     text += "<h1>History</h1>"
 
-    if len(url_history) == 0:
+    if url_history.get_history_size() == 0:
         text += "<div>No history yet!</div>"
     else:
-        for datetime, url, all_properties in reversed(url_history):
+        for datetime, index, things in reversed(url_history.container):
+            url = things[0]
+            all_properties = things[1]
             text += "<h2>{} {}</h2>".format(datetime, url)
 
-            contents_data = read_properties_section("Contents", all_properties)
+            contents_data = CrawlHistory.read_properties_section("Contents", all_properties)
             if "Contents" in contents_data:
                 contents = contents_data["Contents"]
             else:
                 contents = ""
 
-            response = read_properties_section("Response", all_properties)
+            response = CrawlHistory.read_properties_section("Response", all_properties)
             if response:
                 status_code = response["status_code"]
                 charset = response["Charset"]
@@ -328,10 +291,13 @@ def history():
 def historyj():
     json_history = []
 
-    if len(url_history) == 0:
+    if url_history.get_history_size() == 0:
         return json_history
 
-    for datetime, url, all_properties in reversed(url_history):
+    for datetime, index, things in reversed(url_history.container):
+        url = things[0]
+        all_properties = things[1]
+
         json_history.append(
                 {"datetime" : datetime,
                  "url" : url,
@@ -382,7 +348,7 @@ def set_response():
     if len(url_history) > history_length:
         url_history.pop(0)
 
-    url_history.append( (datetime.now(), url, all_properties) )
+    url_history.add( (url, all_properties) )
 
     return jsonify({"success": True, "received": contents})
 
@@ -471,15 +437,22 @@ def get_request_data(request):
 
 
 def get_crawl_properties(url, crawler_data):
+    name = None
+    if "name" in crawler_data:
+        name = crawler_data["name"]
+    crawler = None
+    if "crawler" in crawler_data:
+        crawler = crawler_data["crawler"]
+
+    all_properties = url_history.find(url = url, crawler_name = name, crawler = crawler)
+    print("Returning from saved properties")
+    if all_properties:
+        return all_properties
+
     all_properties = run_webtools_url(url, crawler_data)
-    #all_properties = None
-    #run_cmd_url(url, remote_server)
 
     if all_properties:
-        if len(url_history) > history_length:
-            url_history.pop(0)
-
-        url_history.append( (datetime.now(), url, all_properties) )
+        url_history.add( (url, all_properties) )
     else:
         all_properties = find_response(url)
 
@@ -539,13 +512,13 @@ def proxy():
             "error": "No properties found"
         }), 400
 
-    contents_data = read_properties_section("Contents", all_properties)
+    contents_data = CrawlHistory.read_properties_section("Contents", all_properties)
     if "Contents" in contents_data:
         contents = contents_data["Contents"]
     else:
         contents = ""
 
-    response = read_properties_section("Response", all_properties)
+    response = CrawlHistory.read_properties_section("Response", all_properties)
     if response:
         status_code = response["status_code"]
         content_type = response["Content-Type"]
@@ -574,15 +547,13 @@ def headers():
     crawler_data["settings"]["headers"] = True
     crawler_data["settings"]["ping"] = False
 
-    all_properties = run_webtools_url(url, crawler_data)
-    #all_properties = None
-    #run_cmd_url(url, remote_server)
+    all_properties = get_crawl_properties(url, crawler_data)
 
     if all_properties:
         if len(url_history) > history_length:
             url_history.pop(0)
 
-        url_history.append( (datetime.now(), url, all_properties) )
+        url_history.add( (url, all_properties) )
     else:
         all_properties = find_response(url)
 
@@ -613,17 +584,12 @@ def ping():
     crawler_data["settings"]["headers"] = False
     crawler_data["settings"]["ping"] = True
 
-    all_properties = run_webtools_url(url, crawler_data)
-    #all_properties = None
-    #run_cmd_url(url, remote_server)
+    all_properties = get_crawl_properties(url, crawler_data)
 
     if all_properties:
-        if len(url_history) > history_length:
-            url_history.pop(0)
-
-        url_history.append( (datetime.now(), url, all_properties) )
+        url_history.add(url, all_properties)
     else:
-        all_properties = find_response(url)
+        all_properties = url_history.find(url = url)
 
         if not all_properties:
             return jsonify({
@@ -666,7 +632,10 @@ class CommandLineParser(object):
             "--port", default=3000, type=int, help="Port number to be used"
         )
         self.parser.add_argument(
-            "-l", "--history-length", default=200, type=int, help="Length of history"
+            "-l", "--history-length", default=200, type=int, help="Length of history",
+        )
+        self.parser.add_argument(
+            "-t", "--time-cache-minutes", default=200, type=int, help="Time cache in minutes"
         )
         self.parser.add_argument("--host", default="0.0.0.0", help="Host")
 
@@ -678,5 +647,7 @@ if __name__ == '__main__':
     p.parse()
 
     history_length = p.args.history_length
+    url_history.set_size(history_length)
+    url_history.set_time_cache(p.args.time_cache_minutes)
 
     app.run(debug=True, host=p.args.host, port=p.args.port, threaded=True)

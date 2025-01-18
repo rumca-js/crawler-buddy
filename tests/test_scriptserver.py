@@ -380,7 +380,7 @@ class ScriptServerTest(FakeInternetTestCase):
         all_properties = json.loads(example_properties)
 
         # call tested function
-        data = read_properties_section("Contents", all_properties)
+        data = CrawlHistory.read_properties_section("Contents", all_properties)
 
         self.assertTrue(data)
 
@@ -389,34 +389,34 @@ class ScriptServerTest(FakeInternetTestCase):
         url_history.append((datetime.now(), "https://www.lemonde.fr/en/rss/une.xml", all_properties))
 
         # call tested function
-        data = find_response("https://www.lemonde.fr/en/rss/une.xml")
+        data = url_history.find("https://www.lemonde.fr/en/rss/une.xml")
 
         self.assertTrue(data)
 
     def test_find_response__by_url(self):
         all_properties = json.loads(example_properties)
-        url_history.append((datetime.now(), "https://www.lemonde.fr/en/rss/une.xml", all_properties))
+        url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_properties))
 
         # call tested function
-        data = find_response("https://www.lemonde.fr/en/rss/une.xml")
+        data = url_history.find(url = "https://www.lemonde.fr/en/rss/une.xml")
 
         self.assertTrue(data)
 
     def test_find_response__by_name_found(self):
         all_properties = json.loads(example_properties)
-        url_history.append((datetime.now(), "https://www.lemonde.fr/en/rss/une.xml", all_properties))
+        url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_properties))
 
         # call tested function
-        data = find_response("https://www.lemonde.fr/en/rss/une.xml", crawler_name = "RequestsCrawler")
+        data = url_history.find(url = "https://www.lemonde.fr/en/rss/une.xml", crawler_name = "RequestsCrawler")
 
         self.assertTrue(data)
 
     def test_find_response__by_name_not_found(self):
         all_properties = json.loads(example_properties)
-        url_history.append((datetime.now(), "https://www.lemonde.fr/en/rss/une.xml", all_properties))
+        url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_properties))
 
         # call tested function
-        data = find_response("https://www.lemonde.fr/en/rss/une.xml", crawler_name = "Selenium")
+        data = url_history.find(url = "https://www.lemonde.fr/en/rss/une.xml", crawler_name = "Selenium")
 
         self.assertFalse(data)
 
