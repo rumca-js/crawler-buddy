@@ -29,7 +29,7 @@ from utils import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.5"
+__version__ = "1.0.6"
 
 
 app = Flask(__name__)
@@ -268,11 +268,11 @@ def history():
                 charset = response["Charset"]
                 content_length = response["Content-Length"]
                 content_type = response["Content-Type"]
-                if "crawler_data" in response and "name" in response["crawler_data"]:
+                if "crawler_data" in response and response["crawler_data"] and "name" in response["crawler_data"]:
                     crawler_name = response["crawler_data"]["name"]
                 else:
                     crawler_name = ""
-                if "crawler_data" in response and "crawler" in response["crawler_data"]:
+                if "crawler_data" in response and response["crawler_data"] and "crawler" in response["crawler_data"]:
                     crawler_crawler = response["crawler_data"]["crawler"]
                 else:
                     crawler_crawler = ""
