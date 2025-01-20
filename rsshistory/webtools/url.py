@@ -45,6 +45,7 @@ from .handlerchannelyoutube import YouTubeChannelHandler
 from .handlerchannelodysee import OdyseeChannelHandler
 from .handlers import (
    RedditChannelHandler,
+   RedditUrlHandler,
    ReturnDislike,
    GitHubUrlHandler,
    HackerNewsHandler,
