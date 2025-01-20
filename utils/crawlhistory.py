@@ -43,27 +43,33 @@ class CrawlHistory(object):
         """
         last_found = None
 
-        for timestamp, index, things in reversed(self.container):
+        for timestamp, inner_index, things in reversed(self.container):
             container_url = things[0]
             all_properties = things[1]
 
             if (datetime.now() - timestamp) > timedelta(minutes=10):
                 continue
 
-            if url == container_url and all_properties:
-                response = CrawlHistory.read_properties_section("Response", all_properties)
+            if url is not None and url != container_url:
+                continue
 
-                if crawler_name and response and "crawler_data" in response and "name" in response["crawler_data"]:
-                    if crawler_name != response["crawler_data"]["name"]:
-                        continue
+            if index is not None and index != inner_index:
+                continue
 
-                if crawler and response and "crawler_data" in response and "crawler" in response["crawler_data"]:
-                    if crawler!= response["crawler_data"]["crawler"]:
-                        continue
+            response = CrawlHistory.read_properties_section("Response", all_properties)
 
-                return all_properties
+            if crawler_name is not None and response and "crawler_data" in response and "name" in response["crawler_data"]:
+                if crawler_name != response["crawler_data"]["name"]:
+                    continue
+
+            if crawler is not None and response and "crawler_data" in response and "crawler" in response["crawler_data"]:
+                if crawler!= response["crawler_data"]["crawler"]:
+                    continue
+
+            return inner_index, all_properties
 
     def read_properties_section(section_name, all_properties):
         for properties in all_properties:
-            if section_name == properties["name"]:
-                return properties["data"]
+            if "name" in properties:
+                if section_name == properties["name"]:
+                    return properties["data"]

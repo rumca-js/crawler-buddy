@@ -1,6 +1,6 @@
 version: '3.7'
 services:
-  djangolinkarchive:
+  crawlerbuddy:
     image: rozbujnik/crawler-buddy
     container_name: crawlerbuddy
     build:
@@ -11,3 +11,4 @@ services:
     environment:
       # could be localhost
       ALLOWED_IP: "192.168.0.1"
+      CRAWLER_BUDDY_PORT: 3000

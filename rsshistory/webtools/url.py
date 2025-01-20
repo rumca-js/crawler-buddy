@@ -43,7 +43,12 @@ from .handlervideoyoutube import YouTubeJsonHandler
 from .handlervideoodysee import OdyseeVideoHandler
 from .handlerchannelyoutube import YouTubeChannelHandler
 from .handlerchannelodysee import OdyseeChannelHandler
-from .handlers import RedditChannelHandler
+from .handlers import (
+   RedditChannelHandler,
+   ReturnDislike,
+   GitHubUrlHandler,
+   HackerNewsHandler,
+)
 
 from utils.dateutils import DateUtils
 
@@ -531,7 +536,7 @@ class Url(ContentInterface):
         if handler:
             return handler.get_contents_body_hash()
 
-    def get_properties(self, full=False):
+    def get_properties(self, full=False, include_social=False):
         basic_properties = super().get_properties()
         if not full:
             return basic_properties
@@ -588,12 +593,27 @@ class Url(ContentInterface):
         all_properties.append({"name" : "Options", "data" : request_data})
 
         if response:
+            headers = response.get_headers()
+
             response_data = OrderedDict()
             response_data["is_valid"] = response.is_valid()
             response_data["status_code"] = response.get_status_code()
+
             response_data["Content-Type"] = response.get_content_type()
+            if response_data["Content-Type"] is None and page_handler == HttpPageHandler:
+                if page_handler.p:
+                    if type(page_handler.p) == RssPage:
+                        response_data["Content-Type"] = "application/rss+xml"
+                    if type(page_handler.p) == HtmlPage:
+                        response_data["Content-Type"] = "text/html"
+
             response_data["Content-Length"] = response.get_content_length()
+            response_data["Last-Modified"] = self.response.get_last_modified()
+
             response_data["Charset"] = response.get_content_type_charset()
+            if not response_data["Charset"]:
+                response_data["Charset"] = response.encoding
+
             if self.get_contents_hash():
                 response_data["hash"] = base64.b64encode(self.get_contents_hash()).decode("utf-8")
             else:
@@ -606,7 +626,12 @@ class Url(ContentInterface):
 
             all_properties.append({"name" : "Response", "data" : response_data})
 
-            all_properties.append({"name" : "Headers", "data" : response.get_headers()})
+            all_properties.append({"name" : "Headers", "data" : headers})
+
+        if include_social:
+            social = self.get_social_properties(self.url)
+            if social:
+                all_properties.append({"name" : "Social", "data" : social})
 
         index = 0
         entries = []
@@ -617,6 +642,44 @@ class Url(ContentInterface):
         all_properties.append({"name" : "Entries", "data" : entries})
 
         return all_properties
+
+    def get_social_properties(self):
+        url = self.url
+
+        handler = Url.get_type(url)
+
+        json_obj = {}
+
+        if type(handler) == Url.youtube_video_handler:
+            code = handler.get_video_code()
+            h = ReturnDislike(code)
+            json_obj["thumbs_up"] = h.get_thumbs_up()
+            json_obj["thumbs_down"] = h.get_thumbs_down()
+            json_obj["view_count"] = h.get_view_count()
+            json_obj["rating"] = h.get_rating()
+            json_obj["upvote_ratio"] = h.get_upvote_ratio()
+            json_obj["upvote_view_ratio"] = h.get_upvote_view_ratio()
+
+        elif type(handler) == HtmlPage:
+            handlers = [RedditUrlHandler(handler.url),
+                    GitHubUrlHandler(handler.url),
+                    HackerNewsHandler(handler.url)]
+
+            for handler in handlers:
+                if handler.is_handled_by():
+                    handler_data = handler.get_json_data()
+                    if handler_data and "thumbs_up" in handler_data:
+                        json_obj["thumbs_up"] = handler_data["thumbs_up"]
+                    if handler_data and "thumbs_down" in handler_data:
+                        json_obj["thumbs_down"] = handler_data["thumbs_down"]
+                    if handler_data and "upvote_ratio" in handler_data:
+                        json_obj["upvote_ratio"] = handler_data["upvote_ratio"]
+                    if handler_data and "upvote_view_ratio" in handler_data:
+                        json_obj["upvote_view_ratio"] = handler_data["upvote_view_ratio"]
+
+                    break
+
+        return json_obj
 
 
 class DomainCacheInfo(object):

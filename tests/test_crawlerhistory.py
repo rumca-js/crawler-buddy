@@ -409,6 +409,17 @@ class ScriptServerTest(FakeInternetTestCase):
 
         self.assertTrue(data)
 
+    def test_find_response__by_index_found(self):
+        all_properties = json.loads(example_properties)
+
+        url_history = CrawlHistory()
+        url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_properties))
+
+        # call tested function
+        data = url_history.find(index = 0)
+
+        self.assertTrue(data)
+
     def test_find_response__by_name_not_found(self):
         all_properties = json.loads(example_properties)
 

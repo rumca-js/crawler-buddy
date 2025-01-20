@@ -16,11 +16,13 @@ http://127.0.0.1:3000/crawlj?url=https://google.com&crawler_data={"crawler":"Scr
 """
 from pathlib import Path
 from flask import Flask, request, jsonify, Response
+import socket
 import json
 import html
 import subprocess
 import argparse
 from datetime import datetime
+from collections import OrderedDict
 
 from rsshistory import webtools
 from utils import CrawlHistory
@@ -29,15 +31,40 @@ from utils import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.6"
+__version__ = "1.0.7"
 
 
 app = Flask(__name__)
 
 
+class CrawlerInfo(object):
+
+    def __init__(self):
+        self.queue = OrderedDict()
+        self.crawl_index = 0
+
+    def enter(self, url):
+        self.queue[self.crawl_index] = datetime.now(), url
+
+        if self.get_size() > 100:
+            self.queue = OrderedDict()
+
+        self.crawl_index += 1
+        return self.crawl_index -1
+
+    def leave(self, crawl_index):
+        if crawl_index in self.queue:
+            del self.queue[crawl_index]
+
+    def get_size(self):
+        return len(self.queue)
+
+
 history_length = 200
 # should contain tuples of datetime, URL, properties
 url_history = CrawlHistory(history_length)
+social_history = CrawlHistory(history_length)
+crawler_info = CrawlerInfo()
 
 
 def get_html(body, title="", index=False):
@@ -136,57 +163,16 @@ def run_webtools_url(url, crawler_data = None):
                   "data" : headers }
         ]
     else:
-        response = page_url.get_response()
-        all_properties = page_url.get_properties(full=True)
+        # TODO what if there is exception
+        crawl_index = crawler_info.enter(url)
 
-    if full:
-        page_url = webtools.Url.get_type(url)
-        additional = append_properties(page_url)
-        all_properties.append({"name" : "Social", "data" : additional})
+        response = page_url.get_response()
+
+        all_properties = page_url.get_properties(full=True, include_social=full)
+
+        crawler_info.leave(crawl_index)
 
     return all_properties
-
-
-def run_cmd_url(url, remote_server):
-    output_file = Path("storage") / "out.txt"
-
-    remote_server = remote_server + "/set"
-
-    # TODO timeout
-
-    command = ["poetry", "run", "python", "crawleebeautifulsoup.py", "--url", url, "--remote-server", remote_server]
-    
-    try:
-        # Run the command using subprocess
-        result = subprocess.run(
-            command,
-            #shell=True,
-            text=True,
-            capture_output=True,
-            check=True
-        )
-
-        output = result.stdout
-        error = result.stderr
-        return jsonify({
-            "success": True,
-            "output": output,
-            "error": error
-        })
-    except subprocess.CalledProcessError as e:
-        # Handle command errors
-        return jsonify({
-            "success": False,
-            "output": e.stdout,
-            "error": e.stderr,
-            "return_code": e.returncode
-        })
-    except Exception as e:
-        # Handle general errors
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        })
 
 
 @app.route('/')
@@ -197,9 +183,12 @@ def home():
     <div><a href="/infoj">Info JSON</a> - shows configuration JSON</div>
     <div><a href="/history">History</a> - shows history</div>
     <div><a href="/historyj">History JSON</a> - shows JSON history</div>
-    <div><a href="/findj">find JSON</a> - shows the last crawled result JSON</div>
+    <div><a href="/queue">Queue</a> - shows currently processing queue</div>
+    <div><a href="/find">find</a> - form for findj</div>
+    <div><a href="/findj">find JSON</a> - returns information about history entry JSON</div>
+    <div><a href="/crawl">Crawl</a> - form for crawlj</div>
     <div><a href="/crawlj">Crawlj</a> - crawl a web page</div>
-    <div><a href="/socialj">Social</a> - dynamic, social data JSON</div>
+    <div><a href="/socialj">Socialj</a> - dynamic, social data JSON</div>
     <div><a href="/proxy">Proxy</a> - makes GET request, then passes you the contents, as is</div>
     <p>
     Version:{}
@@ -242,6 +231,45 @@ def infoj():
     return jsonify(properties)
 
 
+def get_entry_html(index, url, all_properties):
+    text = ""
+
+    link = "/findj?index=" + str(index)
+
+    text += """<a href="{}"><h2>{} {}</h2></a>""".format(link, datetime, url)
+
+    contents_data = CrawlHistory.read_properties_section("Contents", all_properties)
+    if "Contents" in contents_data:
+        contents = contents_data["Contents"]
+    else:
+        contents = ""
+
+    response = CrawlHistory.read_properties_section("Response", all_properties)
+    if response:
+        status_code = response["status_code"]
+        charset = response["Charset"]
+        content_length = response["Content-Length"]
+        content_type = response["Content-Type"]
+        if "crawler_data" in response and response["crawler_data"] and "name" in response["crawler_data"]:
+            crawler_name = response["crawler_data"]["name"]
+        else:
+            crawler_name = ""
+        if "crawler_data" in response and response["crawler_data"] and "crawler" in response["crawler_data"]:
+            crawler_crawler = response["crawler_data"]["crawler"]
+        else:
+            crawler_crawler = ""
+    else:
+        status_code = ""
+        charset = ""
+        content_length = ""
+        content_type = ""
+        crawler_name = ""
+
+    text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length:{} Crawler name:{} Crawler:{}</div>".format(status_code, charset, content_type, content_length, crawler_name, crawler_crawler)
+
+    return text
+
+
 @app.route('/history')
 def history():
     text = ""
@@ -254,36 +282,10 @@ def history():
         for datetime, index, things in reversed(url_history.container):
             url = things[0]
             all_properties = things[1]
-            text += "<h2>{} {}</h2>".format(datetime, url)
 
-            contents_data = CrawlHistory.read_properties_section("Contents", all_properties)
-            if "Contents" in contents_data:
-                contents = contents_data["Contents"]
-            else:
-                contents = ""
+            entry_text = get_entry_html(index, url, all_properties)
 
-            response = CrawlHistory.read_properties_section("Response", all_properties)
-            if response:
-                status_code = response["status_code"]
-                charset = response["Charset"]
-                content_length = response["Content-Length"]
-                content_type = response["Content-Type"]
-                if "crawler_data" in response and response["crawler_data"] and "name" in response["crawler_data"]:
-                    crawler_name = response["crawler_data"]["name"]
-                else:
-                    crawler_name = ""
-                if "crawler_data" in response and response["crawler_data"] and "crawler" in response["crawler_data"]:
-                    crawler_crawler = response["crawler_data"]["crawler"]
-                else:
-                    crawler_crawler = ""
-            else:
-                status_code = ""
-                charset = ""
-                content_length = ""
-                content_type = ""
-                crawler_name = ""
-
-            text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length:{} Crawler name:{} Crawler:{}</div>".format(status_code, charset, content_type, content_length, crawler_name, crawler_crawler)
+            text += entry_text
 
     return get_html(body = text, title="History")
 
@@ -354,13 +356,63 @@ def set_response():
     return jsonify({"success": True, "received": contents})
 
 
+@app.route('/find', methods=['GET'])
+def find():
+    url = request.args.get('url')
+    name = request.args.get('name')
+    crawler = request.args.get('crawler')
+
+    if not url and not name and not crawler:
+        form_html = '''
+            <h1>Submit Your Details</h1>
+            <form action="/findj" method="get">
+                <label for="url">URL:</label><br>
+                <input type="text" id="url" name="url" required><br><br>
+
+                <label for="name">Name (optional):</label><br>
+                <input type="text" id="name" name="name"><br><br>
+
+                <label for="crawler">Crawler (optional):</label><br>
+                <input type="text" id="crawler" name="crawler"><br><br>
+
+                <button type="submit">Submit</button>
+            </form>
+            '''
+
+        return get_html(form_html)
+    else:
+        things = url_history.find(url = url, crawler_name = name, crawler = crawler)
+
+        if not things:
+            return get_html("Cannot find any entry matching data")
+
+        index, all_properties = things
+
+        entry_text = get_entry_html(index, url, all_properties)
+
+        return get_html(entry_text)
+
+
 @app.route('/findj', methods=['GET'])
 def findj():
     url = request.args.get('url')
     name = request.args.get('name')
     crawler = request.args.get('crawler')
+    index = request.args.get('index')
 
-    all_properties = find_response(url, name, crawler)
+    if index:
+        index = int(index)
+
+    things = url_history.find(index = index, url = url, crawler_name = name, crawler = crawler)
+
+    if not things:
+        return jsonify({
+            "success": False,
+            "error": "No properties found"
+        }), 400
+
+
+    index, all_properties = things
 
     if not all_properties:
         return jsonify({
@@ -369,42 +421,6 @@ def findj():
         }), 400
 
     return jsonify(all_properties)
-
-
-def append_properties(handler):
-    json_obj = {}
-
-    if type(handler) == webtools.Url.youtube_video_handler:
-        code = handler.get_video_code()
-        h = webtools.ReturnDislike(code)
-        json_obj["thumbs_up"] = h.get_thumbs_up()
-        json_obj["thumbs_down"] = h.get_thumbs_down()
-        json_obj["view_count"] = h.get_view_count()
-        json_obj["rating"] = h.get_rating()
-        json_obj["upvote_ratio"] = h.get_upvote_ratio()
-        json_obj["upvote_view_ratio"] = h.get_upvote_view_ratio()
-
-    elif type(handler) == webtools.HtmlPage:
-
-        handlers = [webtools.RedditUrlHandler(handler.url),
-                webtools.GitHubUrlHandler(handler.url),
-                webtools.HackerNewsHandler(handler.url)]
-
-        for handler in handlers:
-            if handler.is_handled_by():
-                handler_data = handler.get_json_data()
-                if handler_data and "thumbs_up" in handler_data:
-                    json_obj["thumbs_up"] = handler_data["thumbs_up"]
-                if handler_data and "thumbs_down" in handler_data:
-                    json_obj["thumbs_down"] = handler_data["thumbs_down"]
-                if handler_data and "upvote_ratio" in handler_data:
-                    json_obj["upvote_ratio"] = handler_data["upvote_ratio"]
-                if handler_data and "upvote_view_ratio" in handler_data:
-                    json_obj["upvote_view_ratio"] = handler_data["upvote_view_ratio"]
-
-                break
-
-    return json_obj
 
 
 def get_request_data(request):
@@ -445,10 +461,14 @@ def get_crawl_properties(url, crawler_data):
     if "crawler" in crawler_data:
         crawler = crawler_data["crawler"]
 
-    all_properties = url_history.find(url = url, crawler_name = name, crawler = crawler)
+    things = url_history.find(url = url, crawler_name = name, crawler = crawler)
     print("Returning from saved properties")
-    if all_properties:
-        return all_properties
+
+    if things:
+        index, all_properties = things
+
+        if all_properties:
+            return all_properties
 
     all_properties = run_webtools_url(url, crawler_data)
 
@@ -458,6 +478,27 @@ def get_crawl_properties(url, crawler_data):
         all_properties = find_response(url)
 
     return all_properties
+
+
+@app.route('/crawl', methods=['GET'])
+def crawl():
+    form_html = '''
+        <h1>Submit Your Details</h1>
+        <form action="/crawlj" method="get">
+            <label for="url">URL:</label><br>
+            <input type="text" id="url" name="url" required><br><br>
+
+            <label for="name">Name (optional):</label><br>
+            <input type="text" id="name" name="name"><br><br>
+
+            <label for="crawler">Crawler (optional):</label><br>
+            <input type="text" id="crawler" name="crawler"><br><br>
+
+            <button type="submit">Submit</button>
+        </form>
+        '''
+
+    return get_html(form_html)
 
 
 @app.route('/crawlj', methods=['GET'])
@@ -590,7 +631,7 @@ def ping():
     if all_properties:
         url_history.add(url, all_properties)
     else:
-        all_properties = url_history.find(url = url)
+        index, all_properties = url_history.find(url = url)
 
         if not all_properties:
             return jsonify({
@@ -602,7 +643,7 @@ def ping():
 
 
 @app.route('/socialj', methods=['GET'])
-def get_social():
+def socialj():
     """
     Dynamic, social data.
     Thumbs up, etc.
@@ -615,10 +656,37 @@ def get_social():
             "error": "No url provided"
         }), 400
 
-    page_url = webtools.Url.get_type(url)
-    additional = append_properties(page_url)
+    things = social_history.find(url = url)
+    if things:
+        print("Reading from memory")
+        index = things[0]
+        properties = things[1]
+        return jsonify(properties)
 
-    return jsonify(additional)
+    page_url = webtools.Url(url)
+    properties = page_url.get_social_properties()
+
+    social_history.add((url, properties))
+
+    return jsonify(properties)
+
+
+@app.route('/queue', methods=['GET'])
+def queue():
+    size = crawler_info.get_size()
+
+    text = """
+    <div>Currently processing:{}</div>
+    """.format(size)
+
+    text += "<h1>Queue</h1>"
+
+    for index in crawler_info.queue:
+        timestamp, url = crawler_info.queue[index]
+
+        text += "<div>{} {} {}</div>".format(index, timestamp, url)
+
+    return get_html(text)
 
 
 
@@ -650,5 +718,7 @@ if __name__ == '__main__':
     history_length = p.args.history_length
     url_history.set_size(history_length)
     url_history.set_time_cache(p.args.time_cache_minutes)
+
+    socket.setdefaulttimeout(40)
 
     app.run(debug=True, host=p.args.host, port=p.args.port, threaded=True)

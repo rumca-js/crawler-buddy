@@ -447,7 +447,7 @@ class RemoteServerCrawler(CrawlerInterface):
         crawler_data = json.dumps(crawler_data)
 
         try:
-            link = "{}/run?url={}&crawler_data={}".format(server_url, self.request.url, crawler_data)
+            link = "{}/crawlj?url={}&crawler_data={}".format(server_url, self.request.url, crawler_data)
             print(link)
 
             response = requests.get(
@@ -1430,3 +1430,110 @@ class SeleniumBase(CrawlerInterface):
 
     def is_valid(self):
         return True
+
+
+class RemoteServer(object):
+    def __init__(self, remote_server, timeout_s = 30):
+        self.remote_server = remote_server
+        self.timeout_s = timeout_s
+
+    def get_social(self, url):
+        import requests
+
+        link = self.remote_server
+        link = link + "/socialj?url={}".format(url)
+
+        text = None
+        try:
+            result = requests.get(url = link, timeout=50)
+            text = result.text
+        except Exception as E:
+            print(str(E))
+
+        json_obj = None
+        try:
+            import json
+            json_obj = json.loads(text)
+        except ValueError as E:
+            print(str(E))
+
+        return json_obj
+
+    def get_crawlj(self, url):
+        import requests
+
+        link = self.remote_server
+        link = link + "/crawlj?url={}".format(url)
+
+        text = None
+        try:
+            result = requests.get(url = link, timeout=50)
+            text = result.text
+        except Exception as E:
+            print(str(E))
+
+        if not text:
+            return
+
+        json_obj = None
+        try:
+            import json
+            json_obj = json.loads(text)
+        except ValueError as E:
+            print(str(E))
+        except TypeError as E:
+            print(str(E))
+
+        return json_obj
+
+    def get_properties(self, url):
+        import requests
+
+        link = self.remote_server
+        link = link + "/crawlj?url={}".format(url, timeout=50)
+
+        text = None
+        try:
+            result = requests.get(url = link)
+            text = result.text
+        except Exception as E:
+            print(str(E))
+
+        json_obj = None
+        try:
+            import json
+            json_obj = json.loads(text)
+        except ValueError as E:
+            print(str(E))
+
+        if json_obj:
+            return self.read_properties_section("Properties", json_obj)
+
+        return json_obj
+
+    def read_properties_section(self, section_name, all_properties):
+        if not all_properties:
+            return
+
+        for properties in all_properties:
+            if section_name == properties["name"]:
+                return properties["data"]
+
+    def unpack_data(self, input_data):
+        json_data = {}
+
+        data = json.loads(input_data)
+
+        response = self.read_properties_section("Response", data)
+        contents_data = self.read_properties_section("Contents", data)
+
+        if response:
+            json_data["status_code"] = response["status_code"]
+        if contents_data:
+            json_data["contents"] = contents_data["Contents"]
+        if response:
+            json_data["Content-Length"] = response["Content-Length"]
+        if response:
+            json_data["Content-Type"] = response["Content-Type"]
+
+        return json_data

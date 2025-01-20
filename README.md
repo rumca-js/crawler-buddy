@@ -1,6 +1,6 @@
-# Scraping server
+# Crawling server
 
-The Scraping Server is an HTTP-based web crawler that delivers data in an easily accessible JSON format.
+The Crawling Server is an HTTP-based web crawler that delivers data in an easily accessible JSON format.
 
  - No need to rely on tools like yt-dlp or Beautiful Soup for extracting link metadata.
  - Metadata is standardized with consistent fields (e.g., title, description, date_published, etc.).
@@ -8,6 +8,8 @@ The Scraping Server is an HTTP-based web crawler that delivers data in an easily
  - Automatically discovers RSS feed URLs for websites and YouTube channels in many cases.
  - Simplifies data handling—no more parsing RSS files; just consume JSON!
  - Offers a unified interface for all metadata.
+ - Running a containerized docker environment helps isolate problems from the host operating system
+ - All your crawling / scraping / rss clients could use one source, or you can split it up by hosting multiple servers
 
 Available Endpoints:
 
@@ -52,6 +54,7 @@ Notes:
  - Since some things are ambiguous we try to be consistent. For example: server content-type can be upper, or lower-case. This software always uses one strategy
  - Some things might be just fixed by project. No Content-Type, but we detected it is text/html, then software provides it in response
  - To sum up: the strategy is to fix what can be fixed, to make consistent things that are not
+ - You may attempt running same URL with diferent crawlers to obtain data from the first valid response
 
 # Installation
 
