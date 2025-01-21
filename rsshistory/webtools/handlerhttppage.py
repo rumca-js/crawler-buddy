@@ -529,6 +529,18 @@ class HttpPageHandler(HandlerInterface):
         result.extend(self.p.get_page_rating_vector())
         return result
 
+    def get_contents_hash(self):
+        if not self.p:
+            return super().get_contents_hash()
+
+        return self.p.get_contents_hash()
+
+    def get_contents_body_hash(self):
+        if not self.p:
+            return super().get_contents_body_hash()
+
+        return self.p.get_contents_body_hash()
+
     def get_page_rating_status_code(self, status_code):
         rating = 0
         if status_code == 200:

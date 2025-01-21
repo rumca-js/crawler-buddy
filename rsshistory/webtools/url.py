@@ -537,7 +537,7 @@ class Url(ContentInterface):
         if handler:
             return handler.get_contents_body_hash()
 
-    def get_properties(self, full=False, include_social=False):
+    def get_properties(self, full=False, include_social=False, check_robots=False):
         basic_properties = super().get_properties()
         if not full:
             return basic_properties
@@ -599,6 +599,10 @@ class Url(ContentInterface):
             response_data = OrderedDict()
             response_data["is_valid"] = response.is_valid()
             response_data["status_code"] = response.get_status_code()
+
+            if check_robots:
+                domain_info = self.get_domain_info()
+                response_data["is_allowed"] = domain_info.is_allowed(self.url)
 
             response_data["Content-Type"] = response.get_content_type()
             if response_data["Content-Type"] is None and page_handler == HttpPageHandler:

@@ -29,7 +29,7 @@ def main():
 
     request = parser.get_request()
 
-    driver = webtools.ScriptCrawler(request, response_file = parser.args.output_file, response_port = parser.args.port, cwd = ".", script="poetry run python crawlerrequests.py")
+    driver = webtools.ScriptCrawler(request, response_file = parser.args.output_file, cwd = ".", script="poetry run python crawlerrequests.py")
 
     if parser.args.verbose:
         print("Running request:{} with ScriptCrawler".format(request))

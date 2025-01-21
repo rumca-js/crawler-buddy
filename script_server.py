@@ -2,17 +2,7 @@
 Starts server at the specified location
 
 Access through:
-    ip:port/crawl?url=.... etc.
-
-Examples:
-http://127.0.0.1:3000/crawlj?url=https://google.com&crawler=ScriptCrawler
-http://127.0.0.1:3000/crawlj?url=https://google.com&name=RequestsCrawler
-
-http://127.0.0.1:3000/crawlj?url=https://google.com&crawler_data={"crawler":"RequestsCrawler","name":"StealthRequestsCrawler","settings": {"timeout_s":20}}
-http://127.0.0.1:3000/crawlj?url=https://google.com&crawler_data={"crawler":"StealthRequestsCrawler","name":"StealthRequestsCrawler","settings": {"timeout_s":20}}
-http://127.0.0.1:3000/crawlj?url=https://google.com&crawler_data={"crawler":"SeleniumChromeFull","name":"SeleniumChromeFull","settings": {"timeout_s":50, "driver_executable" : "/usr/bin/chromedriver"}}
-http://127.0.0.1:3000/crawlj?url=https://google.com&crawler_data={"crawler":"ScriptCrawler","name":"CrawleeScript","settings": {"timeout_s":50, "script" : "poetry run python crawleebeautifulsoup.py"}}
-http://127.0.0.1:3000/crawlj?url=https://google.com&crawler_data={"crawler":"ScriptCrawler","name":"CrawleeScript","settings": {"timeout_s":50, "script" : "poetry run python crawleebeautifulsoup.py", "remote-server" : "http://127.0.0.1:3000"}}
+    ip:port/crawlj?url=.... etc.
 """
 from pathlib import Path
 from flask import Flask, request, jsonify, Response
@@ -31,7 +21,7 @@ from utils import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.8"
+__version__ = "1.0.9"
 
 
 app = Flask(__name__)

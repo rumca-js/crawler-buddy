@@ -30,7 +30,6 @@ def main():
     driver = WebConfig.get_crawler_from_mapping(request, selenium_config)
 
     driver.response_file = parser.args.output_file
-    driver.response_port = parser.args.port
 
     if parser.args.verbose:
         print("Running request:{} with SeleniumUndetected".format(request))

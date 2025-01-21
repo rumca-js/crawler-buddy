@@ -55,6 +55,7 @@ Notes:
  - Some things might be just fixed by project. No Content-Type, but we detected it is text/html, then software provides it in response
  - To sum up: the strategy is to fix what can be fixed, to make consistent things that are not
  - You may attempt running same URL with diferent crawlers to obtain data from the first valid response
+ - There is initial work for proxy, but since I do not use proxies at all, I have not checked if the code "works". This is crawler software, not a scraper
 
 # Installation
 

@@ -19,6 +19,7 @@ class ScriptCrawlerParser(object):
         self.parser.add_argument("--ping", default=False, help="Ping only")
         self.parser.add_argument("--headers", default=False, help="Fetch headers only")
         self.parser.add_argument("--remote-server", help="Remote server")
+        self.parser.add_argument("--proxy-address", help="Proxy address")
         self.parser.add_argument("--ssl-verify", default=False, help="SSL verify")
 
         # TODO implement

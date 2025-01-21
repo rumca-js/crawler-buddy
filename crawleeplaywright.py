@@ -76,11 +76,22 @@ async def main() -> None:
     interface = webtools.ScriptCrawlerInterface(parser, request)
     response = webtools.PageResponseObject(request.url)
 
-    crawler = PlaywrightCrawler(
-        # Limit the crawl to max requests. Remove or increase it for crawling all links.
-        max_requests_per_crawl=10,
-        request_handler_timeout=timedelta(seconds=request.timeout_s),
-    )
+    if parser.args.proxy_address:
+        proxy_config = ProxyConfiguration(
+                proxy_urls = [parser.args.proxy_address],
+        )
+        crawler = PlaywrightCrawler(
+            proxy_configuration = proxy_config,
+            # Limit the crawl to max requests. Remove or increase it for crawling all links.
+            max_requests_per_crawl=10,
+            request_handler_timeout=timedelta(seconds=request.timeout_s),
+        )
+    else:
+        crawler = PlaywrightCrawler(
+            # Limit the crawl to max requests. Remove or increase it for crawling all links.
+            max_requests_per_crawl=10,
+            request_handler_timeout=timedelta(seconds=request.timeout_s),
+        )
 
     # Define the default request handler, which will be called for every request.
     @crawler.router.default_handler
