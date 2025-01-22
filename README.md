@@ -54,8 +54,16 @@ Notes:
  - Since some things are ambiguous we try to be consistent. For example: server content-type can be upper, or lower-case. This software always uses one strategy
  - Some things might be just fixed by project. No Content-Type, but we detected it is text/html, then software provides it in response
  - To sum up: the strategy is to fix what can be fixed, to make consistent things that are not
- - You may attempt running same URL with diferent crawlers to obtain data from the first valid response
- - There is initial work for proxy, but since I do not use proxies at all, I have not checked if the code "works". This is crawler software, not a scraper
+
+## Additional features
+
+Question: What if someone wants to make two paralell crawling methods, to make crawling faster?
+
+Answer: Not a problem, just call twice /crawlj Endpoint, with different crawling methods, and use the first received response
+
+Question: Does it support proxy?
+
+Answer: I have provided some initial work for proxy, for Selenium. I do not however use proxies at all, so I have not checked if the code "works". This is crawler software, not a scraper
 
 # Installation
 

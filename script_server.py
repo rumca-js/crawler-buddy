@@ -21,7 +21,7 @@ from utils import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.9"
+__version__ = "1.0.10"
 
 
 app = Flask(__name__)
@@ -221,12 +221,12 @@ def infoj():
     return jsonify(properties)
 
 
-def get_entry_html(index, url, all_properties):
+def get_entry_html(index, url, timestamp, all_properties):
     text = ""
 
     link = "/findj?index=" + str(index)
 
-    text += """<a href="{}"><h2>{} {}</h2></a>""".format(link, datetime, url)
+    text += """<a href="{}"><h2>{} {}</h2></a>""".format(link, timestamp, url)
 
     contents_data = CrawlHistory.read_properties_section("Contents", all_properties)
     if "Contents" in contents_data:
@@ -273,7 +273,7 @@ def history():
             url = things[0]
             all_properties = things[1]
 
-            entry_text = get_entry_html(index, url, all_properties)
+            entry_text = get_entry_html(index, url, datetime, all_properties)
 
             text += entry_text
 
@@ -376,9 +376,9 @@ def find():
         if not things:
             return get_html("Cannot find any entry matching data")
 
-        index, all_properties = things
+        index, timestamp, all_properties = things
 
-        entry_text = get_entry_html(index, url, all_properties)
+        entry_text = get_entry_html(index, url, timestamp, all_properties)
 
         return get_html(entry_text)
 
@@ -402,7 +402,7 @@ def findj():
         }), 400
 
 
-    index, all_properties = things
+    index, timestamp, all_properties = things
 
     if not all_properties:
         return jsonify({
@@ -455,7 +455,7 @@ def get_crawl_properties(url, crawler_data):
     print("Returning from saved properties")
 
     if things:
-        index, all_properties = things
+        index, timestamp, all_properties = things
 
         if all_properties:
             return all_properties
@@ -621,7 +621,15 @@ def ping():
     if all_properties:
         url_history.add(url, all_properties)
     else:
-        index, all_properties = url_history.find(url = url)
+        things = url_history.find(url = url)
+
+        if not things:
+            return jsonify({
+                "success": False,
+                "error": "No properties found"
+            }), 400
+
+        index, timestamp, all_properties = things
 
         if not all_properties:
             return jsonify({
@@ -649,9 +657,9 @@ def socialj():
     things = social_history.find(url = url)
     if things:
         print("Reading from memory")
-        index = things[0]
-        properties = things[1]
-        return jsonify(properties)
+        index, timestamp, all_properties = things
+
+        return jsonify(all_properties)
 
     page_url = webtools.Url(url)
     properties = page_url.get_social_properties()

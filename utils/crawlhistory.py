@@ -66,7 +66,7 @@ class CrawlHistory(object):
                 if crawler!= response["crawler_data"]["crawler"]:
                     continue
 
-            return inner_index, all_properties
+            return inner_index, timestamp, all_properties
 
     def read_properties_section(section_name, all_properties):
         for properties in all_properties:
