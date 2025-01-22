@@ -239,15 +239,19 @@ class RequestsCrawler(CrawlerInterface):
                 request_url=self.request.url,
             )
             if not self.response.is_valid():
+                request_result.close()
+
                 return self.response
 
             content_length = self.response.get_content_length()
             if content_length > PAGE_TOO_BIG_BYTES:
                 self.response.status_code = status_code = HTTP_STATUS_CODE_FILE_TOO_BIG
                 self.response.add_error("Page is too big")
+                request_result.close()
                 return self.response
 
             if self.request.ping:
+                request_result.close()
                 return self.response
 
             # TODO do we want to check also content-type?
@@ -259,6 +263,7 @@ class RequestsCrawler(CrawlerInterface):
                 self.response.add_error(
                     "Url:{} is not supported {}".format(self.request.url, content_type)
                 )
+                request_result.close()
                 return self.response
 
             """
@@ -277,6 +282,8 @@ class RequestsCrawler(CrawlerInterface):
                 binary=request_result.content,
                 request_url=self.request.url,
             )
+
+            request_result.close()
 
         except requests.Timeout:
             self.response = PageResponseObject(
