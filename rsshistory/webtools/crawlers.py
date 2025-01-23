@@ -906,6 +906,12 @@ class SeleniumChromeFull(SeleniumDriver):
     def is_valid(self):
         return selenium_feataure_enabled
 
+    def close(self):
+        super().close()
+
+        if self.display:
+            self.display.stop()
+
 
 class SeleniumUndetected(SeleniumDriver):
     """
