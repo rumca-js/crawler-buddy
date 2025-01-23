@@ -21,10 +21,96 @@ from utils import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.10"
+__version__ = "1.0.11"
 
 
 app = Flask(__name__)
+
+
+permanent_data = []
+
+
+class PermanentLogger(object):
+    """
+    Implementation of weblogger that only prints to std out
+    """
+
+    def info(self, info_text, detail_text="", user=None, stack=False):
+        if info_text:
+            print(info_text)
+        if detail_text:
+            print(detail_text)
+
+        if len(permanent_data) > 200:
+            pernament_data.pop(0)
+
+        permanent_data.append(("INFO", info_text, detail_text, user))
+
+    def debug(self, info_text, detail_text="", user=None, stack=False):
+        if info_text:
+            print(info_text)
+        if detail_text:
+            print(detail_text)
+
+        if len(permanent_data) > 200:
+            permanent_data.pop(0)
+
+        permanent_data.append(("DEBUG", info_text, detail_text, user))
+
+    def warning(self, info_text, detail_text="", user=None, stack=False):
+        if info_text:
+            print(info_text)
+        if detail_text:
+            print(detail_text)
+
+        if len(permanent_data) > 200:
+            permanent_data.pop(0)
+
+        permanent_data.append(("WARNING", info_text, detail_text, user))
+
+    def error(self, info_text, detail_text="", user=None, stack=False):
+        if info_text:
+            print(info_text)
+        if detail_text:
+            print(detail_text)
+
+        if len(permanent_data) > 200:
+            permanent_data.pop(0)
+
+        permanent_data.append(("ERROR", info_text, detail_text, user))
+
+    def notify(self, info_text, detail_text="", user=None):
+        if info_text:
+            print(info_text)
+        if detail_text:
+            print(detail_text)
+
+        if len(permanent_data) > 200:
+            permanent_data.pop(0)
+
+        permanent_data.append(("NOTIFY", info_text, detail_text, user))
+
+    def exc(self, exception_object, info_text=None, user=None):
+        if exception_object:
+            print(str(exception_object))
+
+        error_text = traceback.format_exc()
+        print("Exception format")
+        print(error_text)
+
+        stack_lines = traceback.format_stack()
+        stack_string = "".join(stack_lines)
+        print("Stack:")
+        print("".join(stack_lines))
+
+        info_text = info_text + "\n" + str(exception_object)
+
+        detail_text = detail_text + "\n" + error_text + "\n" + stack_lines
+
+        if len(permanent_data) > 200:
+            permanent_data.pop(0)
+
+        permanent_data.append(("EXC", info_text, detail_text, user))
 
 
 class CrawlerInfo(object):
@@ -55,6 +141,8 @@ history_length = 200
 url_history = CrawlHistory(history_length)
 social_history = CrawlHistory(history_length)
 crawler_info = CrawlerInfo()
+
+webtools.WebLogger.web_logger = PermanentLogger()
 
 
 def get_html(body, title="", index=False):
@@ -166,7 +254,7 @@ def run_webtools_url(url, crawler_data = None):
 
 
 @app.route('/')
-def home():
+def index():
     text = """
     <h1>Commands</h1>
     <div><a href="/info">Info</a> - shows configuration</div>
@@ -180,6 +268,7 @@ def home():
     <div><a href="/crawlj">Crawlj</a> - crawl a web page</div>
     <div><a href="/socialj">Socialj</a> - dynamic, social data JSON</div>
     <div><a href="/proxy">Proxy</a> - makes GET request, then passes you the contents, as is</div>
+    <div><a href="/debug">Debug</a> - shows debug information</div>
     <p>
     Version:{}
     </p>
@@ -300,6 +389,22 @@ def historyj():
     return jsonify(json_history)
 
 
+@app.route('/debug')
+def debug():
+    text = ""
+    for items in permanent_data:
+        level = items[0]
+        info_text = items[1]
+        detail_text = items[2]
+        user = items[3]
+
+        text += "<div>Level:{} info:{}</div>".format(level, info_text)
+        if detail_text:
+            text += "<div>{}</div>".format(detail_text)
+
+    return get_html(text)
+
+
 @app.route('/set', methods=['POST'])
 def set_response():
     data = request.json
@@ -337,9 +442,6 @@ def set_response():
     all_properties.append({})
     all_properties.append({"name" : "Response", "data" : response})
     all_properties.append({"name" : "Headers", "data" : headers})
-
-    if len(url_history) > history_length:
-        url_history.pop(0)
 
     url_history.add( (url, all_properties) )
 
@@ -582,9 +684,6 @@ def headers():
     all_properties = get_crawl_properties(url, crawler_data)
 
     if all_properties:
-        if len(url_history) > history_length:
-            url_history.pop(0)
-
         url_history.add( (url, all_properties) )
     else:
         all_properties = find_response(url)

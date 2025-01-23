@@ -12,7 +12,6 @@ from urllib3 import disable_warnings
 from .webtools import WebLogger
 
 from .crawlers import (
-    selenium_feataure_enabled,
     RequestsCrawler,
     SeleniumChromeHeadless,
     SeleniumChromeFull,

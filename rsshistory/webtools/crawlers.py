@@ -455,7 +455,7 @@ class RemoteServerCrawler(CrawlerInterface):
 
         try:
             link = "{}/crawlj?url={}&crawler_data={}".format(server_url, self.request.url, crawler_data)
-            print(link)
+            print("Calling: {}".format(link))
 
             response = requests.get(
                 link,
@@ -472,6 +472,10 @@ class RemoteServerCrawler(CrawlerInterface):
                 status_code=json_data["status_code"],
                 request_url=self.request.url,
             )
+
+            print("Calling: {} DONE".format(link))
+
+            response.close()
 
         except requests.Timeout:
             self.response = PageResponseObject(
@@ -1486,18 +1490,26 @@ class RemoteServer(object):
         self.remote_server = remote_server
         self.timeout_s = timeout_s
 
-    def get_social(self, url):
+    def get_social(self, url, settings=None):
         import requests
 
         link = self.remote_server
         link = link + "/socialj?url={}".format(url)
+        print("RemoteServer: calling:{}".format(link))
+
+        timeout_s = 50
+        if settings and "timeout_s" in settings:
+            timeout_s = settings["timeout_s"]
 
         text = None
         try:
-            result = requests.get(url = link, timeout=50)
-            text = result.text
+            with requests.get(url = link, timeout=timeout_s, verify=False) as result:
+                text = result.text
         except Exception as E:
-            print(str(E))
+            print("Exception in RemoteServer:{}".format(str(E)))
+            return
+
+        print("Calling:{}".format(link))
 
         json_obj = None
         try:
@@ -1508,18 +1520,24 @@ class RemoteServer(object):
 
         return json_obj
 
-    def get_crawlj(self, url):
+    def get_crawlj(self, url, name="", settings=None):
         import requests
 
         link = self.remote_server
-        link = link + "/crawlj?url={}".format(url)
+        link = link + "/crawlj?url={}&name={}".format(url, name)
+        print("RemoteServer: calling:{}".format(link))
+
+        timeout_s = 50
+        if settings and "timeout_s" in settings:
+            timeout_s = settings["timeout_s"]
 
         text = None
         try:
-            result = requests.get(url = link, timeout=50)
-            text = result.text
+            with requests.get(url = link, timeout=timeout_s, verify=False) as result:
+                text = result.text
         except Exception as E:
-            print(str(E))
+            print("Exception in RemoteServer:{}".format(str(E)))
+            return
 
         if not text:
             return
@@ -1540,13 +1558,19 @@ class RemoteServer(object):
 
         link = self.remote_server
         link = link + "/crawlj?url={}".format(url, timeout=50)
+        print("RemoteServer: calling:{}".format(link))
+
+        timeout_s = 50
+        if settings and "timeout_s" in settings:
+            timeout_s = settings["timeout_s"]
 
         text = None
         try:
-            result = requests.get(url = link)
-            text = result.text
+            with requests.get(url = link, timeout=timeout_s, verify=False) as result:
+                text = result.text
         except Exception as E:
-            print(str(E))
+            print("Exception in RemoteServer:{}".format(str(E)))
+            return
 
         json_obj = None
         try:

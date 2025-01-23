@@ -36,7 +36,6 @@ from .crawlers import (
     ScriptCrawler,
     StealthRequestsCrawler,
     RemoteServerCrawler,
-    selenium_feataure_enabled,
     RemoteServer,
 )
 from .crawlerscript import (
