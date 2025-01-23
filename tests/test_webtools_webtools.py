@@ -1,5 +1,11 @@
 import hashlib
-from rsshistory.webtools import HttpRequestBuilder, InputContent, PageOptions, calculate_hash
+from rsshistory.webtools import (
+   HttpRequestBuilder,
+   InputContent,
+   PageOptions,
+   calculate_hash,
+   status_code_to_text,
+)
 
 from .fakeinternet import FakeInternetTestCase
 
@@ -149,6 +155,7 @@ class InputContentTest(FakeInternetTestCase):
         this is <a href="https://second-link.com">Second Link</a>"""
 
         c = InputContent(content)
+        # call tested function
         result = c.htmlify()
         self.assertEqual(result, content)
 
@@ -157,6 +164,7 @@ class InputContentTest(FakeInternetTestCase):
         this is https://second-link.com"""
 
         c = InputContent(content)
+        # call tested function
         result = c.htmlify()
 
         expected_result = """this is <a href="https://first-link.com">https://first-link.com</a>
@@ -169,9 +177,29 @@ class InputContentTest(FakeInternetTestCase):
         this is <a href="https://second-link.com" style="display:flex">Second Link</a>"""
 
         c = InputContent(content)
+        # call tested function
         result = c.htmlify()
 
         expected_result = """this is <a href="https://first-link.com">First Link</a>
         this is <a href="https://second-link.com">Second Link</a>"""
 
         self.assertEqual(result, expected_result)
+
+class WebToolsTest(FakeInternetTestCase):
+    def setUp(self):
+        self.disable_web_pages()
+
+    def test_status_code_to_text(self):
+        text = status_code_to_text(200)
+        # call tested function
+        self.assertTrue(text)
+
+    def test_status_code_to_text(self):
+        text = status_code_to_text(403)
+        # call tested function
+        self.assertTrue(text)
+
+    def test_status_code_to_text(self):
+        text = status_code_to_text(600)
+        # call tested function
+        self.assertTrue(text)

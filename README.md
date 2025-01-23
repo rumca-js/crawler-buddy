@@ -87,6 +87,12 @@ For example available are:
 
 These methods can be selected for each individual URL for crawling.
 
+Crawling methods like /crawlj can be called with crawl settings, which commonly are:
+ - name - name of the desired crawler
+ - crawler - crawler class
+ - handler_class - handler clas, useful if you want to read an URL using 'HttpPageHandler', as normal vanilla HTTP processing, as if read by a browser
+ - timeout_s - timout for crawling
+
 ## Supported platforms
 
  - YouTube - RSS feed discovery, social media data

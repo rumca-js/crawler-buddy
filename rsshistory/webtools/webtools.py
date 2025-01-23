@@ -98,6 +98,30 @@ class WebLogger(object):
             WebLogger.web_logger.exc(exception_object, info_text)
 
 
+def status_code_to_text(status_code):
+    if not status_code:
+        return ""
+
+    if status_code == 200:
+        return "HTTP_STATUS_OK(200)"
+    elif status_code == 403:
+        return "HTTP_STATUS_USER_AGENT(403)"
+    elif status_code == 600:
+        return "HTTP_STATUS_CODE_EXCEPTION(600)"
+    elif status_code == 603:
+        return "HTTP_STATUS_CODE_CONNECTION_ERROR(603)"
+    elif status_code == 604:
+        return "HTTP_STATUS_CODE_TIMEOUT(604)"
+    elif status_code == 612:
+        return "HTTP_STATUS_CODE_FILE_TOO_BIG(612)"
+    elif status_code == 613:
+        return "HTTP_STATUS_CODE_PAGE_UNSUPPORTED(613)"
+    elif status_code == 614:
+        return "HTTP_STATUS_CODE_SERVER_ERROR(614)"
+    else:
+        return str(status_code)
+
+
 def lazy_load_content(func):
     """
     Lazy load for functions.
@@ -521,30 +545,12 @@ class PageResponseObject(object):
     def add_error(self, error_text):
         self.errors.append(error_text)
 
-    def status_code_to_text(status_code):
-        if not status_code:
-            return ""
-
-        if status_code == 600:
-            return "HTTP_STATUS_CODE_EXCEPTION"
-        elif status_code == 603:
-            return "HTTP_STATUS_CODE_CONNECTION_ERROR"
-        elif status_code == 604:
-            return "HTTP_STATUS_CODE_TIMEOUT"
-        elif status_code == 612:
-            return "HTTP_STATUS_CODE_FILE_TOO_BIG"
-        elif status_code == 613:
-            return "HTTP_STATUS_CODE_PAGE_UNSUPPORTED"
-        elif status_code == 614:
-            return "HTTP_STATUS_CODE_SERVER_ERROR"
-        else:
-            return str(status_code)
 
     def __str__(self):
         has_text_data = "Yes" if self.text else "No"
         has_binary_data = "Yes" if self.binary else "No"
 
-        status_code_text = PageResponseObject.status_code_to_text(self.status_code)
+        status_code_text = status_code_to_text(self.status_code)
 
         return "PageResponseObject: Url:{} Status code:{} Headers:{} Text:{} Binary:{}".format(
             self.url,

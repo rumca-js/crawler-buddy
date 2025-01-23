@@ -423,134 +423,6 @@ class RequestsCrawler(CrawlerInterface):
             return False
 
 
-class RemoteServerCrawler(CrawlerInterface):
-    """
-    Server that accepts GET and POST requests, runs requests and returns data via JSON response
-    """
-    def run(self):
-        import requests
-
-        if not self.is_valid():
-            return
-
-        server_url = self.settings["remote_server"]
-
-        crawler_data = {}
-
-        if "crawler" in self.settings:
-            crawler_data["crawler"] = self.settings["crawler"]
-
-        if "name" in self.settings:
-            crawler_data["name"] = self.settings["name"]
-
-        if self.settings:
-            crawler_data["settings"] = self.settings
-
-        if self.request and self.request.timeout_s:
-            if "settings" not in crawler_data:
-                crawler_data["settings"] = {}
-            crawler_data["settings"]["timeout"] = self.request.timeout_s
-
-        crawler_data = json.dumps(crawler_data)
-
-        try:
-            link = "{}/crawlj?url={}&crawler_data={}".format(server_url, self.request.url, crawler_data)
-            print("Calling: {}".format(link))
-
-            response = requests.get(
-                link,
-                timeout=self.request.timeout_s,
-                verify=False,
-                stream=True,
-            )
-
-            json_data = self.unpack_data(response.text)
-
-            self.response = PageResponseObject(
-                self.request.url,
-                text=json_data["contents"],
-                status_code=json_data["status_code"],
-                request_url=self.request.url,
-            )
-
-            print("Calling: {} DONE".format(link))
-
-            response.close()
-
-        except requests.Timeout:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_TIMEOUT,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Page timeout".format(self.request.url))
-
-        except TimeoutException:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_TIMEOUT,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Page timeout".format(self.request.url))
-
-        except requests.exceptions.ConnectionError:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Connection error".format(self.request.url))
-
-        except Exception as E:
-            WebLogger.exc(E, "Url:{} General exception".format(self.request.url))
-
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_EXCEPTION,
-                request_url=self.request.url,
-            )
-            self.response.add_error("General page exception")
-
-        return self.response
-
-    def read_properties_section(self, section_name, all_properties):
-        for properties in all_properties:
-            if section_name == properties["name"]:
-                return properties["data"]
-
-    def unpack_data(self, input_data):
-        json_data = {}
-
-        data = json.loads(input_data)
-
-        response = self.read_properties_section("Response", data)
-        contents_data = self.read_properties_section("Contents", data)
-
-        if response:
-            json_data["status_code"] = response["status_code"]
-        if contents_data:
-            json_data["contents"] = contents_data["Contents"]
-        if response:
-            json_data["Content-Length"] = response["Content-Length"]
-        if response:
-            json_data["Content-Type"] = response["Content-Type"]
-
-        return json_data
-
-    def is_valid(self):
-        try:
-            import requests
-
-            return True
-        except Exception as E:
-            print(str(E))
-            return False
-
-
 class StealthRequestsCrawler(CrawlerInterface):
     """
     Python steath requests
@@ -756,6 +628,9 @@ class SeleniumDriver(CrawlerInterface):
         return headers
 
     def close(self):
+        """
+        https://stackoverflow.com/questions/15067107/difference-between-webdriver-dispose-close-and-quit
+        """
         try:
             if self.driver:
                 self.driver.close()
@@ -766,13 +641,6 @@ class SeleniumDriver(CrawlerInterface):
         try:
             if self.driver:
                 self.driver.quit()
-        except Exception as E:
-            WebLogger.error(str(E))  # TODO
-            WebLogger.debug(str(E))
-
-        try:
-            if self.display:
-                self.display.stop()
         except Exception as E:
             WebLogger.error(str(E))  # TODO
             WebLogger.debug(str(E))
@@ -1493,9 +1361,16 @@ class RemoteServer(object):
     def get_social(self, url, settings=None):
         import requests
 
-        link = self.remote_server
-        link = link + "/socialj?url={}".format(url)
-        print("RemoteServer: calling:{}".format(link))
+        if settings:
+            crawler_data = json.dumps(settings)
+
+            link = self.remote_server
+            link = link + "/crawlj?url={}&crawler_data={}".format(url, crawler_data)
+            print("RemoteServer: calling:{}".format(link))
+        else:
+            link = self.remote_server
+            link = link + "/crawlj?url={}".format(url)
+            print("RemoteServer: calling:{}".format(link))
 
         timeout_s = 50
         if settings and "timeout_s" in settings:
@@ -1506,14 +1381,13 @@ class RemoteServer(object):
             with requests.get(url = link, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
-            print("Exception in RemoteServer:{}".format(str(E)))
+            print("Exception in RemoteServer:{} Url:{}".format(str(E), link))
             return
 
         print("Calling:{}".format(link))
 
         json_obj = None
         try:
-            import json
             json_obj = json.loads(text)
         except ValueError as E:
             print(str(E))
@@ -1523,9 +1397,19 @@ class RemoteServer(object):
     def get_crawlj(self, url, name="", settings=None):
         import requests
 
-        link = self.remote_server
-        link = link + "/crawlj?url={}&name={}".format(url, name)
-        print("RemoteServer: calling:{}".format(link))
+        if settings:
+            if name != "":
+                settings["name"] = name
+
+            crawler_data = json.dumps(settings)
+
+            link = self.remote_server
+            link = link + "/crawlj?url={}&crawler_data={}".format(url, crawler_data)
+            print("RemoteServer: calling:{}".format(link))
+        else:
+            link = self.remote_server
+            link = link + "/crawlj?url={}&name={}".format(url, name)
+            print("RemoteServer: calling:{}".format(link))
 
         timeout_s = 50
         if settings and "timeout_s" in settings:
@@ -1536,7 +1420,7 @@ class RemoteServer(object):
             with requests.get(url = link, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
-            print("Exception in RemoteServer:{}".format(str(E)))
+            print("Exception in RemoteServer:{} Url:{}".format(str(E), link))
             return
 
         if not text:
@@ -1544,7 +1428,6 @@ class RemoteServer(object):
 
         json_obj = None
         try:
-            import json
             json_obj = json.loads(text)
         except ValueError as E:
             print(str(E))
@@ -1553,12 +1436,22 @@ class RemoteServer(object):
 
         return json_obj
 
-    def get_properties(self, url):
+    def get_properties(self, url, settings=None):
         import requests
 
-        link = self.remote_server
-        link = link + "/crawlj?url={}".format(url, timeout=50)
-        print("RemoteServer: calling:{}".format(link))
+        if settings:
+            if name != "":
+                settings["name"] = name
+
+            crawler_data = json.dumps(settings)
+
+            link = self.remote_server
+            link = link + "/crawlj?url={}&crawler_data={}".format(url, crawler_data)
+            print("RemoteServer: calling:{}".format(link))
+        else:
+            link = self.remote_server
+            link = link + "/crawlj?url={}&name={}".format(url, name)
+            print("RemoteServer: calling:{}".format(link))
 
         timeout_s = 50
         if settings and "timeout_s" in settings:
@@ -1569,12 +1462,11 @@ class RemoteServer(object):
             with requests.get(url = link, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
-            print("Exception in RemoteServer:{}".format(str(E)))
+            print("Exception in RemoteServer:{} Url:{}".format(str(E), link))
             return
 
         json_obj = None
         try:
-            import json
             json_obj = json.loads(text)
         except ValueError as E:
             print(str(E))
@@ -1593,6 +1485,9 @@ class RemoteServer(object):
                 return properties["data"]
 
     def unpack_data(self, input_data):
+        """
+        TODO remove?
+        """
         json_data = {}
 
         data = json.loads(input_data)

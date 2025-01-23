@@ -533,3 +533,18 @@ class UrlTest(FakeInternetTestCase):
         # print(url.get_contents())
 
         self.assertTrue(hash != main_hash)
+
+    def test_get_handler_by_name(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        # call tested function
+        handler = Url.get_handler_by_name("HttpPageHandler")
+
+        self.assertTrue(handler)
+        self.assertEqual(handler, HttpPageHandler)
+
+        # call tested function
+        handler = Url.get_handler_by_name("YouTubeChannelHandler")
+
+        self.assertTrue(handler)
+        self.assertNotEqual(handler, HttpPageHandler)

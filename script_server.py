@@ -11,106 +11,21 @@ import json
 import html
 import subprocess
 import argparse
+import traceback
 from datetime import datetime
 from collections import OrderedDict
 
 from rsshistory import webtools
-from utils import CrawlHistory
+from utils import CrawlHistory, PermanentLogger
 
 
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.11"
+__version__ = "1.0.13"
 
 
 app = Flask(__name__)
-
-
-permanent_data = []
-
-
-class PermanentLogger(object):
-    """
-    Implementation of weblogger that only prints to std out
-    """
-
-    def info(self, info_text, detail_text="", user=None, stack=False):
-        if info_text:
-            print(info_text)
-        if detail_text:
-            print(detail_text)
-
-        if len(permanent_data) > 200:
-            pernament_data.pop(0)
-
-        permanent_data.append(("INFO", info_text, detail_text, user))
-
-    def debug(self, info_text, detail_text="", user=None, stack=False):
-        if info_text:
-            print(info_text)
-        if detail_text:
-            print(detail_text)
-
-        if len(permanent_data) > 200:
-            permanent_data.pop(0)
-
-        permanent_data.append(("DEBUG", info_text, detail_text, user))
-
-    def warning(self, info_text, detail_text="", user=None, stack=False):
-        if info_text:
-            print(info_text)
-        if detail_text:
-            print(detail_text)
-
-        if len(permanent_data) > 200:
-            permanent_data.pop(0)
-
-        permanent_data.append(("WARNING", info_text, detail_text, user))
-
-    def error(self, info_text, detail_text="", user=None, stack=False):
-        if info_text:
-            print(info_text)
-        if detail_text:
-            print(detail_text)
-
-        if len(permanent_data) > 200:
-            permanent_data.pop(0)
-
-        permanent_data.append(("ERROR", info_text, detail_text, user))
-
-    def notify(self, info_text, detail_text="", user=None):
-        if info_text:
-            print(info_text)
-        if detail_text:
-            print(detail_text)
-
-        if len(permanent_data) > 200:
-            permanent_data.pop(0)
-
-        permanent_data.append(("NOTIFY", info_text, detail_text, user))
-
-    def exc(self, exception_object, info_text=None, user=None):
-        if exception_object:
-            print(str(exception_object))
-
-        error_text = traceback.format_exc()
-        print("Exception format")
-        print(error_text)
-
-        stack_lines = traceback.format_stack()
-        stack_string = "".join(stack_lines)
-        print("Stack:")
-        print("".join(stack_lines))
-
-        info_text = info_text + "\n" + str(exception_object)
-
-        detail_text = detail_text + "\n" + error_text + "\n" + stack_lines
-
-        if len(permanent_data) > 200:
-            permanent_data.pop(0)
-
-        permanent_data.append(("EXC", info_text, detail_text, user))
 
 
 class CrawlerInfo(object):
@@ -141,7 +56,6 @@ history_length = 200
 url_history = CrawlHistory(history_length)
 social_history = CrawlHistory(history_length)
 crawler_info = CrawlerInfo()
-
 webtools.WebLogger.web_logger = PermanentLogger()
 
 
@@ -224,7 +138,11 @@ def run_webtools_url(url, crawler_data = None):
 
         options.mode_mapping = [new_mapping]
 
-    page_url = webtools.Url(url, page_options=options)
+    handler_class = None
+    if "handler_class" in crawler_data:
+        handler_class = Url.get_handler_by_name(crawler_data["handler_class"])
+
+    page_url = webtools.Url(url, page_options=options, handler_class = handler_class)
 
     if request_headers:
         # TODO implement
@@ -262,13 +180,13 @@ def index():
     <div><a href="/history">History</a> - shows history</div>
     <div><a href="/historyj">History JSON</a> - shows JSON history</div>
     <div><a href="/queue">Queue</a> - shows currently processing queue</div>
-    <div><a href="/find">find</a> - form for findj</div>
-    <div><a href="/findj">find JSON</a> - returns information about history entry JSON</div>
-    <div><a href="/crawl">Crawl</a> - form for crawlj</div>
+    <div><a href="/find">Find</a> - form for findj</div>
+    <div><a href="/findj">Find JSON</a> - returns information about history entry JSON</div>
+    <div><a href="/crawl">Crawl</a> - form for Crawl JSON</div>
     <div><a href="/crawlj">Crawlj</a> - crawl a web page</div>
-    <div><a href="/socialj">Socialj</a> - dynamic, social data JSON</div>
+    <div><a href="/socialj">Socialj</a> - dynamic social data JSON</div>
     <div><a href="/proxy">Proxy</a> - makes GET request, then passes you the contents, as is</div>
-    <div><a href="/debug">Debug</a> - shows debug information</div>
+    <div><a href="/debugg">Debug</a> - shows debug information</div>
     <p>
     Version:{}
     </p>
@@ -326,6 +244,9 @@ def get_entry_html(index, url, timestamp, all_properties):
     response = CrawlHistory.read_properties_section("Response", all_properties)
     if response:
         status_code = response["status_code"]
+        # TODO maybe create a better API
+        status_code = webtools.status_code_to_text(status_code)
+
         charset = response["Charset"]
         content_length = response["Content-Length"]
         content_type = response["Content-Type"]
@@ -389,16 +310,17 @@ def historyj():
     return jsonify(json_history)
 
 
-@app.route('/debug')
-def debug():
+@app.route('/debugg')
+def debugg():
     text = ""
-    for items in permanent_data:
+    for items in reversed(permanent_data):
         level = items[0]
-        info_text = items[1]
-        detail_text = items[2]
-        user = items[3]
+        timestamp = items[1]
+        info_text = items[2]
+        detail_text = items[3]
+        user = items[4]
 
-        text += "<div>Level:{} info:{}</div>".format(level, info_text)
+        text += "<div>[{}] Level:{} info:{}</div>".format(timestamp, level, info_text)
         if detail_text:
             text += "<div>{}</div>".format(detail_text)
 
@@ -606,6 +528,12 @@ def crawlj():
 
     crawler_data = get_request_data(request)
 
+    if not crawler_data:
+        return jsonify({
+            "success": False,
+            "error": "Cannot obtain crawler data"
+        }), 400
+
     crawler_data["settings"]["full"] = full
     crawler_data["settings"]["headers"] = False
     crawler_data["settings"]["ping"] = False
@@ -633,6 +561,12 @@ def proxy():
         }), 400
 
     crawler_data = get_request_data(request)
+
+    if not crawler_data:
+        return jsonify({
+            "success": False,
+            "error": "Cannot obtain crawler data"
+        }), 400
 
     crawler_data["settings"]["full"] = full
     crawler_data["settings"]["headers"] = False
@@ -677,6 +611,12 @@ def headers():
 
     crawler_data = get_request_data(request)
 
+    if not crawler_data:
+        return jsonify({
+            "success": False,
+            "error": "Cannot obtain crawler data"
+        }), 400
+
     crawler_data["settings"]["full"] = full
     crawler_data["settings"]["headers"] = True
     crawler_data["settings"]["ping"] = False
@@ -710,6 +650,12 @@ def ping():
         }), 400
 
     crawler_data = get_request_data(request)
+
+    if not crawler_data:
+        return jsonify({
+            "success": False,
+            "error": "Cannot obtain crawler data"
+        }), 400
 
     crawler_data["settings"]["full"] = full
     crawler_data["settings"]["headers"] = False

@@ -103,6 +103,12 @@ class Url(ContentInterface):
     def register(handler):
         Url.handlers.append(handler)
 
+    def get_handler_by_name(handler_name):
+        handlers = Url.get_handlers()
+        for handler in handlers:
+            if handler.__name__ == handler_name:
+                return handler
+
     def get_handler(self):
         """
         This function does not fetch anything by itself
