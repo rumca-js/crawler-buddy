@@ -313,7 +313,7 @@ def historyj():
 @app.route('/debugg')
 def debugg():
     text = ""
-    for items in reversed(permanent_data):
+    for items in reversed(webtools.WebLogger.web_logger.permanent_data):
         level = items[0]
         timestamp = items[1]
         info_text = items[2]
