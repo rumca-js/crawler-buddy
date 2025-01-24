@@ -627,7 +627,7 @@ def linkj():
 
 @app.route('/queue', methods=['GET'])
 def queue():
-    size = crawler.crawler_info.get_size()
+    size = crawler_main.crawler_info.get_size()
 
     text = """
     <div>Currently processing:{}</div>
@@ -635,8 +635,8 @@ def queue():
 
     text += "<h1>Queue</h1>"
 
-    for index in crawler.crawler_info.queue:
-        timestamp, url = crawler.crawler_info.queue[index]
+    for index in crawler_main.crawler_info.queue:
+        timestamp, url = crawler_main.crawler_info.queue[index]
 
         text += "<div>{} {} {}</div>".format(index, timestamp, url)
 
