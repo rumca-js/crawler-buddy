@@ -1,3 +1,6 @@
+# if poetry update takes forever
+# export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring
+
 [tool.poetry]
 name = "linklibrary"
 version = "0.10.4"
