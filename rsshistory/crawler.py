@@ -72,10 +72,12 @@ class Crawler(object):
 
         new_mapping = None
 
+        config = Configuration()
+
         if "crawler" not in crawler_data and "name" in crawler_data:
-            new_mapping = Configuration.get_crawler(name = crawler_data["name"])
+            new_mapping = config.get_crawler(name = crawler_data["name"])
         elif "name" not in crawler_data and "crawler" in crawler_data:
-            new_mapping = Configuration.get_crawler(crawler_name = crawler_data["crawler"])
+            new_mapping = config.get_crawler(crawler_name = crawler_data["crawler"])
         elif "name" not in crawler_data and "crawler" not in crawler_data:
             pass
         else:
