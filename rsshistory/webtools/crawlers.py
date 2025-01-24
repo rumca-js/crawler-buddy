@@ -36,17 +36,6 @@ from .ipc import (
     string_to_command,
 )
 
-selenium_feataure_enabled = True
-try:
-    from selenium import webdriver
-    from selenium.webdriver.chrome.service import Service
-    from selenium.common.exceptions import TimeoutException
-
-    from selenium.webdriver.support.ui import WebDriverWait
-    from selenium.webdriver.support import expected_conditions as EC
-except Exception as E:
-    print(str(E))
-    selenium_feataure_enabled = False
 
 
 class CrawlerInterface(object):
@@ -422,6 +411,36 @@ class RequestsCrawler(CrawlerInterface):
             print(str(E))
             return False
 
+    def ping(url):
+        import requests
+
+        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"
+
+        headers = {
+            "User-Agent": user_agent,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Charset": "utf-8,ISO-8859-1;q=0.7,*;q=0.3",
+            "Accept-Encoding": "none",
+            "Accept-Language": "en-US,en;q=0.8",
+            "Connection": "keep-alive",
+        }
+
+        try:
+            with requests.get(
+                url=url,
+                headers = headers,
+                timeout=20,
+                verify=False,
+                stream=True,
+            ) as response:
+                if response.status_code >= 200 and response.status_code < 404:
+                    return True
+                else:
+                    return False
+
+        except Exception as E:
+            return False
+
 
 class StealthRequestsCrawler(CrawlerInterface):
     """
@@ -652,7 +671,19 @@ class SeleniumChromeHeadless(SeleniumDriver):
     """
 
     def get_driver(self):
-        from selenium.webdriver.common.proxy import Proxy, ProxyType
+        selenium_feataure_enabled = True
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.chrome.service import Service
+            from selenium.common.exceptions import TimeoutException
+
+            from selenium.webdriver.support.ui import WebDriverWait
+            from selenium.webdriver.support import expected_conditions as EC
+        except Exception as E:
+            print(str(E))
+            selenium_feataure_enabled = False
+
+            from selenium.webdriver.common.proxy import Proxy, ProxyType
 
         capabilities = webdriver.DesiredCapabilities.CHROME.copy()
 
@@ -764,6 +795,18 @@ class SeleniumChromeHeadless(SeleniumDriver):
         return self.response
 
     def is_valid(self):
+        selenium_feataure_enabled = True
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.chrome.service import Service
+            from selenium.common.exceptions import TimeoutException
+
+            from selenium.webdriver.support.ui import WebDriverWait
+            from selenium.webdriver.support import expected_conditions as EC
+        except Exception as E:
+            print(str(E))
+            selenium_feataure_enabled = False
+
         return selenium_feataure_enabled
 
 
@@ -773,6 +816,17 @@ class SeleniumChromeFull(SeleniumDriver):
     """
 
     def get_driver(self):
+        selenium_feataure_enabled = True
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.chrome.service import Service
+            from selenium.common.exceptions import TimeoutException
+
+            from selenium.webdriver.support.ui import WebDriverWait
+            from selenium.webdriver.support import expected_conditions as EC
+        except Exception as E:
+            print(str(E))
+            selenium_feataure_enabled = False
         from selenium.webdriver.common.proxy import Proxy, ProxyType
 
         capabilities = webdriver.DesiredCapabilities.CHROME.copy()
@@ -904,6 +958,17 @@ class SeleniumChromeFull(SeleniumDriver):
         return self.response
 
     def is_valid(self):
+        selenium_feataure_enabled = True
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.chrome.service import Service
+            from selenium.common.exceptions import TimeoutException
+
+            from selenium.webdriver.support.ui import WebDriverWait
+            from selenium.webdriver.support import expected_conditions as EC
+        except Exception as E:
+            print(str(E))
+            selenium_feataure_enabled = False
         return selenium_feataure_enabled
 
     def close(self):
@@ -1365,29 +1430,37 @@ class RemoteServer(object):
         self.timeout_s = timeout_s
 
     def get_social(self, url, settings=None):
+        """
+        @returns None in case of error
+        """
         import requests
 
         if settings:
             crawler_data = json.dumps(settings)
 
             link = self.remote_server
-            link = link + "/crawlj?url={}&crawler_data={}".format(url, crawler_data)
+            link = link + "/socialj?url={}&crawler_data={}".format(url, crawler_data)
             print("RemoteServer: calling:{}".format(link))
         else:
             link = self.remote_server
-            link = link + "/crawlj?url={}".format(url)
+            link = link + "/socialj?url={}".format(url)
             print("RemoteServer: calling:{}".format(link))
 
         timeout_s = 50
         if settings and "timeout_s" in settings:
             timeout_s = settings["timeout_s"]
 
+        # we make request longer - for the server to be able to respond in time
+        timeout_s += 5
+
         text = None
         try:
             with requests.get(url = link, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
-            print("Exception in RemoteServer:{} Url:{}".format(str(E), link))
+            return
+
+        if not text:
             return
 
         print("Calling:{}".format(link))
@@ -1396,11 +1469,16 @@ class RemoteServer(object):
         try:
             json_obj = json.loads(text)
         except ValueError as E:
-            print(str(E))
+            WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
+        except TypeError as E:
+            WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
 
         return json_obj
 
     def get_crawlj(self, url, name="", settings=None):
+        """
+        @returns None in case of error
+        """
         import requests
 
         if settings:
@@ -1411,22 +1489,24 @@ class RemoteServer(object):
 
             link = self.remote_server
             link = link + "/crawlj?url={}&crawler_data={}".format(url, crawler_data)
-            print("RemoteServer: calling:{}".format(link))
+            WebLogger.debug("RemoteServer: calling:{}".format(link))
         else:
             link = self.remote_server
             link = link + "/crawlj?url={}&name={}".format(url, name)
-            print("RemoteServer: calling:{}".format(link))
+            WebLogger.debug("RemoteServer: calling:{}".format(link))
 
         timeout_s = 50
         if settings and "timeout_s" in settings:
             timeout_s = settings["timeout_s"]
+
+        # we make request longer - for the server to be able to respond in time
+        timeout_s += 5
 
         text = None
         try:
             with requests.get(url = link, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
-            print("Exception in RemoteServer:{} Url:{}".format(str(E), link))
             return
 
         if not text:
@@ -1436,13 +1516,16 @@ class RemoteServer(object):
         try:
             json_obj = json.loads(text)
         except ValueError as E:
-            print(str(E))
+            WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
         except TypeError as E:
-            print(str(E))
+            WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
 
         return json_obj
 
     def get_properties(self, url, settings=None):
+        """
+        @returns None in case of error
+        """
         import requests
 
         if settings:
@@ -1463,19 +1546,26 @@ class RemoteServer(object):
         if settings and "timeout_s" in settings:
             timeout_s = settings["timeout_s"]
 
+        # we make request longer - for the server to be able to respond in time
+        timeout_s += 5
+
         text = None
         try:
             with requests.get(url = link, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
-            print("Exception in RemoteServer:{} Url:{}".format(str(E), link))
+            return
+
+        if not text:
             return
 
         json_obj = None
         try:
             json_obj = json.loads(text)
         except ValueError as E:
-            print(str(E))
+            WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
+        except TypeError as E:
+            WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
 
         if json_obj:
             return self.read_properties_section("Properties", json_obj)

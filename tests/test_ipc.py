@@ -1,5 +1,5 @@
-from ..webtools.ipc import *
-from ..webtools import get_response_from_bytes
+from rsshistory.webtools.ipc import *
+from rsshistory.webtools import get_response_from_bytes
 
 from .fakeinternet import FakeInternetTestCase
 

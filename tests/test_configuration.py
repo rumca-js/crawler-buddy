@@ -6,7 +6,7 @@ from rsshistory.webtools import (
     PageResponseObject,
     HttpPageHandler,
 )
-from script_server import *
+from rsshistory.configuration import Configuration
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 
@@ -17,10 +17,10 @@ class ScriptServerTest(FakeInternetTestCase):
 
     def test_get_crawler(self):
         # call tested function
-        crawler = get_crawler("SeleniumChromeFull")
+        crawler = Configuration().get_crawler("SeleniumChromeFull")
         self.assertTrue(crawler)
 
     def test_get_crawler_config(self):
         # call tested function
-        config = get_crawler_config()
+        config = Configuration().get_crawler_config()
         self.assertTrue(config)

@@ -182,6 +182,11 @@ class HttpRequestBuilder(object):
             response = crawler.get_response()
             response.set_crawler(crawler_data)
             crawler.close()
+
+            WebLogger.debug(
+                "Url:{}: Running crawler {}\n{} DONE".format(request.url, type(crawler), crawler_data)
+            )
+
             if response:
                 return response
 
@@ -267,8 +272,6 @@ class HttpRequestBuilder(object):
             self.dead = True
             return None
 
-        WebLogger.debug("[R] Url:{}. Options:{}".format(self.url, self.options))
-
         request = PageRequestObject(
             url=self.url,
             headers=self.headers,
@@ -276,12 +279,6 @@ class HttpRequestBuilder(object):
         )
 
         self.response = self.get_contents_internal(request=request)
-
-        WebLogger.debug(
-            "Url:{}. Options:{} Requesting page: DONE".format(
-                self.url, self.options
-            )
-        )
 
         return self.response
 
@@ -507,6 +504,11 @@ class HttpPageHandler(HandlerInterface):
             return
         return self.p.get_date_published()
 
+    def get_canonical_url(self):
+        if not self.p:
+            return self.url
+        return self.p.get_canonical_url()
+
     def get_properties(self):
         if not self.p:
             return
@@ -570,6 +572,11 @@ class HttpPageHandler(HandlerInterface):
         return self.p.is_valid()
 
     def is_cloudflare_protected(self):
+        """
+        You'd probably be more successful trying to not trigger the 
+        bot detection in the first place rather than trying to bypass it after the fact. 
+        """
+
         if not self.p:
             return False
 

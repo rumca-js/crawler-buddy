@@ -32,6 +32,9 @@ class HandlerInterface(DefaultContentPage):
         else:
             return self.url
 
+    def get_canonical_url(self):
+        return self.get_url()
+
     def get_feeds(self):
         """
         even for post, or individual videos we might request feed url

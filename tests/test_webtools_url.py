@@ -255,44 +255,58 @@ class UrlTest(FakeInternetTestCase):
     def test_get_properties__rss__basic(self):
         MockRequestCounter.mock_page_requests = 0
 
+        test_link = "https://www.codeproject.com/WebServices/NewsRSS.aspx"
+
         # call tested function
-        url = Url("https://www.codeproject.com/WebServices/NewsRSS.aspx")
+        url = Url(test_link)
 
         url.get_response()
         properties = url.get_properties()
 
         self.assertTrue("title" in properties)
         self.assertTrue("link" in properties)
+
+        self.assertEqual(properties["link"], test_link)
+        self.assertEqual(properties["link_request"], test_link)
+
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_properties__youtube_channel__basic(self):
         MockRequestCounter.mock_page_requests = 0
 
+        test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
+
         # call tested function
-        url = Url(
-            "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
-        )
+        url = Url(test_link)
 
         url.get_response()
         properties = url.get_properties()
 
         self.assertTrue("title" in properties)
         self.assertTrue("link" in properties)
+
+        self.assertEqual(properties["link"], test_link)
+        self.assertEqual(properties["link_request"], test_link)
+
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_properties__youtube_video__basic(self):
         MockRequestCounter.mock_page_requests = 0
 
+        test_link = "https://www.youtube.com/watch?v=1234"
+
         # call tested function
-        url = Url(
-            "https://www.youtube.com/watch?v=1234"
-        )
+        url = Url(test_link)
 
         url.get_response()
         properties = url.get_properties()
 
         self.assertTrue("title" in properties)
         self.assertTrue("link" in properties)
+
+        self.assertEqual(properties["link"], test_link)
+        self.assertEqual(properties["link_request"], test_link)
+
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_properties__html__basic(self):
@@ -308,6 +322,10 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertTrue("title" in properties)
         self.assertTrue("link" in properties)
+
+        self.assertEqual(properties["link"], test_link)
+        self.assertEqual(properties["link_request"], test_link)
+
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_properties__html__advanced(self):
@@ -328,13 +346,19 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertTrue("title" in properties)
         self.assertTrue("link" in properties)
+
+        self.assertEqual(properties["link"], test_link)
+        self.assertEqual(properties["link_request"], test_link)
+
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_properties__rss__advanced(self):
         MockRequestCounter.mock_page_requests = 0
 
+        test_link = "https://www.codeproject.com/WebServices/NewsRSS.aspx"
+
         # call tested function
-        url = Url("https://www.codeproject.com/WebServices/NewsRSS.aspx")
+        url = Url(test_link)
 
         url.get_response()
         all_properties = url.get_properties(full=True)
@@ -346,15 +370,19 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertTrue("title" in properties)
         self.assertTrue("link" in properties)
+
+        self.assertEqual(properties["link"], test_link)
+        self.assertEqual(properties["link_request"], test_link)
+
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_properties__youtube_channel__advanced(self):
         MockRequestCounter.mock_page_requests = 0
 
+        test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
+
         # call tested function
-        url = Url(
-            "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
-        )
+        url = Url(test_link)
 
         url.get_response()
         all_properties = url.get_properties(full=True)
@@ -366,15 +394,19 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertTrue("title" in properties)
         self.assertTrue("link" in properties)
+
+        self.assertEqual(properties["link"], test_link)
+        self.assertEqual(properties["link_request"], test_link)
+
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_properties__youtube_video__advanced(self):
         MockRequestCounter.mock_page_requests = 0
 
+        test_link = "https://www.youtube.com/watch?v=1234"
+
         # call tested function
-        url = Url(
-            "https://www.youtube.com/watch?v=1234"
-        )
+        url = Url(test_link)
 
         url.get_response()
         all_properties = url.get_properties(full=True)
@@ -386,6 +418,10 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertTrue("title" in properties)
         self.assertTrue("link" in properties)
+
+        self.assertEqual(properties["link"], test_link)
+        self.assertEqual(properties["link_request"], test_link)
+
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_cleaned_link(self):
@@ -395,6 +431,34 @@ class UrlTest(FakeInternetTestCase):
         link = Url.get_cleaned_link(test_link)
 
         self.assertEqual(link, "https://my-server:8185/view/somethingsomething")
+
+    def test_get_cleaned_link__stupid_google_link(self):
+        cleaned_link = Url.get_cleaned_link(
+            "https://www.google.com/url?q=https://forum.ddopl.com/&sa=Udupa"
+        )
+
+        self.assertEqual(cleaned_link, "https://forum.ddopl.com")
+
+    def test_get_cleaned_link__stupid_google_link2(self):
+        cleaned_link = Url.get_cleaned_link(
+            "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://worldofwarcraft.blizzard.com/&ved=2ahUKEwjtx56Pn5WFAxU2DhAIHYR1CckQFnoECCkQAQ&usg=AOvVaw1pDkx5K7B5loKccvg_079-"
+        )
+
+        self.assertEqual(cleaned_link, "https://worldofwarcraft.blizzard.com")
+
+    def test_get_cleaned_link__stupid_youtube_link(self):
+        cleaned_link = Url.get_cleaned_link(
+            "https://www.youtube.com/redirect?event=lorum&redir_token=ipsum&q=https%3A%2F%2Fcorridordigital.com%2F&v=LeB9DcFT810"
+        )
+
+        self.assertEqual(cleaned_link, "https://corridordigital.com/&v=LeB9DcFT810")
+
+    def test_get_cleaned_link(self):
+        cleaned_link = Url.get_cleaned_link("https://www.YouTube.com/Test")
+        self.assertEqual(cleaned_link, "https://www.youtube.com/Test")
+
+        cleaned_link = Url.get_cleaned_link("https://www.YouTube.com/Test/")
+        self.assertEqual(cleaned_link, "https://www.youtube.com/Test")
 
     def test_get_feeds__youtube(self):
         MockRequestCounter.mock_page_requests = 0

@@ -14,7 +14,7 @@ class UrlLocationTest(FakeInternetTestCase):
         # call tested function
         self.assertTrue(p.is_mainstream())
 
-        p = UrlLocation("http://youtube.com/?v=1234")
+        p = UrlLocation("http://youtube.com/watch?v=1234")
         # call tested function
         self.assertTrue(p.is_mainstream())
 
@@ -22,7 +22,7 @@ class UrlLocationTest(FakeInternetTestCase):
         # call tested function
         self.assertTrue(p.is_mainstream())
 
-        p = UrlLocation("http://www.m.youtube.com/?v=1235")
+        p = UrlLocation("http://www.m.youtube.com/watch?v=1235")
         # call tested function
         self.assertTrue(p.is_mainstream())
 

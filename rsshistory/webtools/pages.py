@@ -49,6 +49,9 @@ class ContentInterface(object):
     def get_url(self):
         return self.url
 
+    def get_canonical_url(self):
+        return self.url
+
     def get_page_rating(self):
         """
         Default behavior
@@ -129,12 +132,16 @@ class ContentInterface(object):
         props["page_rating"] = self.get_page_rating()
         props["date_published"] = self.get_date_published()
         props["tags"] = self.get_tags()
+        props["link_canonical"] = self.get_canonical_url()
 
         return props
 
     def is_cloudflare_protected(self):
         """
         Should not obtain contents by itself
+
+        You'd probably be more successful trying to not trigger 
+        the bot detection in the first place rather than trying to bypass it after the fact. 
         """
         contents = self.contents
 
@@ -435,6 +442,8 @@ class JsonPage(ContentInterface):
         try:
             contents = self.get_contents()
             self.json_obj = json.loads(contents)
+            if self.json_obj != {}:
+                self.json_obj = None
         except ValueError:
             # to be expected
             WebLogger.debug("Invalid json:{}".format(contents))
@@ -1495,6 +1504,16 @@ class HtmlPage(ContentInterface):
             return None
 
         return self.get_meta_field("keywords")
+
+    def get_canonical_url(self):
+        canonical_tag = self.soup.find('link', rel='canonical')
+        if canonical_tag:
+            canonical_link = canonical_tag.get('href')
+            if canonical_link.endswith("/"):
+                return canonical_link[:-1]
+            return canonical_link
+
+        return self.url
 
     def get_og_title(self):
         return self.get_og_field("title")

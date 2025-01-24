@@ -77,11 +77,18 @@ class Url(ContentInterface):
     ):
         """
         @param handler_class Allows to enforce desired handler to be used to process link
+
+        There are various ways url can be specified. For simplicity we cleanup it.
+        I do not like trailing slashes, no google stupid links, etc.
         """
+
         if url:
+            self.request_url = url
+            url = Url.get_cleaned_link(url)
             self.url = url
         else:
             self.url = None
+            self.request_url = None
 
         if page_options:
             self.options = page_options
@@ -361,6 +368,22 @@ class Url(ContentInterface):
         else:
             return self.url
 
+    def get_canonical_url(self):
+        handlers = Url.get_handlers()
+        for handler_class in handlers:
+            handler = handler_class(url = self.url)
+            if handler.is_handled_by():
+                return handler.get_canonical_url()
+
+        return self.url
+
+    def get_urls(self):
+        properties = {}
+        properties["link"] = page_url.url
+        properties["link_request"] = page_url.request_url
+        properties["link_canonical"] = page_url.get_canonical_url()
+        return properties
+
     def get_domain_info(self):
         return DomainCache.get_object(self.url)
 
@@ -545,6 +568,8 @@ class Url(ContentInterface):
 
     def get_properties(self, full=False, include_social=False, check_robots=False):
         basic_properties = super().get_properties()
+        basic_properties["link_request"] = self.request_url
+
         if not full:
             return basic_properties
 

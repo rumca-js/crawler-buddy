@@ -252,6 +252,30 @@ webpage_perfect_contents = """<html lang="pl">
 </html>
 """
 
+webpage_html_canonical_1 = """<html>
+ <head>
+ <link rel="shortcut icon" href="https://www.youtube.com/s/desktop/e4d15d2c/img/favicon.ico" type="image/x-icon"><link rel="icon" href="https://www.youtube.com/s/desktop/e4d15d2c/img/favicon_32x32.png" sizes="32x32"><link rel="icon" href="https://www.youtube.com/s/desktop/e4d15d2c/img/favicon_48x48.png" sizes="48x48"><link rel="icon" href="https://www.youtube.com/s/desktop/e4d15d2c/img/favicon_96x96.png" sizes="96x96"><link rel="icon" href="https://www.youtube.com/s/desktop/e4d15d2c/img/favicon_144x144.png" sizes="144x144">
+ <link rel="canonical" href="https://www.example.com/">
+ <title>YouTube</title>
+
+ </head>
+ <body>
+ page body
+ </body>
+"""
+
+webpage_html_canonical_2 = """<html>
+ <head>
+ <link rel="shortcut icon" href="https://www.youtube.com/s/desktop/e4d15d2c/img/favicon.ico" type="image/x-icon"><link rel="icon" href="https://www.youtube.com/s/desktop/e4d15d2c/img/favicon_32x32.png" sizes="32x32"><link rel="icon" href="https://www.youtube.com/s/desktop/e4d15d2c/img/favicon_48x48.png" sizes="48x48"><link rel="icon" href="https://www.youtube.com/s/desktop/e4d15d2c/img/favicon_96x96.png" sizes="96x96"><link rel="icon" href="https://www.youtube.com/s/desktop/e4d15d2c/img/favicon_144x144.png" sizes="144x144">
+ <link rel="canonical" href="https://www.example.com/">
+ <title>YouTube</title>
+
+ </head>
+ <body>
+ page body
+ </body>
+"""
+
 
 class HtmlPageTest(FakeInternetTestCase):
     def test_default_language(self):
@@ -613,3 +637,22 @@ class HtmlPageTest(FakeInternetTestCase):
             thumbnail,
             "https://google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png",
         )
+
+    def test_get_canonical_url(self):
+        contents = webpage_html_canonical_1
+
+        page = HtmlPage("https://google.com", contents)
+
+        # call tested function
+        link = page.get_canonical_url()
+
+        self.assertEqual(link, "https://www.example.com")
+
+        contents = webpage_html_canonical_2
+
+        page = HtmlPage("https://google.com", contents)
+
+        # call tested function
+        link = page.get_canonical_url()
+
+        self.assertEqual(link, "https://www.example.com")

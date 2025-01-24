@@ -1,3 +1,6 @@
 # TODO
  - entry rules
  - logging level
+ - respect robots
+ - ssl verification
+ - use canonical links

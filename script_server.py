@@ -13,9 +13,9 @@ import subprocess
 import argparse
 import traceback
 from datetime import datetime
-from collections import OrderedDict
 
-from rsshistory import webtools
+from rsshistory import webtools, configuration
+from rsshistory.crawler import Crawler
 from utils import CrawlHistory, PermanentLogger
 
 
@@ -28,35 +28,13 @@ __version__ = "1.0.14"
 app = Flask(__name__)
 
 
-class CrawlerInfo(object):
-
-    def __init__(self):
-        self.queue = OrderedDict()
-        self.crawl_index = 0
-
-    def enter(self, url):
-        self.queue[self.crawl_index] = datetime.now(), url
-
-        if self.get_size() > 100:
-            self.queue = OrderedDict()
-
-        self.crawl_index += 1
-        return self.crawl_index -1
-
-    def leave(self, crawl_index):
-        if crawl_index in self.queue:
-            del self.queue[crawl_index]
-
-    def get_size(self):
-        return len(self.queue)
-
-
 history_length = 200
 # should contain tuples of datetime, URL, properties
 url_history = CrawlHistory(history_length)
 social_history = CrawlHistory(history_length)
-crawler_info = CrawlerInfo()
 webtools.WebLogger.web_logger = PermanentLogger()
+config = configuration.Configuration()
+crawler_main = Crawler()
 
 
 def get_html(body, title="", index=False):
@@ -78,99 +56,6 @@ def get_html(body, title="", index=False):
     return html
 
 
-def get_crawler_config():
-    path = Path("init_browser_setup.json")
-    if path.exists():
-        print("Reading configuration from file")
-        with path.open("r") as file:
-            config = json.load(file)
-            for index, item in enumerate(config):
-                config[index]["crawler"] = webtools.WebConfig.get_crawler_from_string(item["crawler"])
-
-            return config
-    else:
-        print("Reading configuration from webtools")
-        return webtools.WebConfig.get_init_crawler_config()
-
-
-def get_crawler(name = None, crawler_name = None):
-    config = get_crawler_config()
-    for item in config:
-        if name:
-            if name == item["name"]:
-                return item
-        if crawler_name:
-            if crawler_name == item["crawler"].__name__:
-                return item
-
-
-def run_webtools_url(url, crawler_data = None):
-
-    # this is something new
-
-    page_url = webtools.Url(url)
-    options = page_url.get_init_page_options()
-
-    full = crawler_data["settings"]["full"]
-    request_headers = crawler_data["settings"]["headers"]
-    request_ping = crawler_data["settings"]["ping"]
-
-    remote_server = crawler_data["settings"]["remote_server"]
-
-    new_mapping = None
-
-    if "crawler" not in crawler_data and "name" in crawler_data:
-        new_mapping = get_crawler(name = crawler_data["name"])
-    elif "name" not in crawler_data and "crawler" in crawler_data:
-        new_mapping = get_crawler(crawler_name = crawler_data["crawler"])
-    elif "name" not in crawler_data and "crawler" not in crawler_data:
-        pass
-    else:
-        new_mapping = crawler_data
-        new_mapping["crawler"] = webtools.WebConfig.get_crawler_from_string(new_mapping["crawler"])
-
-    if new_mapping:
-        if new_mapping["settings"] is None:
-            new_mapping["settings"] = {}
-        new_mapping["settings"]["remote-server"] = remote_server
-
-        print("Running:{}, with:{}".format(url, new_mapping))
-
-        options.mode_mapping = [new_mapping]
-
-    handler_class = None
-    if "handler_class" in crawler_data:
-        handler_class = Url.get_handler_by_name(crawler_data["handler_class"])
-
-    page_url = webtools.Url(url, page_options=options, handler_class = handler_class)
-
-    if request_headers:
-        # TODO implement
-        headers = page_url.get_headers()
-        all_properties = [
-                { "name" : "Headers",
-                  "data" : headers }
-        ]
-    elif request_ping:
-        # TODO implement
-        headers = page_url.get_headers()
-        all_properties = [
-                { "name" : "Headers",
-                  "data" : headers }
-        ]
-    else:
-        # TODO what if there is exception
-        crawl_index = crawler_info.enter(url)
-
-        response = page_url.get_response()
-
-        all_properties = page_url.get_properties(full=True, include_social=full)
-
-        crawler_info.leave(crawl_index)
-
-    return all_properties
-
-
 @app.route('/')
 def index():
     text = """
@@ -186,6 +71,7 @@ def index():
     <div><a href="/crawlj">Crawlj</a> - crawl a web page</div>
     <div><a href="/socialj">Socialj</a> - dynamic social data JSON</div>
     <div><a href="/proxy">Proxy</a> - makes GET request, then passes you the contents, as is</div>
+    <div><a href="/linkj">Linkj</a> - return link info JSON</div>
     <div><a href="/debugg">Debug</a> - shows debug information</div>
     <p>
     Version:{}
@@ -201,7 +87,7 @@ def info():
     <h1>Crawlers</h1>
     """
 
-    config = get_crawler_config()
+    config = configuration.get_crawler_config()
     for item in config:
         name = item["name"]
         crawler = item["crawler"]
@@ -219,7 +105,7 @@ def infoj():
 
     properties = []
 
-    config = get_crawler_config()
+    config = configuration.get_crawler_config()
     for item in config:
         item["crawler"] = item["crawler"].__name__
 
@@ -233,7 +119,9 @@ def get_entry_html(index, url, timestamp, all_properties):
 
     link = "/findj?index=" + str(index)
 
-    text += """<a href="{}"><h2>{} {}</h2></a>""".format(link, timestamp, url)
+    timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+
+    text += """<a href="{}"><h2>[{}] {}</h2></a>""".format(link, timestamp_str, url)
 
     contents_data = CrawlHistory.read_properties_section("Contents", all_properties)
     if "Contents" in contents_data:
@@ -484,7 +372,7 @@ def get_crawl_properties(url, crawler_data):
         if all_properties:
             return all_properties
 
-    all_properties = run_webtools_url(url, crawler_data)
+    all_properties = crawler_main.run(url, crawler_data)
 
     if all_properties:
         url_history.add( (url, all_properties) )
@@ -714,9 +602,31 @@ def socialj():
     return jsonify(properties)
 
 
+@app.route('/linkj', methods=['GET'])
+def linkj():
+    url = request.args.get('url')
+
+    if not url:
+        return jsonify({
+            "success": False,
+            "error": "No url provided"
+        }), 400
+
+    page_url = webtools.Url(url)
+
+    properties = {}
+    properties["link"] = page_url.url
+    properties["link_request"] = page_url.request_url
+    properties["link_canonical"] = page_url.get_canonical_url()
+
+    # TODO maybe we could add support for canonical links, maybe we could try reading fast, via requests?
+
+    return jsonify(properties)
+
+
 @app.route('/queue', methods=['GET'])
 def queue():
-    size = crawler_info.get_size()
+    size = crawler.crawler_info.get_size()
 
     text = """
     <div>Currently processing:{}</div>
@@ -724,8 +634,8 @@ def queue():
 
     text += "<h1>Queue</h1>"
 
-    for index in crawler_info.queue:
-        timestamp, url = crawler_info.queue[index]
+    for index in crawler.crawler_info.queue:
+        timestamp, url = crawler.crawler_info.queue[index]
 
         text += "<div>{} {} {}</div>".format(index, timestamp, url)
 
