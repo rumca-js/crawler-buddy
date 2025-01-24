@@ -58,9 +58,12 @@ class Crawler(object):
 
             response = page_url.get_response()
 
-            all_properties = page_url.get_properties(full=True, include_social=full)
-
-            self.crawler_info.leave(crawl_index)
+            try:
+                all_properties = page_url.get_properties(full=True, include_social=full)
+                self.crawler_info.leave(crawl_index)
+            except Exception as e:
+                self.crawler_info.leave(crawl_index)
+                raise
 
         return all_properties
 
