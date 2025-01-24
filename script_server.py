@@ -642,6 +642,13 @@ def queue():
     return get_html(text)
 
 
+@app.route('/processes', methods=['GET'])
+def processes():
+    process = subprocess.run(['top', '-b', '-n', '1'], capture_output=True, text=True)
+
+    return get_html(process.stdout)
+
+
 
 class CommandLineParser(object):
     """
