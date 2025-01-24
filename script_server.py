@@ -431,6 +431,7 @@ def crawlj():
         all_properties = get_crawl_properties(url, crawler_data)
     except Exception as E:
         webtools.WebLogger.exc(E, "Exception when calling crawlj")
+        all_properties = None
 
     if not all_properties:
         return jsonify({
