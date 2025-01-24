@@ -427,7 +427,10 @@ def crawlj():
     crawler_data["settings"]["headers"] = False
     crawler_data["settings"]["ping"] = False
 
-    all_properties = get_crawl_properties(url, crawler_data)
+    try:
+        all_properties = get_crawl_properties(url, crawler_data)
+    except Exception as E:
+        webtools.WebLogger.exc(E, "Exception when calling crawlj")
 
     if not all_properties:
         return jsonify({
