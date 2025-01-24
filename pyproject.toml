@@ -25,6 +25,7 @@ pytz = "^2024.2"
 
 #  use things below if you want to use selenium
 selenium="*"
+psutil="*"
 
 chardet = "^5.2.0"
 # psycopg2 = "*"

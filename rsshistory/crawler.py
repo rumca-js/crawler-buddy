@@ -1,4 +1,5 @@
 import subprocess
+import psutil
 from datetime import datetime
 from collections import OrderedDict
 from rsshistory import webtools
@@ -110,33 +111,22 @@ class Crawler(object):
         return page_url
 
     def kill_chrom_processes(self):
-        try:
-            # Run the `killall -9 chrom*` command
-            subprocess.run(["killall", "-9", "chrom*"], check=True)
-            print("All chrom* processes have been killed.")
-        except subprocess.CalledProcessError as e:
-            print(f"Failed to kill processes: {e}")
-        except FileNotFoundError:
-            print("The 'killall' command is not available on this system.")
+        """Kill all processes whose names start with 'chrom'."""
+        for proc in psutil.process_iter(['pid', 'name']):
+            try:
+                if proc.info['name'] and proc.info['name'].lower().startswith('chrom'):
+                    proc.kill()  # Kill the process
+                    webtools.WebLogger.error(f"Killed process: {proc.info['name']} (PID: {proc.info['pid']})")
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
+                webtools.WebLogger.error(f"Could not kill process {proc.info.get('name', 'unknown')}: {e}")
 
     def count_chrom_processes(self):
-        try:
-            # Use subprocess to run `htop` or directly parse `ps aux` output
-            result = subprocess.run(
-                ["ps", "-e", "-o", "comm"],  # Get command names of running processes
-                text=True,
-                capture_output=True,
-                check=True
-            )
-            
-            # Count lines that match 'chrom*'
-            chrom_processes = [
-                line for line in result.stdout.splitlines() if line.startswith("chrom")
-            ]
-            
-            print(f"Number of running chrom* processes: {len(chrom_processes)}")
-            return len(chrom_processes)
-        
-        except subprocess.CalledProcessError as e:
-            print(f"Error while running ps command: {e}")
-            return 0
+        """Count the number of running processes whose names start with 'chrom'."""
+        count = 0
+        for proc in psutil.process_iter(['pid', 'name']):
+            try:
+                if proc.info['name'] and proc.info['name'].lower().startswith('chrom'):
+                    count += 1
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                continue  # Skip processes we can't access
+        return count
