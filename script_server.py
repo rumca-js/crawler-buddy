@@ -22,7 +22,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.14"
+__version__ = "1.0.15"
 
 
 app = Flask(__name__)
@@ -213,7 +213,7 @@ def debugg():
         if detail_text:
             text += "<div>{}</div>".format(detail_text)
 
-    return get_html(text)
+    return get_html(text, title="Debug")
 
 
 @app.route('/set', methods=['POST'])
@@ -282,7 +282,7 @@ def find():
             </form>
             '''
 
-        return get_html(form_html)
+        return get_html(form_html, title="Find")
     else:
         things = url_history.find(url = url, crawler_name = name, crawler = crawler)
 
@@ -293,7 +293,7 @@ def find():
 
         entry_text = get_entry_html(index, url, timestamp, all_properties)
 
-        return get_html(entry_text)
+        return get_html(entry_text, title=url)
 
 
 @app.route('/findj', methods=['GET'])
@@ -401,7 +401,7 @@ def crawl():
         </form>
         '''
 
-    return get_html(form_html)
+    return get_html(form_html, "Crawl")
 
 
 @app.route('/crawlj', methods=['GET'])
@@ -643,7 +643,7 @@ def queue():
 
         text += "<div>{} {} {}</div>".format(index, timestamp, url)
 
-    return get_html(text)
+    return get_html(text, title="Queue")
 
 
 @app.route('/processes', methods=['GET'])
@@ -658,7 +658,7 @@ def processes():
     for line in lines:
         text += "<div>{}</div>".format(line)
 
-    return get_html(text)
+    return get_html(text, title="Processes")
 
 
 
