@@ -14,7 +14,8 @@ import argparse
 import traceback
 from datetime import datetime
 
-from rsshistory import webtools, configuration
+from rsshistory import webtools
+from rsshistory.configuration import Configuration
 from rsshistory.crawler import Crawler
 from utils import CrawlHistory, PermanentLogger
 
@@ -22,7 +23,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.20"
+__version__ = "1.0.21"
 
 
 app = Flask(__name__)
@@ -33,7 +34,7 @@ history_length = 200
 url_history = CrawlHistory(history_length)
 social_history = CrawlHistory(history_length)
 webtools.WebLogger.web_logger = PermanentLogger()
-config = configuration.Configuration()
+config = Configuration()
 crawler_main = Crawler()
 
 
@@ -658,7 +659,10 @@ def processes():
 
     lines = out.split("\n")
 
-    text = "<h1>Processes</h1>"
+    text = "<h1>Chrome processes</h1>"
+    text += "<div>Number of chrom processes {}</div>".format(crawler_main.count_chrom_processes())
+
+    text += "<h1>Processes</h1>"
 
     for line in lines:
         text += "<div>{}</div>".format(line)

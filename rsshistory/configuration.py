@@ -12,9 +12,16 @@ class Configuration(object):
         self.data["ssl_verify"] = False             # TODO use that
         self.data["use_canonical_links"] = False    # TODO use that
         self.data["prefer_non_www"] = False         # TODO use that
+        self.data["debug"] = True         # TODO use that
 
         self.crawler_config = None
         self.read_crawler_config()
+
+    def is_set(self, name):
+        if name in self.data:
+            return self.data[name]
+
+        return False
 
     def read_crawler_config(self):
         path = Path("init_browser_setup.json")
