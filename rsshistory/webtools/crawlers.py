@@ -37,6 +37,12 @@ from .ipc import (
 )
 
 
+class WebToolsTimeoutException(Exception):
+    """Custom exception to indicate a request timeout."""
+    def __init__(self, message="The request has timed out."):
+        super().__init__(message)
+
+
 
 class CrawlerInterface(object):
     def __init__(self, request, response_file=None, settings=None):
@@ -283,7 +289,7 @@ class RequestsCrawler(CrawlerInterface):
             )
             self.response.add_error("Url:{} Page timeout".format(self.request.url))
 
-        except TimeoutException:
+        except WebToolsTimeoutException:
             self.response = PageResponseObject(
                 self.request.url,
                 text=None,
@@ -383,7 +389,7 @@ class RequestsCrawler(CrawlerInterface):
             thread.join(timeout_s)
             
             if thread.is_alive():
-                raise TimeoutException("Request timed out")
+                raise WebToolsTimeoutException("Request timed out")
             if result['exception']:
                 raise result['exception']
             return result['response']
