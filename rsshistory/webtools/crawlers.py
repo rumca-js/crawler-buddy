@@ -891,6 +891,17 @@ class SeleniumChromeFull(SeleniumDriver):
             return None
 
     def run(self):
+        selenium_feataure_enabled = True
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.chrome.service import Service
+            from selenium.common.exceptions import TimeoutException
+
+            from selenium.webdriver.support.ui import WebDriverWait
+            from selenium.webdriver.support import expected_conditions as EC
+        except Exception as E:
+            print(str(E))
+            selenium_feataure_enabled = False
         """
         To obtain RSS page you have to run real, full blown browser.
 
@@ -1014,6 +1025,17 @@ class SeleniumUndetected(SeleniumDriver):
             return
 
     def run(self):
+        selenium_feataure_enabled = True
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.chrome.service import Service
+            from selenium.common.exceptions import TimeoutException
+
+            from selenium.webdriver.support.ui import WebDriverWait
+            from selenium.webdriver.support import expected_conditions as EC
+        except Exception as E:
+            print(str(E))
+            selenium_feataure_enabled = False
         """
         To obtain RSS page you have to run real, full blown browser.
 
