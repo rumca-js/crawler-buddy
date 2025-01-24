@@ -1,3 +1,4 @@
+import subprocess
 from datetime import datetime
 from collections import OrderedDict
 from rsshistory import webtools
@@ -65,6 +66,10 @@ class Crawler(object):
                 self.crawler_info.leave(crawl_index)
                 raise
 
+        if self.count_chrom_processes() > 30:
+            webtools.WebLogger.error("Too many chrome processes")
+            self.kill_chrom_processes()
+
         return all_properties
 
     def get_page_url(self, url, crawler_data):
@@ -103,3 +108,35 @@ class Crawler(object):
         page_url = webtools.Url(url, page_options=options, handler_class = handler_class)
 
         return page_url
+
+    def kill_chrom_processes(self):
+        try:
+            # Run the `killall -9 chrom*` command
+            subprocess.run(["killall", "-9", "chrom*"], check=True)
+            print("All chrom* processes have been killed.")
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to kill processes: {e}")
+        except FileNotFoundError:
+            print("The 'killall' command is not available on this system.")
+
+    def count_chrom_processes(self):
+        try:
+            # Use subprocess to run `htop` or directly parse `ps aux` output
+            result = subprocess.run(
+                ["ps", "-e", "-o", "comm"],  # Get command names of running processes
+                text=True,
+                capture_output=True,
+                check=True
+            )
+            
+            # Count lines that match 'chrom*'
+            chrom_processes = [
+                line for line in result.stdout.splitlines() if line.startswith("chrom")
+            ]
+            
+            print(f"Number of running chrom* processes: {len(chrom_processes)}")
+            return len(chrom_processes)
+        
+        except subprocess.CalledProcessError as e:
+            print(f"Error while running ps command: {e}")
+            return 0
