@@ -22,7 +22,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.19"
+__version__ = "1.0.20"
 
 
 app = Flask(__name__)

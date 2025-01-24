@@ -866,7 +866,7 @@ class SeleniumChromeFull(SeleniumDriver):
             self.display = Display(visible=0, size=(800, 600))
             self.display.start()
         except Exception as E:
-            print("Str: {}".format(E))
+            WebLogger.exc(E, "Problems with creating display")
 
         options = webdriver.ChromeOptions()
         options.add_argument("--no-sandbox")
@@ -992,7 +992,10 @@ class SeleniumChromeFull(SeleniumDriver):
         super().close()
 
         if self.display:
-            self.display.stop()
+            try:
+                self.display.stop()
+            except Exception as E:
+                WebLogger.exc(E, "Problems with closing display")
 
 
 class SeleniumUndetected(SeleniumDriver):
