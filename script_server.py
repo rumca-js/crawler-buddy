@@ -646,7 +646,15 @@ def queue():
 def processes():
     process = subprocess.run(['top', '-b', '-n', '1'], capture_output=True, text=True)
 
-    return get_html(process.stdout)
+    out = process.stdout
+
+    lines = out.split("\n")
+    text = ""
+
+    for line in lines:
+        text += "<div>{}</div>".format(line)
+
+    return get_html(text)
 
 
 
