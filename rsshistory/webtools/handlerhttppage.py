@@ -180,7 +180,8 @@ class HttpRequestBuilder(object):
 
             crawler.run()
             response = crawler.get_response()
-            response.set_crawler(crawler_data)
+            if response:
+                response.set_crawler(crawler_data)
             crawler.close()
 
             WebLogger.debug(
