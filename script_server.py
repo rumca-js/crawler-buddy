@@ -152,6 +152,7 @@ def get_entry_html(index, url, timestamp, all_properties):
         content_length = ""
         content_type = ""
         crawler_name = ""
+        crawler_crawler = ""
 
     text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length:{} Crawler name:{} Crawler:{}</div>".format(status_code, charset, content_type, content_length, crawler_name, crawler_crawler)
 
