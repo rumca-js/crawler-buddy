@@ -867,6 +867,7 @@ class SeleniumChromeFull(SeleniumDriver):
             self.display.start()
         except Exception as E:
             WebLogger.exc(E, "Problems with creating display")
+            return
 
         options = webdriver.ChromeOptions()
         options.add_argument("--no-sandbox")
