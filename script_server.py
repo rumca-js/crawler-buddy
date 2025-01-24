@@ -201,7 +201,10 @@ def historyj():
 
 @app.route('/debugg')
 def debugg():
-    text = ""
+    text = """
+    <h1>Debug</h1>
+    """
+
     for items in reversed(webtools.WebLogger.web_logger.permanent_data):
         level = items[0]
         timestamp = items[1]
@@ -654,7 +657,8 @@ def processes():
     out = process.stdout
 
     lines = out.split("\n")
-    text = ""
+
+    text = "<h1>Processes</h1>"
 
     for line in lines:
         text += "<div>{}</div>".format(line)
