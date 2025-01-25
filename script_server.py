@@ -23,7 +23,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.23"
+__version__ = "1.0.24"
 
 
 app = Flask(__name__)
@@ -644,9 +644,12 @@ def queue():
     text += "<h1>Queue</h1>"
 
     for index in crawler_main.crawler_info.queue:
-        timestamp, url = crawler_main.crawler_info.queue[index]
+        things = crawler_main.crawler_info.queue[index]
+        timestamp, url, crawler_data = things
 
-        text += "<div>{} {} {}</div>".format(index, timestamp, url)
+        timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+
+        text += "<div>{} {} {} {}</div>".format(index, timestamp_str, url, crawler_data)
 
     return get_html(text, title="Queue")
 

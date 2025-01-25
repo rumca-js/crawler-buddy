@@ -12,8 +12,8 @@ class CrawlerInfo(object):
         self.queue = OrderedDict()
         self.crawl_index = 0
 
-    def enter(self, url):
-        self.queue[self.crawl_index] = datetime.now(), url
+    def enter(self, url, crawler_data = None):
+        self.queue[self.crawl_index] = datetime.now(), url, crawler_data
 
         if self.get_size() > 100:
             self.queue = OrderedDict()
@@ -56,7 +56,7 @@ class Crawler(object):
             ]
         else:
             # TODO what if there is exception
-            crawl_index = self.crawler_info.enter(url)
+            crawl_index = self.crawler_info.enter(url, crawler_data)
 
             try:
                 response = page_url.get_response()
