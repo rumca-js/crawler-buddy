@@ -4,6 +4,7 @@ these scripts will not work in case of multithreaded app
 """
 
 import os
+import psutil
 from pathlib import Path
 
 from urllib3.exceptions import InsecureRequestWarning
@@ -29,7 +30,7 @@ class WebConfig(object):
 
     script_operating_dir = None
     script_responses_directory = Path("storage")
-
+    display = None
     browser_mapping = {}
 
     def init():
@@ -122,6 +123,14 @@ class WebConfig(object):
         mapping.append(WebConfig.get_default_browser_setup(StealthRequestsCrawler))
 
         return mapping
+
+    def get_default_crawler(url):
+        config = WebConfig.get_init_crawler_config()
+        if config:
+            crawler_data = dict(config[0])
+            if "crawler" in crawler_data:
+                crawler_data["crawler"] = crawler_data["crawler"](url =url)
+                return crawler_data
 
     def get_default_browser_setup(browser, enabled=True):
         return {
@@ -237,3 +246,50 @@ class WebConfig(object):
 
     def disable_ssl_warnings():
         disable_warnings(InsecureRequestWarning)
+
+    def kill_chrom_processes():
+        """Kill all processes whose names start with 'chrom'."""
+        for proc in psutil.process_iter(['pid', 'name']):
+            try:
+                if proc.info['name'] and proc.info['name'].lower().startswith('chrom'):
+                    proc.kill()  # Kill the process
+                    webtools.WebLogger.error(f"Killed process: {proc.info['name']} (PID: {proc.info['pid']})")
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
+                webtools.WebLogger.error(f"Could not kill process {proc.info.get('name', 'unknown')}: {e}")
+
+    def count_chrom_processes():
+        """Count the number of running processes whose names start with 'chrom'."""
+        count = 0
+        for proc in psutil.process_iter(['pid', 'name']):
+            try:
+                if proc.info['name'] and proc.info['name'].lower().startswith('chrom'):
+                    count += 1
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                continue  # Skip processes we can't access
+        return count
+
+    def start_display():
+        try:
+            from pyvirtualdisplay import Display
+
+            # Check if WebConfig.display is already initialized and active
+            if isinstance(getattr(WebConfig, 'display', None), Display) and WebConfig.display.is_alive():
+                return  # Do nothing if already initialized and active
+
+            # Requires xvfb
+            os.environ["DISPLAY"] = ":10.0"
+
+            # Create and start the Display
+            WebConfig.display = Display(visible=0, size=(800, 600))
+            WebConfig.display.start()
+        except Exception as E:
+            WebLogger.error(f"Problems with creating display: {str(E)}")
+            return
+
+    def stop_display(self):
+        try:
+            WebConfig.display.stop()
+            WebConfig.display = None
+        except Exception as E:
+            WebLogger.error(f"Problems with creating display")
+            return

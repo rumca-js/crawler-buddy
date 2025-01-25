@@ -28,3 +28,10 @@ class WebConfigTest(FakeInternetTestCase):
 
         crawler = WebConfig.get_crawler_from_string("StealthRequestsCrawler")
         self.assertTrue(crawler)
+
+    def test_get_default_crawler(self):
+        config = WebConfig.get_default_crawler("https://test.com")
+
+        self.assertIn("name", config)
+        self.assertIn("crawler", config)
+        self.assertIn("settings", config)

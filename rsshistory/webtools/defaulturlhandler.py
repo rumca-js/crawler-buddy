@@ -8,10 +8,10 @@ class DefaultUrlHandler(HandlerInterface):
     This handler works as HTML page handler, mostly
     """
 
-    def __init__(self, url=None, contents=None, page_options=None, url_builder=None):
+    def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         super().__init__(
             url,
-            page_options = page_options,
+            settings = settings,
             url_builder = url_builder
         )
 
@@ -23,8 +23,11 @@ class DefaultUrlHandler(HandlerInterface):
         if self.response:
             return self.response
 
+        settings = {}
+        settings["handler_class"] = HttpPageHandler
+
         # now call url with those options
-        self.handler = self.url_builder(self.url, handler_class=HttpPageHandler)
+        self.handler = self.url_builder(self.url, settings=settings)
         self.response = self.handler.get_response()
 
         if not self.response or not self.response.is_valid():
@@ -81,8 +84,11 @@ class DefaultChannelHandler(DefaultUrlHandler):
 
         feed_url = feeds[0]
 
+        settings = {}
+        settings["handler_class"] = HttpPageHandler
+
         # now call url with those options
-        self.handler = Url(feed_url, handler_class=HttpPageHandler)
+        self.handler = Url(feed_url, settings=settings)
         self.response = self.handler.get_response()
 
         if not self.response or not self.response.is_valid():

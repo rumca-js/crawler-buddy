@@ -66,15 +66,14 @@ class Crawler(object):
                 self.crawler_info.leave(crawl_index)
                 raise
 
-        if self.count_chrom_processes() > 30:
+        if webtools.WebConfig.count_chrom_processes() > 30:
             webtools.WebLogger.error("Too many chrome processes")
-            self.kill_chrom_processes()
+            webtools.WebConfig.kill_chrom_processes()
 
         return all_properties
 
     def get_page_url(self, url, crawler_data):
         page_url = webtools.Url(url)
-        options = page_url.get_init_page_options()
 
         remote_server = crawler_data["settings"]["remote_server"]
 
@@ -90,7 +89,10 @@ class Crawler(object):
             pass
         else:
             new_mapping = crawler_data
-            new_mapping["crawler"] = webtools.WebConfig.get_crawler_from_string(new_mapping["crawler"])
+            crawler = webtools.WebConfig.get_crawler_from_string(new_mapping["crawler"])
+            new_mapping["crawler"] = crawler
+
+        new_mapping["crawler"] = new_mapping["crawler"](url=url)
 
         if new_mapping:
             if new_mapping["settings"] is None:
@@ -99,55 +101,10 @@ class Crawler(object):
 
             print("Running:{}, with:{}".format(url, new_mapping))
 
-            options.mode_mapping = [new_mapping]
-
-        handler_class = None
         if "handler_class" in crawler_data:
-            handler_class = Url.get_handler_by_name(crawler_data["handler_class"])
+            new_mapping["handler_class"] = Url.get_handler_by_name(crawler_data["handler_class"])
 
-        page_url = webtools.Url(url, page_options=options, handler_class = handler_class)
+        page_url = webtools.Url(url, settings=new_mapping)
 
         return page_url
 
-    def kill_chrom_processes(self):
-        """Kill all processes whose names start with 'chrom'."""
-        for proc in psutil.process_iter(['pid', 'name']):
-            try:
-                if proc.info['name'] and proc.info['name'].lower().startswith('chrom'):
-                    proc.kill()  # Kill the process
-                    webtools.WebLogger.error(f"Killed process: {proc.info['name']} (PID: {proc.info['pid']})")
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
-                webtools.WebLogger.error(f"Could not kill process {proc.info.get('name', 'unknown')}: {e}")
-
-    def count_chrom_processes(self):
-        """Count the number of running processes whose names start with 'chrom'."""
-        count = 0
-        for proc in psutil.process_iter(['pid', 'name']):
-            try:
-                if proc.info['name'] and proc.info['name'].lower().startswith('chrom'):
-                    count += 1
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                continue  # Skip processes we can't access
-        return count
-
-    def start_display(self):
-        try:
-            # requires xvfb
-            import os
-
-            os.environ["DISPLAY"] = ":10.0"
-            from pyvirtualdisplay import Display
-
-            self.display = Display(visible=0, size=(800, 600))
-            self.display.start()
-        except Exception as E:
-            webtools.WebLogger.error(f"Problems with creating display")
-            return
-
-    def stop_display(self):
-        try:
-            self.display.stop()
-            self.display = None
-        except Exception as E:
-            webtools.WebLogger.error(f"Problems with creating display")
-            return

@@ -5,11 +5,11 @@ from .handlerhttppage import HttpPageHandler
 
 class OdyseeChannelHandler(DefaultChannelHandler):
 
-    def __init__(self, url=None, contents=None, page_options=None, url_builder=None):
+    def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         super().__init__(
             url,
             contents=contents,
-            page_options=page_options,
+            settings=settings,
             url_builder=url_builder,
         )
 

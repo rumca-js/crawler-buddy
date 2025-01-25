@@ -23,7 +23,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.25"
+__version__ = "1.0.26"
 
 
 app = Flask(__name__)
@@ -34,7 +34,7 @@ history_length = 200
 url_history = CrawlHistory(history_length)
 social_history = CrawlHistory(history_length)
 webtools.WebLogger.web_logger = PermanentLogger()
-config = Configuration()
+configuration = Configuration()
 crawler_main = Crawler()
 
 
@@ -432,6 +432,7 @@ def crawlj():
     crawler_data["settings"]["ping"] = False
 
     try:
+        webtools.WebConfig.start_display()
         all_properties = get_crawl_properties(url, crawler_data)
     except Exception as E:
         webtools.WebLogger.exc(E, "Exception when calling crawlj")
@@ -705,8 +706,8 @@ if __name__ == '__main__':
 
     socket.setdefaulttimeout(40)
 
-    crawler_main.start_display()
+    webtools.WebConfig.start_display()
 
     app.run(debug=True, host=p.args.host, port=p.args.port, threaded=True)
 
-    crawler_main.stop_display()
+    webtools.WebConfig.stop_display()

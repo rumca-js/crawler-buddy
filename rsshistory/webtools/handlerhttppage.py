@@ -43,29 +43,22 @@ class HttpRequestBuilder(object):
 
     # use headers from https://www.supermonitoring.com/blog/check-browser-http-headers/
 
-    def __init__(self, url=None, options=None, page_object=None, request=None, url_builder=None):
+    def __init__(self, url=None, settings=None, request=None, url_builder=None):
         """
         @param url URL
         @param contents URL page contents
         @param use_selenium decides if selenium is used
-        @param page_object All settings are used from page object, with page contents
         """
         self.request = request
         self.response = None
         self.timeout_s = 10
 
-        if page_object:
-            self.url = page_object.url
-            self.options = page_object.options
-            self.dead = page_object.dead
-            self.robots_contents = page_object.robots_contents
-        else:
-            self.url = url
-            self.options = options
-            self.robots_contents = None
+        self.url = url
+        self.settings = settings
+        self.robots_contents = None
 
-            # Flag to not retry same contents requests for things we already know are dead
-            self.dead = False
+        # Flag to not retry same contents requests for things we already know are dead
+        self.dead = False
 
         if self.url is None:
             stack_lines = traceback.format_stack()
@@ -80,9 +73,6 @@ class HttpRequestBuilder(object):
             self.protocol = "http"
         else:
             self.protocol = "https"
-
-        if not self.options:
-            self.options = PageOptions()
 
         self.user_agent = None
         if request:
@@ -137,59 +127,46 @@ class HttpRequestBuilder(object):
 
         First configured thing provides return value
         """
-        if self.options:
-            request.ssl_verify = self.options.ssl_verify
-        if self.options:
-            request.ping = self.options.ping
+        if self.settings and "ssl_verify" in self.settings:
+            request.ssl_verify = self.settings["ssl_verify"]
+        if self.settings and "ping" in self.settings:
+            request.ping = self.settings["ping"]
 
-        if self.options:
-            mode_mapping = self.options.mode_mapping
+        crawler_data = self.settings
+
+        if crawler_data and "timeout_s" in self.settings:
+            request.timeout_s = self.settings["timeout_s"]
         else:
-            mode_mapping = WebConfig.get_init_crawler_config()
+            WebLogger.warning("timeout_s was not specified when calling")
+            request.timeout_s = 20
 
-        request.timeout_s = self.options.get_timeout(request.timeout_s)
+        if not crawler_data:
+            return
 
-        if not mode_mapping or len(mode_mapping) == 0:
-            self.dead = True
-            WebLogger.error(
-                "Url:{} Could not identify method of page capture".format(request.url)
-            )
-            WebLogger.error("Could not identify method of page capture")
+        if "crawler" not in crawler_data:
+            WebLogger.error("Url:{} No crawler in crawler data".format(request.url))
+            return
 
-            self.response = PageResponseObject(
-                request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-                request_url=request.url,
-            )
-            return self.response
+        crawler = crawler_data["crawler"]
 
-        for crawler_data in mode_mapping:
-            crawler = WebConfig.get_crawler_from_mapping(request, crawler_data)
-            if not crawler:
-                WebLogger.debug(
-                    "Cannot find crawler in WebConfig:{}".format(
-                        crawler_data["crawler"]
-                    )
-                )
-                continue
+        WebLogger.debug(
+            "Url:{}: Running crawler {}\n{}".format(request.url, type(crawler), crawler_data)
+        )
 
-            WebLogger.debug(
-                "Url:{}: Running crawler {}\n{}".format(request.url, type(crawler), crawler_data)
-            )
+        crawler.set_settings(crawler_data)
 
-            crawler.run()
-            response = crawler.get_response()
-            if response:
-                response.set_crawler(crawler_data)
-            crawler.close()
+        crawler.run()
+        response = crawler.get_response()
+        if response:
+            response.set_crawler(crawler_data)
+        crawler.close()
 
-            WebLogger.debug(
-                "Url:{}: Running crawler {}\n{} DONE".format(request.url, type(crawler), crawler_data)
-            )
+        WebLogger.debug(
+            "Url:{}: Running crawler {}\n{} DONE".format(request.url, type(crawler), crawler_data)
+        )
 
-            if response:
-                return response
+        if response:
+            return response
 
         self.dead = True
         WebLogger.debug(
@@ -319,11 +296,14 @@ class HttpRequestBuilder(object):
 class HttpPageHandler(HandlerInterface):
     user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"
 
-    def __init__(self, url=None, contents=None, page_options=None, url_builder=None):
-        super().__init__(url=url, contents=contents, page_options=page_options, url_builder =url_builder)
+    def __init__(self, url=None, contents=None, settings=None, url_builder=None):
+        super().__init__(url=url, contents=contents, settings=settings, url_builder =url_builder)
         self.p = None
         self.response = None
-        self.options = page_options
+        self.settings = settings
+        if not self.settings:
+            self.settings = WebConfig.get_default_crawler(self.url)
+
         self.url_builder = url_builder
 
     def is_handled_by(self):
@@ -360,45 +340,13 @@ class HttpPageHandler(HandlerInterface):
             return self.response
 
     def get_response_implementation(self):
-        self.get_response_once()
-
-        if not self.options:
-            WebLogger.error("No options passed")
-            return
-
-        original_mapping = self.options.mode_mapping
-
-        if len(self.options.mode_mapping) < 2:
-            return
-
-
-        if (
-            self.options.use_browser_promotions
-            and self.is_advanced_processing_possible()
-        ):
-            # we warn, because if that happens too often, it is easy just to
-            # define EntryRule for that domain
-            WebLogger.error(
-                "Url:{}. Retrying with different browser {}".format(
-                    self.url,
-                    self.options.mode_mapping[0],
-                )
-            )
-
-            self.options.mode_mapping = self.options.mode_mapping[1:]
-
-            self.get_response_once()
-
-            self.options.mode_mapping = original_mapping
-
-    def get_response_once(self):
         url = self.url
 
         dap = UrlLocation(url)
 
         if url.startswith("https") or url.startswith("http"):
             if not dap.is_media():
-                builder = HttpRequestBuilder(url=url, options=self.options)
+                builder = HttpRequestBuilder(url=url, settings=self.settings)
                 self.response = builder.get_response()
 
                 if not self.response:
@@ -428,42 +376,6 @@ class HttpPageHandler(HandlerInterface):
         url = self.url
 
         return PageFactory.get(self.response, contents)
-
-    def is_advanced_processing_possible(self):
-        """
-        If we do not have data, but we think we can do better
-        """
-        if self.options.mode_mapping is None:
-            return False
-
-        if not self.response:
-            return True
-
-        # content is defined, and it is not support
-        content_type = self.response.get_content_type()
-        if content_type and not self.response.is_content_type_supported():
-            return False
-
-        status_code = self.response.get_status_code()
-        if status_code == HTTP_STATUS_CODE_CONNECTION_ERROR:
-            return False
-
-        if status_code < 200 or status_code > 404:
-            return True
-
-        # if not self.p:
-        #    return True
-
-        # if not self.p.is_valid():
-        #    # if we have response, but it is invalid, we may try obtaining contents with more advanced processing
-        #    return True
-
-        text = self.response.get_text()
-
-        if text == "" or text is None:
-            return True
-
-        return False
 
     def get_title(self):
         if not self.p:
@@ -624,5 +536,5 @@ class HttpPageHandler(HandlerInterface):
         return result
 
     def ping(self, timeout_s = 120):
-        builder = HttpRequestBuilder(url=self.url, options=self.options)
+        builder = HttpRequestBuilder(url=self.url, settings=self.settings)
         return builder.ping()

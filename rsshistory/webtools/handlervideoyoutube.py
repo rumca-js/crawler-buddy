@@ -10,8 +10,8 @@ from .defaulturlhandler import DefaultUrlHandler
 
 
 class YouTubeVideoHandler(DefaultUrlHandler):
-    def __init__(self, url=None, contents=None, page_options=None, url_builder=None):
-        super().__init__(url, contents=contents, page_options=page_options, url_builder=url_builder)
+    def __init__(self, url=None, contents=None, settings=None, url_builder=None):
+        super().__init__(url, contents=contents, settings=settings, url_builder=url_builder)
 
         self.url = self.input2url(url)
         self.code = self.input2code(url)
@@ -89,8 +89,8 @@ class YouTubeVideoHandler(DefaultUrlHandler):
 
 
 class YouTubeHtmlHandler(HtmlPage, YouTubeVideoHandler):
-    def __init__(self, url, page_options=None):
-        super().__init__(url, page_options)
+    def __init__(self, url, settings=None):
+        super().__init__(url, settings=settings)
 
     def is_valid(self):
         """
@@ -129,11 +129,11 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
     TODO Use if above in youtube.h
     """
 
-    def __init__(self, url, page_options=None, url_builder=None):
+    def __init__(self, url, settings=None, url_builder=None):
         """
         TODO We should , most probably call the parnet constructor
         """
-        super().__init__(url=url, page_options=page_options, url_builder=url_builder)
+        super().__init__(url=url, settings=settings, url_builder=url_builder)
 
         self.yt_text = None
         self.yt_ob = None

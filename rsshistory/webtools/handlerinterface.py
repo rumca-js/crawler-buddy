@@ -10,7 +10,7 @@ class HandlerInterface(DefaultContentPage):
     this allows us to provide interface
     """
 
-    def __init__(self, url=None, contents=None, page_options=None, url_builder=None):
+    def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         super().__init__(
             url,
             contents=contents,
@@ -19,7 +19,7 @@ class HandlerInterface(DefaultContentPage):
         self.response = None
         self.dead = None
         self.code = None  # social media handle, ID of channel, etc.
-        self.options = page_options
+        self.settings = settings
         self.handler = None  # for example rss UrlHandler
         self.url_builder = url_builder
 

@@ -12,14 +12,14 @@ class YouTubeChannelHandler(DefaultChannelHandler):
     Natively since we inherit RssPage, the contents should be RssPage
     """
 
-    def __init__(self, url=None, contents=None, page_options=None, url_builder=None):
+    def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         self.html_url = None  # channel html page contains useful info
         self.rss_url = None
 
         super().__init__(
             url,
             contents=contents,
-            page_options=page_options,
+            settings=settings,
             url_builder=url_builder,
         )
 
@@ -207,7 +207,13 @@ class YouTubeChannelHandler(DefaultChannelHandler):
         if not feed:
             return
 
-        self.rss_url = self.url_builder(feed, handler_class=HttpPageHandler)
+        if self.settings:
+            settings = dict(self.settings)
+        else:
+            settings = {}
+        settings["handler_class"] = HttpPageHandler
+
+        self.rss_url = self.url_builder(feed, settings=settings)
         self.rss_url.get_response()
         return self.rss_url
 

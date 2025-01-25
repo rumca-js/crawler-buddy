@@ -27,6 +27,7 @@ from .webtools import (
     URL_TYPE_FONT,
     URL_TYPE_UNKNOWN,
 )
+from .webconfig import WebConfig
 from .urllocation import UrlLocation
 from .pages import (
     ContentInterface,
@@ -73,7 +74,7 @@ class Url(ContentInterface):
             ]
 
     def __init__(
-        self, url=None, page_options=None, handler_class=None, url_builder=None
+        self, url=None, settings=None, url_builder=None
     ):
         """
         @param handler_class Allows to enforce desired handler to be used to process link
@@ -90,19 +91,30 @@ class Url(ContentInterface):
             self.url = None
             self.request_url = None
 
-        if page_options:
-            self.options = page_options
-        else:
-            self.options = self.get_init_page_options(page_options)
+        self.settings = settings
+        self.handler = None
 
-        if handler_class:
-            self.handler = handler_class(url, page_options=self.options)
-        else:
-            self.handler = None
+        if not self.settings:
+            self.settings = WebConfig.get_default_crawler(self.url)
+
+        if "crawler" not in self.settings:
+            settings = WebConfig.get_default_crawler(self.url)
+
+            self.settings["name"] = settings["name"]
+            self.settings["crawler"] = settings["crawler"]
+            self.settings["settings"] = settings["settings"]
+
+        if self.settings and "handler_class" in self.settings:
+            handler_class = self.settings["handler_class"]
+            self.handler = handler_class(self.url, settings = self.settings, url_builder=url_builder)
 
         self.response = None
-        if not url_builder:
+        self.url_builder = url_builder
+        if not self.url_builder:
             self.url_builder = Url
+
+    def get_init_settings(self):
+        return WebConfig.get_default_crawler(self.url)
 
     def get_handlers():
         return Url.handlers
@@ -222,20 +234,6 @@ class Url(ContentInterface):
         handler = self.get_handler()
         return handler.ping(timeout_s=timeout_s)
 
-    def get_init_page_options(self, initial_options=None):
-        from .webconfig import WebConfig
-
-        options = PageOptions()
-
-        if initial_options:
-            options.mode_mapping = initial_options.mode_mapping
-        else:
-            options.mode_mapping = WebConfig.get_init_crawler_config()
-
-        self.override_mapping(options)
-
-        return options
-
     def get_handler_implementation(self):
         url = self.url
         if not url:
@@ -249,13 +247,13 @@ class Url(ContentInterface):
 
         handlers = Url.get_handlers()
         for handler in handlers:
-            h = handler(url=self.url, page_options=self.options, url_builder=self.url_builder)
+            h = handler(url=self.url, settings=self.settings, url_builder=self.url_builder)
             if h.is_handled_by():
                 self.url = h.url
                 return h
 
         if url.startswith("https") or url.startswith("http"):
-            return HttpPageHandler(url, page_options=self.options, url_builder=self.url_builder)
+            return HttpPageHandler(url, settings=self.settings, url_builder=self.url_builder)
         elif url.startswith("smb") or url.startswith("ftp"):
             # not yet supported
             return DefaultContentPage(url)
@@ -273,13 +271,8 @@ class Url(ContentInterface):
         else:
             p = UrlLocation(self.url)
             u = self.url_builder(p.get_domain())
-            u.set_config(self.options)
+            u.set_config(self.settings)
             return u
-
-    def set_config(self, otheroptions):
-        if self.options:
-            if otheroptions:
-                self.options.copy_config(otheroptions)
 
     def get_robots_txt_url(self):
         return UrlLocation(self.url).get_robots_txt_url()
@@ -308,7 +301,7 @@ class Url(ContentInterface):
         domain = p.get_domain()
 
         url = self.url_builder(domain)
-        url.set_config(self.options)
+        url.set_config(self.settings)
 
         return url.get_favicon()
 
@@ -388,7 +381,7 @@ class Url(ContentInterface):
         return DomainCache.get_object(self.url)
 
     def __str__(self):
-        return "{}".format(self.options)
+        return "{}".format(self.settings)
 
     def is_valid(self):
         if not self.handler:
@@ -445,16 +438,6 @@ class Url(ContentInterface):
             return self.response.get_status_code()
 
         return 0
-
-    def override_mapping(self, options):
-        if Url.is_selenium_browser_required(self.url):
-            browser = options.get_crawler("SeleniumChromeFull")
-            if browser:
-                options.bring_to_front(browser)
-        elif Url.is_crawlee_browser_required(self.url):
-            browser = options.get_crawler("CrawleeScript")
-            if browser:
-                options.bring_to_front(browser)
 
     def is_selenium_browser_required(url):
         if not url:
@@ -611,16 +594,8 @@ class Url(ContentInterface):
 
         all_properties.append({"name" : "Contents", "data" : {"Contents" : self.get_contents()}})
 
-        request_data = OrderedDict()
-        request_data["Options SSL"] = self.options.ssl_verify
-        request_data["Options Ping"] = self.options.ping
-        request_data["Options use browser promotions"] = self.options.use_browser_promotions
-        request_data["Options mode mapping"] = str(self.options.mode_mapping)
-        request_data["Options user agent"] = str(self.options.user_agent)
-
-        request_data["Page Handler"] = str(page_handler.__class__.__name__)
-        if hasattr(page_handler, "p"):
-            request_data["Page Type"] = str(page_handler.p.__class__.__name__)
+        request_data = dict(self.settings)
+        request_data["crawler"] = type(request_data["crawler"]).__name__
 
         all_properties.append({"name" : "Options", "data" : request_data})
 
@@ -724,7 +699,7 @@ class DomainCacheInfo(object):
     """
 
     def __init__(
-        self, url, respect_robots_txt=True, page_options=None, url_builder=None
+        self, url, respect_robots_txt=True, settings=None, url_builder=None
     ):
         p = UrlLocation(url)
 
@@ -732,7 +707,7 @@ class DomainCacheInfo(object):
 
         self.url = p.get_domain()
         self.robots_contents = None
-        self.options = page_options
+        self.settings = settings
         self.url_builder = url_builder
 
         if not self.url_builder:
@@ -775,8 +750,7 @@ class DomainCacheInfo(object):
             return self.robots_contents
 
         robots_url = self.get_robots_txt_url()
-        u = self.url_builder(robots_url)
-        u.set_config(self.options)
+        u = self.url_builder(robots_url, settings = self.settings)
 
         response = u.get_response()
         if response:
@@ -819,7 +793,7 @@ class DomainCacheInfo(object):
         urls = self.get_site_maps_urls()
         for url in urls:
             u = slef.url_builder(url=url)
-            u.set_config(self.options)
+            u.set_config(self.settings)
             response = u.get_response()
             contents = response.get_text()
             if contents:
@@ -852,7 +826,7 @@ class DomainCacheInfo(object):
         all_subordinates = set()
 
         u = self.url_builder(site)
-        u.set_config(self.options)
+        u.set_config(self.settings)
         response = u.get_response
         if not response:
             return all_subordinates
@@ -884,11 +858,11 @@ class DomainCache(object):
     default_cache_size = 400
     respect_robots_txt = True
 
-    def get_object(domain_url, page_options=None, url_builder=None):
+    def get_object(domain_url, settings=None, url_builder=None):
         if DomainCache.object is None:
             DomainCache.object = DomainCache(
                 DomainCache.default_cache_size,
-                page_options=page_options,
+                settings=settings,
                 url_builder=url_builder,
             )
 
@@ -898,7 +872,7 @@ class DomainCache(object):
         self,
         cache_size=400,
         respect_robots_txt=True,
-        page_options=None,
+        settings=None,
         url_builder=None,
     ):
         """
@@ -907,7 +881,7 @@ class DomainCache(object):
         self.cache_size = cache_size
         self.cache = {}
         self.respect_robots_txt = respect_robots_txt
-        self.options = page_options
+        self.settings = settings
         self.url_builder = url_builder
 
     def get_domain_info(self, input_url):
@@ -926,7 +900,7 @@ class DomainCache(object):
         return DomainCacheInfo(
             domain_url,
             self.respect_robots_txt,
-            page_options=self.options,
+            settings=self.settings,
             url_builder=self.url_builder,
         )
 
@@ -948,18 +922,14 @@ class DomainCache(object):
             self.cache[item[0]] = {"date": item[1], "domain": item[2]}
 
 
-def fetch_url(link, page_options=None, url_builder=None):
-    if url_builder:
-        u = url_builder(url=link, page_options=page_options, url_builder=url_builder)
-    else:
-        u = Url(url=link, page_options=page_options, url_builder=url_builder)
-
+def fetch_url(link, settings=None):
+    u = url_builder(url=link, settings=settings)
     u.get_response()
     return u
 
 
 async def fetch_all_urls(
-    links, page_options=None, url_builder=None, max_concurrency=10
+    links, settings=None, url_builder=None, max_concurrency=10
 ):
     num_pages = int(len(links) / max_concurrency)
     num_pages_mod = len(links) % max_concurrency
@@ -974,7 +944,7 @@ async def fetch_all_urls(
         tasks = []
 
         for link in links[page_start:page_stop]:
-            tasks.append(asyncio.to_thread(fetch_url, link, page_options, url_builder))
+            tasks.append(asyncio.to_thread(fetch_url, link, settings, url_builder))
 
         result = await asyncio.gather(*tasks)
         return result

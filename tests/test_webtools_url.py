@@ -19,23 +19,6 @@ class UrlTest(FakeInternetTestCase):
         contents = url.get_contents()
         self.assertTrue(contents != None)
 
-    def test_get_page_options(self):
-        page_options = PageOptions()
-        page_options.use_full_browser = True
-
-        url = Url("https://multiple-favicons.com/page.html", page_options=page_options)
-        # call tested function
-        options = url.options
-        self.assertTrue(options.use_full_browser)
-
-        page_options = PageOptions()
-        page_options.use_headless_browser = True
-
-        url = Url("https://multiple-favicons.com/page.html", page_options=page_options)
-        # call tested function
-        options = url.options
-        self.assertTrue(options.use_headless_browser)
-
     def test_get_robots_txt_url(self):
         url = Url("https://page-with-http-status-500.com")
         # call tested function
@@ -52,17 +35,11 @@ class UrlTest(FakeInternetTestCase):
         self.assertFalse(url.is_valid())
 
         # 1 for requests +1 for next
-        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-        self.assertEqual(len(MockRequestCounter.request_history), 2)
+        self.assertEqual(len(MockRequestCounter.request_history), 1)
 
         self.assertEqual(MockRequestCounter.request_history[0][0], "https://page-with-http-status-500.com")
-        self.assertEqual(MockRequestCounter.request_history[1][0], "https://page-with-http-status-500.com")
-
-        first_crawler = MockRequestCounter.request_history[0][1]["name"]
-        second_crawler = MockRequestCounter.request_history[1][1]["name"]
-
-        self.assertNotEqual(first_crawler, second_crawler)
 
     def test_is_valid__true(self):
         MockRequestCounter.mock_page_requests = 0
@@ -124,28 +101,6 @@ class UrlTest(FakeInternetTestCase):
         )
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
-
-    def test_get_for_page_spotify(self):
-        MockRequestCounter.mock_page_requests = 0
-
-        o = PageOptions()
-        o.use_full_browser = True
-        handler = Url("https://open.spotify.com", page_options=o)
-
-        self.assertEqual(handler.options.use_full_browser, True)
-
-        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
-
-    def test_get_for_page_youtube(self):
-        MockRequestCounter.mock_page_requests = 0
-
-        o = PageOptions()
-        o.use_headless_browser = True
-        handler = Url("https://open.spotify.com", page_options=o)
-
-        self.assertEqual(handler.options.use_headless_browser, True)
-
-        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_last_modified(self):
         MockRequestCounter.mock_page_requests = 0
@@ -498,25 +453,29 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(result, url)
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-    def test_get_init_page_options__yahoo(self):
+    def test_get_init_settings__yahoo(self):
         MockRequestCounter.mock_page_requests = 0
 
-        options = Url("https://yahoo.com/test_link").get_init_page_options()
+        settings = Url("https://yahoo.com/test_link").get_init_settings()
 
-        self.assertTrue(len(options.mode_mapping) > 0)
-        # self.assertEqual(options.mode_mapping[0]["crawler"], "ScriptCrawler")
-        self.assertEqual(options.mode_mapping[0]["name"], "CrawleeScript")
+        self.assertIn("name", settings)
+        self.assertIn("crawler", settings)
+        self.assertIn("settings", settings)
+
+        self.assertEqual(settings["name"], "DefaultCrawler")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_get_init_page_options__techcrunch(self):
+    def test_get_init_settings__techcrunch(self):
         MockRequestCounter.mock_page_requests = 0
 
-        options = Url("https://techcrunch.com/test_link").get_init_page_options()
+        settings = Url("https://techcrunch.com/test_link").get_init_settings()
 
-        self.assertTrue(len(options.mode_mapping) > 0)
-        # self.assertEqual(options.mode_mapping[0]["crawler"], "ScriptCrawler")
-        self.assertEqual(options.mode_mapping[0]["name"], "CrawleeScript")
+        self.assertIn("name", settings)
+        self.assertIn("crawler", settings)
+        self.assertIn("settings", settings)
+
+        self.assertEqual(settings["name"], "DefaultCrawler")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 

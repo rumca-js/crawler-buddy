@@ -375,7 +375,7 @@ class PageResponseObject(object):
 
     def set_crawler(self, crawler_data):
         self.crawler_data = dict(crawler_data)
-        self.crawler_data["crawler"] = self.crawler_data["crawler"].__name__
+        self.crawler_data["crawler"] = type(self.crawler_data["crawler"]).__name__
 
     def get_content_type(self):
         if "Content-Type" in self.headers:

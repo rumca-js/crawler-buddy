@@ -167,8 +167,8 @@ class MockRequestCounter(object):
 
 
 class YouTubeJsonHandlerMock(YouTubeJsonHandler):
-    def __init__(self, url, page_options=None, url_builder=None):
-        super().__init__(url, page_options=page_options, url_builder=url_builder)
+    def __init__(self, url, settings=None, url_builder=None):
+        super().__init__(url, settings=settings, url_builder=url_builder)
 
     def download_details_youtube(self):
         MockRequestCounter.requested(self.url)
@@ -659,9 +659,12 @@ class DefaultCrawler(CrawlerInterface):
     def run(self):
         request = self.request
 
-        print("FakeInternet:Url:{} Crawler:{}".format(self.request.url, self.crawler_data["name"]))
+        if self.settings:
+            print("FakeInternet:Url:{} Crawler:{}".format(self.request.url, self.settings["name"]))
+        else:
+            print("FakeInternet:Url:{}".format(self.request.url))
 
-        MockRequestCounter.requested(request.url, info=self.crawler_data)
+        MockRequestCounter.requested(request.url, info=self.settings)
 
         self.response = TestResponseObject(request.url, request.headers, request.timeout_s)
 
@@ -678,6 +681,7 @@ class FakeInternetTestCase(unittest.TestCase):
 
     def disable_web_pages(self):
         # HttpRequestBuilder.get_contents_function = self.get_contents_function
+        WebConfig.get_default_crawler = FakeInternetTestCase.get_default_crawler
 
         Url.youtube_video_handler = YouTubeJsonHandlerMock
         # UrlHandler.youtube_video_handler = YouTubeJsonHandlerMock
@@ -692,6 +696,14 @@ class FakeInternetTestCase(unittest.TestCase):
 
         WebConfig.use_print_logging()
         WebConfig.get_crawler_from_mapping = FakeInternetTestCase.get_crawler_from_mapping
+
+    def get_default_crawler(url):
+        data = {}
+        data["name"] = "DefaultCrawler"
+        data["crawler"] = DefaultCrawler(url = url)
+        data["settings"] = {"timeout_s" : 20}
+
+        return data
 
     def get_crawler_from_mapping(request, crawler_data):
         if "settings" in crawler_data:

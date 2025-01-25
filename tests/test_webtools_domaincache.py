@@ -81,7 +81,7 @@ class DomainCacheInfoTest(FakeInternetTestCase):
         cache_info.is_allowed("https://page-with-http-status-500.com/test.html")
 
         # +1 for first browser, +1 for second browser
-        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
         cache_info = cache.get_domain_info(
             "https://page-with-http-status-500.com"
@@ -90,4 +90,4 @@ class DomainCacheInfoTest(FakeInternetTestCase):
         # call tested function
         cache_info.is_allowed("https://page-with-http-status-500.com/test.html")
 
-        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
