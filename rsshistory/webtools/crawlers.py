@@ -466,12 +466,22 @@ class StealthRequestsCrawler(CrawlerInterface):
 
         import stealth_requests as requests
 
-        answer = requests.get(
-            self.request.url,
-            timeout=self.timeout_s,
-            verify=self.request.ssl_verify,
-            #stream=True,   # does not work with it
-        )
+        try:
+            answer = requests.get(
+                self.request.url,
+                timeout=self.timeout_s,
+                verify=self.request.ssl_verify,
+                #stream=True,   # does not work with it
+            )
+        except Exception as E:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
+                request_url=self.request.url,
+            )
+            self.response.add_error("Url:{} Connection error".format(self.request.url))
+            return self.response
 
         content = answer.content
         text = answer.text
