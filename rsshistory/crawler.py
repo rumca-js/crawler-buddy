@@ -58,9 +58,8 @@ class Crawler(object):
             # TODO what if there is exception
             crawl_index = self.crawler_info.enter(url)
 
-            response = page_url.get_response()
-
             try:
+                response = page_url.get_response()
                 all_properties = page_url.get_properties(full=True, include_social=full)
                 self.crawler_info.leave(crawl_index)
             except Exception as e:
