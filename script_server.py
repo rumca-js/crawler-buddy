@@ -23,7 +23,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.22"
+__version__ = "1.0.23"
 
 
 app = Flask(__name__)
@@ -702,4 +702,8 @@ if __name__ == '__main__':
 
     socket.setdefaulttimeout(40)
 
+    crawler_main.start_display()
+
     app.run(debug=True, host=p.args.host, port=p.args.port, threaded=True)
+
+    crawler_main.stop_display()

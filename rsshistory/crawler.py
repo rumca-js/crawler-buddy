@@ -129,3 +129,25 @@ class Crawler(object):
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 continue  # Skip processes we can't access
         return count
+
+    def start_display(self):
+        try:
+            # requires xvfb
+            import os
+
+            os.environ["DISPLAY"] = ":10.0"
+            from pyvirtualdisplay import Display
+
+            self.display = Display(visible=0, size=(800, 600))
+            self.display.start()
+        except Exception as E:
+            webtools.WebLogger.error(f"Problems with creating display")
+            return
+
+    def stop_display(self):
+        try:
+            self.display.stop()
+            self.display = None
+        except Exception as E:
+            webtools.WebLogger.error(f"Problems with creating display")
+            return

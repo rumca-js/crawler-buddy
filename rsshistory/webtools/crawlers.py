@@ -547,17 +547,6 @@ class SeleniumDriver(CrawlerInterface):
         self.driver = None
         self.driver_executable = driver_executable
 
-        try:
-            self.display = None
-            # requires xvfb
-            # import os
-            # os.environ["DISPLAY"] = ":10.0"
-            # from pyvirtualdisplay import Display
-            # self.display = Display(visible=0, size=(800, 600))
-            # self.display.start()
-        except Exception as E:
-            print("Str: {}".format(E))
-
     def get_driver(self):
         """
         https://www.lambdatest.com/blog/internationalization-with-selenium-webdriver/
@@ -856,19 +845,6 @@ class SeleniumChromeFull(SeleniumDriver):
         else:
             service = Service()
 
-        try:
-            # requires xvfb
-            import os
-
-            os.environ["DISPLAY"] = ":10.0"
-            from pyvirtualdisplay import Display
-
-            self.display = Display(visible=0, size=(800, 600))
-            self.display.start()
-        except Exception as E:
-            WebLogger.exc(E, "Problems with creating display")
-            return
-
         options = webdriver.ChromeOptions()
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
@@ -991,12 +967,6 @@ class SeleniumChromeFull(SeleniumDriver):
 
     def close(self):
         super().close()
-
-        if self.display:
-            try:
-                self.display.stop()
-            except Exception as E:
-                WebLogger.exc(E, "Problems with closing display")
 
 
 class SeleniumUndetected(SeleniumDriver):
