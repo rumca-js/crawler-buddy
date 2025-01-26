@@ -286,7 +286,7 @@ class WebConfig(object):
             WebLogger.error(f"Problems with creating display: {str(E)}")
             return
 
-    def stop_display(self):
+    def stop_display():
         try:
             WebConfig.display.stop()
             WebConfig.display = None

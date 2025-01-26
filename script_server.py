@@ -444,7 +444,13 @@ def crawlj():
             "error": "No properties found"
         }), 400
 
-    return jsonify(all_properties)
+    try:
+        return jsonify(all_properties)
+    except:
+        return jsonify({
+            "success": False,
+            "error": "Cannot convert to JSON: {}".format(str(all_properties))
+        }), 400
 
 
 @app.route('/proxy', methods=['GET'])
