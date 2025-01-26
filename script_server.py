@@ -23,7 +23,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.26"
+__version__ = "1.0.27"
 
 
 app = Flask(__name__)
@@ -382,7 +382,7 @@ def get_crawl_properties(url, crawler_data):
     if all_properties:
         url_history.add( (url, all_properties) )
     else:
-        all_properties = find_response(url)
+        all_properties = url_history.find(url = url)
 
     return all_properties
 
@@ -524,7 +524,7 @@ def headers():
     if all_properties:
         url_history.add( (url, all_properties) )
     else:
-        all_properties = find_response(url)
+        all_properties = url_history.find(url = url)
 
         if not all_properties:
             return jsonify({

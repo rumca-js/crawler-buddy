@@ -34,7 +34,15 @@ class Crawler(object):
         self.crawler_info = CrawlerInfo()
 
     def run(self, url, crawler_data = None):
+        if not crawler_data:
+            webtools.WebLogger.error("Could not find crawler data")
+            return
+
         page_url = self.get_page_url(url, crawler_data)
+
+        if not page_url:
+            webtools.WebLogger.error("Could not find page url")
+            return
 
         request_headers = crawler_data["settings"]["headers"]
         request_ping = crawler_data["settings"]["ping"]
@@ -83,16 +91,21 @@ class Crawler(object):
 
         if "crawler" not in crawler_data and "name" in crawler_data:
             new_mapping = config.get_crawler(name = crawler_data["name"])
+            new_mapping["crawler"] = new_mapping["crawler"](url=url)
         elif "name" not in crawler_data and "crawler" in crawler_data:
             new_mapping = config.get_crawler(crawler_name = crawler_data["crawler"])
+            new_mapping["crawler"] = new_mapping["crawler"](url=url)
         elif "name" not in crawler_data and "crawler" not in crawler_data:
-            pass
+            new_mapping = webtools.WebConfig.get_default_crawler(url)
         else:
             new_mapping = crawler_data
             crawler = webtools.WebConfig.get_crawler_from_string(new_mapping["crawler"])
             new_mapping["crawler"] = crawler
+            new_mapping["crawler"] = new_mapping["crawler"](url=url)
 
-        new_mapping["crawler"] = new_mapping["crawler"](url=url)
+        if not new_mapping:
+            webtools.WebLogger.error("Could not find crawler")
+            return
 
         if new_mapping:
             if new_mapping["settings"] is None:
