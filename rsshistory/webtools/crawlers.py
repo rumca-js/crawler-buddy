@@ -1506,6 +1506,10 @@ class RemoteServer(object):
         except TypeError as E:
             WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
 
+        if "success" in json_obj and not json_obj["success"]:
+            WebLogger.error(json_obj["error"])
+            return False
+
         return json_obj
 
     def get_crawlj(self, url, name="", settings=None):
@@ -1552,6 +1556,10 @@ class RemoteServer(object):
             WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
         except TypeError as E:
             WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
+
+        if "success" in json_obj and not json_obj["success"]:
+            WebLogger.error(json_obj["error"])
+            return False
 
         return json_obj
 
@@ -1600,6 +1608,10 @@ class RemoteServer(object):
         except TypeError as E:
             WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
 
+        if "success" in json_obj and not json_obj["success"]:
+            WebLogger.error(json_obj["error"])
+            return False
+
         if json_obj:
             return self.read_properties_section("Properties", json_obj)
 
@@ -1608,6 +1620,10 @@ class RemoteServer(object):
     def read_properties_section(self, section_name, all_properties):
         if not all_properties:
             return
+
+        if "success" in all_properties and not all_properties["success"]:
+            WebLogger.error(all_properties["error"])
+            return False
 
         for properties in all_properties:
             if section_name == properties["name"]:
