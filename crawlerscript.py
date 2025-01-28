@@ -14,7 +14,7 @@ from rsshistory import webtools
 
 def main():
     webtools.WebConfig.init()
-    webtools.WebConfig.use_print_logging() 
+    webtools.WebConfig.use_print_logging()
 
     parser = webtools.ScriptCrawlerParser()
     parser.parse()
@@ -29,7 +29,12 @@ def main():
 
     request = parser.get_request()
 
-    driver = webtools.ScriptCrawler(request, response_file = parser.args.output_file, cwd = ".", script="poetry run python crawlerrequests.py")
+    driver = webtools.ScriptCrawler(
+        request,
+        response_file=parser.args.output_file,
+        cwd=".",
+        script="poetry run python crawlerrequests.py",
+    )
 
     if parser.args.verbose:
         print("Running request:{} with ScriptCrawler".format(request))

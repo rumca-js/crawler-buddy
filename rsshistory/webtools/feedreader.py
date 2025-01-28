@@ -27,11 +27,11 @@ class FeedObject(object):
             for child in aproperty_value:
                 if child.text:
                     parts.append(child.text)
-                parts.append(ET.tostring(child, encoding='unicode', method='html'))
+                parts.append(ET.tostring(child, encoding="unicode", method="html"))
                 if child.tail:
                     parts.append(child.tail)
 
-            inner_content = ''.join(parts).strip()
+            inner_content = "".join(parts).strip()
             return inner_content
 
     def get_prop_attribute(self, aproperty, attribute):

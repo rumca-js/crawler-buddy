@@ -21,7 +21,7 @@ except Exception as E:
 
 def main():
     webtools.WebConfig.init()
-    webtools.WebConfig.use_print_logging() 
+    webtools.WebConfig.use_print_logging()
 
     parser = webtools.ScriptCrawlerParser()
     parser.parse()
@@ -51,5 +51,6 @@ def main():
         interface = webtools.ScriptCrawlerInterface(parser, request)
         interface.response = response
         interface.save_response()
+
 
 main()

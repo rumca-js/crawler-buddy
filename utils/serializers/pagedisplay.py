@@ -21,9 +21,11 @@ class PageDisplay(object):
         options = page_url.get_init_page_options()
 
         if parser.args.remote_server:
-            options.mode_mapping = WebConfig.get_init_crawler_config(remote_server = parser.args.remote_server)
+            options.mode_mapping = WebConfig.get_init_crawler_config(
+                remote_server=parser.args.remote_server
+            )
 
-        u = Url(url, page_options = options)
+        u = Url(url, page_options=options)
         u.get_response()
 
         properties = u.get_properties(full=True)
@@ -43,14 +45,14 @@ class PageDisplay(object):
             if section_name == "Headers" and not verbose:
                 continue
 
-            #if section_name == "Response" and not verbose:
+            # if section_name == "Response" and not verbose:
             #    continue
 
             print("-------------")
 
             for key in section_properties:
                 value = section_properties[key]
-                
+
                 if isinstance(value, str):
                     print("{}:{}".format(key, value))
                 elif value is None:

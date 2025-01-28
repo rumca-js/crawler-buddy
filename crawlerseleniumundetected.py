@@ -15,7 +15,7 @@ from rsshistory.webtools import WebConfig
 
 def main():
     WebConfig.init()
-    WebConfig.use_print_logging() 
+    WebConfig.use_print_logging()
 
     parser = webtools.ScriptCrawlerParser()
     parser.parse()
@@ -46,5 +46,6 @@ def main():
     print(response)
     driver.save_response()
     driver.close()
+
 
 main()

@@ -4,7 +4,9 @@ from .urllocation import UrlLocation
 
 class OdyseeVideoHandler(DefaultUrlHandler):
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
-        super().__init__(url, contents=contents, settings=settings, url_builder=url_builder)
+        super().__init__(
+            url, contents=contents, settings=settings, url_builder=url_builder
+        )
         self.channel = None
         self.video = None
         self.url = self.input2url(url)

@@ -45,11 +45,11 @@ from .handlervideoodysee import OdyseeVideoHandler
 from .handlerchannelyoutube import YouTubeChannelHandler
 from .handlerchannelodysee import OdyseeChannelHandler
 from .handlers import (
-   RedditChannelHandler,
-   RedditUrlHandler,
-   ReturnDislike,
-   GitHubUrlHandler,
-   HackerNewsHandler,
+    RedditChannelHandler,
+    RedditUrlHandler,
+    ReturnDislike,
+    GitHubUrlHandler,
+    HackerNewsHandler,
 )
 
 from utils.dateutils import DateUtils
@@ -66,16 +66,14 @@ class Url(ContentInterface):
     odysee_channel_handler = OdyseeChannelHandler
 
     handlers = [
-            YouTubeJsonHandler,
-            YouTubeChannelHandler,
-            OdyseeVideoHandler,
-            OdyseeChannelHandler,
-            HttpPageHandler,
-            ]
+        YouTubeJsonHandler,
+        YouTubeChannelHandler,
+        OdyseeVideoHandler,
+        OdyseeChannelHandler,
+        HttpPageHandler,
+    ]
 
-    def __init__(
-        self, url=None, settings=None, url_builder=None
-    ):
+    def __init__(self, url=None, settings=None, url_builder=None):
         """
         @param handler_class Allows to enforce desired handler to be used to process link
 
@@ -106,7 +104,9 @@ class Url(ContentInterface):
 
         if self.settings and "handler_class" in self.settings:
             handler_class = self.settings["handler_class"]
-            self.handler = handler_class(self.url, settings = self.settings, url_builder=url_builder)
+            self.handler = handler_class(
+                self.url, settings=self.settings, url_builder=url_builder
+            )
 
         self.response = None
         self.url_builder = url_builder
@@ -247,13 +247,17 @@ class Url(ContentInterface):
 
         handlers = Url.get_handlers()
         for handler in handlers:
-            h = handler(url=self.url, settings=self.settings, url_builder=self.url_builder)
+            h = handler(
+                url=self.url, settings=self.settings, url_builder=self.url_builder
+            )
             if h.is_handled_by():
                 self.url = h.url
                 return h
 
         if url.startswith("https") or url.startswith("http"):
-            return HttpPageHandler(url, settings=self.settings, url_builder=self.url_builder)
+            return HttpPageHandler(
+                url, settings=self.settings, url_builder=self.url_builder
+            )
         elif url.startswith("smb") or url.startswith("ftp"):
             # not yet supported
             return DefaultContentPage(url)
@@ -364,7 +368,7 @@ class Url(ContentInterface):
     def get_canonical_url(self):
         handlers = Url.get_handlers()
         for handler_class in handlers:
-            handler = handler_class(url = self.url)
+            handler = handler_class(url=self.url)
             if handler.is_handled_by():
                 return handler.get_canonical_url()
 
@@ -566,7 +570,7 @@ class Url(ContentInterface):
         feeds = self.get_feeds()
         if len(feeds) > 0:
             for key, feed in enumerate(feeds):
-                properties["feed_"+str(key)] = feed
+                properties["feed_" + str(key)] = feed
 
         if type(page_handler) is Url.youtube_channel_handler:
             if page_handler.get_channel_name():
@@ -581,23 +585,29 @@ class Url(ContentInterface):
         if type(page_handler) is HttpPageHandler and type(page_handler.p) is HtmlPage:
             properties["favicon"] = page_handler.p.get_favicon()
             properties["meta title"] = page_handler.p.get_meta_field("title")
-            properties["meta description"] = page_handler.p.get_meta_field("description")
+            properties["meta description"] = page_handler.p.get_meta_field(
+                "description"
+            )
             properties["meta keywords"] = page_handler.p.get_meta_field("keywords")
 
             properties["og:title"] = page_handler.p.get_og_field("title")
             properties["og:description"] = page_handler.p.get_og_field("description")
             properties["og:image"] = page_handler.p.get_og_field("image")
             properties["og:site_name"] = page_handler.p.get_og_field("site_name")
-            properties["schema:thumbnailUrl"] = page_handler.p.get_schema_field("thumbnailUrl")
+            properties["schema:thumbnailUrl"] = page_handler.p.get_schema_field(
+                "thumbnailUrl"
+            )
 
-        all_properties.append({"name" : "Properties", "data" : properties})
+        all_properties.append({"name": "Properties", "data": properties})
 
-        all_properties.append({"name" : "Contents", "data" : {"Contents" : self.get_contents()}})
+        all_properties.append(
+            {"name": "Contents", "data": {"Contents": self.get_contents()}}
+        )
 
         request_data = dict(self.settings)
         request_data["crawler"] = type(request_data["crawler"]).__name__
 
-        all_properties.append({"name" : "Options", "data" : request_data})
+        all_properties.append({"name": "Options", "data": request_data})
 
         if response:
             headers = response.get_headers()
@@ -611,7 +621,10 @@ class Url(ContentInterface):
                 response_data["is_allowed"] = domain_info.is_allowed(self.url)
 
             response_data["Content-Type"] = response.get_content_type()
-            if response_data["Content-Type"] is None and page_handler == HttpPageHandler:
+            if (
+                response_data["Content-Type"] is None
+                and page_handler == HttpPageHandler
+            ):
                 if page_handler.p:
                     if type(page_handler.p) == RssPage:
                         response_data["Content-Type"] = "application/rss+xml"
@@ -626,25 +639,34 @@ class Url(ContentInterface):
                 response_data["Charset"] = response.encoding
 
             if self.get_contents_hash():
-                response_data["hash"] = base64.b64encode(self.get_contents_hash()).decode("utf-8")
+                response_data["hash"] = base64.b64encode(
+                    self.get_contents_hash()
+                ).decode("utf-8")
             else:
                 response_data["hash"] = ""
             if self.get_contents_body_hash():
-                response_data["body_hash"] = base64.b64encode(self.get_contents_body_hash()).decode("utf-8")
+                response_data["body_hash"] = base64.b64encode(
+                    self.get_contents_body_hash()
+                ).decode("utf-8")
             else:
                 response_data["body_hash"] = ""
             response_data["crawler_data"] = response.crawler_data
-            if response_data["crawler_data"] and "handler_class" in response_data["crawler_data"]:
-                response_data["crawler_data"]["handler_class"] = response_data["crawler_data"]["handler_class"].__name__
+            if (
+                response_data["crawler_data"]
+                and "handler_class" in response_data["crawler_data"]
+            ):
+                response_data["crawler_data"]["handler_class"] = response_data[
+                    "crawler_data"
+                ]["handler_class"].__name__
 
-            all_properties.append({"name" : "Response", "data" : response_data})
+            all_properties.append({"name": "Response", "data": response_data})
 
-            all_properties.append({"name" : "Headers", "data" : headers})
+            all_properties.append({"name": "Headers", "data": headers})
 
         if include_social:
             social = self.get_social_properties(self.url)
             if social:
-                all_properties.append({"name" : "Social", "data" : social})
+                all_properties.append({"name": "Social", "data": social})
 
         index = 0
         entries = []
@@ -652,7 +674,7 @@ class Url(ContentInterface):
             if "feed_entry" in entry:
                 del entry["feed_entry"]
             entries.append(entry)
-        all_properties.append({"name" : "Entries", "data" : entries})
+        all_properties.append({"name": "Entries", "data": entries})
 
         return all_properties
 
@@ -674,9 +696,11 @@ class Url(ContentInterface):
             json_obj["upvote_view_ratio"] = h.get_upvote_view_ratio()
 
         elif type(handler) == HtmlPage:
-            handlers = [RedditUrlHandler(handler.url),
-                    GitHubUrlHandler(handler.url),
-                    HackerNewsHandler(handler.url)]
+            handlers = [
+                RedditUrlHandler(handler.url),
+                GitHubUrlHandler(handler.url),
+                HackerNewsHandler(handler.url),
+            ]
 
             for handler in handlers:
                 if handler.is_handled_by():
@@ -688,7 +712,9 @@ class Url(ContentInterface):
                     if handler_data and "upvote_ratio" in handler_data:
                         json_obj["upvote_ratio"] = handler_data["upvote_ratio"]
                     if handler_data and "upvote_view_ratio" in handler_data:
-                        json_obj["upvote_view_ratio"] = handler_data["upvote_view_ratio"]
+                        json_obj["upvote_view_ratio"] = handler_data[
+                            "upvote_view_ratio"
+                        ]
 
                     break
 
@@ -700,9 +726,7 @@ class DomainCacheInfo(object):
     is_access_valid
     """
 
-    def __init__(
-        self, url, respect_robots_txt=True, settings=None, url_builder=None
-    ):
+    def __init__(self, url, respect_robots_txt=True, settings=None, url_builder=None):
         p = UrlLocation(url)
 
         self.respect_robots_txt = respect_robots_txt
@@ -752,7 +776,7 @@ class DomainCacheInfo(object):
             return self.robots_contents
 
         robots_url = self.get_robots_txt_url()
-        u = self.url_builder(robots_url, settings = self.settings)
+        u = self.url_builder(robots_url, settings=self.settings)
 
         response = u.get_response()
         if response:
@@ -856,7 +880,7 @@ class DomainCache(object):
     Url().get_domain_cache().is_allowed()
     """
 
-    object = None               # singleton
+    object = None  # singleton
     default_cache_size = 400
     respect_robots_txt = True
 
@@ -930,9 +954,7 @@ def fetch_url(link, settings=None):
     return u
 
 
-async def fetch_all_urls(
-    links, settings=None, url_builder=None, max_concurrency=10
-):
+async def fetch_all_urls(links, settings=None, url_builder=None, max_concurrency=10):
     num_pages = int(len(links) / max_concurrency)
     num_pages_mod = len(links) % max_concurrency
 

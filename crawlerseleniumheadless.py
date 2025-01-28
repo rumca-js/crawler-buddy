@@ -3,6 +3,7 @@ This script is not required, SeleniumChromeHeadless can be called directly from 
  - we just show off how it can be done
  - it can be used to compare with other crawling scripts
 """
+
 import json
 import time
 import argparse
@@ -13,7 +14,7 @@ from rsshistory.webtools import WebConfig
 
 
 def main():
-    WebConfig.use_print_logging() 
+    WebConfig.use_print_logging()
     WebConfig.init()
 
     parser = webtools.ScriptCrawlerParser()
@@ -44,5 +45,6 @@ def main():
     print(response)
     driver.save_response()
     driver.close()
+
 
 main()

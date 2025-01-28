@@ -9,11 +9,7 @@ class DefaultUrlHandler(HandlerInterface):
     """
 
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
-        super().__init__(
-            url,
-            settings = settings,
-            url_builder = url_builder
-        )
+        super().__init__(url, settings=settings, url_builder=url_builder)
 
     def get_response(self):
         """
@@ -38,7 +34,7 @@ class DefaultUrlHandler(HandlerInterface):
 
             return self.response
 
-    def ping(self, timeout_s = 120):
+    def ping(self, timeout_s=120):
         from .handlerhttppage import HttpPageHandler
 
         if self.response:

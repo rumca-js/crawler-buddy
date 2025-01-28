@@ -24,3 +24,20 @@ class ScriptServerTest(FakeInternetTestCase):
         # call tested function
         config = Configuration().get_crawler_config()
         self.assertTrue(config)
+
+    def test_is_allowed(self):
+        config = Configuration()
+        config.data["allowed_ids"] = "admin"
+
+        # call tested function
+        self.assertTrue(config.is_allowed("admin"))
+        # call tested function
+        self.assertFalse(config.is_allowed(""))
+        # call tested function
+        self.assertFalse(config.is_allowed(None))
+
+        config.data["allowed_ids"] = []
+        # call tested function
+        self.assertTrue(config.is_allowed("admin"))
+        # call tested function
+        self.assertTrue(config.is_allowed(""))

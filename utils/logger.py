@@ -20,6 +20,7 @@ class PrintLogger(object):
     """
     Implementation of weblogger that only prints to std out
     """
+
     def info(self, info_text, detail_text="", user=None, stack=False):
         if info_text:
             print(info_text)
@@ -68,6 +69,7 @@ class PermanentLogger(object):
     """
     Implementation of weblogger that only prints to std out
     """
+
     def __init__(self):
         self.permanent_data = []
 

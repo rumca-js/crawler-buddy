@@ -14,7 +14,7 @@ from rsshistory import webtools
 
 def main():
     webtools.WebConfig.init()
-    webtools.WebConfig.use_print_logging() 
+    webtools.WebConfig.use_print_logging()
 
     parser = webtools.ScriptCrawlerParser()
     parser.parse()
@@ -24,7 +24,9 @@ def main():
 
     request = parser.get_request()
 
-    driver = webtools.StealthRequestsCrawler(request, parser.args.output_file, parser.args.port)
+    driver = webtools.StealthRequestsCrawler(
+        request, parser.args.output_file, parser.args.port
+    )
 
     if parser.args.verbose:
         print("Running request:{} with Stealth".format(request))
@@ -41,5 +43,6 @@ def main():
     print(response)
     driver.save_response()
     driver.close()
+
 
 main()

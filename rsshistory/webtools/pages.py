@@ -13,7 +13,7 @@ from .webtools import (
     WebLogger,
     date_str_to_date,
 )
-from .urllocation import  UrlLocation
+from .urllocation import UrlLocation
 from .feedreader import FeedReader
 
 
@@ -140,8 +140,8 @@ class ContentInterface(object):
         """
         Should not obtain contents by itself
 
-        You'd probably be more successful trying to not trigger 
-        the bot detection in the first place rather than trying to bypass it after the fact. 
+        You'd probably be more successful trying to not trigger
+        the bot detection in the first place rather than trying to bypass it after the fact.
         """
         contents = self.contents
 
@@ -811,7 +811,9 @@ class RssPage(ContentInterface):
             elif "links" in self.feed.feed.image:
                 links = self.feed.feed.image["links"]
                 if len(links) > 0:
-                    WebLogger.error("I do not know how to process links {}".format(str(links)))
+                    WebLogger.error(
+                        "I do not know how to process links {}".format(str(links))
+                    )
             else:
                 WebLogger.error(
                     '<a href="{}">{}</a> Unsupported image type for feed. Image:{}'.format(
@@ -954,19 +956,19 @@ class ContentLinkParser(ContentInterface):
             wh = item.find('"')
             if wh != -1:
                 item = item[:wh]
-            wh = item.find('<')
+            wh = item.find("<")
             if wh != -1:
                 item = item[:wh]
-            wh = item.find('>')
+            wh = item.find(">")
             if wh != -1:
                 item = item[:wh]
-            wh = item.find('&quot;')
+            wh = item.find("&quot;")
             if wh != -1:
                 item = item[:wh]
-            wh = item.find('&gt;')
+            wh = item.find("&gt;")
             if wh != -1:
                 item = item[:wh]
-            wh = item.find('&lt;')
+            wh = item.find("&lt;")
             if wh != -1:
                 item = item[:wh]
 
@@ -1136,7 +1138,9 @@ class ContentLinkParser(ContentInterface):
             p = UrlLocation(link)
             new_link = p.get_domain()
             if new_link == "https://" or new_link == "http://":
-                WebLogger.error("Incorrect link to add: {}".format(new_link), stack=True)
+                WebLogger.error(
+                    "Incorrect link to add: {}".format(new_link), stack=True
+                )
                 continue
 
             if not p.is_web_link():
@@ -1506,9 +1510,9 @@ class HtmlPage(ContentInterface):
         return self.get_meta_field("keywords")
 
     def get_canonical_url(self):
-        canonical_tag = self.soup.find('link', rel='canonical')
+        canonical_tag = self.soup.find("link", rel="canonical")
         if canonical_tag:
-            canonical_link = canonical_tag.get('href')
+            canonical_link = canonical_tag.get("href")
             if canonical_link.endswith("/"):
                 return canonical_link[:-1]
             return canonical_link

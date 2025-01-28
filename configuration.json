@@ -1,6 +1,10 @@
-# TODO
- - entry rules
- - logging level
- - respect robots
- - ssl verification
- - use canonical links
+{
+    "respect_robots_txt" : true,
+    "logging_level" : 10,
+    "ssl_verify" : true,
+    "use_canonical_links" : true,
+    "prefer_non_www" : false,
+    "debug" : true,
+    "allowed_ids" : [
+    ]
+}

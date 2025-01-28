@@ -28,7 +28,7 @@ os.environ["CRAWLEE_STORAGE_DIR"] = "./storage/{}".format(os.getpid())
 def cleanup_storage():
     path = os.environ["CRAWLEE_STORAGE_DIR"]
     # cannot remove it yet, when program is running :(
-    #shutil.rmtree(path)
+    # shutil.rmtree(path)
 
 
 crawlee_feataure_enabled = True
@@ -48,15 +48,15 @@ except Exception as E:
     crawlee_feataure_enabled = False
 
 
-def on_close(interface, response, status_code = 0):
+def on_close(interface, response, status_code=0):
     interface.response = response
     interface.save_response()
     cleanup_storage()
-    #crawlee complains if we kill it like this sys.exit(0)
+    # crawlee complains if we kill it like this sys.exit(0)
 
 
 async def main() -> None:
-    webtools.WebConfig.use_print_logging() 
+    webtools.WebConfig.use_print_logging()
 
     parser = webtools.ScriptCrawlerParser()
     parser.parse()
@@ -78,10 +78,10 @@ async def main() -> None:
 
     if parser.args.proxy_address:
         proxy_config = ProxyConfiguration(
-                proxy_urls = [parser.args.proxy_address],
+            proxy_urls=[parser.args.proxy_address],
         )
         crawler = PlaywrightCrawler(
-            proxy_configuration = proxy_config,
+            proxy_configuration=proxy_config,
             # Limit the crawl to max requests. Remove or increase it for crawling all links.
             max_requests_per_crawl=10,
             request_handler_timeout=timedelta(seconds=request.timeout_s),

@@ -150,7 +150,9 @@ class HttpRequestBuilder(object):
         crawler = crawler_data["crawler"]
 
         WebLogger.debug(
-            "Url:{}: Running crawler {}\n{}".format(request.url, type(crawler), crawler_data)
+            "Url:{}: Running crawler {}\n{}".format(
+                request.url, type(crawler), crawler_data
+            )
         )
 
         crawler.set_settings(crawler_data)
@@ -162,16 +164,16 @@ class HttpRequestBuilder(object):
         crawler.close()
 
         WebLogger.debug(
-            "Url:{}: Running crawler {}\n{} DONE".format(request.url, type(crawler), crawler_data)
+            "Url:{}: Running crawler {}\n{} DONE".format(
+                request.url, type(crawler), crawler_data
+            )
         )
 
         if response:
             return response
 
         self.dead = True
-        WebLogger.debug(
-            "Url:{} No response from crawler".format(request.url)
-        )
+        WebLogger.debug("Url:{} No response from crawler".format(request.url))
 
         self.response = PageResponseObject(
             request.url,
@@ -297,7 +299,9 @@ class HttpPageHandler(HandlerInterface):
     user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"
 
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
-        super().__init__(url=url, contents=contents, settings=settings, url_builder =url_builder)
+        super().__init__(
+            url=url, contents=contents, settings=settings, url_builder=url_builder
+        )
         self.p = None
         self.response = None
         self.settings = settings
@@ -486,8 +490,8 @@ class HttpPageHandler(HandlerInterface):
 
     def is_cloudflare_protected(self):
         """
-        You'd probably be more successful trying to not trigger the 
-        bot detection in the first place rather than trying to bypass it after the fact. 
+        You'd probably be more successful trying to not trigger the
+        bot detection in the first place rather than trying to bypass it after the fact.
         """
 
         if not self.p:
@@ -535,6 +539,6 @@ class HttpPageHandler(HandlerInterface):
 
         return result
 
-    def ping(self, timeout_s = 120):
+    def ping(self, timeout_s=120):
         builder = HttpRequestBuilder(url=self.url, settings=self.settings)
         return builder.ping()

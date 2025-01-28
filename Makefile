@@ -40,6 +40,7 @@ run:
 reformat:
 	poetry run black $(APP_NAME)
 	poetry run black utils
+	poetry run black *.py
 
 backfiles:
 	find . -type f -name "*.bak" -exec rm -f {} +

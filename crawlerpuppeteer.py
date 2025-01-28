@@ -27,7 +27,7 @@ async def main() -> None:
     browser = await launch()
     page = await browser.newPage()
 
-    this_response = webtools.PageResponseObject(request.url, request_url = request.url)
+    this_response = webtools.PageResponseObject(request.url, request_url=request.url)
 
     # Define a callback to handle responses
     async def intercept_response(response):
@@ -36,11 +36,11 @@ async def main() -> None:
         this_response.headers = response.headers
 
     # Attach the callback to the response event
-    page.on('response', intercept_response)
+    page.on("response", intercept_response)
 
     await page.goto(parser.args.url)
 
-    content = await page.evaluate('document.body.textContent', force_expr=True)
+    content = await page.evaluate("document.body.textContent", force_expr=True)
 
     await browser.close()
 

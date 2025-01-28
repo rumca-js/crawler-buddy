@@ -184,7 +184,9 @@ class PageOptions(object):
     def __init__(self):
         self.ssl_verify = True
         self.ping = False
-        self.use_browser_promotions = True  # tries next mode if normal processing does not work
+        self.use_browser_promotions = (
+            True  # tries next mode if normal processing does not work
+        )
 
         self.mode_mapping = {}
 
@@ -240,7 +242,7 @@ class PageOptions(object):
         if not self.mode_mapping or len(self.mode_mapping) == 0:
             return timeout_s
 
-        first_mode = self.mode_mapping[0] 
+        first_mode = self.mode_mapping[0]
 
         if "settings" not in first_mode:
             return timeout_s
@@ -545,7 +547,6 @@ class PageResponseObject(object):
     def add_error(self, error_text):
         self.errors.append(error_text)
 
-
     def __str__(self):
         has_text_data = "Yes" if self.text else "No"
         has_binary_data = "Yes" if self.binary else "No"
@@ -561,24 +562,15 @@ class PageResponseObject(object):
         )
 
     def is_html(self):
-        if (
-            self.get_content_type() is not None
-            and self.is_content_html()
-        ):
+        if self.get_content_type() is not None and self.is_content_html():
             return True
 
     def is_rss(self):
-        if (
-            self.get_content_type() is not None
-            and self.is_content_rss()
-        ):
+        if self.get_content_type() is not None and self.is_content_rss():
             return True
 
     def is_json(self):
-        if (
-            self.get_content_type() is not None
-            and self.is_content_json()
-        ):
+        if self.get_content_type() is not None and self.is_content_json():
             return True
 
     def is_text(self):

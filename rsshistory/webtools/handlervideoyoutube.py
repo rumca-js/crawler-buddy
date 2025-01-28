@@ -11,7 +11,9 @@ from .defaulturlhandler import DefaultUrlHandler
 
 class YouTubeVideoHandler(DefaultUrlHandler):
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
-        super().__init__(url, contents=contents, settings=settings, url_builder=url_builder)
+        super().__init__(
+            url, contents=contents, settings=settings, url_builder=url_builder
+        )
 
         self.url = self.input2url(url)
         self.code = self.input2code(url)
@@ -211,7 +213,6 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             from datetime import datetime
             from pytz import timezone
 
-
             date_string = self.yt_ob.get_date_published()
             date = datetime.strptime(date_string, "%Y%m%d")
             dt = datetime.combine(date, datetime.min.time())
@@ -321,6 +322,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
     def load_details(self):
         from utils.serializers import YouTubeJson
+
         self.yt_ob = YouTubeJson()
 
         if self.yt_text and not self.yt_ob.loads(self.yt_text):

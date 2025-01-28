@@ -40,8 +40,9 @@ class RedditChannelHandler(DefaultChannelHandler):
 
 
 class RedditUrlHandler(DefaultUrlHandler):
-    '''https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/'''
-    '''https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/.json'''
+    """https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/"""
+
+    """https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/.json"""
 
     def __init__(self, url=None, contents=None):
         super().__init__(
@@ -109,7 +110,7 @@ class RedditUrlHandler(DefaultUrlHandler):
         if wh_colon == -1:
             return
 
-        text = json_text[wh_semi+1: wh_colon].strip()
+        text = json_text[wh_semi + 1 : wh_colon].strip()
         return text
 
     def get_json_data(self):
@@ -180,7 +181,9 @@ class GitHubUrlHandler(DefaultUrlHandler):
                 try:
                     return json.loads(contents)
                 except ValueError:
-                    WebLogger.error("GitHub:Cannot process contents {}".format(url_link))
+                    WebLogger.error(
+                        "GitHub:Cannot process contents {}".format(url_link)
+                    )
             else:
                 WebLogger.error("GitHub:No url link contents {}".format(url_link))
         else:
@@ -208,6 +211,7 @@ class ReturnDislike(DefaultUrlHandler):
 
     def read_data(self):
         from .url import Url
+
         url = "https://returnyoutubedislikeapi.com/votes?videoId=" + self.code
 
         u = Url(url)
@@ -292,7 +296,9 @@ class HackerNewsHandler(DefaultUrlHandler):
                 try:
                     return json.loads(contents)
                 except ValueError:
-                    WebLogger.error("GitHub:Cannot process contents {}".format(url_link))
+                    WebLogger.error(
+                        "GitHub:Cannot process contents {}".format(url_link)
+                    )
             else:
                 WebLogger.error("GitHub:No url link contents {}".format(url_link))
         else:

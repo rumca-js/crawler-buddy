@@ -12,14 +12,14 @@ class CrawlerInfo(object):
         self.queue = OrderedDict()
         self.crawl_index = 0
 
-    def enter(self, url, crawler_data = None):
+    def enter(self, url, crawler_data=None):
         self.queue[self.crawl_index] = datetime.now(), url, crawler_data
 
         if self.get_size() > 100:
             self.queue = OrderedDict()
 
         self.crawl_index += 1
-        return self.crawl_index -1
+        return self.crawl_index - 1
 
     def leave(self, crawl_index):
         if crawl_index in self.queue:
@@ -33,7 +33,7 @@ class Crawler(object):
     def __init__(self):
         self.crawler_info = CrawlerInfo()
 
-    def run(self, url, crawler_data = None):
+    def run(self, url, crawler_data=None):
         if not crawler_data:
             webtools.WebLogger.error("Could not find crawler data")
             return
@@ -51,17 +51,11 @@ class Crawler(object):
         if request_headers:
             # TODO implement
             headers = page_url.get_headers()
-            all_properties = [
-                    { "name" : "Headers",
-                      "data" : headers }
-            ]
+            all_properties = [{"name": "Headers", "data": headers}]
         elif request_ping:
             # TODO implement
             headers = page_url.get_headers()
-            all_properties = [
-                    { "name" : "Headers",
-                      "data" : headers }
-            ]
+            all_properties = [{"name": "Headers", "data": headers}]
         else:
             # TODO what if there is exception
             crawl_index = self.crawler_info.enter(url, crawler_data)
@@ -90,10 +84,10 @@ class Crawler(object):
         config = Configuration()
 
         if "crawler" not in crawler_data and "name" in crawler_data:
-            new_mapping = config.get_crawler(name = crawler_data["name"])
+            new_mapping = config.get_crawler(name=crawler_data["name"])
             new_mapping["crawler"] = new_mapping["crawler"](url=url)
         elif "name" not in crawler_data and "crawler" in crawler_data:
-            new_mapping = config.get_crawler(crawler_name = crawler_data["crawler"])
+            new_mapping = config.get_crawler(crawler_name=crawler_data["crawler"])
             new_mapping["crawler"] = new_mapping["crawler"](url=url)
         elif "name" not in crawler_data and "crawler" not in crawler_data:
             new_mapping = webtools.WebConfig.get_default_crawler(url)
@@ -115,9 +109,10 @@ class Crawler(object):
             print("Running:{}, with:{}".format(url, new_mapping))
 
         if "handler_class" in crawler_data:
-            new_mapping["handler_class"] = Url.get_handler_by_name(crawler_data["handler_class"])
+            new_mapping["handler_class"] = Url.get_handler_by_name(
+                crawler_data["handler_class"]
+            )
 
         page_url = webtools.Url(url, settings=new_mapping)
 
         return page_url
-

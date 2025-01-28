@@ -91,6 +91,7 @@ class YouTubeChannelHandler(DefaultChannelHandler):
         from .webtools import WebLogger
 
         from utils.programwrappers import ytdlp
+
         yt = ytdlp.YTDLP(url)
         self.yt_text = yt.download_data()
 
@@ -99,9 +100,12 @@ class YouTubeChannelHandler(DefaultChannelHandler):
             return
 
         from utils.serializers import YouTubeJson
+
         self.yt_ob = YouTubeJson()
         if not self.yt_ob.loads(self.yt_text):
-            WebLogger.error("Cannot obtain read json data url:{}\ndata:{}".format(url, self.yt_text))
+            WebLogger.error(
+                "Cannot obtain read json data url:{}\ndata:{}".format(url, self.yt_text)
+            )
             return
 
         return self.yt_ob.get_channel_code()
@@ -219,14 +223,14 @@ class YouTubeChannelHandler(DefaultChannelHandler):
 
     def get_html_url(self):
         return None
-        #if self.html_url:
+        # if self.html_url:
         #    return self.html_url
 
-        #u = self.url_builder(self.get_channel_url(), handler_class=HttpPageHandler)
-        #u.get_response()
-        #self.html_url = u
+        # u = self.url_builder(self.get_channel_url(), handler_class=HttpPageHandler)
+        # u.get_response()
+        # self.html_url = u
 
-        #return self.html_url
+        # return self.html_url
 
     def get_html_page(self):
         html_url = self.get_html_url()

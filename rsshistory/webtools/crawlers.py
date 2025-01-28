@@ -40,9 +40,9 @@ from .ipc import (
 
 class WebToolsTimeoutException(Exception):
     """Custom exception to indicate a request timeout."""
+
     def __init__(self, message="The request has timed out."):
         super().__init__(message)
-
 
 
 class CrawlerInterface(object):
@@ -198,6 +198,7 @@ class RequestsCrawler(CrawlerInterface):
     """
     Python requests
     """
+
     default_headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -375,7 +376,7 @@ class RequestsCrawler(CrawlerInterface):
 
         def request_with_timeout(url, headers, timeout, verify, stream, result):
             try:
-                result['response'] = requests.get(
+                result["response"] = requests.get(
                     url,
                     headers=headers,
                     timeout=timeout,
@@ -383,10 +384,10 @@ class RequestsCrawler(CrawlerInterface):
                     stream=stream,
                 )
             except Exception as e:
-                result['exception'] = e
+                result["exception"] = e
 
         def make_request_with_threading(url, headers, timeout_s, ssl_verify, stream):
-            result = {'response': None, 'exception': None}
+            result = {"response": None, "exception": None}
 
             thread = threading.Thread(
                 target=request_with_timeout,
@@ -394,12 +395,12 @@ class RequestsCrawler(CrawlerInterface):
             )
             thread.start()
             thread.join(timeout_s)
-            
+
             if thread.is_alive():
                 raise WebToolsTimeoutException("Request timed out")
-            if result['exception']:
-                raise result['exception']
-            return result['response']
+            if result["exception"]:
+                raise result["exception"]
+            return result["response"]
 
         headers = self.request.request_headers
         if not headers:
@@ -441,7 +442,7 @@ class RequestsCrawler(CrawlerInterface):
         try:
             with requests.get(
                 url=url,
-                headers = headers,
+                headers=headers,
                 timeout=20,
                 verify=False,
                 stream=True,
@@ -478,7 +479,7 @@ class StealthRequestsCrawler(CrawlerInterface):
                 self.request.url,
                 timeout=self.timeout_s,
                 verify=self.request.ssl_verify,
-                #stream=True,   # does not work with it
+                # stream=True,   # does not work with it
             )
         except Exception as E:
             self.response = PageResponseObject(
@@ -706,7 +707,9 @@ class SeleniumChromeHeadless(SeleniumDriver):
         capabilities = webdriver.DesiredCapabilities.CHROME.copy()
 
         # Proxy Configuration
-        if any(key in self.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]):
+        if any(
+            key in self.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]
+        ):
             prox = Proxy()
             prox.proxy_type = ProxyType.MANUAL
             prox.http_proxy = self.settings.get("http_proxy")
@@ -718,7 +721,9 @@ class SeleniumChromeHeadless(SeleniumDriver):
         if self.driver_executable:
             p = Path(self.driver_executable)
             if not p.exists():
-                WebLogger.error(f"Chromedriver executable not found at: {self.driver_executable}")
+                WebLogger.error(
+                    f"Chromedriver executable not found at: {self.driver_executable}"
+                )
                 return None
             service = Service(executable_path=self.driver_executable)
         else:
@@ -850,7 +855,9 @@ class SeleniumChromeFull(SeleniumDriver):
         capabilities = webdriver.DesiredCapabilities.CHROME.copy()
 
         # Proxy Configuration
-        if self.settings and any(key in self.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]):
+        if self.settings and any(
+            key in self.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]
+        ):
             prox = Proxy()
             prox.proxy_type = ProxyType.MANUAL
             prox.http_proxy = self.settings.get("http_proxy")
@@ -862,7 +869,9 @@ class SeleniumChromeFull(SeleniumDriver):
         if self.driver_executable:
             p = Path(self.driver_executable)
             if not p.exists():
-                WebLogger.error(f"Chromedriver executable not found at: {self.driver_executable}")
+                WebLogger.error(
+                    f"Chromedriver executable not found at: {self.driver_executable}"
+                )
                 return None
             service = Service(executable_path=self.driver_executable)
         else:
@@ -1007,7 +1016,9 @@ class SeleniumUndetected(SeleniumDriver):
         options = uc.ChromeOptions()
 
         # Proxy Configuration
-        if any(key in self.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]):
+        if any(
+            key in self.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]
+        ):
             prox = Proxy()
             prox.proxy_type = ProxyType.MANUAL
             prox.http_proxy = self.settings.get("http_proxy")
@@ -1244,7 +1255,9 @@ class ScriptCrawler(CrawlerInterface):
                 if len(data) > 3:
                     headers = data[4]["data"]
 
-                self.response = PageResponseObject(url = url, request_url = url, text = contents, headers = headers)
+                self.response = PageResponseObject(
+                    url=url, request_url=url, text=contents, headers=headers
+                )
                 return self.response
 
             except ValueError:
@@ -1458,7 +1471,7 @@ class SeleniumBase(CrawlerInterface):
 
 
 class RemoteServer(object):
-    def __init__(self, remote_server, timeout_s = 30):
+    def __init__(self, remote_server, timeout_s=30):
         self.remote_server = remote_server
         self.timeout_s = timeout_s
 
@@ -1488,7 +1501,7 @@ class RemoteServer(object):
 
         text = None
         try:
-            with requests.get(url = link, timeout=timeout_s, verify=False) as result:
+            with requests.get(url=link, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
             return
@@ -1502,9 +1515,9 @@ class RemoteServer(object):
         try:
             json_obj = json.loads(text)
         except ValueError as E:
-            WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
+            WebLogger.error(info_text="Url:{} Cannot read response".format(link))
         except TypeError as E:
-            WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
+            WebLogger.error(info_text="Url:{} Cannot read response".format(link))
 
         if "success" in json_obj and not json_obj["success"]:
             WebLogger.error(json_obj["error"])
@@ -1541,7 +1554,7 @@ class RemoteServer(object):
 
         text = None
         try:
-            with requests.get(url = link, timeout=timeout_s, verify=False) as result:
+            with requests.get(url=link, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
             return
@@ -1553,9 +1566,9 @@ class RemoteServer(object):
         try:
             json_obj = json.loads(text)
         except ValueError as E:
-            WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
+            WebLogger.error(info_text="Url:{} Cannot read response".format(link))
         except TypeError as E:
-            WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
+            WebLogger.error(info_text="Url:{} Cannot read response".format(link))
 
         if "success" in json_obj and not json_obj["success"]:
             WebLogger.error(json_obj["error"])
@@ -1592,7 +1605,7 @@ class RemoteServer(object):
 
         text = None
         try:
-            with requests.get(url = link, timeout=timeout_s, verify=False) as result:
+            with requests.get(url=link, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
             return
@@ -1604,9 +1617,9 @@ class RemoteServer(object):
         try:
             json_obj = json.loads(text)
         except ValueError as E:
-            WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
+            WebLogger.error(info_text="Url:{} Cannot read response".format(link))
         except TypeError as E:
-            WebLogger.error(info_text = "Url:{} Cannot read response".format(link))
+            WebLogger.error(info_text="Url:{} Cannot read response".format(link))
 
         if "success" in json_obj and not json_obj["success"]:
             WebLogger.error(json_obj["error"])

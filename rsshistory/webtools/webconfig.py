@@ -129,39 +129,39 @@ class WebConfig(object):
         if config:
             crawler_data = dict(config[0])
             if "crawler" in crawler_data:
-                crawler_data["crawler"] = crawler_data["crawler"](url =url)
+                crawler_data["crawler"] = crawler_data["crawler"](url=url)
                 return crawler_data
 
     def get_default_browser_setup(browser, enabled=True):
         return {
-            "enabled"   : enabled,
-            "name"      : browser.__name__,
-            "crawler"   : browser,
-            "settings"  : {"timeout_s": 20},
+            "enabled": enabled,
+            "name": browser.__name__,
+            "crawler": browser,
+            "settings": {"timeout_s": 20},
         }
 
     def get_requests():
         return {
-            "enabled"   : True,
-            "name"      : "RequestsCrawler",
-            "crawler"   : RequestsCrawler,
-            "settings"  : {"timeout_s": 20},
+            "enabled": True,
+            "name": "RequestsCrawler",
+            "crawler": RequestsCrawler,
+            "settings": {"timeout_s": 20},
         }
 
     def get_scriptcralwer(script, name=""):
         if script:
             return {
-                "enabled"   : True,
-                "name"      : name,
-                "crawler"   : ScriptCrawler,
-                "settings"  : {"script": script, "timeout_s": 40},
+                "enabled": True,
+                "name": name,
+                "crawler": ScriptCrawler,
+                "settings": {"script": script, "timeout_s": 40},
             }
         else:
             return {
-                "enabled"   : False,
-                "name"      : name,
-                "crawler"   : ScriptCrawler,
-                "settings"  : {"script": script, "timeout_s": 40},
+                "enabled": False,
+                "name": name,
+                "crawler": ScriptCrawler,
+                "settings": {"script": script, "timeout_s": 40},
             }
 
     def get_seleniumheadless():
@@ -169,20 +169,20 @@ class WebConfig(object):
 
         if chromedriver_path.exists():
             return {
-                "enabled"   : False,
-                "name"      : "SeleniumChromeHeadless",
-                "crawler"   : SeleniumChromeHeadless,
-                "settings"  : {
+                "enabled": False,
+                "name": "SeleniumChromeHeadless",
+                "crawler": SeleniumChromeHeadless,
+                "settings": {
                     "driver_executable": str(chromedriver_path),
                     "timeout_s": 30,
                 },
             }
         else:
             return {
-                "enabled"   : True,
-                "name"      : "SeleniumChromeHeadless",
-                "crawler"   : SeleniumChromeHeadless,
-                "settings"  : {"driver_executable": None, "timeout_s": 40},
+                "enabled": True,
+                "name": "SeleniumChromeHeadless",
+                "crawler": SeleniumChromeHeadless,
+                "settings": {"driver_executable": None, "timeout_s": 40},
             }
 
     def get_seleniumfull():
@@ -190,20 +190,20 @@ class WebConfig(object):
 
         if chromedriver_path.exists():
             return {
-                "enabled"   : False,
-                "name"      : "SeleniumChromeFull",
-                "crawler"   : SeleniumChromeFull,
-                "settings"  : {
+                "enabled": False,
+                "name": "SeleniumChromeFull",
+                "crawler": SeleniumChromeFull,
+                "settings": {
                     "driver_executable": str(chromedriver_path),
                     "timeout_s": 40,
                 },
             }
         else:
             return {
-                "enabled"   : False,
-                "name"      : "SeleniumChromeFull",
-                "crawler"   : SeleniumChromeFull,
-                "settings"  : {"driver_executable": None, "timeout_s": 40},
+                "enabled": False,
+                "name": "SeleniumChromeFull",
+                "crawler": SeleniumChromeFull,
+                "settings": {"driver_executable": None, "timeout_s": 40},
             }
 
     def get_seleniumundetected():
@@ -211,29 +211,28 @@ class WebConfig(object):
 
         if chromedriver_path.exists():
             return {
-                "enabled"   : False,
-                "name"      : "SeleniumUndetected",
-                "crawler"   : SeleniumUndetected,
-                "settings"  : {
+                "enabled": False,
+                "name": "SeleniumUndetected",
+                "crawler": SeleniumUndetected,
+                "settings": {
                     "driver_executable": str(chromedriver_path),
                     "timeout_s": 30,
                 },
             }
         else:
             return {
-                "enabled"   : False,
-                "name"      : "SeleniumUndetected",
-                "crawler"   : SeleniumUndetected,
-                "settings"  : {"driver_executable": None, "timeout_s": 40},
+                "enabled": False,
+                "name": "SeleniumUndetected",
+                "crawler": SeleniumUndetected,
+                "settings": {"driver_executable": None, "timeout_s": 40},
             }
 
     def get_seleniumbase():
         return {
-            "enabled"   : False,
-            "name"      : "SeleniumBase",
-            "crawler"   : SeleniumBase,
-            "settings"  : {
-            },
+            "enabled": False,
+            "name": "SeleniumBase",
+            "crawler": SeleniumBase,
+            "settings": {},
         }
 
     def use_logger(Logger):
@@ -249,20 +248,28 @@ class WebConfig(object):
 
     def kill_chrom_processes():
         """Kill all processes whose names start with 'chrom'."""
-        for proc in psutil.process_iter(['pid', 'name']):
+        for proc in psutil.process_iter(["pid", "name"]):
             try:
-                if proc.info['name'] and proc.info['name'].lower().startswith('chrom'):
+                if proc.info["name"] and proc.info["name"].lower().startswith("chrom"):
                     proc.kill()  # Kill the process
-                    webtools.WebLogger.error(f"Killed process: {proc.info['name']} (PID: {proc.info['pid']})")
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
-                webtools.WebLogger.error(f"Could not kill process {proc.info.get('name', 'unknown')}: {e}")
+                    webtools.WebLogger.error(
+                        f"Killed process: {proc.info['name']} (PID: {proc.info['pid']})"
+                    )
+            except (
+                psutil.NoSuchProcess,
+                psutil.AccessDenied,
+                psutil.ZombieProcess,
+            ) as e:
+                webtools.WebLogger.error(
+                    f"Could not kill process {proc.info.get('name', 'unknown')}: {e}"
+                )
 
     def count_chrom_processes():
         """Count the number of running processes whose names start with 'chrom'."""
         count = 0
-        for proc in psutil.process_iter(['pid', 'name']):
+        for proc in psutil.process_iter(["pid", "name"]):
             try:
-                if proc.info['name'] and proc.info['name'].lower().startswith('chrom'):
+                if proc.info["name"] and proc.info["name"].lower().startswith("chrom"):
                     count += 1
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 continue  # Skip processes we can't access
@@ -273,7 +280,10 @@ class WebConfig(object):
             from pyvirtualdisplay import Display
 
             # Check if WebConfig.display is already initialized and active
-            if isinstance(getattr(WebConfig, 'display', None), Display) and WebConfig.display.is_alive():
+            if (
+                isinstance(getattr(WebConfig, "display", None), Display)
+                and WebConfig.display.is_alive()
+            ):
                 return  # Do nothing if already initialized and active
 
             # Requires xvfb

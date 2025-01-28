@@ -1,6 +1,7 @@
 """
 Simple scraping script.
 """
+
 import socket
 import json
 import traceback
@@ -9,12 +10,12 @@ import time
 import requests
 
 from rsshistory.webtools import (
-   Url,
-   RssPage,
-   HtmlPage,
-   fetch_url,
-   fetch_all_urls,
-   WebConfig,
+    Url,
+    RssPage,
+    HtmlPage,
+    fetch_url,
+    fetch_all_urls,
+    WebConfig,
 )
 from utils.serializers import PageDisplay, PageDisplayParser
 

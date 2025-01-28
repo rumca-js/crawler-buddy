@@ -3,6 +3,7 @@ This script is not required, RequestsCrawler can be called directly from a proje
  - we just show off how it can be done
  - it can be used to compare with other crawling scripts
 """
+
 import json
 import time
 import argparse
@@ -13,7 +14,7 @@ from rsshistory import webtools
 
 def main():
     webtools.WebConfig.init()
-    webtools.WebConfig.use_print_logging() 
+    webtools.WebConfig.use_print_logging()
 
     parser = webtools.ScriptCrawlerParser()
     parser.parse()
@@ -40,5 +41,6 @@ def main():
     print(response)
     driver.save_response()
     driver.close()
+
 
 main()

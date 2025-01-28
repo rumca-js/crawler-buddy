@@ -2,11 +2,12 @@
 TODO:
      - we want to find only entries within mintes of last query
 """
+
 from datetime import datetime, timedelta
 
 
 class CrawlHistory(object):
-    def __init__(self, size=200, time_cache_m = 10):
+    def __init__(self, size=200, time_cache_m=10):
         """
         @param time_cache_m Time Cache in minutes
         """
@@ -37,7 +38,7 @@ class CrawlHistory(object):
     def get_history(self):
         return self.container
 
-    def find(self, index = None, url = None, crawler_name= None, crawler = None):
+    def find(self, index=None, url=None, crawler_name=None, crawler=None):
         """
         return index
         """
@@ -58,12 +59,22 @@ class CrawlHistory(object):
 
             response = CrawlHistory.read_properties_section("Response", all_properties)
 
-            if crawler_name is not None and response and "crawler_data" in response and "name" in response["crawler_data"]:
+            if (
+                crawler_name is not None
+                and response
+                and "crawler_data" in response
+                and "name" in response["crawler_data"]
+            ):
                 if crawler_name != response["crawler_data"]["name"]:
                     continue
 
-            if crawler is not None and response and "crawler_data" in response and "crawler" in response["crawler_data"]:
-                if crawler!= response["crawler_data"]["crawler"]:
+            if (
+                crawler is not None
+                and response
+                and "crawler_data" in response
+                and "crawler" in response["crawler_data"]
+            ):
+                if crawler != response["crawler_data"]["crawler"]:
                     continue
 
             return inner_index, timestamp, all_properties

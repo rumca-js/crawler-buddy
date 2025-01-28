@@ -1,16 +1,18 @@
 """
 This is example script about how to use this project as a simple RSS reader
 """
+
 from rsshistory.webtools import (
-   WebConfig,
-   HttpPageHandler,
-   FeedClientParser,
-   FeedClient,
-   ScrapingClient,
+    WebConfig,
+    HttpPageHandler,
+    FeedClientParser,
+    FeedClient,
+    ScrapingClient,
 )
 from sqlalchemy import (
     create_engine,
 )
+
 
 def main():
     WebConfig.init()

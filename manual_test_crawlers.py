@@ -13,6 +13,7 @@ In my setup it was around:
 
 # TODO check if status code is valid for all
 """
+
 import time
 import subprocess
 
@@ -26,29 +27,41 @@ test_webpage = "https://google.com"
 def call_process(input_script):
     start_time = time.time()
     try:
-        subprocess.check_call("poetry run python {} --url {} --output-file {} --timeout 20".format(input_script, test_webpage, "out.txt"), timeout=20)
+        subprocess.check_call(
+            "poetry run python {} --url {} --output-file {} --timeout 20".format(
+                input_script, test_webpage, "out.txt"
+            ),
+            timeout=20,
+        )
     except Exception as e:
         return 100000000
 
     return time.time() - start_time
 
+
 def call_requests():
     return call_process("crawlerrequests.py")
+
 
 def call_crawleebeautiful():
     return call_process("crawleebeautifulsoup.py")
 
+
 def call_crawleeplaywright():
     return call_process("crawleeplaywright.py")
+
 
 def call_seleniumchromeheadless():
     return call_process("crawlerseleniumheadless.py")
 
+
 def call_seleniumchromeundetected():
     return call_process("crawlerseleniumundetected.py")
 
+
 def call_seleniumbase():
     return call_process("crawlerseleniumbase.py")
+
 
 def main():
     time_requests = call_requests()
@@ -64,5 +77,6 @@ def main():
     print(f"seleniumchromeheadless:{time_seleniumchromeheadless} [s]")
     print(f"seleniumchromeundetected:{time_seleniumchromeundetected} [s]")
     print(f"seleniumbase:{time_seleniumbase} [s]")
+
 
 main()

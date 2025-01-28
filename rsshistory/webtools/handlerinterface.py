@@ -109,15 +109,14 @@ class HandlerInterface(DefaultContentPage):
     def get_response(self):
         raise NotImplementedError
 
-    def ping(self, timeout_s = 120):
+    def ping(self, timeout_s=120):
         """
         @param timeout_s 0 is unlimited
         """
         raise NotImplementedError
 
     def get_view_count(self):
-        """
-        """
+        """ """
         return
 
     def get_thumbs_up(self):

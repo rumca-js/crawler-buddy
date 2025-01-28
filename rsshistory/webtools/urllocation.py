@@ -7,6 +7,7 @@ from .webtools import (
     URL_TYPE_UNKNOWN,
 )
 
+
 class UrlLocation(object):
     def __init__(self, url):
         self.url = url
