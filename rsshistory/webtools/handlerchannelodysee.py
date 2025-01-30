@@ -17,6 +17,8 @@ class OdyseeChannelHandler(DefaultChannelHandler):
             self.code = self.input2code(url)
             self.url = self.code2url(self.code)
 
+        self.rss_url = None
+
     def is_handled_by(self):
         if not self.url:
             return False
@@ -108,3 +110,38 @@ class OdyseeChannelHandler(DefaultChannelHandler):
             return result
         else:
             return []
+
+    def get_entries(self):
+        rss_url = self.get_rss_url()
+        if rss_url:
+            return rss_url.get_entries()
+        else:
+            return []
+
+    def get_rss_url(self):
+        from .webtools import WebLogger
+
+        if self.rss_url:
+            return self.rss_url
+
+        feeds = self.get_feeds()
+        if not feeds or len(feeds) == 0:
+            WebLogger.error(
+                "Url:{} Cannot read YouTube channel feed URL".format(self.url)
+            )
+            return
+
+        feed = feeds[0]
+
+        if not feed:
+            return
+
+        if self.settings:
+            settings = dict(self.settings)
+        else:
+            settings = {}
+        settings["handler_class"] = HttpPageHandler
+
+        self.rss_url = self.url_builder(feed, settings=settings)
+        self.rss_url.get_response()
+        return self.rss_url

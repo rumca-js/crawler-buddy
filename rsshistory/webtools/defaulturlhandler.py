@@ -92,5 +92,4 @@ class DefaultChannelHandler(DefaultUrlHandler):
 
         if self.response:
             self.contents = self.response.get_text()
-
             return self.response
