@@ -61,6 +61,24 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertIn("crawler", page_url.settings)
         self.assertEqual(type(page_url.settings["crawler"]).__name__, "RequestsCrawler")
 
+    def test_get_page_url__invalid(self):
+        crawler = Crawler()
+
+        test_url = "https://linkedin.com"
+
+        crawler_data = {
+                "name" : "RequestsCrawlerDupa",
+                "crawler" : "RequestsCrawlerDupa",
+                "settings" : {
+                    "timeout_s" : 20,
+                    "remote_server": "https://",
+                }
+        }
+
+        # call tested function
+        page_url = crawler.get_page_url(test_url, crawler_data)
+        self.assertFalse(page_url)
+
     def test_get_page_url__by_both(self):
         crawler = Crawler()
 
