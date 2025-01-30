@@ -57,7 +57,8 @@ class CrawlerInterface(object):
         self.request = request
         self.response = None
         self.response_file = response_file
-        self.settings = settings
+        if settings:
+            self.set_settings(settings)
 
         if self.request.timeout_s and settings and "timeout_s" in settings:
             self.timeout_s = max(self.request.timeout_s, settings["timeout_s"])
@@ -564,10 +565,12 @@ class SeleniumDriver(CrawlerInterface):
     def set_settings(self, settings):
         if (
             settings
-            and "driver_executable" in settings
-            and settings["driver_executable"]
+            and "settings" in settings
+            and "driver_executable" in settings["settings"]
+            and settings["settings"]["driver_executable"]
         ):
-            self.driver_executable = settings["driver_executable"]
+            self.driver_executable = settings["settings"]["driver_executable"]
+            print(self.driver_executable)
 
         self.settings = settings
 
