@@ -329,6 +329,10 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(properties["link"], test_link)
         self.assertEqual(properties["link_request"], test_link)
 
+        self.assertEqual(all_properties[5]["name"], "Entries")
+        entries = all_properties[5]["data"]
+        self.assertTrue(len(entries) > 0)
+
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_properties__youtube_channel__advanced(self):
@@ -353,7 +357,39 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(properties["link"], test_link)
         self.assertEqual(properties["link_request"], test_link)
 
+        self.assertEqual(all_properties[5]["name"], "Entries")
+        entries = all_properties[5]["data"]
+        self.assertTrue(len(entries) > 0)
+
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
+    def test_get_properties__odysee_channel__advanced(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://odysee.com/$/rss/@DistroTube:2"
+
+        # call tested function
+        url = Url(test_link)
+
+        url.get_response()
+        all_properties = url.get_properties(full=True)
+
+        self.assertTrue(len(all_properties) > 0)
+        self.assertEqual(all_properties[0]["name"], "Properties")
+
+        properties = all_properties[0]["data"]
+
+        self.assertTrue("title" in properties)
+        self.assertTrue("link" in properties)
+
+        #self.assertEqual(properties["link"], test_link)
+        self.assertEqual(properties["link_request"], test_link)
+
+        self.assertEqual(all_properties[5]["name"], "Entries")
+        entries = all_properties[5]["data"]
+        self.assertTrue(len(entries) > 0)
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_properties__youtube_video__advanced(self):
         MockRequestCounter.mock_page_requests = 0
