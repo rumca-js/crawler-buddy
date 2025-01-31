@@ -4,6 +4,7 @@ from datetime import datetime
 from collections import OrderedDict
 from rsshistory import webtools
 from rsshistory.configuration import Configuration
+from rsshistory.entryrules import EntryRules
 
 
 class CrawlerInfo(object):
@@ -32,6 +33,7 @@ class CrawlerInfo(object):
 class Crawler(object):
     def __init__(self):
         self.crawler_info = CrawlerInfo()
+        self.entry_rules = EntryRules()
 
     def run(self, url, crawler_data=None):
         if not crawler_data:
@@ -97,9 +99,15 @@ class Crawler(object):
                 return
             new_mapping["crawler"] = new_mapping["crawler"](url=url)
         elif "name" not in crawler_data and "crawler" not in crawler_data:
-            new_mapping = webtools.WebConfig.get_default_crawler(url)
-            if not new_mapping:
-                return
+            crawler_name = self.entry_rules.get_browser(url)
+            if not crawler_name:
+                new_mapping = webtools.WebConfig.get_default_crawler(url)
+                if not new_mapping:
+                    return
+            else:
+                new_mapping = config.get_crawler(name=crawler_name)
+                if not new_mapping:
+                    webtools.WebLogger.error("Cannot find specified crawler in config: {}".format(crawler_name))
         else:
             new_mapping = config.get_crawler(name=crawler_data["name"])
             if not new_mapping:

@@ -34,6 +34,14 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
+    def test_get_vide_code__watch_more_args(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        handler = YouTubeVideoHandler("https://www.youtube.com/watch?app=desktop&v=nkll0StZJLA&t=34s")
+        self.assertEqual(handler.get_video_code(), "nkll0StZJLA")
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_video_code__with_time(self):
         MockRequestCounter.mock_page_requests = 0
 

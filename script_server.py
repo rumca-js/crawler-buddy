@@ -24,7 +24,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.31"
+__version__ = "1.0.32"
 
 
 app = Flask(__name__)
@@ -338,11 +338,11 @@ def debug():
         detail_text = items[3]
         user = items[4]
 
-        info_text = html.unescape(info_text)
+        info_text = html.escape(info_text)
 
         text += "<div>[{}] Level:{} info:{}</div>".format(timestamp, level, info_text)
         if detail_text:
-            detail_text = html.unescape(detail_text)
+            detail_text = html.escape(detail_text)
             text += "<div>{}</div>".format(detail_text)
 
     return get_html(id=id, body=text, title="Debug")

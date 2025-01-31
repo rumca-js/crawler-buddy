@@ -10,6 +10,7 @@ The Crawling Server is an HTTP-based web crawler that delivers data in an easily
  - Offers a unified interface for all metadata.
  - Running a containerized docker environment helps isolate problems from the host operating system
  - All your crawling / scraping / rss clients could use one source, or you can split it up by hosting multiple servers
+ - Encoding? What encoding? All responses are in UTF
 
 Available Endpoints:
 
@@ -18,6 +19,7 @@ Available Endpoints:
  - GET /infoj - Similar to /info, but explicitly returns the information, in JSON format.
  - GET /history - Displays the crawl history.
  - GET /historyj - Displays the crawl history, in JSON format.
+ - GET /queue - Displays information about the current queue
  - GET /crawlj - Crawls a specified page. Accepts the following query parameters:
     - url (string): The URL to crawl.
     - name (string): The name of the crawler.
@@ -42,6 +44,8 @@ Fields:
  - Response - commonly used response fields Provides Content-Type, Content-Length, status\_code, etc.
  - Headers - all response headers of page. Provides Content-Type, Content-Length, etc.
  - Entries - if the link contains subordinate elements, like RSS, this field is populated with their meta data
+
+You can see the structure in [Example response file](https://raw.githubusercontent.com/rumca-js/crawler-buddy/refs/heads/main/example_response.json)
 
 Response contains hashes that can easily be used to check if page has changed over time.
 To decode contents hash.
@@ -92,6 +96,8 @@ Crawling methods like /crawlj can be called with crawl settings, which commonly 
  - crawler - crawler class
  - handler_class - handler clas, useful if you want to read an URL using 'HttpPageHandler', as normal vanilla HTTP processing, as if read by a browser
  - timeout_s - timout for crawling
+
+No need to select methods manually, as some methods are already predefined and used automatically! Just take a look at entry_rules.json file!
 
 ## Supported platforms
 

@@ -10,6 +10,7 @@ from pathlib import Path
 import os
 import subprocess
 import threading
+import urllib.parse
 
 from utils.dateutils import DateUtils
 from utils.basictypes import fix_path_for_os
@@ -570,7 +571,6 @@ class SeleniumDriver(CrawlerInterface):
             and settings["settings"]["driver_executable"]
         ):
             self.driver_executable = settings["settings"]["driver_executable"]
-            print(self.driver_executable)
 
         self.settings = settings
 
@@ -950,6 +950,10 @@ class SeleniumChromeFull(SeleniumDriver):
             self.driver.set_page_load_timeout(selenium_timeout)
 
             self.driver.get(self.request.url)
+
+            if "settings" in self.settings and "delay_s" in self.settings["settings"]:
+                delay_s = self.settings["settings"]["delay_s"]
+                time.sleep(delay_s)
 
             status_code = self.get_selenium_status_code(self.driver)
 
@@ -1484,15 +1488,18 @@ class RemoteServer(object):
         """
         import requests
 
+        encoded_url = urllib.parse.quote(url, safe="")
+
         if settings:
             crawler_data = json.dumps(settings)
+            encoded_crawler_data = urllib.parse.quote(crawler_data, safe="")
 
             link = self.remote_server
-            link = link + "/socialj?url={}&crawler_data={}".format(url, crawler_data)
+            link = f"{link}/socialj?url={encoded_url}&crawler_data={encoded_crawler_data}"
             print("RemoteServer: calling:{}".format(link))
         else:
             link = self.remote_server
-            link = link + "/socialj?url={}".format(url)
+            link = f"{link}/socialj?url={encoded_url}"
             print("RemoteServer: calling:{}".format(link))
 
         timeout_s = 50
@@ -1518,9 +1525,11 @@ class RemoteServer(object):
         try:
             json_obj = json.loads(text)
         except ValueError as E:
-            WebLogger.error(info_text="Url:{} Cannot read response".format(link))
+            WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
+            return
         except TypeError as E:
-            WebLogger.error(info_text="Url:{} Cannot read response".format(link))
+            WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
+            return
 
         if "success" in json_obj and not json_obj["success"]:
             WebLogger.error(json_obj["error"])
@@ -1534,18 +1543,27 @@ class RemoteServer(object):
         """
         import requests
 
+        encoded_url = urllib.parse.quote(url, safe="")
+
         if settings:
             if name != "":
                 settings["name"] = name
 
             crawler_data = json.dumps(settings)
+            encoded_crawler_data = urllib.parse.quote(crawler_data, safe="")
 
             link = self.remote_server
-            link = link + "/crawlj?url={}&crawler_data={}".format(url, crawler_data)
+            link = f"{link}/crawlj?url={encoded_url}&crawler_data={encoded_crawler_data}"
+            WebLogger.debug("RemoteServer: calling:{}".format(link))
+        elif name != "":
+            link = self.remote_server
+            link = f"{link}/crawlj?url={encoded_url}&name={name}"
+
             WebLogger.debug("RemoteServer: calling:{}".format(link))
         else:
             link = self.remote_server
-            link = link + "/crawlj?url={}&name={}".format(url, name)
+            link = f"{link}/crawlj?url={encoded_url}"
+
             WebLogger.debug("RemoteServer: calling:{}".format(link))
 
         timeout_s = 50
@@ -1569,9 +1587,11 @@ class RemoteServer(object):
         try:
             json_obj = json.loads(text)
         except ValueError as E:
-            WebLogger.error(info_text="Url:{} Cannot read response".format(link))
+            WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
+            return
         except TypeError as E:
-            WebLogger.error(info_text="Url:{} Cannot read response".format(link))
+            WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
+            return
 
         if "success" in json_obj and not json_obj["success"]:
             WebLogger.error(json_obj["error"])
@@ -1579,54 +1599,8 @@ class RemoteServer(object):
 
         return json_obj
 
-    def get_properties(self, url, settings=None):
-        """
-        @returns None in case of error
-        """
-        import requests
-
-        if settings:
-            if name != "":
-                settings["name"] = name
-
-            crawler_data = json.dumps(settings)
-
-            link = self.remote_server
-            link = link + "/crawlj?url={}&crawler_data={}".format(url, crawler_data)
-            print("RemoteServer: calling:{}".format(link))
-        else:
-            link = self.remote_server
-            link = link + "/crawlj?url={}&name={}".format(url, name)
-            print("RemoteServer: calling:{}".format(link))
-
-        timeout_s = 50
-        if settings and "timeout_s" in settings:
-            timeout_s = settings["timeout_s"]
-
-        # we make request longer - for the server to be able to respond in time
-        timeout_s += 5
-
-        text = None
-        try:
-            with requests.get(url=link, timeout=timeout_s, verify=False) as result:
-                text = result.text
-        except Exception as E:
-            return
-
-        if not text:
-            return
-
-        json_obj = None
-        try:
-            json_obj = json.loads(text)
-        except ValueError as E:
-            WebLogger.error(info_text="Url:{} Cannot read response".format(link))
-        except TypeError as E:
-            WebLogger.error(info_text="Url:{} Cannot read response".format(link))
-
-        if "success" in json_obj and not json_obj["success"]:
-            WebLogger.error(json_obj["error"])
-            return False
+    def get_properties(self, url, name = "", settings=None):
+        json_obj = self.crawlj(url=url, name=name, settings=settings)
 
         if json_obj:
             return self.read_properties_section("Properties", json_obj)

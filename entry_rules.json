@@ -1,0 +1,22 @@
+{
+    "entryrules": [
+        {
+            "id": 1,
+            "enabled": true,
+            "rule_url": "www.politico.com, barrons.com, www.reuters.com, techcrunch.com, .yahoo.com, engadget.com, phys.org, youtube.com/channel, wsj.com, www.wsj.com, open.spotify.com/show, www.washingtontimes.com, washingtontimes.com",
+            "rule_name": "selenium full",
+            "block": false,
+            "auto_tag": "",
+            "browser": "CrawleeScript"
+        },
+        {
+            "id": 2,
+            "enabled": true,
+            "rule_url": "wsj.com, mashable.com, www.youtube.com/user",
+            "rule_name": "crawlee",
+            "block": false,
+            "auto_tag": "",
+            "browser": "SeleniumChromeFull"
+        }
+    ]
+}
