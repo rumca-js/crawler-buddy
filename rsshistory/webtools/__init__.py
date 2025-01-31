@@ -35,8 +35,8 @@ from .crawlers import (
     SeleniumUndetected,
     ScriptCrawler,
     StealthRequestsCrawler,
-    RemoteServer,
 )
+from remoteserver import RemoteServer
 from .crawlerscript import (
     ScriptCrawlerParser,
     ScriptCrawlerInterface,

@@ -59,6 +59,18 @@ Notes:
  - Some things might be just fixed by project. No Content-Type, but we detected it is text/html, then software provides it in response
  - To sum up: the strategy is to fix what can be fixed, to make consistent things that are not
 
+# How to use the response?
+
+Sure that is quite simple.
+
+For Python RemoteServer has been provided in remoteserver.py file. To obtain all properties it is enough to use the following code:
+
+```
+link = "https://google.com"
+server = RemoteServer(server_address)
+all_properties = server.get_crawlj(url=link)
+```
+
 ## Additional features
 
 Question: What if someone wants to make two paralell crawling methods, to make crawling faster?
