@@ -36,7 +36,7 @@ from .crawlers import (
     ScriptCrawler,
     StealthRequestsCrawler,
 )
-from remoteserver import RemoteServer
+from .remoteserver import RemoteServer
 from .crawlerscript import (
     ScriptCrawlerParser,
     ScriptCrawlerInterface,

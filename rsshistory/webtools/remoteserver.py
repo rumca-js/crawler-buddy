@@ -52,14 +52,14 @@ class RemoteServer(object):
         try:
             json_obj = json.loads(text)
         except ValueError as E:
-            WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
+            # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
             return
         except TypeError as E:
-            WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
+            # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
             return
 
         if "success" in json_obj and not json_obj["success"]:
-            WebLogger.error(json_obj["error"])
+            # WebLogger.error(json_obj["error"])
             return False
 
         return json_obj
@@ -81,17 +81,17 @@ class RemoteServer(object):
 
             link = self.remote_server
             link = f"{link}/crawlj?url={encoded_url}&crawler_data={encoded_crawler_data}"
-            WebLogger.debug("RemoteServer: calling:{}".format(link))
+            # WebLogger.debug("RemoteServer: calling:{}".format(link))
         elif name != "":
             link = self.remote_server
             link = f"{link}/crawlj?url={encoded_url}&name={name}"
 
-            WebLogger.debug("RemoteServer: calling:{}".format(link))
+            # WebLogger.debug("RemoteServer: calling:{}".format(link))
         else:
             link = self.remote_server
             link = f"{link}/crawlj?url={encoded_url}"
 
-            WebLogger.debug("RemoteServer: calling:{}".format(link))
+            # WebLogger.debug("RemoteServer: calling:{}".format(link))
 
         timeout_s = 50
         if settings and "timeout_s" in settings:
@@ -114,14 +114,14 @@ class RemoteServer(object):
         try:
             json_obj = json.loads(text)
         except ValueError as E:
-            WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
+            # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
             return
         except TypeError as E:
-            WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
+            # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
             return
 
         if "success" in json_obj and not json_obj["success"]:
-            WebLogger.error(json_obj["error"])
+            # WebLogger.error(json_obj["error"])
             return False
 
         return json_obj
@@ -139,7 +139,7 @@ class RemoteServer(object):
             return
 
         if "success" in all_properties and not all_properties["success"]:
-            WebLogger.error(all_properties["error"])
+            # WebLogger.error(all_properties["error"])
             return False
 
         for properties in all_properties:
