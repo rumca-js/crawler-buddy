@@ -12,6 +12,10 @@ The Crawling Server is an HTTP-based web crawler that delivers data in an easily
  - All your crawling / scraping / rss clients could use one source, or you can split it up by hosting multiple servers
  - Encoding? What encoding? All responses are in UTF
 
+<div align="center">
+  <img alt="Meme" src="images/crawler_buddy.png" style="width:450px">
+</div>
+
 Available Endpoints:
 
  - GET / - Provides index page
