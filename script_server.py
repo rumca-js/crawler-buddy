@@ -2,7 +2,7 @@
 Starts server at the specified location
 
 Access through:
-    ip:port/crawlj?url=.... etc.
+    ip:port/getj?url=.... etc.
 """
 
 from pathlib import Path
@@ -24,7 +24,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 
 
 app = Flask(__name__)
@@ -210,8 +210,8 @@ def index():
     text += """<div><a href="/queue?id={}">Queue</a> - shows currently processing queue</div>""".format( id)
     text += """<div><a href="/find?id={}">Find</a> - form for findj</div>""".format(id)
     text += """<div><a href="/findj?id={}">Find JSON</a> - returns information about history entry JSON</div>""".format(id)
-    text += """<div><a href="/crawl?id={}">Crawl</a> - form for Crawl JSON</div>""".format(id)
-    text += """<div><a href="/crawlj?id={}">Crawlj</a> - crawl a web page</div>""".format(id)
+    text += """<div><a href="/get?id={}">Get</a> - form for crawling a web page using GET method</div>""".format(id)
+    text += """<div><a href="/getj?id={}">Getj</a> - crawl a web page using GET method</div>""".format(id)
     text += """<div><a href="/socialj?id={}">Socialj</a> - dynamic social data JSON</div>""".format(id)
     text += """<div><a href="/proxy?id={}">Proxy</a> - makes GET request, then passes you the contents, as is</div>""".format(id)
     text += """<div><a href="/linkj?id={}">Linkj</a> - return link info JSON</div>""".format(id)
@@ -477,7 +477,7 @@ def get():
 
     form_html = """
         <h1>Submit Your Details</h1>
-        <form action="/crawlj?id={}" method="get">
+        <form action="/getj?id={}" method="get">
             <label for="url">URL:</label><br>
             <input type="text" id="url" name="url" required><br><br>
 
@@ -521,7 +521,7 @@ def getj():
         webtools.WebConfig.start_display()
         all_properties = get_crawl_properties(url, crawler_data)
     except Exception as E:
-        webtools.WebLogger.exc(E, "Exception when calling crawlj")
+        webtools.WebLogger.exc(E, "Exception when calling getj")
         all_properties = None
 
     if not all_properties:
