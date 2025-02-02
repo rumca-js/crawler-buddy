@@ -20,7 +20,7 @@ Available Endpoints:
  - GET /history - Displays the crawl history.
  - GET /historyj - Displays the crawl history, in JSON format.
  - GET /queue - Displays information about the current queue
- - GET /crawlj - Crawls a specified page. Accepts the following query parameters:
+ - GET /getj - Crawls a specified page. Accepts the following query parameters:
     - url (string): The URL to crawl.
     - name (string): The name of the crawler.
     - crawler (string): The crawler type.

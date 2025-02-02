@@ -24,7 +24,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "1.0.35"
+__version__ = "2.0.0"
 
 
 app = Flask(__name__)
@@ -340,7 +340,7 @@ def debug():
 
         info_text = html.escape(info_text)
 
-        text += '<div style="margin-bottom:2px">'
+        text += '<div style="display: flex; flex-direction: column; gap: 0.2em;">'
         text += '<div>[{}] Level:{} info:{}</div>'.format(timestamp, level, info_text)
         if detail_text:
             detail_text = html.escape(detail_text)
@@ -469,8 +469,8 @@ def findj():
     return jsonify(all_properties)
 
 
-@app.route("/crawl", methods=["GET"])
-def crawl():
+@app.route("/get", methods=["GET"])
+def get():
     id = request.args.get("id")
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -496,8 +496,8 @@ def crawl():
     return get_html(id=id, body=form_html, title="Crawl")
 
 
-@app.route("/crawlj", methods=["GET"])
-def crawlj():
+@app.route("/getj", methods=["GET"])
+def getj():
     id = request.args.get("id")
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -734,7 +734,7 @@ def queue():
 
         timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
         
-        text += '<div style="margin-bottom:2px">'
+        text += '<div style="display: flex; flex-direction: column; gap: 0.2em;">'
         text += "<div>{} {} {} {}</div>".format(index, timestamp_str, url, crawler_data)
         text += "</div>"
 
