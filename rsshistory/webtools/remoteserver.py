@@ -33,6 +33,8 @@ class RemoteServer(object):
         timeout_s = 50
         if settings and "timeout_s" in settings:
             timeout_s = settings["timeout_s"]
+        if settings and "delay_s" in settings:
+            timeout_s += settings["delay_s"]
 
         # we make request longer - for the server to be able to respond in time
         timeout_s += 5
@@ -97,6 +99,8 @@ class RemoteServer(object):
         timeout_s = 50
         if settings and "timeout_s" in settings:
             timeout_s = settings["timeout_s"]
+        if settings and "delay_s" in settings:
+            timeout_s += settings["delay_s"]
 
         # we make request longer - for the server to be able to respond in time
         timeout_s += 5
