@@ -170,15 +170,6 @@ class YouTubeChannelHandler(DefaultChannelHandler):
         if self.dead:
             return
 
-        if self.is_channel_name():
-            html_url = self.get_html_url()
-            if html_url:
-                feeds = html.get_feeds()
-                if feeds and len(feeds) > 0:
-                    self.code = self.input2code(feeds[0])
-                    if self.code:
-                        self.url = self.get_channel_url()
-
         rss_url = self.get_rss_url()
         if rss_url:
             self.response = rss_url.get_response()
@@ -207,17 +198,13 @@ class YouTubeChannelHandler(DefaultChannelHandler):
             return
 
         feed = feeds[0]
-
         if not feed:
             return
 
-        if self.settings:
-            settings = dict(self.settings)
-        else:
-            settings = {}
+        settings = {}
         settings["handler_class"] = HttpPageHandler
 
-        self.rss_url = self.url_builder(feed, settings=settings)
+        self.rss_url = self.url_builder(url=feed, settings=settings)
         self.rss_url.get_response()
         return self.rss_url
 
@@ -232,12 +219,12 @@ class YouTubeChannelHandler(DefaultChannelHandler):
 
         # return self.html_url
 
-    def get_html_page(self):
-        html_url = self.get_html_url()
-        if html_url:
-            handler = html_url.get_handler()
-            if handler.p:
-                return handler.p
+    #def get_html_page(self):
+    #    html_url = self.get_html_url()
+    #    if html_url:
+    #        handler = html_url.get_handler()
+    #        if handler.p:
+    #            return handler.p
 
     def get_entries(self):
         rss_url = self.get_rss_url()
