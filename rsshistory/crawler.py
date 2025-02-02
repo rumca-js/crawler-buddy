@@ -80,8 +80,6 @@ class Crawler(object):
         """
         TODO decide what can be copied from incoming crawler data
         """
-        page_url = webtools.Url(url)
-
         remote_server = crawler_data["settings"]["remote_server"]
 
         new_mapping = None
@@ -133,5 +131,4 @@ class Crawler(object):
             new_mapping["handler_class"] = Url.get_handler_by_name(new_mapping["handler_class"])
 
         page_url = webtools.Url(url, settings=new_mapping)
-
         return page_url

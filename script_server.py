@@ -521,7 +521,7 @@ def getj():
         webtools.WebConfig.start_display()
         all_properties = get_crawl_properties(url, crawler_data)
     except Exception as E:
-        webtools.WebLogger.exc(E, "Exception when calling getj")
+        webtools.WebLogger.exc(E, info_text="Exception when calling getj {} {}".format(url, crawler_data))
         all_properties = None
 
     if not all_properties:

@@ -105,7 +105,7 @@ class Url(ContentInterface):
         if self.settings and "handler_class" in self.settings:
             handler_class = self.settings["handler_class"]
             self.handler = handler_class(
-                self.url, settings=self.settings, url_builder=url_builder
+                url=self.url, settings=self.settings, url_builder=url_builder
             )
 
         self.response = None
@@ -256,7 +256,7 @@ class Url(ContentInterface):
 
         if url.startswith("https") or url.startswith("http"):
             return HttpPageHandler(
-                url, settings=self.settings, url_builder=self.url_builder
+                url=url, settings=self.settings, url_builder=self.url_builder
             )
         elif url.startswith("smb") or url.startswith("ftp"):
             # not yet supported
@@ -320,6 +320,8 @@ class Url(ContentInterface):
     def get_cleaned_link(url):
         if not url:
             return
+
+        url = url.strip()
 
         if url.endswith("/"):
             url = url[:-1]

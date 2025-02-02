@@ -15,6 +15,7 @@ class RemoteServer(object):
         """
         @returns None in case of error
         """
+        url = url.strip()
 
         encoded_url = urllib.parse.quote(url, safe="")
 
@@ -72,6 +73,7 @@ class RemoteServer(object):
         @returns None in case of error
         """
         import requests
+        url = url.strip()
 
         encoded_url = urllib.parse.quote(url, safe="")
 

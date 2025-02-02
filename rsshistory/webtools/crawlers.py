@@ -53,7 +53,9 @@ class CrawlerInterface(object):
         @param settings passed settings
         """
         if not request and url:
-            self.request = PageRequestObject(url)
+            request = PageRequestObject(url)
+        elif not request and not url:
+            raise TypeError("Incorrect crawler use")
 
         self.request = request
         self.response = None
