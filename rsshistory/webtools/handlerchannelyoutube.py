@@ -25,7 +25,9 @@ class YouTubeChannelHandler(DefaultChannelHandler):
 
         if url:
             self.code = self.input2code(url)
-            self.url = self.code2url(self.code)
+            url = self.code2url(self.code)
+            if url:
+                self.url = url
 
     def is_handled_by(self):
         if not self.url:
@@ -69,7 +71,8 @@ class YouTubeChannelHandler(DefaultChannelHandler):
         return self.code2url(code)
 
     def code2url(self, code):
-        return "https://www.youtube.com/channel/{}".format(code)
+        if code:
+            return "https://www.youtube.com/channel/{}".format(code)
 
     def code2feed(self, code):
         return "https://www.youtube.com/feeds/videos.xml?channel_id={}".format(code)
@@ -77,7 +80,7 @@ class YouTubeChannelHandler(DefaultChannelHandler):
     def input2code(self, url):
         wh = url.find("www.youtube.com")
         if wh == -1:
-            return url
+            return None
 
         if self.is_channel_name():
             return self.input2code_handle(url)
