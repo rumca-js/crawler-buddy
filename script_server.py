@@ -733,8 +733,10 @@ def queue():
         timestamp, url, crawler_data = things
 
         timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
-
+        
+        text += '<div style="margin-bottom:2px">'
         text += "<div>{} {} {} {}</div>".format(index, timestamp_str, url, crawler_data)
+        text += "</div>"
 
     return get_html(id=id, body=text, title="Queue")
 
