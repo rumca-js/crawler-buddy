@@ -53,7 +53,7 @@ class CrawlerInterface(object):
         @param settings passed settings
         """
         if not request and url:
-            request = PageRequestObject(url)
+            self.request = PageRequestObject(url)
 
         self.request = request
         self.response = None
