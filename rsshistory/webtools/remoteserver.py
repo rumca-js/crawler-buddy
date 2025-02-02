@@ -67,7 +67,7 @@ class RemoteServer(object):
 
         return json_obj
 
-    def get_crawlj(self, url, name="", settings=None):
+    def get_getj(self, url, name="", settings=None):
         """
         @returns None in case of error
         """
@@ -83,16 +83,16 @@ class RemoteServer(object):
             encoded_crawler_data = urllib.parse.quote(crawler_data, safe="")
 
             link = self.remote_server
-            link = f"{link}/crawlj?url={encoded_url}&crawler_data={encoded_crawler_data}"
+            link = f"{link}/getj?url={encoded_url}&crawler_data={encoded_crawler_data}"
             # WebLogger.debug("RemoteServer: calling:{}".format(link))
         elif name != "":
             link = self.remote_server
-            link = f"{link}/crawlj?url={encoded_url}&name={name}"
+            link = f"{link}/getj?url={encoded_url}&name={name}"
 
             # WebLogger.debug("RemoteServer: calling:{}".format(link))
         else:
             link = self.remote_server
-            link = f"{link}/crawlj?url={encoded_url}"
+            link = f"{link}/getj?url={encoded_url}"
 
             # WebLogger.debug("RemoteServer: calling:{}".format(link))
 
@@ -132,7 +132,7 @@ class RemoteServer(object):
         return json_obj
 
     def get_properties(self, url, name = "", settings=None):
-        json_obj = self.crawlj(url=url, name=name, settings=settings)
+        json_obj = self.get_getj(url=url, name=name, settings=settings)
 
         if json_obj:
             return self.read_properties_section("Properties", json_obj)
