@@ -72,14 +72,14 @@ For Python RemoteServer has been provided in remoteserver.py file. To obtain all
 ```
 link = "https://google.com"
 server = RemoteServer(server_address)
-all_properties = server.get_crawlj(url=link)
+all_properties = server.get_getj(url=link)
 ```
 
 ## Additional features
 
 Question: What if someone wants to make two paralell crawling methods, to make crawling faster?
 
-Answer: Not a problem, just call twice /crawlj Endpoint, with different crawling methods, and use the first received response
+Answer: Not a problem, just call twice /getj Endpoint, with different crawling methods, and use the first received response
 
 Question: Does it support proxy?
 
