@@ -25,7 +25,7 @@ class YouTubeChannelHandler(DefaultChannelHandler):
 
         if url:
             self.code = self.input2code(url)
-            self.url = self.code2url()
+            self.url = self.code2url(self.code)
 
     def is_handled_by(self):
         if not self.url:
