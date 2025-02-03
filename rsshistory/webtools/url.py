@@ -216,6 +216,10 @@ class Url(ContentInterface):
             self.handler = self.get_handler_implementation()
 
         if self.handler:
+            if "respect_robots_txt" in self.settings and self.settings["respect_robots_txt"]:
+                if not self.is_allowed():
+                    return
+
             self.response = self.handler.get_response()
 
             if self.response:
@@ -259,8 +263,7 @@ class Url(ContentInterface):
                 url=url, settings=self.settings, url_builder=self.url_builder
             )
         elif url.startswith("smb") or url.startswith("ftp"):
-            # not yet supported
-            return DefaultContentPage(url)
+            raise NotImplementedError("Protocol has not been implemented")
 
     def is_url_valid(self):
         return True
@@ -619,8 +622,7 @@ class Url(ContentInterface):
             response_data["status_code"] = response.get_status_code()
 
             if check_robots:
-                domain_info = self.get_domain_info()
-                response_data["is_allowed"] = domain_info.is_allowed(self.url)
+                response_data["is_allowed"] = self.is_allowed()
 
             response_data["Content-Type"] = response.get_content_type()
             if (
@@ -671,6 +673,10 @@ class Url(ContentInterface):
         all_properties.append({"name": "Entries", "data": entries})
 
         return all_properties
+
+    def is_allowed(self):
+        domain_info = self.get_domain_info()
+        return domain_info.is_allowed(self.url)
 
     def get_social_properties(self):
         url = self.url

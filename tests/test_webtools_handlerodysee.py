@@ -170,16 +170,17 @@ class OdyseeChannelHandlerTest(FakeInternetTestCase):
     def test_get_channel_url(self):
         MockRequestCounter.mock_page_requests = 0
         self.assertEqual(
-            OdyseeChannelHandler("1234").get_channel_url(),
-            "https://odysee.com/1234",
+            OdyseeChannelHandler("https://odysee.com/$/rss/@samtime:1").get_channel_url(),
+            "https://odysee.com/@samtime:1",
         )
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_channel_feed(self):
         MockRequestCounter.mock_page_requests = 0
+
         self.assertEqual(
-            OdyseeChannelHandler("1234").get_channel_feed(),
-            "https://odysee.com/$/rss/1234",
+            OdyseeChannelHandler("https://odysee.com/@samtime:1").get_channel_feed(),
+            "https://odysee.com/$/rss/@samtime:1",
         ) 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 

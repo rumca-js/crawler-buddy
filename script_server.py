@@ -24,7 +24,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "2.0.5"
+__version__ = "2.0.6"
 
 
 app = Flask(__name__)
@@ -123,39 +123,6 @@ def get_entry_html(id, index, url, timestamp, all_properties):
     return text
 
 
-def get_request_data(request):
-    crawler_data = request.args.get("crawler_data")
-    crawler = request.args.get("crawler")
-    name = request.args.get("name")
-
-    parsed_crawler_data = None
-    if crawler_data:
-        try:
-            parsed_crawler_data = json.loads(crawler_data)
-        except json.JSONDecodeError as E:
-            print(str(E))
-
-    if parsed_crawler_data is None:
-        parsed_crawler_data = {}
-
-    if crawler:
-        parsed_crawler_data["crawler"] = crawler
-    if name:
-        parsed_crawler_data["name"] = name
-
-    if "settings" not in parsed_crawler_data:
-        parsed_crawler_data["settings"] = {}
-
-    remote_server = "http://"+str(request.host)
-
-    if configuration.is_set("ssl_verify"):
-        parsed_crawler_data["settings"]["ssl_verify"] = True
-    if configuration.is_set("respect_robots_txt"):
-        parsed_crawler_data["settings"]["respect_robots_txt"] = True
-
-    parsed_crawler_data["settings"]["remote_server"] = remote_server
-
-    return parsed_crawler_data
 
 
 def get_crawl_properties(url, crawler_data):
@@ -502,17 +469,15 @@ def getj():
         return get_html(id=id, body="Cannot access this view", title="Error")
 
     url = request.args.get("url")
-    full = request.args.get("full")
 
     if not url:
         return jsonify({"success": False, "error": "No url provided"}), 400
 
-    crawler_data = get_request_data(request)
+    crawler_data = crawler_main.get_request_data(request)
 
     if not crawler_data:
         return jsonify({"success": False, "error": "Cannot obtain crawler data"}), 400
 
-    crawler_data["settings"]["full"] = full
     crawler_data["settings"]["headers"] = False
     crawler_data["settings"]["ping"] = False
 
@@ -547,17 +512,15 @@ def proxy():
         return get_html(id=id, body="Cannot access this view", title="Error")
 
     url = request.args.get("url")
-    full = request.args.get("full")
 
     if not url:
         return jsonify({"success": False, "error": "No url provided"}), 400
 
-    crawler_data = get_request_data(request)
+    crawler_data = crawler_main.get_request_data(request)
 
     if not crawler_data:
         return jsonify({"success": False, "error": "Cannot obtain crawler data"}), 400
 
-    crawler_data["settings"]["full"] = full
     crawler_data["settings"]["headers"] = False
     crawler_data["settings"]["ping"] = False
 
@@ -591,17 +554,15 @@ def headers():
         return get_html(id=id, body="Cannot access this view", title="Error")
 
     url = request.args.get("url")
-    full = request.args.get("full")
 
     if not url:
         return jsonify({"success": False, "error": "No url provided"}), 400
 
-    crawler_data = get_request_data(request)
+    crawler_data = crawler_main.get_request_data(request)
 
     if not crawler_data:
         return jsonify({"success": False, "error": "Cannot obtain crawler data"}), 400
 
-    crawler_data["settings"]["full"] = full
     crawler_data["settings"]["headers"] = True
     crawler_data["settings"]["ping"] = False
 
@@ -626,17 +587,15 @@ def ping():
         return get_html(id=id, body="Cannot access this view", title="Error")
 
     url = request.args.get("url")
-    full = request.args.get("full")
 
     if not url:
         return jsonify({"success": False, "error": "No url provided"}), 400
 
-    crawler_data = get_request_data(request)
+    crawler_data = crawler_main.get_request_data(request)
 
     if not crawler_data:
         return jsonify({"success": False, "error": "Cannot obtain crawler data"}), 400
 
-    crawler_data["settings"]["full"] = full
     crawler_data["settings"]["headers"] = False
     crawler_data["settings"]["ping"] = True
 

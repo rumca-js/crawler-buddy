@@ -183,8 +183,9 @@ class YouTubeChannelHandlerTest(FakeInternetTestCase):
             "https://www.youtube.com/feeds/videos.xml?channel_id=SAMTIMESAMTIMESAMTIMESAM",
             url_builder=Url
         )
+
         self.assertEqual(
-            handler.url,
+            handler.get_feeds()[0],
             "https://www.youtube.com/feeds/videos.xml?channel_id=SAMTIMESAMTIMESAMTIMESAM",
         )
 
@@ -234,23 +235,14 @@ class YouTubeChannelHandlerTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_source_code2url(self):
-        MockRequestCounter.mock_page_requests = 0
-
-        self.assertEqual(
-            YouTubeChannelHandler("1234").get_channel_url(),
-            "https://www.youtube.com/channel/1234",
-        )
-
-        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
-
     def test_source_code2feed(self):
         MockRequestCounter.mock_page_requests = 0
 
-        self.assertTrue(
-            "https://www.youtube.com/feeds/videos.xml?channel_id=1234"
-            in YouTubeChannelHandler("1234").get_feeds(),
-        )
+        test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=1234"
+
+        handler = YouTubeChannelHandler(test_link)
+
+        self.assertIn(test_link, handler.get_feeds())
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 

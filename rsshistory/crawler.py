@@ -1,5 +1,6 @@
 import subprocess
 import psutil
+import json
 from datetime import datetime
 from collections import OrderedDict
 from rsshistory import webtools
@@ -34,6 +35,44 @@ class Crawler(object):
     def __init__(self):
         self.crawler_info = CrawlerInfo()
         self.entry_rules = EntryRules()
+        self.configuration = Configuration()
+
+    def get_request_data(self, request):
+        crawler_data = request.args.get("crawler_data")
+        crawler = request.args.get("crawler")
+        name = request.args.get("name")
+
+        parsed_crawler_data = None
+        if crawler_data:
+            try:
+                parsed_crawler_data = json.loads(crawler_data)
+            except json.JSONDecodeError as E:
+                print(str(E))
+
+        if parsed_crawler_data is None:
+            parsed_crawler_data = {}
+
+        if crawler:
+            parsed_crawler_data["crawler"] = crawler
+        if name:
+            parsed_crawler_data["name"] = name
+
+        if "settings" not in parsed_crawler_data:
+            parsed_crawler_data["settings"] = {}
+
+        remote_server = "http://"+str(request.host)
+
+        if "ssl_verify" not in parsed_crawler_data["settings"] and self.configuration.is_set("ssl_verify"):
+            parsed_crawler_data["settings"]["ssl_verify"] = True
+        if "respect_robots_txt" not in parsed_crawler_data["settings"] and self.configuration.is_set("respect_robots_txt"):
+            parsed_crawler_data["settings"]["respect_robots_txt"] = True
+
+        full = request.args.get("full")
+        parsed_crawler_data["settings"]["full"] = full
+
+        parsed_crawler_data["settings"]["remote_server"] = remote_server
+
+        return parsed_crawler_data
 
     def run(self, url, crawler_data=None):
         if not crawler_data:
@@ -84,15 +123,13 @@ class Crawler(object):
 
         new_mapping = None
 
-        config = Configuration()
-
         if "crawler" not in crawler_data and "name" in crawler_data:
-            new_mapping = config.get_crawler(name=crawler_data["name"])
+            new_mapping = self.configuration.get_crawler(name=crawler_data["name"])
             if not new_mapping:
                 return
             new_mapping["crawler"] = new_mapping["crawler"](url=url)
         elif "name" not in crawler_data and "crawler" in crawler_data:
-            new_mapping = config.get_crawler(crawler_name=crawler_data["crawler"])
+            new_mapping = self.configuration.get_crawler(crawler_name=crawler_data["crawler"])
             if not new_mapping:
                 return
             new_mapping["crawler"] = new_mapping["crawler"](url=url)
@@ -103,11 +140,11 @@ class Crawler(object):
                 if not new_mapping:
                     return
             else:
-                new_mapping = config.get_crawler(name=crawler_name)
+                new_mapping = self.configuration.get_crawler(name=crawler_name)
                 if not new_mapping:
                     webtools.WebLogger.error("Cannot find specified crawler in config: {}".format(crawler_name))
         else:
-            new_mapping = config.get_crawler(name=crawler_data["name"])
+            new_mapping = self.configuration.get_crawler(name=crawler_data["name"])
             if not new_mapping:
                 return
             new_mapping["crawler"] = new_mapping["crawler"](url=url)

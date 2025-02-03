@@ -78,3 +78,25 @@ class HttpPageHandlerTest(FakeInternetTestCase):
 
         # call tested function
         self.assertTrue(handler.get_response())
+
+    def test_is_handled_by(self):
+        test_link = "http://linkedin.com"
+
+        # call tested function
+        handler = HttpPageHandler(test_link, url_builder = Url)
+
+        self.assertTrue(handler.is_handled_by())
+
+        test_link = "https://linkedin.com"
+
+        # call tested function
+        handler = HttpPageHandler(test_link, url_builder = Url)
+
+        self.assertTrue(handler.is_handled_by())
+
+        test_link = "ftp://linkedin.com"
+
+        # call tested function
+        handler = HttpPageHandler(test_link, url_builder = Url)
+
+        self.assertFalse(handler.is_handled_by())
