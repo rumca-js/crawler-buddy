@@ -24,7 +24,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "2.0.4"
+__version__ = "2.0.5"
 
 
 app = Flask(__name__)
@@ -80,6 +80,7 @@ def get_entry_html(id, index, url, timestamp, all_properties):
         contents = ""
 
     response = CrawlHistory.read_properties_section("Response", all_properties)
+    options = CrawlHistory.read_properties_section("Options", all_properties)
     if response:
         status_code = response["status_code"]
         # TODO maybe create a better API
@@ -88,20 +89,18 @@ def get_entry_html(id, index, url, timestamp, all_properties):
         charset = response["Charset"]
         content_length = response["Content-Length"]
         content_type = response["Content-Type"]
-        if (
-            "crawler_data" in response
-            and response["crawler_data"]
-            and "name" in response["crawler_data"]
+
+        if (options
+            and "name" in options
         ):
-            crawler_name = response["crawler_data"]["name"]
+            crawler_name = options["name"]
         else:
             crawler_name = ""
         if (
-            "crawler_data" in response
-            and response["crawler_data"]
-            and "crawler" in response["crawler_data"]
+            options
+            and "crawler" in options
         ):
-            crawler_crawler = response["crawler_data"]["crawler"]
+            crawler_crawler = options["crawler"]
         else:
             crawler_crawler = ""
     else:

@@ -652,14 +652,6 @@ class Url(ContentInterface):
                 ).decode("utf-8")
             else:
                 response_data["body_hash"] = ""
-            response_data["crawler_data"] = response.crawler_data
-            if (
-                response_data["crawler_data"]
-                and "handler_class" in response_data["crawler_data"]
-            ):
-                response_data["crawler_data"]["handler_class"] = response_data[
-                    "crawler_data"
-                ]["handler_class"].__name__
 
             all_properties.append({"name": "Response", "data": response_data})
 

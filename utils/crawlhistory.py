@@ -63,6 +63,7 @@ class CrawlHistory(object):
                 crawler_name is not None
                 and response
                 and "crawler_data" in response
+                and response["crawler_data"]
                 and "name" in response["crawler_data"]
             ):
                 if crawler_name != response["crawler_data"]["name"]:
@@ -72,6 +73,7 @@ class CrawlHistory(object):
                 crawler is not None
                 and response
                 and "crawler_data" in response
+                and response["crawler_data"]
                 and "crawler" in response["crawler_data"]
             ):
                 if crawler != response["crawler_data"]["crawler"]:
