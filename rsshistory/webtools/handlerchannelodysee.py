@@ -15,9 +15,6 @@ class OdyseeChannelHandler(DefaultChannelHandler):
 
         if url:
             self.code = self.input2code(url)
-            url = self.code2url(self.code)
-            if url:
-                self.url = url
 
         self.rss_url = None
 

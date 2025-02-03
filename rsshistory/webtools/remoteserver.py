@@ -45,9 +45,11 @@ class RemoteServer(object):
             with requests.get(url=link, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
+            print(str(E))
             return
 
         if not text:
+            print("No text")
             return
 
         print("Calling:{}".format(link))
@@ -56,13 +58,16 @@ class RemoteServer(object):
         try:
             json_obj = json.loads(text)
         except ValueError as E:
+            print("Url:{} Cannot read response".format(link, text))
             # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
             return
         except TypeError as E:
+            print("Url:{} Cannot read response".format(link, text))
             # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
             return
 
         if "success" in json_obj and not json_obj["success"]:
+            print("Not a success")
             # WebLogger.error(json_obj["error"])
             return False
 
@@ -107,27 +112,34 @@ class RemoteServer(object):
         # we make request longer - for the server to be able to respond in time
         timeout_s += 5
 
+        print("Calling:{}".format(link))
+
         text = None
         try:
             with requests.get(url=link, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
+            print(str(E))
             return
 
         if not text:
+            print("No text")
             return
 
         json_obj = None
         try:
             json_obj = json.loads(text)
         except ValueError as E:
+            print("Url:{} Cannot read response".format(link, text))
             # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
             return
         except TypeError as E:
+            print("Url:{} Cannot read response".format(link, text))
             # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
             return
 
         if "success" in json_obj and not json_obj["success"]:
+            print("Not a success")
             # WebLogger.error(json_obj["error"])
             return False
 
@@ -146,6 +158,7 @@ class RemoteServer(object):
             return
 
         if "success" in all_properties and not all_properties["success"]:
+            print("Not a success")
             # WebLogger.error(all_properties["error"])
             return False
 

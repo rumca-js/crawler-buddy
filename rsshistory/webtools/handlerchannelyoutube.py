@@ -25,9 +25,6 @@ class YouTubeChannelHandler(DefaultChannelHandler):
 
         if url:
             self.code = self.input2code(url)
-            url = self.code2url(self.code)
-            if url:
-                self.url = url
 
     def is_handled_by(self):
         if not self.url:
@@ -214,21 +211,6 @@ class YouTubeChannelHandler(DefaultChannelHandler):
 
     def get_html_url(self):
         return None
-        # if self.html_url:
-        #    return self.html_url
-
-        # u = self.url_builder(self.get_channel_url(), handler_class=HttpPageHandler)
-        # u.get_response()
-        # self.html_url = u
-
-        # return self.html_url
-
-    #def get_html_page(self):
-    #    html_url = self.get_html_url()
-    #    if html_url:
-    #        handler = html_url.get_handler()
-    #        if handler.p:
-    #            return handler.p
 
     def get_entries(self):
         rss_url = self.get_rss_url()

@@ -208,7 +208,7 @@ class UrlTest(FakeInternetTestCase):
         self.assertTrue("title" in properties)
         self.assertTrue("link" in properties)
 
-        self.assertEqual(properties["link"], channel_link)
+        self.assertEqual(properties["link"], test_link)
         self.assertEqual(properties["link_request"], test_link)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
@@ -323,7 +323,7 @@ class UrlTest(FakeInternetTestCase):
         self.assertTrue("title" in properties)
         self.assertTrue("link" in properties)
 
-        self.assertEqual(properties["link"], channel_link)
+        self.assertEqual(properties["link"], test_link)
         self.assertEqual(properties["link_request"], test_link)
 
         self.assertEqual(all_properties[5]["name"], "Entries")

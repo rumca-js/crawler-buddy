@@ -116,10 +116,12 @@ class OdyseeChannelHandlerTest(FakeInternetTestCase):
     def test_constructor__channel_url(self):
         MockRequestCounter.mock_page_requests = 0
 
-        # call tested function
-        handler = OdyseeChannelHandler("https://odysee.com/@samtime:1?test", url_builder=Url)
+        test_link = "https://odysee.com/@samtime:1?test"
 
-        self.assertEqual(handler.url, "https://odysee.com/@samtime:1")
+        # call tested function
+        handler = OdyseeChannelHandler(test_link, url_builder=Url)
+
+        self.assertEqual(handler.url, test_link)
         self.assertEqual(
             handler.code2url(handler.code), "https://odysee.com/@samtime:1"
         )
@@ -131,10 +133,12 @@ class OdyseeChannelHandlerTest(FakeInternetTestCase):
     def test_constructor__feed_url(self):
         MockRequestCounter.mock_page_requests = 0
 
-        # call tested function
-        handler = OdyseeChannelHandler("https://odysee.com/$/rss/@samtime:1?test", url_builder=Url)
+        test_link = "https://odysee.com/$/rss/@samtime:1?test"
 
-        self.assertEqual(handler.url, "https://odysee.com/@samtime:1")
+        # call tested function
+        handler = OdyseeChannelHandler(test_link, url_builder=Url)
+
+        self.assertEqual(handler.url, test_link)
         self.assertEqual(
             handler.code2url(handler.code), "https://odysee.com/@samtime:1"
         )
