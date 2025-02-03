@@ -28,7 +28,7 @@ class Configuration(object):
     def read_crawler_config(self):
         path = Path("init_browser_setup.json")
         if path.exists():
-            print("Reading configuration from file")
+            print("Reading crawler config from file")
             with path.open("r") as file:
                 config = json.load(file)
                 for index, item in enumerate(config):
@@ -40,7 +40,7 @@ class Configuration(object):
 
                 return self.crawler_config
         else:
-            print("Reading configuration from webtools")
+            print("Reading crawler config from webtools")
             self.crawler_config = webtools.WebConfig.get_init_crawler_config()
             return self.crawler_config
 
@@ -65,10 +65,6 @@ class Configuration(object):
                     ]
                 if "allowed_ids" in json_config:
                     self.data["allowed_ids"] = json_config["allowed_ids"]
-        else:
-            print("Reading configuration from webtools")
-            self.crawler_config = webtools.WebConfig.get_init_crawler_config()
-            return self.crawler_config
 
     def get_crawler_config(self):
         return self.crawler_config
@@ -78,10 +74,10 @@ class Configuration(object):
         for item in config:
             if name:
                 if name == item["name"]:
-                    return item
+                    return dict(item)
             if crawler_name:
                 if crawler_name == item["crawler"].__name__:
-                    return item
+                    return dict(item)
 
     def is_allowed(self, id):
         if "allowed_ids" in self.data:
