@@ -574,8 +574,9 @@ class Url(ContentInterface):
 
         feeds = self.get_feeds()
         if len(feeds) > 0:
+            properties["feeds"] = []
             for key, feed in enumerate(feeds):
-                properties["feed_" + str(key)] = feed
+                properties["feeds"].append(feed)
 
         if type(page_handler) is Url.youtube_channel_handler:
             if page_handler.get_channel_name():

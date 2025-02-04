@@ -23,23 +23,47 @@ Available Endpoints:
  - GET /infoj - Similar to /info, but explicitly returns the information, in JSON format.
  - GET /history - Displays the crawl history.
  - GET /historyj - Displays the crawl history, in JSON format.
- - GET /queue - Displays information about the current queue
+ - GET /queue - Displays information about the current queue.
+ - GET /get - form for getj Endpoint.
  - GET /getj - Crawls a specified page. Accepts the following query parameters:
     - url (string): The URL to crawl.
-    - name (string): The name of the crawler.
-    - crawler (string): The crawler type.
-    - crawler_data (string): Additional data for the crawler.
+    - name (optional, string): The name of the crawler.
+    - crawler (optional, string): The crawler type.
+    - crawler_data (optional, string): Additional data for the crawler.
     - Response: Returns JSON with crawl properties.
+ - GET /find - form for findj Endpoint.
  - GET /findj - Retrieves the last crawl information for a specified URL.
     - Query parameter: url (string).
     - Response: Returns JSON with the last crawl details.
- - GET /social Provides social and dynamic information about a specified URL.
+ - GET /socialj Provides social and dynamic information about a specified URL.
     - Query parameter: url (string).
     - Response: Returns JSON with social data.
  - GET /proxy Returns URL data as is, contents, status_code. Useful if you try to access page that is only accessible by selenium, or crawlee
     - Response: Passes contents of response, and status code as is
+ - GET /linkj Provides link information - canonical links, etc.
+ - GET /feedsj Provides feeds information
 
-## Response JSON
+## GET request
+
+The getj Entpoint request arguments. Either one needs to be true: name, crawler, or crawler_data.
+
+- url (string): The URL to crawl
+- name (optional, string): The name of the crawler
+- crawler (optional, string): The crawler type
+- crawler_data (optional, dict): Additional data for the crawler
+
+crawler_data is a dict, with settings:
+ - name (optional, string)
+ - crawler (optional, string)
+ - settings (dict)
+
+settings is a dict, with settings:
+ - timeout_s (int) - the amount of time we wait for a page response
+ - delay_s (int) - delay which should be used after visiting a page using crawler. Useful if it is needed to wait for javascript.
+ - driver_executable (string) string to driver executable. Useful for selenium
+ - script (string) string informing which script should be used. Useful if ScriptCrawler is used
+
+## GET response JSON
 
 Fields:
 

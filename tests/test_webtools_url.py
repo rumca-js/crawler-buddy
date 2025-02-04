@@ -267,8 +267,8 @@ class UrlTest(FakeInternetTestCase):
 
         properties = all_properties[0]["data"]
 
-        self.assertTrue("title" in properties)
-        self.assertTrue("link" in properties)
+        self.assertIn("title", properties)
+        self.assertIn("link", properties)
 
         self.assertEqual(properties["link"], test_link)
         self.assertEqual(properties["link_request"], test_link)
@@ -291,8 +291,9 @@ class UrlTest(FakeInternetTestCase):
 
         properties = all_properties[0]["data"]
 
-        self.assertTrue("title" in properties)
-        self.assertTrue("link" in properties)
+        self.assertIn("title", properties)
+        self.assertIn("link", properties)
+        self.assertIn("feeds", properties)
 
         self.assertEqual(properties["link"], test_link)
         self.assertEqual(properties["link_request"], test_link)
@@ -320,8 +321,9 @@ class UrlTest(FakeInternetTestCase):
 
         properties = all_properties[0]["data"]
 
-        self.assertTrue("title" in properties)
-        self.assertTrue("link" in properties)
+        self.assertIn("title", properties)
+        self.assertIn("link", properties)
+        self.assertIn("feeds", properties)
 
         self.assertEqual(properties["link"], test_link)
         self.assertEqual(properties["link_request"], test_link)
@@ -348,8 +350,9 @@ class UrlTest(FakeInternetTestCase):
 
         properties = all_properties[0]["data"]
 
-        self.assertTrue("title" in properties)
-        self.assertTrue("link" in properties)
+        self.assertIn("title", properties)
+        self.assertIn("link", properties)
+        self.assertIn("feeds", properties)
 
         #self.assertEqual(properties["link"], test_link)
         self.assertEqual(properties["link_request"], test_link)
@@ -376,8 +379,9 @@ class UrlTest(FakeInternetTestCase):
 
         properties = all_properties[0]["data"]
 
-        self.assertTrue("title" in properties)
-        self.assertTrue("link" in properties)
+        self.assertIn("title", properties)
+        self.assertIn("link", properties)
+        self.assertIn("feeds", properties)
 
         self.assertEqual(properties["link"], test_link)
         self.assertEqual(properties["link_request"], test_link)

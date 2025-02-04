@@ -906,6 +906,9 @@ class RssPage(ContentInterface):
         if self.contents.find("encoding") >= 0:
             return "utf-8"
 
+    def get_feeds(self):
+        return self.url
+
 
 class RssContentReader(object):
     def __init__(self, url, contents):

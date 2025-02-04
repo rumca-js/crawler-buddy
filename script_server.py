@@ -181,6 +181,7 @@ def index():
     text += """<div><a href="/socialj?id={}">Socialj</a> - dynamic social data JSON</div>""".format(id)
     text += """<div><a href="/proxy?id={}">Proxy</a> - makes GET request, then passes you the contents, as is</div>""".format(id)
     text += """<div><a href="/linkj?id={}">Linkj</a> - return link info JSON</div>""".format(id)
+    text += """<div><a href="/feedsj?id={}">Linkj</a> - return feeds info JSON</div>""".format(id)
 
     if configuration.is_set("debug"):
         text += """<div><a href="/debug?id={}">Debug</a> - shows debug information</div>""".format(id)
@@ -664,6 +665,29 @@ def linkj():
     properties["link"] = page_url.url
     properties["link_request"] = page_url.request_url
     properties["link_canonical"] = page_url.get_canonical_url()
+
+    # TODO maybe we could add support for canonical links, maybe we could try reading fast, via requests?
+
+    return jsonify(properties)
+
+
+@app.route("/feedsj", methods=["GET"])
+def linkj():
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    url = request.args.get("url")
+
+    if not url:
+        return jsonify({"success": False, "error": "No url provided"}), 400
+
+    page_url = webtools.Url(url)
+
+    properties = {"feeds" : []}
+
+    for feed in page_url.get_feeds():
+        properties["feeds"].append(feed)
 
     # TODO maybe we could add support for canonical links, maybe we could try reading fast, via requests?
 
