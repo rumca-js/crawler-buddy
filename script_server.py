@@ -672,7 +672,7 @@ def linkj():
 
 
 @app.route("/feedsj", methods=["GET"])
-def linkj():
+def feedsj():
     id = request.args.get("id")
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
