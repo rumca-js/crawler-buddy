@@ -25,6 +25,7 @@ from .handlers import (
     GitHubUrlHandler,
     ReturnDislike,
     HackerNewsHandler,
+    InternetArchive,
 )
 
 from .crawlers import (

@@ -5,6 +5,7 @@
     "use_canonical_links" : true,
     "prefer_non_www" : false,
     "debug" : true,
+    "default_crawler" : null,
     "allowed_ids" : [
     ]
 }

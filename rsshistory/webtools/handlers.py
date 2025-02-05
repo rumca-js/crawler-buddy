@@ -313,3 +313,16 @@ class HackerNewsHandler(DefaultUrlHandler):
             result["upvote_ratio"] = json["score"]
 
         return result
+
+
+class InternetArchive(DefaultUrlHandler):
+    def __init__(self, url):
+        super().__init__(url)
+
+    def get_archive_url(self, time=None):
+        if not time:
+            return "https://web.archive.org/web/*/" + self.url
+
+        if time:
+            time_str = time.strftime("%Y%m%d")
+            return "https://web.archive.org/web/{}110000*/".format(time_str) + self.url

@@ -75,7 +75,7 @@ class YouTubeChannelHandler(DefaultChannelHandler):
         return "https://www.youtube.com/feeds/videos.xml?channel_id={}".format(code)
 
     def input2code(self, url):
-        wh = url.find("www.youtube.com")
+        wh = url.find("youtube.com")
         if wh == -1:
             return None
 
@@ -265,3 +265,9 @@ class YouTubeChannelHandler(DefaultChannelHandler):
         rss_url = self.get_rss_url()
         if rss_url:
             return rss_url.get_tags()
+
+    def get_canonical_url(self):
+        if self.url.find("feeds") >= 0:
+            return self.url
+        else:
+            return self.get_channel_url()

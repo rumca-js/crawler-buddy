@@ -136,7 +136,7 @@ class Crawler(object):
         elif "name" not in crawler_data and "crawler" not in crawler_data:
             crawler_name = self.entry_rules.get_browser(url)
             if not crawler_name:
-                new_mapping = webtools.WebConfig.get_default_crawler(url)
+                new_mapping = self.get_default_crawler(url)
                 if not new_mapping:
                     return
             else:
@@ -169,3 +169,14 @@ class Crawler(object):
 
         page_url = webtools.Url(url, settings=new_mapping)
         return page_url
+
+    def get_default_crawler(self, url):
+        default_crawler = self.configuration.get("default_crawler")
+        if default_crawler:
+            new_mapping = self.get_crawler(name = default_crawler)
+            if new_mapping:
+                return new_mapping
+
+        new_mapping = webtools.WebConfig.get_default_crawler(url)
+        if new_mapping:
+            return new_mapping

@@ -32,6 +32,7 @@ from tests.fakeinternetdata import (
     webpage_html_favicon,
     webpage_with_rss_link_rss_contents,
     webpage_html_casinos,
+    webpage_html_canonical_1,
 )
 from tests.fake.geekwirecom import (
     geekwire_feed,
@@ -455,6 +456,9 @@ class TestResponseObject(PageResponseObject):
 
         elif url == "https://page-with-rss-link.com/feed":
             return webpage_with_rss_link_rss_contents
+
+        elif url == "https://page-with-canonical-link.com":
+            return webpage_html_canonical_1
 
         elif url == "https://slot-casino-page.com":
             return webpage_html_casinos

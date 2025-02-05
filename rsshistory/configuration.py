@@ -6,13 +6,17 @@ from rsshistory import webtools
 
 class Configuration(object):
     def __init__(self):
+        """
+        This should be a place that well describes what is in the configuration
+        """
         self.data = {}
-        self.data["respect_robots_txt"] = False  # TODO use that
+        self.data["respect_robots_txt"] = False
         self.data["logging_level"] = logging.INFO  # TODO use that
-        self.data["ssl_verify"] = False  # TODO use that
+        self.data["ssl_verify"] = False
         self.data["use_canonical_links"] = False  # TODO use that
         self.data["prefer_non_www"] = False  # TODO use that
         self.data["debug"] = True  # TODO use that
+        self.data["default_crawler"] = None
 
         self.crawler_config = None
 
@@ -24,6 +28,10 @@ class Configuration(object):
             return self.data[name]
 
         return False
+
+    def get(self, name):
+        if name in self.data:
+            return self.data[name]
 
     def read_crawler_config(self):
         path = Path("init_browser_setup.json")
@@ -50,21 +58,20 @@ class Configuration(object):
             print("Reading configuration:{}".format(str(path)))
             with path.open("r") as file:
                 json_config = json.load(file)
+                self.read_json_config(json_config)
 
-                if "debug" in json_config:
-                    self.data["debug"] = json_config["debug"]
-                if "respect_robots_txt" in json_config:
-                    self.data["respect_robots_txt"] = json_config["respect_robots_txt"]
-                if "ssl_verify" in json_config:
-                    self.data["ssl_verify"] = json_config["ssl_verify"]
-                if "prefer_non_www" in json_config:
-                    self.data["prefer_non_www"] = json_config["prefer_non_www"]
-                if "use_canonical_links" in json_config:
-                    self.data["use_canonical_links"] = json_config[
-                        "use_canonical_links"
-                    ]
-                if "allowed_ids" in json_config:
-                    self.data["allowed_ids"] = json_config["allowed_ids"]
+    def read_json_config(self, json_config):
+        self.read_json_config_field(json_config, "debug")
+        self.read_json_config_field(json_config, "respect_robots_txt")
+        self.read_json_config_field(json_config, "ssl_verify")
+        self.read_json_config_field(json_config, "prefer_non_www")
+        self.read_json_config_field(json_config, "use_canonical_links")
+        self.read_json_config_field(json_config, "allowed_ids")
+        self.read_json_config_field(json_config, "default_crawler")
+
+    def read_json_config_field(self, json_config, field):
+        if field in json_config:
+            self.data[field] = json_config[field]
 
     def get_crawler_config(self):
         return self.crawler_config

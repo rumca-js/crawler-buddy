@@ -34,21 +34,21 @@ class UrlTest(FakeInternetTestCase):
             "https://www.google.com/url?q=https://forum.ddopl.com/&sa=Udupa"
         )
 
-        self.assertEqual(cleaned_link, "https://forum.ddopl.com")
+        self.assertEqual(cleaned_link, "https://forum.ddopl.com/")
 
     def test_get_cleaned_link__stupid_google_link2(self):
         cleaned_link = Url.get_cleaned_link(
             "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://worldofwarcraft.blizzard.com/&ved=2ahUKEwjtx56Pn5WFAxU2DhAIHYR1CckQFnoECCkQAQ&usg=AOvVaw1pDkx5K7B5loKccvg_079-"
         )
 
-        self.assertEqual(cleaned_link, "https://worldofwarcraft.blizzard.com")
+        self.assertEqual(cleaned_link, "https://worldofwarcraft.blizzard.com/")
 
     def test_get_cleaned_link__stupid_youtube_link(self):
         cleaned_link = Url.get_cleaned_link(
             "https://www.youtube.com/redirect?event=lorum&redir_token=ipsum&q=https%3A%2F%2Fcorridordigital.com%2F&v=LeB9DcFT810"
         )
 
-        self.assertEqual(cleaned_link, "https://corridordigital.com/&v=LeB9DcFT810")
+        self.assertEqual(cleaned_link, "https://corridordigital.com")
 
     def test_get_cleaned_link(self):
         cleaned_link = Url.get_cleaned_link("https://www.YouTube.com/Test")
@@ -649,3 +649,108 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertTrue(hash != main_hash)
 
+    def test_get_urls__html__canonical(self):
+        test_link = "https://page-with-canonical-link.com"
+        test_canonical_link = "https://www.page-with-canonical-link.com"
+
+        url = Url(test_link)
+
+        # call tested function
+        urls = url.get_urls()
+
+        self.assertEqual(len(urls), 3)
+        self.assertEqual(urls["link"], test_link)
+        self.assertEqual(urls["link_request"], test_link)
+        self.assertEqual(urls["link_canonical"], test_canonical_link)
+
+    def test_get_urls__reddit(self):
+        url = Url("https://www.reddit.com/r/searchengines/.rss")
+
+        # call tested function
+        urls = url.get_urls()
+
+        self.assertEqual(len(urls), 3)
+        self.assertEqual(urls["link"], "https://www.reddit.com/r/searchengines/.rss")
+        self.assertEqual(urls["link_request"], "https://www.reddit.com/r/searchengines/.rss")
+        self.assertEqual(urls["link_canonical"], "https://www.reddit.com/r/searchengines/.rss")
+
+    def test_get_urls__stupid_link(self):
+        test_link = "https://www.youtube.com/redirect?event=lorum&redir_token=ipsum&q=https%3A%2F%2Fcorridordigital.com%2F&v=LeB9DcFT810"
+
+        url = Url(test_link)
+
+        # call tested function
+        urls = url.get_urls()
+
+        self.assertEqual(len(urls), 3)
+        self.assertEqual(urls["link"], "https://corridordigital.com")
+        self.assertEqual(urls["link_request"], "https://www.youtube.com/redirect?event=lorum&redir_token=ipsum&q=https%3A%2F%2Fcorridordigital.com%2F&v=LeB9DcFT810")
+        self.assertEqual(urls["link_canonical"], "https://corridordigital.com")
+
+    def test_get_urls__youtube_rss_channel(self):
+        test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
+        test_channel_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
+
+        url = Url(test_link)
+
+        # call tested function
+        urls = url.get_urls()
+
+        self.assertEqual(len(urls), 3)
+        self.assertEqual(urls["link"], test_link)
+        self.assertEqual(urls["link_request"], test_link)
+        self.assertEqual(urls["link_canonical"], test_link)
+
+    def test_get_urls__youtube_channel_id(self):
+        test_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
+
+        url = Url(test_link)
+
+        # call tested function
+        urls = url.get_urls()
+
+        self.assertEqual(len(urls), 3)
+        self.assertEqual(urls["link"], test_link)
+        self.assertEqual(urls["link_request"], test_link)
+        self.assertEqual(urls["link_canonical"], test_link)
+
+    def test_get_urls__youtube_channel_id_non_canonical(self):
+        test_link = "https://youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
+        test_canonical_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
+
+        url = Url(test_link)
+
+        # call tested function
+        urls = url.get_urls()
+
+        self.assertEqual(len(urls), 3)
+        self.assertEqual(urls["link"], test_link)
+        self.assertEqual(urls["link_request"], test_link)
+        self.assertEqual(urls["link_canonical"], test_canonical_link)
+
+    def test_get_urls__youtube_video(self):
+        test_link = "https://www.youtube.com/watch?v=1234"
+
+        url = Url(test_link)
+
+        # call tested function
+        urls = url.get_urls()
+
+        self.assertEqual(len(urls), 3)
+        self.assertEqual(urls["link"], test_link)
+        self.assertEqual(urls["link_request"], test_link)
+        self.assertEqual(urls["link_canonical"], test_link)
+
+    def test_get_urls__youtube_video__noncanonical(self):
+        test_link = "https://m.youtube.com/watch?v=1234"
+        test_canonical_link = "https://www.youtube.com/watch?v=1234"
+
+        url = Url(test_link)
+
+        # call tested function
+        urls = url.get_urls()
+
+        self.assertEqual(len(urls), 3)
+        self.assertEqual(urls["link"], test_link)
+        self.assertEqual(urls["link_request"], test_link)
+        self.assertEqual(urls["link_canonical"], test_canonical_link)

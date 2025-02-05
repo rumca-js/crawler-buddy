@@ -211,7 +211,9 @@ class CrawlerTest(FakeInternetTestCase):
                 "crawler": "RequestsCrawler",
                 "settings" : {
                    "ssl_verify" : false,
-                   "respect_robots_txt" : false
+                   "respect_robots_txt" : false,
+                   "timeout_s" : 60,
+                   "delay_s" : 10
                 }
         }"""
 
@@ -224,3 +226,5 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertEqual(data["crawler"], "RequestsCrawler")
         self.assertEqual(data["settings"]["ssl_verify"], False)
         self.assertEqual(data["settings"]["respect_robots_txt"], False)
+        self.assertEqual(data["settings"]["timeout_s"], 60)
+        self.assertEqual(data["settings"]["delay_s"], 10)

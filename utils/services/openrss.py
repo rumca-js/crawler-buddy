@@ -1,4 +1,4 @@
-from rsshistory.webtools import UrlLocation, HttpPageHandler, RssPage, Url
+from rsshistory.webtools import UrlLocation, Url
 
 
 class OpenRss(object):
@@ -10,10 +10,8 @@ class OpenRss(object):
         url_procolles = p.get_protocolless()
 
         u = Url("https://openrss.org/" + url_procolles)
-        u.options.mode = "standard"
         u.get_response()
 
-        handler = u.get_handler()
-        if type(handler) is HttpPageHandler:
-            if type(handler.p) is RssPage:
-                return handler.p.get_link()
+        properties = u.get_properties()
+        if properties:
+            return properties["link"]

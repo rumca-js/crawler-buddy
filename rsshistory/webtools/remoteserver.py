@@ -3,6 +3,17 @@ import requests
 import urllib.parse
 
 
+class ResponseObject(object):
+    def __init__(self, url, text, binary, status_code):
+        self.url = url
+        self.text = text
+        self.binary = binary
+        self.status_code = status_code
+
+    def get_text(self):
+        return self.text
+
+
 class RemoteServer(object):
     """
     Crawler buddy communication class
@@ -11,7 +22,7 @@ class RemoteServer(object):
         self.remote_server = remote_server
         self.timeout_s = timeout_s
 
-    def get_social(self, url, settings=None):
+    def get_socialj(self, url, settings=None):
         """
         @returns None in case of error
         """
@@ -187,3 +198,11 @@ class RemoteServer(object):
             json_data["Content-Type"] = response["Content-Type"]
 
         return json_data
+
+    def get_response(self, all_properties):
+        properties = self.read_properties_section("Properties", all_properties)
+        response_data = self.read_properties_section("Response", all_properties)
+        contents_data = self.read_properties_section("Contents", all_properties)
+
+        o = ResponseObject(url=properties["link"], text = contents_data["Contents"], binary="", status_code = response_data["status_code"])
+        return o

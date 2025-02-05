@@ -11,7 +11,7 @@ options.mode_mapping
 
 """
 
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse, parse_qs
 from collections import OrderedDict
 import urllib.robotparser
 import asyncio
@@ -50,6 +50,7 @@ from .handlers import (
     ReturnDislike,
     GitHubUrlHandler,
     HackerNewsHandler,
+    InternetArchive,
 )
 
 from utils.dateutils import DateUtils
@@ -168,6 +169,11 @@ class Url(ContentInterface):
                         return HtmlPage(url, "")
 
                     if page_type == URL_TYPE_RSS:
+                        return RssPage(url, "")
+
+                    if url.find("rss") >= 0:
+                        return RssPage(url, "")
+                    if url.find("feed") >= 0:
                         return RssPage(url, "")
 
                     return
@@ -344,23 +350,24 @@ class Url(ContentInterface):
 
         stupid_google_string = "https://www.google.com/url"
         if url.find(stupid_google_string) >= 0:
-            wh = url.find("http", len(stupid_google_string))
-            if wh >= 0:
-                url = url[wh:]
-                wh = url.find("&")
-                if wh >= 0:
-                    url = url[:wh]
-                    url = Url.get_cleaned_link(url)
+            parsed_url = urlparse(url)
+            query_params = parse_qs(parsed_url.query)
+            param_value = query_params.get("url", [None])[0]
+            if param_value:
+                return param_value
+            param_value = query_params.get("q", [None])[0]
+            if param_value:
+                return param_value
 
         stupid_youtube_string = "https://www.youtube.com/redirect"
         if url.find(stupid_youtube_string) >= 0:
-            wh = url.rfind("&q=")
-            if wh >= 0:
-                wh = url.find("http", wh)
-                if wh >= 0:
-                    url = url[wh:]
-                    url = unquote(url)
-                    url = Url.get_cleaned_link(url)
+            parsed_url = urlparse(url)
+            query_params = parse_qs(parsed_url.query)
+            param_value = query_params.get("q", [None])[0]
+
+            param_value = unquote(param_value)
+            param_value = Url.get_cleaned_link(param_value)
+            return param_value
 
         return url
 
@@ -371,6 +378,9 @@ class Url(ContentInterface):
             return self.url
 
     def get_canonical_url(self):
+        if self.handler:
+            return self.handler.get_canonical_url()
+
         handlers = Url.get_handlers()
         for handler_class in handlers:
             handler = handler_class(url=self.url)
@@ -381,9 +391,22 @@ class Url(ContentInterface):
 
     def get_urls(self):
         properties = {}
-        properties["link"] = page_url.url
-        properties["link_request"] = page_url.request_url
-        properties["link_canonical"] = page_url.get_canonical_url()
+        properties["link"] = self.url
+        properties["link_request"] = self.request_url
+        properties["link_canonical"] = self.get_canonical_url()
+        return properties
+
+    def get_urls_archive(self):
+        p = UrlLocation(self.url)
+        short_url = p.get_protocolless()
+
+        properties = []
+
+        archive = InternetArchive(self.url)
+        properties.append(archive.get_archive_url())
+
+        properties.append("https://archive.ph/" + short_url)
+
         return properties
 
     def get_domain_info(self):
@@ -603,6 +626,8 @@ class Url(ContentInterface):
             properties["schema:thumbnailUrl"] = page_handler.p.get_schema_field(
                 "thumbnailUrl"
             )
+
+        properties["link_archives"] = self.get_urls_archive()
 
         all_properties.append({"name": "Properties", "data": properties})
 
