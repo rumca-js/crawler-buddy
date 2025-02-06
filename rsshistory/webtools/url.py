@@ -668,7 +668,7 @@ class Url(ContentInterface):
                         response_data["Content-Type"] = "text/html"
 
             response_data["Content-Length"] = response.get_content_length()
-            response_data["Last-Modified"] = self.response.get_last_modified()
+            response_data["Last-Modified"] = response.get_last_modified()
 
             response_data["Charset"] = response.get_content_type_charset()
             if not response_data["Charset"]:
@@ -682,6 +682,11 @@ class Url(ContentInterface):
                 response_data["body_hash"] = self.property_encode(self.get_contents_body_hash())
             else:
                 response_data["body_hash"] = ""
+
+            if len(response.errors) > 0:
+                response_data["errors"] = []
+                for error in response.errors:
+                    response_data["errors"].append(error)
 
             all_properties.append({"name": "Response", "data": response_data})
 

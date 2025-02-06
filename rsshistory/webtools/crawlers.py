@@ -238,6 +238,7 @@ class RequestsCrawler(CrawlerInterface):
             request_result = self.build_requests()
 
             if not request_result:
+                self.response.add_error("Could not build response")
                 return self.response
 
             self.response = PageResponseObject(
@@ -326,7 +327,7 @@ class RequestsCrawler(CrawlerInterface):
                 status_code=HTTP_STATUS_CODE_EXCEPTION,
                 request_url=self.request.url,
             )
-            self.response.add_error("General page exception")
+            self.response.add_error("General page exception: {}".format(str(E)))
 
         return self.response
 
