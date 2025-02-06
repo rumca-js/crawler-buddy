@@ -73,11 +73,10 @@ def get_entry_html(id, index, url, timestamp, all_properties):
 
     text += """<a href="{}"><h2>[{}] {}</h2></a>""".format(link, timestamp_str, url)
 
+    contents = ""
     contents_data = CrawlHistory.read_properties_section("Contents", all_properties)
-    if "Contents" in contents_data:
+    if contents_data and "Contents" in contents_data:
         contents = contents_data["Contents"]
-    else:
-        contents = ""
 
     response = CrawlHistory.read_properties_section("Response", all_properties)
     options = CrawlHistory.read_properties_section("Options", all_properties)
