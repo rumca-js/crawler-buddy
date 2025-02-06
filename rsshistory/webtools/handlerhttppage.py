@@ -531,15 +531,9 @@ class HttpPageHandler(HandlerInterface):
         if not self.p:
             return result
 
-        if type(self.p) is RssPage:
-            feeds = self.p.get_feeds()
-            if feeds and len(feeds) > 0:
-                result.extend(feeds)
-
-        if type(self.p) is HtmlPage:
-            feeds = self.p.get_feeds()
-            if feeds and len(feeds) > 0:
-                result.extend(feeds)
+        feeds = self.p.get_feeds()
+        if feeds and len(feeds) > 0:
+            result.extend(feeds)
 
         return result
 

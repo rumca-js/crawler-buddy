@@ -521,7 +521,7 @@ class PageResponseObject(object):
         return self.text
 
     def get_binary(self):
-        return self.content
+        return self.binary
 
     def get_headers(self):
         self.headers["Content-Type"] = self.get_content_type()

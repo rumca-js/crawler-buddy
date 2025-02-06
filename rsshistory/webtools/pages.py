@@ -5,6 +5,7 @@ import json
 from datetime import datetime
 from dateutil import parser
 import html
+import lxml.etree as ET
 
 from utils.dateutils import DateUtils
 
@@ -907,7 +908,7 @@ class RssPage(ContentInterface):
             return "utf-8"
 
     def get_feeds(self):
-        return self.url
+        return [self.url]
 
 
 class RssContentReader(object):
@@ -1189,6 +1190,95 @@ class ContentLinkParser(ContentInterface):
             links, UrlLocation(self.url).get_domain()
         )
         return links - in_domain
+
+
+class OpmlPageEntry(ContentInterface):
+    def __init__(self, url, contents, opml_entry):
+        super().__init__(url=url, contents=contents)
+        self.opml_entry = opml_entry
+        self.title = None
+        self.link = None
+
+        self.parse()
+
+    def parse(self):
+        if "xmlUrl" in self.opml_entry.attrib:
+            self.url = self.opml_entry.attrib["xmlUrl"]
+        else:
+            self.url = None
+        if "title" in self.opml_entry.attrib:
+            self.title = self.opml_entry.attrib["title"]
+
+    def get_title(self):
+        return self.title
+
+    def get_description(self):
+        pass
+
+    def get_language(self):
+        pass
+
+    def get_thumbnail(self):
+        pass
+
+    def get_author(self):
+        pass
+
+    def get_album(self):
+        pass
+
+    def get_tags(self):
+        pass
+
+
+class OpmlPage(ContentInterface):
+    def __init__(self, url, contents):
+        """
+        We could provide support for more items
+        https://github.com/microsoft/rss-reader-wp/blob/master/RSSReader_WP7/sample-opml.xml
+        """
+        super().__init__(url=url, contents=contents)
+        self.entries = []
+        self.parse()
+
+    def parse(self):
+        return self.parse_implementation()
+
+    def parse_implementation(self):
+        if not self.contents:
+            return
+
+        try:
+            parser = ET.XMLParser(strip_cdata=False, recover=True)
+            self.root = ET.fromstring(self.contents.encode(), parser=parser)
+        except Exception as E:
+            print(str(E))
+            self.root = None
+
+        if self.root is None:
+            return
+
+        entries = self.root.findall(".//outline")
+        if len(entries) > 0:
+            for entry in entries:
+                opml_entry = OpmlPageEntry(self.url, self.contents, entry)
+                if opml_entry.get_url():
+                    self.entries.append(opml_entry)
+            return entries
+
+    def get_entries(self):
+        return self.entries
+
+    def get_feeds(self):
+        result = []
+        for entry in self.entries:
+            result.append(entry.get_url())
+
+        return result
+
+    def is_valid(self):
+        if self.get_contents().find("<opml") >= 0:
+            return True
 
 
 class HtmlPage(ContentInterface):
@@ -1819,12 +1909,20 @@ class PageFactory(object):
             if p.is_valid():
                 return p
 
+            p = OpmlPage(url, contents)
+            if p.is_valid():
+                return p
+
             p = JsonPage(url, contents)
             if p.is_valid():
                 return p
 
         if response.is_rss():
             p = RssPage(url, contents)
+            if p.is_valid():
+                return p
+
+            p = OpmlPage(url, contents)
             if p.is_valid():
                 return p
 
@@ -1860,6 +1958,10 @@ class PageFactory(object):
             return p
 
         p = RssPage(url, contents)
+        if p.is_valid():
+            return p
+
+        p = OpmlPage(url, contents)
         if p.is_valid():
             return p
 

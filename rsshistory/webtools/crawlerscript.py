@@ -62,9 +62,18 @@ class ScriptCrawlerInterface(CrawlerInterface):
 
     def __init__(self, parser, request):
         settings = None
+        self.parser = parser
+
         if parser.args.remote_server:
             settings = {"remote_server": parser.args.remote_server}
 
         super().__init__(
             request, response_file=parser.args.output_file, settings=settings
         )
+
+    def save_response(self):
+        if self.parser.args.verbose:
+            if self.response:
+                print(self.response)
+
+        super().save_response()

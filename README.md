@@ -147,6 +147,11 @@ No need to select methods manually, as some methods are already predefined and u
  - Reddit - RSS feed discovery, social media data
  - HTML pages - RSS feed discovery for links
 
+File support
+ - RSS / atom files
+ - OMPL files
+ - HTML files
+
 # Scripts
 
 Repository contains various crawling scripts. All start with 'crawl' prefix.

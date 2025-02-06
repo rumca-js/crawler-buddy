@@ -53,6 +53,9 @@ from tests.fake.robotstxtcom import (
 from tests.fake.codeproject import (
     webpage_code_project_rss,
 )
+from tests.fake.opmlfile import (
+    opml_file,
+)
 from tests.fake.hackernews import (
     webpage_hackernews_rss,
     hacker_news_item,
@@ -418,6 +421,9 @@ class TestResponseObject(PageResponseObject):
 
         elif url == "https://rsspage.com/rss.xml":
             return webpage_samtime_odysee
+
+        elif url == "https://opml-file-example.com/ompl.xml":
+            return opml_file
 
         elif url == "https://invalid.rsspage.com/rss.xml":
             return ""

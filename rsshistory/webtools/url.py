@@ -631,9 +631,15 @@ class Url(ContentInterface):
 
         all_properties.append({"name": "Properties", "data": properties})
 
-        all_properties.append(
-            {"name": "Contents", "data": {"Contents": self.get_contents()}}
-        )
+        if response:
+            if response.get_text():
+                all_properties.append(
+                    {"name": "Contents", "data": {"Contents": response.get_text()}}
+                )
+            elif response.get_binary():
+                all_properties.append(
+                    {"name": "Contents", "data": {"Contents": self.property_encode(response.get_binary())}}
+                )
 
         request_data = dict(self.settings)
         request_data["crawler"] = type(request_data["crawler"]).__name__
@@ -669,15 +675,11 @@ class Url(ContentInterface):
                 response_data["Charset"] = response.encoding
 
             if self.get_contents_hash():
-                response_data["hash"] = base64.b64encode(
-                    self.get_contents_hash()
-                ).decode("utf-8")
+                response_data["hash"] = self.property_encode(self.get_contents_hash())
             else:
                 response_data["hash"] = ""
             if self.get_contents_body_hash():
-                response_data["body_hash"] = base64.b64encode(
-                    self.get_contents_body_hash()
-                ).decode("utf-8")
+                response_data["body_hash"] = self.property_encode(self.get_contents_body_hash())
             else:
                 response_data["body_hash"] = ""
 
@@ -699,6 +701,9 @@ class Url(ContentInterface):
         all_properties.append({"name": "Entries", "data": entries})
 
         return all_properties
+
+    def property_encode(self, byte_property):
+        return base64.b64encode(byte_property).decode("utf-8")
 
     def is_allowed(self):
         domain_info = self.get_domain_info()

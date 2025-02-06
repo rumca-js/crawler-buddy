@@ -504,7 +504,7 @@ class UrlTest(FakeInternetTestCase):
         self.assertFalse(domain_info.is_allowed("https://robots-txt.com/admin/"))
         self.assertTrue(domain_info.is_allowed("https://robots-txt.com/admin"))
 
-    def test_get_feeds__youtube(self):
+    def test_find_rss_url__youtube(self):
         MockRequestCounter.mock_page_requests = 0
 
         test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
@@ -520,6 +520,51 @@ class UrlTest(FakeInternetTestCase):
         MockRequestCounter.mock_page_requests = 0
 
         test_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
+        test_link_result = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
+        url = Url(test_link)
+
+        feeds = url.get_feeds()
+        self.assertIn(test_link_result, feeds)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
+    def test_get_feeds__odysee(self):
+        MockRequestCounter.mock_page_requests = 0
+        test_link = "https://odysee.com/@samtime:1?test"
+        test_link_result = "https://odysee.com/$/rss/@samtime:1"
+        url = Url(test_link)
+
+        feeds = url.get_feeds()
+        self.assertIn(test_link_result, feeds)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
+    def test_get_feeds__rss(self):
+        MockRequestCounter.mock_page_requests = 0
+        test_link = "https://www.codeproject.com/WebServices/NewsRSS.aspx"
+
+        url = Url(test_link)
+        url.get_response()
+
+        feeds = url.get_feeds()
+        self.assertIn(test_link, feeds)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
+    def test_get_feeds__opml(self):
+        MockRequestCounter.mock_page_requests = 0
+        test_link = "https://opml-file-example.com/ompl.xml"
+        test_link_result = "https://www.opmllink1.com"
+
+        url = Url(test_link)
+        url.get_response()
+
+        feeds = url.get_feeds()
+        self.assertIn(test_link_result, feeds)
+        self.assertNotIn(test_link, feeds)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
+    def test_find_rss_url__youtube_channel(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
         url = Url(test_link)
 
         result = Url.find_rss_url(url)
@@ -529,7 +574,7 @@ class UrlTest(FakeInternetTestCase):
         )
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_get_feeds__odysee(self):
+    def test_find_rss_url__odysee(self):
         MockRequestCounter.mock_page_requests = 0
         url = Url("https://odysee.com/@samtime:1?test")
 
@@ -537,7 +582,7 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(result.url, "https://odysee.com/$/rss/@samtime:1")
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_get_feeds__rss(self):
+    def test_find_rss_url__rss(self):
         MockRequestCounter.mock_page_requests = 0
         url = Url("https://www.codeproject.com/WebServices/NewsRSS.aspx")
 

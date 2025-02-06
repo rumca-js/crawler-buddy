@@ -62,6 +62,8 @@ class CrawlerInterface(object):
         self.response_file = response_file
         if settings:
             self.set_settings(settings)
+        else:
+            self.settings = settings
 
         if self.request.timeout_s and settings and "timeout_s" in settings:
             self.timeout_s = max(self.request.timeout_s, settings["timeout_s"])
@@ -240,7 +242,7 @@ class RequestsCrawler(CrawlerInterface):
 
             self.response = PageResponseObject(
                 url=request_result.url,
-                text="",
+                text=None,
                 status_code=request_result.status_code,
                 headers=dict(request_result.headers),
                 request_url=self.request.url,
@@ -252,7 +254,6 @@ class RequestsCrawler(CrawlerInterface):
 
             content_length = self.response.get_content_length()
             if content_length > PAGE_TOO_BIG_BYTES:
-                self.response.status_code = status_code = HTTP_STATUS_CODE_FILE_TOO_BIG
                 self.response.add_error("Page is too big")
                 request_result.close()
                 return self.response
@@ -266,31 +267,28 @@ class RequestsCrawler(CrawlerInterface):
             content_type = self.response.get_content_type()
 
             if content_type and not self.response.is_content_type_supported():
-                self.response.status_code = HTTP_STATUS_CODE_PAGE_UNSUPPORTED
-                self.response.add_error(
-                    "Url:{} is not supported {}".format(self.request.url, content_type)
-                )
+                self.response.binary = request_result.content
                 request_result.close()
                 return self.response
+            else:
+                """
+                IF we do not know the content type, or content type is supported
+                """
+                encoding = self.get_encoding(request_result, self.response)
+                if encoding:
+                    request_result.encoding = encoding
 
-            """
-            IF we do not know the content type, or content type is supported
-            """
-            encoding = self.get_encoding(request_result, self.response)
-            if encoding:
-                request_result.encoding = encoding
+                self.response = PageResponseObject(
+                    url=request_result.url,
+                    text=request_result.text,
+                    status_code=request_result.status_code,
+                    encoding=request_result.encoding,
+                    headers=dict(request_result.headers),
+                    binary=request_result.content,
+                    request_url=self.request.url,
+                )
 
-            self.response = PageResponseObject(
-                url=request_result.url,
-                text=request_result.text,
-                status_code=request_result.status_code,
-                encoding=request_result.encoding,
-                headers=dict(request_result.headers),
-                binary=request_result.content,
-                request_url=self.request.url,
-            )
-
-            request_result.close()
+                request_result.close()
 
         except requests.Timeout:
             self.response = PageResponseObject(
