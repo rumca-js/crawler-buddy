@@ -46,7 +46,7 @@ example_properties = """
       "Page Handler": "HttpPageHandler",
       "Page Type": "RssPage"
     },
-    "name": "Options"
+    "name": "Settings"
   },
   {
     "data": {

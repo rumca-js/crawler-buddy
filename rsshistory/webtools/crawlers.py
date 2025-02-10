@@ -237,8 +237,6 @@ class RequestsCrawler(CrawlerInterface):
 
         try:
             request_result = self.build_requests()
-            print("request_result")
-            print(request_result)
 
             if request_result is None:
                 self.response.add_error("Could not build response")

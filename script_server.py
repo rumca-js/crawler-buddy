@@ -24,7 +24,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "2.1.0"
+__version__ = "2.1.1"
 
 
 app = Flask(__name__)
@@ -71,15 +71,10 @@ def get_entry_html(id, index, url, timestamp, all_properties):
 
     timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
-    text += """<a href="{}"><h2>[{}] {}</h2></a>""".format(link, timestamp_str, url)
-
-    contents = ""
-    contents_data = CrawlHistory.read_properties_section("Contents", all_properties)
-    if contents_data and "Contents" in contents_data:
-        contents = contents_data["Contents"]
+    text += """<a href="{}"><h2>[{}] {}</h2></a>\n""".format(link, timestamp_str, url)
 
     response = CrawlHistory.read_properties_section("Response", all_properties)
-    options = CrawlHistory.read_properties_section("Options", all_properties)
+    options = CrawlHistory.read_properties_section("Settings", all_properties)
     if response:
         status_code = response["status_code"]
         # TODO maybe create a better API
@@ -110,7 +105,7 @@ def get_entry_html(id, index, url, timestamp, all_properties):
         crawler_name = ""
         crawler_crawler = ""
 
-    text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length:{} Crawler name:{} Crawler:{}</div>".format(
+    text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length:{} Crawler name:{} Crawler:{}</div>\n".format(
         status_code,
         charset,
         content_type,
@@ -120,8 +115,6 @@ def get_entry_html(id, index, url, timestamp, all_properties):
     )
 
     return text
-
-
 
 
 def get_crawl_properties(url, crawler_data):
