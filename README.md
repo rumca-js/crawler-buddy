@@ -68,15 +68,18 @@ settings is a dict, with settings:
 Fields:
 
  - Properties - general properties, like title, description, thumbnail, language, date\_published, feed\_url
- - Contents - text contents of page
+ - Text - text contents of page
+ - Binary - binary contents of page
  - Response - commonly used response fields Provides Content-Type, Content-Length, status\_code, etc.
  - Headers - all response headers of page. Provides Content-Type, Content-Length, etc.
  - Entries - if the link contains subordinate elements, like RSS, this field is populated with their meta data
 
 You can see the structure in [Example response file](https://raw.githubusercontent.com/rumca-js/crawler-buddy/refs/heads/main/example_response.json)
 
-Response contains hashes that can easily be used to check if page has changed over time.
-To decode contents hash.
+Some fields need to be decoded from JSON string:
+ - hash
+ - body hash
+ - binary data
 
 ```
 base64.b64decode(encoded_string)

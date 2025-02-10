@@ -237,8 +237,10 @@ class RequestsCrawler(CrawlerInterface):
 
         try:
             request_result = self.build_requests()
+            print("request_result")
+            print(request_result)
 
-            if not request_result:
+            if request_result is None:
                 self.response.add_error("Could not build response")
                 return self.response
 
@@ -417,7 +419,7 @@ class RequestsCrawler(CrawlerInterface):
             ssl_verify=self.request.ssl_verify,
             stream=True,
         )
-        if response:
+        if response is not None:
             return response
 
     def is_valid(self):

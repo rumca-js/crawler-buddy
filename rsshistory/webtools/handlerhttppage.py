@@ -161,6 +161,9 @@ class HttpRequestBuilder(object):
         response = crawler.get_response()
         if response:
             response.set_crawler(crawler_data)
+            if response.errors:
+                for error in response.errors:
+                    WebLogger.debug("Url:{}: {}".format(request.url, error))
         crawler.close()
 
         WebLogger.debug(
@@ -481,15 +484,16 @@ class HttpPageHandler(HandlerInterface):
         return self.response.status_code
 
     def is_valid(self):
-        if not self.p:
-            return False
 
         # not valid HTTP response
         response = self.response
         if not response or not response.is_valid():
             return False
 
-        return self.p.is_valid()
+        if self.p:
+            return self.p.is_valid()
+
+        return True
 
     def is_cloudflare_protected(self):
         """

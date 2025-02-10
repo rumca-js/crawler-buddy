@@ -7,6 +7,7 @@ This module provides replacement for the Internet.
 
 import logging
 import unittest
+import traceback
 
 from utils.dateutils import DateUtils
 from rsshistory.webtools import (
@@ -168,6 +169,11 @@ class MockRequestCounter(object):
         MockRequestCounter.mock_page_requests = 0
         MockRequestCounter.request_history = []
 
+    def debug_lines(self):
+        stack_lines = traceback.format_stack()
+        stack_string = "\n".join(stack_lines)
+        print(stack_string)
+
 
 
 class YouTubeJsonHandlerMock(YouTubeJsonHandler):
@@ -265,13 +271,10 @@ class TestResponseObject(PageResponseObject):
 
     def __init__(self, url, headers, timeout):
         self.status_code = 200
-
-        text = self.get_text_for_url(url)
+        self.errors = []
 
         self.url = url
         self.request_url = url
-        self.text = text
-        self.binary = text.encode()
         self.headers = {}
 
         # encoding = chardet.detect(contents)['encoding']
@@ -281,6 +284,8 @@ class TestResponseObject(PageResponseObject):
 
         self.set_headers(url)
         self.set_status(url)
+        self.set_text(url)
+        self.set_binary(url)
 
     def set_headers(self, url):
         if url == "https://page-with-last-modified-header.com":
@@ -297,6 +302,9 @@ class TestResponseObject(PageResponseObject):
 
         elif url.find("instance.com") >= 0 and url.find("json") >= 0:
             self.headers["Content-Type"] = "json"
+
+        elif url.startswith("https://binary") and url.find("jpg") >= 0:
+            self.headers["Content-Type"] = "image/jpg"
 
     def set_status(self, url):
         if url.startswith("https://www.youtube.com/watch?v=666"):
@@ -349,6 +357,14 @@ class TestResponseObject(PageResponseObject):
 
         elif url == "https://page-with-http-status-500.com/robots.txt":
             self.status_code = 500
+
+    def set_text(self, url):
+        if url.startswith("https://binary"):
+            self.text = None
+            return
+
+        text = self.get_text_for_url(url)
+        self.text = text
 
     def get_text_for_url(self, url):
         if url.startswith("https://youtube.com/channel/"):
@@ -575,6 +591,12 @@ class TestResponseObject(PageResponseObject):
         b.og_description = "Page og_description"
 
         return b.build_contents()
+
+    def set_binary(self, url):
+        self.binary = None
+        if url.startswith("https://binary"):
+            text = url
+            self.binary = text.encode("utf-8")
 
     def get_contents_youtube_channel(self, url):
         if url == "https://youtube.com/channel/samtime/rss.xml":

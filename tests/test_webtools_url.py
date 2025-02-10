@@ -388,6 +388,33 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
+    def test_get_properties__image_advanced(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://binary.jpg.com"
+
+        # call tested function
+        url = Url(test_link)
+
+        url.get_response()
+        all_properties = url.get_properties(full=True)
+
+        self.assertTrue(len(all_properties) > 0)
+        self.assertEqual(all_properties[0]["name"], "Properties")
+
+        properties = all_properties[0]["data"]
+
+        self.assertIn("title", properties)
+        self.assertIn("link", properties)
+
+        self.assertEqual(properties["link"], test_link)
+        self.assertEqual(properties["link_request"], test_link)
+
+        self.assertTrue(len(all_properties) > 0)
+        self.assertEqual(all_properties[1]["name"], "Binary")
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
     def test_get_contents__pass(self):
         url = Url("https://multiple-favicons.com/page.html")
         # call tested function
@@ -416,7 +443,7 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.request_history[0][0], "https://page-with-http-status-500.com")
 
-    def test_is_valid__true(self):
+    def test_is_valid__html(self):
         MockRequestCounter.mock_page_requests = 0
         url = Url("https://multiple-favicons.com/page.html")
 
@@ -425,6 +452,19 @@ class UrlTest(FakeInternetTestCase):
         url.get_response()
 
         self.assertEqual(type(url.get_handler().p), HtmlPage)
+
+        # call tested function
+        self.assertTrue(url.is_valid())
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
+    def test_is_valid__image(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://binary.jpg.com"
+
+        url = Url(test_link)
+        url.get_response()
 
         # call tested function
         self.assertTrue(url.is_valid())
@@ -447,22 +487,6 @@ class UrlTest(FakeInternetTestCase):
         url.response = PageResponseObject(link, None, status_code=500)
 
         # call tested function
-        self.assertFalse(url.is_valid())
-
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
-
-    def test_is_valid__false_p_is_None(self):
-        MockRequestCounter.mock_page_requests = 0
-        url = Url("https://multiple-favicons.com/page.html")
-
-        self.assertEqual(type(url.get_handler()), HttpPageHandler)
-
-        self.assertEqual(url.get_handler().p, None)
-        url.get_response()
-
-        self.assertEqual(type(url.get_handler().p), HtmlPage)
-        url.handler.p = None
-
         self.assertFalse(url.is_valid())
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)

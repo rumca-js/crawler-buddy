@@ -593,7 +593,46 @@ class Url(ContentInterface):
 
         all_properties = []
 
-        properties = basic_properties
+        properties_data = self.get_properties_data()
+
+        all_properties.append({"name": "Properties", "data": properties_data})
+
+        if response:
+            if response.get_text():
+                all_properties.append(
+                    {"name": "Text", "data": {"Contents": response.get_text()}}
+                )
+            elif response.get_binary():
+                all_properties.append(
+                    {"name": "Binary", "data": {"Contents": self.property_encode(response.get_binary())}}
+                )
+
+        request_data = dict(self.settings)
+        request_data["crawler"] = type(request_data["crawler"]).__name__
+
+        all_properties.append({"name": "Settings", "data": request_data})
+
+        response_data = self.get_response_data()
+        all_properties.append({"name": "Response", "data": response_data})
+        raw_headers_data = response.get_headers()
+        all_properties.append({"name": "Headers", "data": raw_headers_data})
+
+        if include_social:
+            social_data = self.get_social_properties(self.url)
+            if social_data:
+                all_properties.append({"name": "Social", "data": social_data})
+
+        entries_data = self.get_entry_data()
+        all_properties.append({"name": "Entries", "data": entries_data})
+
+        return all_properties
+
+    def get_properties_data(self):
+        properties = super().get_properties()
+        response = self.get_response()
+        page_handler = self.get_handler()
+
+        properties["link_request"] = self.request_url
 
         feeds = self.get_feeds()
         if len(feeds) > 0:
@@ -629,32 +668,30 @@ class Url(ContentInterface):
 
         properties["link_archives"] = self.get_urls_archive()
 
-        all_properties.append({"name": "Properties", "data": properties})
+        return properties
+
+    def get_response_data(self):
+        """
+        Easy digestible response data
+        """
+        response_data = OrderedDict()
+        response = self.get_response()
+        page_handler = self.get_handler()
+
+        response_data["is_valid"] = response.is_valid()
+
+        respect_robots_txt = False
+        is_allowed = True
+        if "respect_robots_txt" in self.settings and self.settings["respect_robots_txt"]:
+            respect_robots_txt = self.settings["respect_robots_txt"]
+            is_allowed = self.is_allowed()
+
+        response_data["is_allowed"] = is_allowed
+        if respect_robots_txt and not is_allowed:
+            return response_data
 
         if response:
-            if response.get_text():
-                all_properties.append(
-                    {"name": "Contents", "data": {"Contents": response.get_text()}}
-                )
-            elif response.get_binary():
-                all_properties.append(
-                    {"name": "Contents", "data": {"Contents": self.property_encode(response.get_binary())}}
-                )
-
-        request_data = dict(self.settings)
-        request_data["crawler"] = type(request_data["crawler"]).__name__
-
-        all_properties.append({"name": "Options", "data": request_data})
-
-        if response:
-            headers = response.get_headers()
-
-            response_data = OrderedDict()
-            response_data["is_valid"] = response.is_valid()
             response_data["status_code"] = response.get_status_code()
-
-            if check_robots:
-                response_data["is_allowed"] = self.is_allowed()
 
             response_data["Content-Type"] = response.get_content_type()
             if (
@@ -688,24 +725,17 @@ class Url(ContentInterface):
                 for error in response.errors:
                     response_data["errors"].append(error)
 
-            all_properties.append({"name": "Response", "data": response_data})
+        return response_data
 
-            all_properties.append({"name": "Headers", "data": headers})
-
-        if include_social:
-            social = self.get_social_properties(self.url)
-            if social:
-                all_properties.append({"name": "Social", "data": social})
-
+    def get_entry_data(self):
         index = 0
         entries = []
         for entry in self.get_entries():
             if "feed_entry" in entry:
                 del entry["feed_entry"]
             entries.append(entry)
-        all_properties.append({"name": "Entries", "data": entries})
 
-        return all_properties
+        return entries
 
     def property_encode(self, byte_property):
         return base64.b64encode(byte_property).decode("utf-8")

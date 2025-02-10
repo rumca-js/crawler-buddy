@@ -63,6 +63,7 @@ class RssPageTest(FakeInternetTestCase):
         self.disable_web_pages()
 
     def test_get_title__rss(self):
+        MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_rss)
 
         # call tested function
@@ -72,6 +73,7 @@ class RssPageTest(FakeInternetTestCase):
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_title__youtube(self):
+        MockRequestCounter.mock_page_requests = 0
         # default language
         reader = RssPage(
             "https://linkedin.com/test", youtube_channel_rss_linus_tech_tips
@@ -82,6 +84,7 @@ class RssPageTest(FakeInternetTestCase):
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_description(self):
+        MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_rss)
 
         # call tested function
@@ -90,6 +93,7 @@ class RssPageTest(FakeInternetTestCase):
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_language(self):
+        MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_rss)
 
         # call tested function
@@ -99,6 +103,7 @@ class RssPageTest(FakeInternetTestCase):
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_thumbnail(self):
+        MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_rss)
 
         # call tested function
@@ -111,6 +116,7 @@ class RssPageTest(FakeInternetTestCase):
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_author(self):
+        MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_rss)
 
         # call tested function
@@ -120,6 +126,7 @@ class RssPageTest(FakeInternetTestCase):
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_entries(self):
+        MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_rss)
         entries = reader.get_entries()
         entries = list(entries)
@@ -134,6 +141,7 @@ class RssPageTest(FakeInternetTestCase):
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_entry_old_date(self):
+        MockRequestCounter.mock_page_requests = 0
         # default language
         reader = RssPage("https://linkedin.com/test", webpage_old_pubdate_rss)
         entries = reader.get_entries()
@@ -149,6 +157,7 @@ class RssPageTest(FakeInternetTestCase):
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_entry_no_date(self):
+        MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_no_pubdate_rss)
         entries = reader.get_entries()
         entries = list(entries)
@@ -167,6 +176,7 @@ class RssPageTest(FakeInternetTestCase):
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_entry_page_rating(self):
+        MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_no_pubdate_rss)
         entries = reader.get_entries()
         entries = list(entries)
@@ -179,12 +189,14 @@ class RssPageTest(FakeInternetTestCase):
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_is_valid__true_youtube(self):
+        MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_samtime_youtube_rss)
         self.assertTrue(reader.is_valid())
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_is_valid__true(self):
+        MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_old_pubdate_rss)
         entries = reader.get_entries()
 
@@ -194,6 +206,7 @@ class RssPageTest(FakeInternetTestCase):
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_is_valid__geek_false(self):
+        MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", geekwire_feed)
         entries = reader.get_entries()
 
@@ -203,6 +216,7 @@ class RssPageTest(FakeInternetTestCase):
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_is_valid__warhammer_true(self):
+        MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", warhammer_community_rss)
         entries = reader.get_entries()
 
@@ -212,6 +226,7 @@ class RssPageTest(FakeInternetTestCase):
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_contents_body_hash(self):
+        MockRequestCounter.mock_page_requests = 0
         # default language
         reader = RssPage("https://linkedin.com/test", webpage_old_pubdate_rss)
 

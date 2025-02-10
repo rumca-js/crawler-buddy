@@ -13,6 +13,12 @@ class ResponseObject(object):
     def get_text(self):
         return self.text
 
+    def get_binary(self):
+        return self.binary
+
+    def get_status_code(self):
+        return self.status_code
+
 
 class RemoteServer(object):
     """
@@ -202,7 +208,21 @@ class RemoteServer(object):
     def get_response(self, all_properties):
         properties = self.read_properties_section("Properties", all_properties)
         response_data = self.read_properties_section("Response", all_properties)
-        contents_data = self.read_properties_section("Contents", all_properties)
 
-        o = ResponseObject(url=properties["link"], text = contents_data["Contents"], binary="", status_code = response_data["status_code"])
+        text_data = self.read_properties_section("Text", all_properties)
+        binary_data = self.read_properties_section("Binary", all_properties)
+
+        text = ""
+        if text_data:
+            text = text_data["Contents"]
+
+        binary = None
+        if binary_data:
+            binary = base64.b64decode(binary_data["Contents"])
+
+        if not response_data:
+            o = ResponseObject(url=properties["link"], text = text, binary=binary)
+            return o
+
+        o = ResponseObject(url=properties["link"], text = text, binary=binary, status_code = response_data["status_code"])
         return o
