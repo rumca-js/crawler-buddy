@@ -23,6 +23,7 @@ from .crawlers import (
 )
 
 
+
 class WebConfig(object):
     """
     API to configure webtools
@@ -303,3 +304,6 @@ class WebConfig(object):
         except Exception as E:
             WebLogger.error(f"Problems with creating display")
             return
+
+    def get_bytes_limit():
+        return 5000000  # 5 MB. There are some RSS more than 1MB

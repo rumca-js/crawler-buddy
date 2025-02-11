@@ -164,12 +164,13 @@ class MockRequestCounter(object):
         """
         MockRequestCounter.request_history.append([url, info])
         MockRequestCounter.mock_page_requests += 1
+        #MockRequestCounter.debug_lines()
 
     def reset():
         MockRequestCounter.mock_page_requests = 0
         MockRequestCounter.request_history = []
 
-    def debug_lines(self):
+    def debug_lines():
         stack_lines = traceback.format_stack()
         stack_string = "\n".join(stack_lines)
         print(stack_string)

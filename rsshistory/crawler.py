@@ -72,6 +72,11 @@ class Crawler(object):
 
         parsed_crawler_data["settings"]["remote_server"] = remote_server
 
+        if "bytes_limit" not in parsed_crawler_data and self.configuration.is_set("bytes_limit"):
+            parsed_crawler_data["bytes_limit"] = self.configuration.get("bytes_limit")
+        else:
+            parsed_crawler_data["bytes_limit"] = webtools.WebConfig.get_bytes_limit()
+
         return parsed_crawler_data
 
     def run(self, url, crawler_data=None):

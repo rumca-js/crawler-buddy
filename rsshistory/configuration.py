@@ -68,6 +68,7 @@ class Configuration(object):
         self.read_json_config_field(json_config, "use_canonical_links")
         self.read_json_config_field(json_config, "allowed_ids")
         self.read_json_config_field(json_config, "default_crawler")
+        self.read_json_config_field(json_config, "bytes_limit")
 
     def read_json_config_field(self, json_config, field):
         if field in json_config:

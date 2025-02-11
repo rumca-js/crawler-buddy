@@ -151,6 +151,7 @@ class CrawlerTest(FakeInternetTestCase):
         request = FlaskRequest("http://192.168.0.0")
         request.set("name", "MMMMmm")
 
+        # call tested function
         data = crawler.get_request_data(request)
 
         self.assertEqual(data["name"], "MMMMmm")
@@ -161,6 +162,7 @@ class CrawlerTest(FakeInternetTestCase):
         request = FlaskRequest("http://192.168.0.0")
         request.set("crawler", "MMMMmm")
 
+        # call tested function
         data = crawler.get_request_data(request)
 
         self.assertEqual(data["crawler"], "MMMMmm")
@@ -176,6 +178,7 @@ class CrawlerTest(FakeInternetTestCase):
         request = FlaskRequest("http://192.168.0.0")
         request.set("crawler_data", crawler_data)
 
+        # call tested function
         data = crawler.get_request_data(request)
 
         self.assertEqual(data["name"], "Requests")
@@ -196,6 +199,7 @@ class CrawlerTest(FakeInternetTestCase):
         request = FlaskRequest("http://192.168.0.0")
         request.set("crawler_data", crawler_data)
 
+        # call tested function
         data = crawler.get_request_data(request)
 
         self.assertEqual(data["name"], "Requests")
@@ -220,6 +224,7 @@ class CrawlerTest(FakeInternetTestCase):
         request = FlaskRequest("http://192.168.0.0")
         request.set("crawler_data", crawler_data)
 
+        # call tested function
         data = crawler.get_request_data(request)
 
         self.assertEqual(data["name"], "Requests")
@@ -228,3 +233,23 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertEqual(data["settings"]["respect_robots_txt"], False)
         self.assertEqual(data["settings"]["timeout_s"], 60)
         self.assertEqual(data["settings"]["delay_s"], 10)
+
+    def test_get_request_data__bytes_limit(self):
+        crawler = Crawler()
+
+        crawler_data = """{
+                "name": "Requests",
+                "crawler": "RequestsCrawler",
+                "settings": {
+                   "ssl_verify": true,
+                   "respect_robots_txt": true
+                }
+        }"""
+
+        request = FlaskRequest("http://192.168.0.0")
+        request.set("crawler_data", crawler_data)
+
+        # call tested function
+        data = crawler.get_request_data(request)
+
+        self.assertTrue(data["bytes_limit"])

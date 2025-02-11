@@ -24,7 +24,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "2.1.1"
+__version__ = "2.1.2"
 
 
 app = Flask(__name__)
@@ -204,7 +204,7 @@ def info():
         name = item["name"]
         crawler = item["crawler"]
         settings = item["settings"]
-        text += "<div>Name:{} Crawler:{} Settings:{}</div>".format(
+        text += "<div>Name:{} Crawler:{} Settings:{}</div>\n".format(
             name, crawler.__name__, settings
         )
 
@@ -240,7 +240,7 @@ def history():
 
     text = ""
 
-    text += "<h1>History</h1>"
+    text += "<h1>History</h1>\n"
 
     if url_history.get_history_size() == 0:
         text += "<div>No history yet!</div>"
@@ -300,12 +300,12 @@ def debug():
 
         info_text = html.escape(info_text)
 
-        text += '<div style="display: flex; flex-direction: column; gap: 0.2em;">'
-        text += '<div>[{}] Level:{} info:{}</div>'.format(timestamp, level, info_text)
+        text += '<div style="margin-bottom: 1em;">\n'
+        text += '<div>[{}] Level:{} info:{}</div>\n'.format(timestamp, level, info_text)
         if detail_text:
             detail_text = html.escape(detail_text)
-            text += "<div>{}</div>".format(detail_text)
-        text += "</div>"
+            text += "<div>{}</div>\n".format(detail_text)
+        text += "</div>\n"
 
     return get_html(id=id, body=text, title="Debug")
 
@@ -724,7 +724,7 @@ def queue():
         size
     )
 
-    text += "<h1>Queue</h1>"
+    text += "<h1>Queue</h1>\n"
 
     for index in crawler_main.crawler_info.queue:
         things = crawler_main.crawler_info.queue[index]
@@ -732,9 +732,7 @@ def queue():
 
         timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
         
-        text += '<div style="display: flex; flex-direction: column; gap: 0.2em;">'
-        text += "<div>{} {} {} {}</div>".format(index, timestamp_str, url, crawler_data)
-        text += "</div>"
+        text += '<div style="margin-bottom:1em;">{} {} {} {}</div>\n'.format(index, timestamp_str, url, crawler_data)
 
     return get_html(id=id, body=text, title="Queue")
 
@@ -754,15 +752,15 @@ def processes():
 
     lines = out.split("\n")
 
-    text = "<h1>Chrome processes</h1>"
-    text += "<div>Number of chrom processes {}</div>".format(
+    text = "<h1>Chrome processes</h1>\n"
+    text += "<div>Number of chrom processes {}</div>\n".format(
         webtools.WebConfig.count_chrom_processes()
     )
 
-    text += "<h1>Processes</h1>"
+    text += "<h1>Processes</h1>\n"
 
     for line in lines:
-        text += "<div>{}</div>".format(line)
+        text += '<div style="margin-bottom:1em;">{}</div>\n'.format(line)
 
     return get_html(id=id, body=text, title="Processes")
 

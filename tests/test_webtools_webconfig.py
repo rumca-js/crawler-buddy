@@ -35,3 +35,8 @@ class WebConfigTest(FakeInternetTestCase):
         self.assertIn("name", config)
         self.assertIn("crawler", config)
         self.assertIn("settings", config)
+
+    def test_get_bytes_limits(self):
+        limit = WebConfig.get_bytes_limit()
+
+        self.assertTrue(limit)

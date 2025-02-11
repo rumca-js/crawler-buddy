@@ -22,7 +22,6 @@ from .webtools import (
     WebLogger,
     get_request_to_bytes,
     get_response_from_bytes,
-    PAGE_TOO_BIG_BYTES,
     HTTP_STATUS_CODE_EXCEPTION,
     HTTP_STATUS_CODE_CONNECTION_ERROR,
     HTTP_STATUS_CODE_TIMEOUT,
@@ -255,10 +254,12 @@ class RequestsCrawler(CrawlerInterface):
                 return self.response
 
             content_length = self.response.get_content_length()
-            if content_length > PAGE_TOO_BIG_BYTES:
-                self.response.add_error("Page is too big")
-                request_result.close()
-                return self.response
+
+            if "bytes_limit" in self.settings:
+                if content_length > self.settings["bytes_limit"]:
+                    self.response.add_error("Page is too big")
+                    request_result.close()
+                    return self.response
 
             if self.request.ping:
                 request_result.close()

@@ -48,7 +48,6 @@ from utils.dateutils import DateUtils
 __version__ = "0.0.5"
 
 
-PAGE_TOO_BIG_BYTES = 5000000  # 5 MB. There are some RSS more than 1MB
 
 
 URL_TYPE_RSS = "rss"
@@ -163,6 +162,12 @@ def date_str_to_date(date_str):
 def calculate_hash(text):
     try:
         return hashlib.md5(text.encode("utf-8")).digest()
+    except Exception as E:
+        WebLogger.exc(E, "Could not calculate hash")
+
+def calculate_hash_binary(binary):
+    try:
+        return hashlib.md5(binary).digest()
     except Exception as E:
         WebLogger.exc(E, "Could not calculate hash")
 

@@ -1,4 +1,5 @@
 from .pages import DefaultContentPage
+from .webtools import calculate_hash_binary, calculate_hash
 
 
 class HandlerInterface(DefaultContentPage):
@@ -64,6 +65,22 @@ class HandlerInterface(DefaultContentPage):
     def get_contents(self):
         if self.response:
             return self.response.get_text()
+
+    def get_contents_hash(self):
+        if self.response is None:
+            self.get_response()
+
+        if self.response is not None:
+            text = self.response.get_text()
+            if text:
+                return calculate_hash(text)
+
+            binary = self.response.get_binary()
+            if binary:
+                return calculate_hash_binary(binary)
+
+    def get_contents_body_hash(self):
+        return self.get_contents_hash()
 
     def get_title(self):
         if self.handler:
