@@ -13,7 +13,7 @@ from utils import CrawlHistory
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 
 
-example_properties = """
+example_requests_properties = """
 [
   {
     "data": {
@@ -34,17 +34,18 @@ example_properties = """
     "data": {
       "Contents": "test"
     },
-    "name": "Contents"
+    "name": "Text"
   },
   {
     "data": {
-      "Options Ping": false,
-      "Options SSL": true,
-      "Options mode mapping": "[{'crawler': <class 'rsshistory.webtools.crawlers.RequestsCrawler'>, 'name': 'RequestsCrawler', 'settings': {'timeout_s': 20, 'crawler': 'RequestsCrawler', 'name': 'RequestsCrawler', 'remote_server': 'http://192.168.0.200:3000', 'timeout': 10, 'full': None, 'headers': False, 'ping': False, 'remote-server': 'http://192.168.0.200:3000'}}]",
-      "Options use browser promotions": true,
-      "Options user agent": "None",
-      "Page Handler": "HttpPageHandler",
-      "Page Type": "RssPage"
+      "bytes_limit": 5000000,
+      "crawler": "RequestsCrawler",
+      "enabled": true,
+      "name": "RequestsCrawler",
+      "settings": {
+        "remote-server": "http://127.0.0.1:3000",
+        "timeout_s": 20
+      }
     },
     "name": "Settings"
   },
@@ -363,21 +364,24 @@ example_properties = """
 ]
 """
 
+example_selenium_properties = example_requests_properties.replace("RequestsCrawler", "SeleniumChromeFull")
+example_selenium_properties = example_selenium_properties.replace(""""status_code": 200""", """"status_code": 403""")
+
 
 class ScriptServerTest(FakeInternetTestCase):
     def setUp(self):
         self.disable_web_pages()
 
     def test_read_properties_section(self):
-        all_properties = json.loads(example_properties)
+        all_properties = json.loads(example_requests_properties)
 
         # call tested function
-        data = CrawlHistory.read_properties_section("Contents", all_properties)
+        data = CrawlHistory.read_properties_section("Text", all_properties)
 
         self.assertTrue(data)
 
     def test_find_response__by_url(self):
-        all_properties = json.loads(example_properties)
+        all_properties = json.loads(example_requests_properties)
 
         url_history = CrawlHistory()
         url_history.add((datetime.now(), "https://www.lemonde.fr/en/rss/une.xml", all_properties))
@@ -388,7 +392,7 @@ class ScriptServerTest(FakeInternetTestCase):
         self.assertTrue(data)
 
     def test_find_response__by_url(self):
-        all_properties = json.loads(example_properties)
+        all_properties = json.loads(example_requests_properties)
 
         url_history = CrawlHistory()
         url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_properties))
@@ -399,18 +403,27 @@ class ScriptServerTest(FakeInternetTestCase):
         self.assertTrue(data)
 
     def test_find_response__by_name_found(self):
-        all_properties = json.loads(example_properties)
+        all_requests_properties = json.loads(example_requests_properties)
+        all_selenium_properties = json.loads(example_selenium_properties)
 
         url_history = CrawlHistory()
-        url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_properties))
+        url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_requests_properties))
+        url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_selenium_properties))
 
         # call tested function
         data = url_history.find(url = "https://www.lemonde.fr/en/rss/une.xml", crawler_name = "RequestsCrawler")
-
         self.assertTrue(data)
+        items = data[2]
+        self.assertEqual(items[3]["data"]["status_code"], 200)
+
+        # call tested function
+        data = url_history.find(url = "https://www.lemonde.fr/en/rss/une.xml", crawler_name = "SeleniumChromeFull")
+        self.assertTrue(data)
+        items = data[2]
+        self.assertEqual(items[3]["data"]["status_code"], 403)
 
     def test_find_response__by_index_found(self):
-        all_properties = json.loads(example_properties)
+        all_properties = json.loads(example_requests_properties)
 
         url_history = CrawlHistory()
         url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_properties))
@@ -421,7 +434,7 @@ class ScriptServerTest(FakeInternetTestCase):
         self.assertTrue(data)
 
     def test_find_response__by_name_not_found(self):
-        all_properties = json.loads(example_properties)
+        all_properties = json.loads(example_requests_properties)
 
         url_history = CrawlHistory()
         url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_properties))
@@ -432,7 +445,7 @@ class ScriptServerTest(FakeInternetTestCase):
         self.assertFalse(data)
 
     def test_find_response__not_found__date_old(self):
-        all_properties = json.loads(example_properties)
+        all_properties = json.loads(example_requests_properties)
 
         url_history = CrawlHistory()
         url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_properties))

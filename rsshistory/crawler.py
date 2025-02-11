@@ -6,6 +6,7 @@ from collections import OrderedDict
 from rsshistory import webtools
 from rsshistory.configuration import Configuration
 from rsshistory.entryrules import EntryRules
+from utils import CrawlHistory
 
 
 class CrawlerInfo(object):
@@ -36,6 +37,10 @@ class Crawler(object):
         self.crawler_info = CrawlerInfo()
         self.entry_rules = EntryRules()
         self.configuration = Configuration()
+        self.url_history = CrawlHistory(200)
+
+    def get_history(self):
+        return self.url_history
 
     def get_request_data(self, request):
         crawler_data = request.args.get("crawler_data")
@@ -185,3 +190,32 @@ class Crawler(object):
         new_mapping = webtools.WebConfig.get_default_crawler(url)
         if new_mapping:
             return new_mapping
+
+    def get_crawl_properties(self, url, crawler_data):
+        """
+        returns properties
+        """
+        name = None
+        if "name" in crawler_data:
+            name = crawler_data["name"]
+        crawler = None
+        if "crawler" in crawler_data:
+            crawler = crawler_data["crawler"]
+
+        things = self.get_history().find(url=url, crawler_name=name, crawler=crawler)
+
+        if things:
+            print("Returning from saved properties")
+            index, timestamp, all_properties = things
+
+            if all_properties:
+                return all_properties
+
+        all_properties = self.run(url, crawler_data)
+
+        if all_properties:
+            self.get_history().add((url, all_properties))
+        else:
+            all_properties = self.get_history().find(url=url)
+
+        return all_properties

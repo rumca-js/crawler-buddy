@@ -24,7 +24,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "2.1.3"
+__version__ = "2.1.4"
 
 
 app = Flask(__name__)
@@ -32,7 +32,6 @@ app = Flask(__name__)
 
 history_length = 200
 # should contain tuples of datetime, URL, properties
-url_history = CrawlHistory(history_length)
 social_history = CrawlHistory(history_length)
 webtools.WebLogger.web_logger = PermanentLogger()
 configuration = Configuration()
@@ -115,33 +114,6 @@ def get_entry_html(id, index, url, timestamp, all_properties):
     )
 
     return text
-
-
-def get_crawl_properties(url, crawler_data):
-    name = None
-    if "name" in crawler_data:
-        name = crawler_data["name"]
-    crawler = None
-    if "crawler" in crawler_data:
-        crawler = crawler_data["crawler"]
-
-    things = url_history.find(url=url, crawler_name=name, crawler=crawler)
-    print("Returning from saved properties")
-
-    if things:
-        index, timestamp, all_properties = things
-
-        if all_properties:
-            return all_properties
-
-    all_properties = crawler_main.run(url, crawler_data)
-
-    if all_properties:
-        url_history.add((url, all_properties))
-    else:
-        all_properties = url_history.find(url=url)
-
-    return all_properties
 
 
 @app.route("/")
@@ -242,10 +214,10 @@ def history():
 
     text += "<h1>History</h1>\n"
 
-    if url_history.get_history_size() == 0:
+    if crawler_main.get_history().get_history_size() == 0:
         text += "<div>No history yet!</div>"
     else:
-        for datetime, index, things in reversed(url_history.container):
+        for datetime, index, things in reversed(crawler_main.get_history().container):
             url = things[0]
             all_properties = things[1]
 
@@ -264,10 +236,10 @@ def historyj():
 
     json_history = []
 
-    if url_history.get_history_size() == 0:
+    if crawler_main.get_history().get_history_size() == 0:
         return json_history
 
-    for datetime, index, things in reversed(url_history.container):
+    for datetime, index, things in reversed(crawler_main.get_history().container):
         url = things[0]
         all_properties = things[1]
 
@@ -352,7 +324,7 @@ def set_response():
     all_properties.append({"name": "Response", "data": response})
     all_properties.append({"name": "Headers", "data": headers})
 
-    url_history.add((url, all_properties))
+    crawler_main.get_history().add((url, all_properties))
 
     return jsonify({"success": True, "received": contents})
 
@@ -388,7 +360,7 @@ def find():
 
         return get_html(id=id, body=form_html, title="Find")
     else:
-        things = url_history.find(url=url, crawler_name=name, crawler=crawler)
+        things = crawler_main.get_history().find(url=url, crawler_name=name, crawler=crawler)
 
         if not things:
             return get_html(
@@ -416,7 +388,7 @@ def findj():
     if index:
         index = int(index)
 
-    things = url_history.find(index=index, url=url, crawler_name=name, crawler=crawler)
+    things = crawler_main.get_history().find(index=index, url=url, crawler_name=name, crawler=crawler)
 
     if not things:
         return jsonify({"success": False, "error": "No properties found"}), 400
@@ -477,7 +449,7 @@ def getj():
 
     try:
         webtools.WebConfig.start_display()
-        all_properties = get_crawl_properties(url, crawler_data)
+        all_properties = crawler_main.get_crawl_properties(url, crawler_data)
     except Exception as E:
         webtools.WebLogger.exc(E, info_text="Exception when calling getj {} {}".format(url, crawler_data))
         all_properties = None
@@ -518,7 +490,7 @@ def proxy():
     crawler_data["settings"]["headers"] = False
     crawler_data["settings"]["ping"] = False
 
-    all_properties = get_crawl_properties(url, crawler_data)
+    all_properties = crawler_main.get_crawl_properties(url, crawler_data)
 
     if not all_properties:
         return jsonify({"success": False, "error": "No properties found"}), 400
@@ -560,12 +532,12 @@ def headers():
     crawler_data["settings"]["headers"] = True
     crawler_data["settings"]["ping"] = False
 
-    all_properties = get_crawl_properties(url, crawler_data)
+    all_properties = crawler_main.get_crawl_properties(url, crawler_data)
 
     if all_properties:
-        url_history.add((url, all_properties))
+        crawler_main.get_history().add((url, all_properties))
     else:
-        all_properties = url_history.find(url=url)
+        all_properties = crawler_main.get_history().find(url=url)
 
         if not all_properties:
             return jsonify({"success": False, "error": "No properties found"}), 400
@@ -593,12 +565,12 @@ def ping():
     crawler_data["settings"]["headers"] = False
     crawler_data["settings"]["ping"] = True
 
-    all_properties = get_crawl_properties(url, crawler_data)
+    all_properties = crawler_main.get_crawl_properties(url, crawler_data)
 
     if all_properties:
-        url_history.add(url, all_properties)
+        crawler_main.get_history().add(url, all_properties)
     else:
-        things = url_history.find(url=url)
+        things = crawler_main.get_history().find(url=url)
 
         if not things:
             return jsonify({"success": False, "error": "No properties found"}), 400
@@ -801,8 +773,9 @@ if __name__ == "__main__":
     p.parse()
 
     history_length = p.args.history_length
-    url_history.set_size(history_length)
-    url_history.set_time_cache(p.args.time_cache_minutes)
+
+    crawler_main.get_history().set_size(history_length)
+    crawler_main.get_history().set_time_cache(p.args.time_cache_minutes)
 
     socket.setdefaulttimeout(40)
 
