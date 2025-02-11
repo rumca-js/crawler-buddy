@@ -39,6 +39,18 @@ class HttpPageHandlerTest(FakeInternetTestCase):
         # call tested function
         self.assertTrue(type(handler.get_page_handler()), RssPage)
 
+    def test_get_page_handler__broken_content_type(self):
+        test_link = "https://rss-page-with-broken-content-type.com/feed"
+        settings = Url(test_link).get_init_settings()
+
+        handler = HttpPageHandler(test_link, settings = settings, url_builder = Url)
+        response = handler.get_response()
+
+        # call tested function
+        self.assertTrue(type(handler.get_page_handler()), RssPage)
+
+        self.assertEqual(response.get_content_type(), "text/html")
+
     def test_get_contents_hash(self):
         test_link = "https://linkedin.com"
         settings = Url(test_link).get_init_settings()

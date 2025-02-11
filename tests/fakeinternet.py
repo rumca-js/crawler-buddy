@@ -307,6 +307,18 @@ class TestResponseObject(PageResponseObject):
         elif url.startswith("https://binary") and url.find("jpg") >= 0:
             self.headers["Content-Type"] = "image/jpg"
 
+        elif url.startswith("https://image"):
+            self.headers["Content-Type"] = "image/jpg"
+
+        elif url.startswith("https://audio"):
+            self.headers["Content-Type"] = "audio/midi"
+
+        elif url.startswith("https://video"):
+            self.headers["Content-Type"] = "video/mp4"
+
+        elif url == "https://rss-page-with-broken-content-type.com/feed":
+            self.headers["Content-Type"] = "text/html"
+
     def set_status(self, url):
         if url.startswith("https://www.youtube.com/watch?v=666"):
             self.status_code = 500
@@ -363,6 +375,15 @@ class TestResponseObject(PageResponseObject):
         if url.startswith("https://binary"):
             self.text = None
             return
+        elif url.startswith("https://image"):
+            self.text = None
+            return
+        elif url.startswith("https://audio"):
+            self.text = None
+            return
+        elif url.startswith("https://video"):
+            self.text = None
+            return
 
         text = self.get_text_for_url(url)
         self.text = text
@@ -375,6 +396,9 @@ class TestResponseObject(PageResponseObject):
             return webpage_no_pubdate_rss
 
         if url.startswith("https://www.youtube.com/user/linustechtips"):
+            return youtube_channel_html_linus_tech_tips
+
+        if url == "https://rss-page-with-broken-content-type.com/feed":
             return youtube_channel_html_linus_tech_tips
 
         if url.startswith("https://www.geekwire.com/feed"):
@@ -596,6 +620,15 @@ class TestResponseObject(PageResponseObject):
     def set_binary(self, url):
         self.binary = None
         if url.startswith("https://binary"):
+            text = url
+            self.binary = text.encode("utf-8")
+        elif url.startswith("https://image"):
+            text = url
+            self.binary = text.encode("utf-8")
+        elif url.startswith("https://audio"):
+            text = url
+            self.binary = text.encode("utf-8")
+        elif url.startswith("https://video"):
             text = url
             self.binary = text.encode("utf-8")
 

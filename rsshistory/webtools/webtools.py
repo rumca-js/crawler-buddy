@@ -585,6 +585,13 @@ class PageResponseObject(object):
         ):
             return True
 
+    def is_content_type(self, inner):
+        if (
+            self.get_content_type() is not None
+            and self.get_content_type().find(inner) >= 0
+        ):
+            return True
+
 
 def get_request_to_bytes(request, script):
     from .ipc import string_to_command

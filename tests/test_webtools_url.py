@@ -412,6 +412,72 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertTrue(len(all_properties) > 0)
         self.assertEqual(all_properties[1]["name"], "Binary")
+        self.assertTrue(all_properties[1]["data"]["Contents"])
+
+        self.assertEqual(all_properties[3]["name"], "Response")
+        self.assertEqual(all_properties[3]["data"]["Content-Type"], "image/jpg")
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
+    def test_get_properties__audio_advanced(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://audio.jpg.com"
+
+        # call tested function
+        url = Url(test_link)
+
+        url.get_response()
+        all_properties = url.get_properties(full=True)
+
+        self.assertTrue(len(all_properties) > 0)
+        self.assertEqual(all_properties[0]["name"], "Properties")
+
+        properties = all_properties[0]["data"]
+
+        self.assertIn("title", properties)
+        self.assertIn("link", properties)
+
+        self.assertEqual(properties["link"], test_link)
+        self.assertEqual(properties["link_request"], test_link)
+
+        self.assertTrue(len(all_properties) > 0)
+        self.assertEqual(all_properties[1]["name"], "Binary")
+        self.assertTrue(all_properties[1]["data"]["Contents"])
+
+        self.assertEqual(all_properties[3]["name"], "Response")
+        self.assertEqual(all_properties[3]["data"]["Content-Type"], "audio/midi")
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
+    def test_get_properties__video_advanced(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://video.jpg.com"
+
+        # call tested function
+        url = Url(test_link)
+
+        url.get_response()
+        all_properties = url.get_properties(full=True)
+
+        self.assertTrue(len(all_properties) > 0)
+        self.assertEqual(all_properties[0]["name"], "Properties")
+
+        properties = all_properties[0]["data"]
+
+        self.assertIn("title", properties)
+        self.assertIn("link", properties)
+
+        self.assertEqual(properties["link"], test_link)
+        self.assertEqual(properties["link_request"], test_link)
+
+        self.assertTrue(len(all_properties) > 0)
+        self.assertEqual(all_properties[1]["name"], "Binary")
+        self.assertTrue(all_properties[1]["data"]["Contents"])
+
+        self.assertEqual(all_properties[3]["name"], "Response")
+        self.assertEqual(all_properties[3]["data"]["Content-Type"], "video/mp4")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 

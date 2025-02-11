@@ -1947,9 +1947,14 @@ class PageFactory(object):
             if p.is_valid():
                 return p
 
-        if response.is_text():
-            p = DefaultContentPage(url, contents)
-            return p
+        if response.is_content_type("image"):
+            return
+        if response.is_content_type("audio"):
+            return
+        if response.is_content_type("video"):
+            return
+        if response.is_content_type("font"):
+            return
 
         # we do not know what it is. Guess
 
@@ -1973,6 +1978,10 @@ class PageFactory(object):
         # p = XmlPage(url, contents)
         # if p.is_valid():
         #    return p
+
+        if response.is_text():
+            p = DefaultContentPage(url, contents)
+            return p
 
         p = DefaultContentPage(url, contents)
         return p
