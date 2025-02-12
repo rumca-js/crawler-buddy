@@ -1,4 +1,4 @@
-from rsshistory.webtools import HtmlPage, calculate_hash, FeedReader
+from src.webtools import HtmlPage, calculate_hash, FeedReader
 
 from tests.fake.reddit import reddit_rss_text
 

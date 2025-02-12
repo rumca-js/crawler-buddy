@@ -1,4 +1,4 @@
-from rsshistory.webtools import Url, DomainCache, DomainCacheInfo
+from src.webtools import Url, DomainCache, DomainCacheInfo
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 

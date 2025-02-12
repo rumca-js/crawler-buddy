@@ -9,7 +9,7 @@ import asyncio
 import time
 import requests
 
-from rsshistory.webtools import (
+from src.webtools import (
     Url,
     RssPage,
     HtmlPage,

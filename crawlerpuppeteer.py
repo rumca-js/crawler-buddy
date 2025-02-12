@@ -8,7 +8,7 @@ except Exception as E:
     puppeteer_feature_enabled = False
 
 import crawlerscript
-from rsshistory import webtools
+from src import webtools
 
 
 async def main() -> None:

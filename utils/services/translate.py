@@ -1,4 +1,4 @@
-from rsshistory.webtools import UrlLocation
+from src.webtools import UrlLocation
 
 
 class TranslatePage(object):

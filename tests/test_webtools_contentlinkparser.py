@@ -1,4 +1,4 @@
-from rsshistory.webtools import ContentLinkParser
+from src.webtools import ContentLinkParser
 
 from tests.fakeinternet import FakeInternetTestCase
 

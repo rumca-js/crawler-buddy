@@ -1,4 +1,4 @@
-from rsshistory.webtools import HtmlPage, calculate_hash
+from src.webtools import HtmlPage, calculate_hash
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 

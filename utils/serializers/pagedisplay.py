@@ -1,6 +1,6 @@
 import argparse
 
-from rsshistory.webtools import (
+from src.webtools import (
     Url,
     RssPage,
     HtmlPage,

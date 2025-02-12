@@ -1,12 +1,12 @@
 from datetime import datetime
-from rsshistory.webtools import (
+from src.webtools import (
     Url,
     PageOptions,
     HtmlPage,
     PageResponseObject,
     HttpPageHandler,
 )
-from rsshistory.crawler import Crawler
+from src.crawler import Crawler
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 

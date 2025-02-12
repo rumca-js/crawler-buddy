@@ -1,5 +1,5 @@
 import hashlib
-from rsshistory.webtools import (
+from src.webtools import (
    HttpRequestBuilder,
    InputContent,
    PageOptions,

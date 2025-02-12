@@ -10,7 +10,7 @@ import unittest
 import traceback
 
 from utils.dateutils import DateUtils
-from rsshistory.webtools import (
+from src.webtools import (
     YouTubeVideoHandler,
     YouTubeJsonHandler,
     YouTubeChannelHandler,

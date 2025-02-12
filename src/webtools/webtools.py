@@ -48,8 +48,6 @@ from utils.dateutils import DateUtils
 __version__ = "0.0.5"
 
 
-
-
 URL_TYPE_RSS = "rss"
 URL_TYPE_CSS = "css"
 URL_TYPE_JAVASCRIPT = "javascript"
@@ -164,6 +162,7 @@ def calculate_hash(text):
         return hashlib.md5(text.encode("utf-8")).digest()
     except Exception as E:
         WebLogger.exc(E, "Could not calculate hash")
+
 
 def calculate_hash_binary(binary):
     try:

@@ -1,4 +1,4 @@
-from rsshistory.webtools import (
+from src.webtools import (
    OdyseeVideoHandler,
    OdyseeChannelHandler,
    Url,

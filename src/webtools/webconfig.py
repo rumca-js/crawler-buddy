@@ -23,7 +23,6 @@ from .crawlers import (
 )
 
 
-
 class WebConfig(object):
     """
     API to configure webtools

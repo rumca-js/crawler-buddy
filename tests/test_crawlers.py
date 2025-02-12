@@ -1,5 +1,5 @@
 from datetime import datetime
-from rsshistory.webtools import (
+from src.webtools import (
     Url,
     PageOptions,
     HtmlPage,

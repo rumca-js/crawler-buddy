@@ -1,4 +1,9 @@
-from rsshistory.webtools import RssPage, HtmlPage, YouTubeVideoHandler, UrlAgeModerator
+from src.webtools import (
+   RssPage,
+   HtmlPage,
+   YouTubeVideoHandler,
+   UrlAgeModerator
+)
 from .fakeinternet import FakeInternetTestCase
 
 

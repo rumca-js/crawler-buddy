@@ -1,4 +1,4 @@
-from rsshistory.webtools import UrlLocation, Url
+from src.webtools import UrlLocation, Url
 
 
 class OpenRss(object):

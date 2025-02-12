@@ -15,16 +15,16 @@ import argparse
 import traceback
 from datetime import datetime
 
-from rsshistory import webtools
-from rsshistory.configuration import Configuration
-from rsshistory.crawler import Crawler
+from src import webtools
+from src.configuration import Configuration
+from src.crawler import Crawler
 from utils import CrawlHistory, PermanentLogger
 
 
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "2.1.4"
+__version__ = "2.1.5"
 
 
 app = Flask(__name__)
@@ -66,11 +66,12 @@ def get_entry_html(id, index, url, timestamp, all_properties):
 
     if not id:
         id = ""
-    link = "/findj?id={}&index={}".format(id, str(index))
+    find_link = "/findj?id={}&index={}".format(id, str(index))
+    remove_link = "/removej?id={}&index={}".format(id, str(index))
 
     timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
-    text += """<a href="{}"><h2>[{}] {}</h2></a>\n""".format(link, timestamp_str, url)
+    text += """<a href="{}"><h2>[{}] {}</h2></a> <a href="{}">Remove</a>\n""".format(find_link, timestamp_str, url, remove_link)
 
     response = CrawlHistory.read_properties_section("Response", all_properties)
     options = CrawlHistory.read_properties_section("Settings", all_properties)
@@ -140,6 +141,7 @@ def index():
     text += """<div><a href="/queue?id={}">Queue</a> - shows currently processing queue</div>""".format( id)
     text += """<div><a href="/find?id={}">Find</a> - form for findj</div>""".format(id)
     text += """<div><a href="/findj?id={}">Find JSON</a> - returns information about history entry JSON</div>""".format(id)
+    text += """<div><a href="/removej?id={}">Remove history</a> - removes history entry</div>""".format(id)
     text += """<div><a href="/get?id={}">Get</a> - form for crawling a web page using GET method</div>""".format(id)
     text += """<div><a href="/getj?id={}">Getj</a> - crawl a web page using GET method</div>""".format(id)
     text += """<div><a href="/socialj?id={}">Socialj</a> - dynamic social data JSON</div>""".format(id)
@@ -399,6 +401,23 @@ def findj():
         return jsonify({"success": False, "error": "No properties found"}), 400
 
     return jsonify(all_properties)
+
+
+@app.route("/removej", methods=["GET"])
+def removej():
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    index = request.args.get("index")
+
+    if index:
+        index = int(index)
+
+    if crawler_main.get_history().remove(index=index):
+        return jsonify({"success": True})
+
+    return jsonify({"success": False, "error": "Could not remove"}), 400
 
 
 @app.route("/get", methods=["GET"])

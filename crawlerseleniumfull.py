@@ -9,8 +9,8 @@ import time
 import argparse
 import sys
 
-from rsshistory import webtools
-from rsshistory.webtools import WebConfig
+from src import webtools
+from src.webtools import WebConfig
 
 
 def main():

@@ -3,9 +3,9 @@ import psutil
 import json
 from datetime import datetime
 from collections import OrderedDict
-from rsshistory import webtools
-from rsshistory.configuration import Configuration
-from rsshistory.entryrules import EntryRules
+from src import webtools
+from src.configuration import Configuration
+from src.entryrules import EntryRules
 from utils import CrawlHistory
 
 

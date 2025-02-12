@@ -39,6 +39,9 @@ from .handlerhttppage import (
     HttpPageHandler,
     HttpRequestBuilder,
 )
+from .crawlers import (
+    RequestsCrawler,
+)
 
 from .handlervideoyoutube import YouTubeJsonHandler
 from .handlervideoodysee import OdyseeVideoHandler
@@ -241,8 +244,7 @@ class Url(ContentInterface):
         pass
 
     def ping(self, timeout_s=5):
-        handler = self.get_handler()
-        return handler.ping(timeout_s=timeout_s)
+        return RequestsCrawler.ping(self.url)
 
     def get_handler_implementation(self):
         url = self.url
@@ -694,10 +696,7 @@ class Url(ContentInterface):
             response_data["status_code"] = response.get_status_code()
 
             response_data["Content-Type"] = response.get_content_type()
-            if (
-                response_data["Content-Type"] is None
-                and page_handler == HttpPageHandler
-            ):
+            if page_handler == HttpPageHandler:
                 if page_handler.p:
                     if type(page_handler.p) == RssPage:
                         response_data["Content-Type"] = "application/rss+xml"

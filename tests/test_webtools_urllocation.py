@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from rsshistory.webtools import UrlLocation
+from src.webtools import UrlLocation
 
 from tests.fakeinternet import FakeInternetTestCase
 

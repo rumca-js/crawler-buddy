@@ -1,4 +1,4 @@
-from rsshistory.webtools import OpmlPage
+from src.webtools import OpmlPage
 from tests.fake.opmlfile import opml_file
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter

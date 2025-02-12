@@ -15,9 +15,6 @@
 CP = cp
 PROJECT_NAME = crawler-buddy
 PORT=3000
-APP_NAME = rsshistory
-# Edit companion app if necessary
-COMPANION_APP = catalog
 
 # Assumptions:
 #  - python poetry is in your path
@@ -38,7 +35,7 @@ run:
 #  - python black is in your path
 # Black should use gitignore files to ignore refactoring
 reformat:
-	poetry run black $(APP_NAME)
+	poetry run black src
 	poetry run black utils
 	poetry run black *.py
 

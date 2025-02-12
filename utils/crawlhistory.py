@@ -79,6 +79,24 @@ class CrawlHistory(object):
 
             return inner_index, timestamp, all_properties
 
+    def remove(self, index):
+        """
+        return index
+        """
+        last_found = False
+
+        result = []
+
+        for timestamp, inner_index, things in self.container:
+            if index != inner_index:
+                result.append([timestamp, inner_index, things])
+            else:
+                last_found = True
+
+        self.container = result
+
+        return last_found
+
     def read_properties_section(section_name, all_properties):
         for properties in all_properties:
             if "name" in properties:

@@ -1,12 +1,12 @@
 from datetime import datetime
-from rsshistory.webtools import (
+from src.webtools import (
     Url,
     PageOptions,
     HtmlPage,
     PageResponseObject,
     HttpPageHandler,
 )
-from rsshistory.configuration import Configuration
+from src.configuration import Configuration
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 

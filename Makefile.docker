@@ -59,9 +59,5 @@ push:
 	# docker image tag local-image:INIT new-repo:tagname
 	docker push $(USER_NAME)/$(APP_NAME)
 
-refresh:
-	docker exec -d container_id poetry run celery call app.tasks.process_all_jobs -a '["rsshistory.threadhandlers.OneTaskProcessor"]'
-
-
 compose-refresh:
 	docker compose up --build $(USER_NAME)/$(APP_NAME)

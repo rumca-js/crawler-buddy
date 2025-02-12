@@ -1,7 +1,7 @@
 from datetime import datetime
 import hashlib
 
-from rsshistory.webtools import RssPage, calculate_hash, RssContentReader
+from src.webtools import RssPage, calculate_hash, RssContentReader
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 from tests.fakeinternetdata import (

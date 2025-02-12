@@ -2,7 +2,7 @@
 This is example script about how to use this project as a simple RSS reader
 """
 
-from rsshistory.webtools import (
+from src.webtools import (
     WebConfig,
     HttpPageHandler,
     FeedClientParser,

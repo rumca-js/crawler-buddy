@@ -1,7 +1,7 @@
 import json
 import logging
 from pathlib import Path
-from rsshistory import webtools
+from src import webtools
 
 
 class Configuration(object):

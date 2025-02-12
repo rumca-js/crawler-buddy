@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import json
 
-from rsshistory.webtools import (
+from src.webtools import (
     Url,
     PageOptions,
     HtmlPage,
@@ -456,3 +456,28 @@ class ScriptServerTest(FakeInternetTestCase):
         data = url_history.find(url = "https://www.lemonde.fr/en/rss/une.xml", crawler_name = "RequestsCrawler")
 
         self.assertFalse(data)
+
+    def test_remove(self):
+        all_requests_properties = json.loads(example_requests_properties)
+        all_selenium_properties = json.loads(example_selenium_properties)
+
+        url_history = CrawlHistory()
+        url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_requests_properties))
+        url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_selenium_properties))
+
+        # call tested function
+        status = url_history.remove(index = 0)
+
+        self.assertTrue(status)
+        self.assertEqual(url_history.get_history_size(), 1)
+
+        # call tested function
+        status = url_history.remove(index = 1)
+
+        self.assertTrue(status)
+        self.assertEqual(url_history.get_history_size(), 0)
+
+        # call tested function
+        status = url_history.remove(index = 2)
+
+        self.assertFalse(status)
