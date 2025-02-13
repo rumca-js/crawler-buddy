@@ -127,18 +127,7 @@ class HttpRequestBuilder(object):
 
         First configured thing provides return value
         """
-        if self.settings and "ssl_verify" in self.settings:
-            request.ssl_verify = self.settings["ssl_verify"]
-        if self.settings and "ping" in self.settings:
-            request.ping = self.settings["ping"]
-
         crawler_data = self.settings
-
-        if crawler_data and "timeout_s" in self.settings:
-            request.timeout_s = self.settings["timeout_s"]
-        else:
-            WebLogger.warning("timeout_s was not specified when calling")
-            request.timeout_s = 20
 
         if not crawler_data:
             return
@@ -150,9 +139,10 @@ class HttpRequestBuilder(object):
         crawler = crawler_data["crawler"]
 
         WebLogger.debug(
-            "Url:{}: Running crawler {}\n{}".format(
+            info_text = "Url:{}: Running crawler {}\n{}".format(
                 request.url, type(crawler), crawler_data
-            )
+            ),
+            stack=False
         )
 
         crawler.set_settings(crawler_data)

@@ -24,7 +24,7 @@ from utils import CrawlHistory, PermanentLogger
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "2.1.5"
+__version__ = "2.1.6"
 
 
 app = Flask(__name__)
@@ -71,7 +71,7 @@ def get_entry_html(id, index, url, timestamp, all_properties):
 
     timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
-    text += """<a href="{}"><h2>[{}] {}</h2></a> <a href="{}">Remove</a>\n""".format(find_link, timestamp_str, url, remove_link)
+    text += """<a href="{}"><h2 style="margin-bottom:0px">[{}] {}</h2></a> <a href="{}">Remove</a>\n""".format(find_link, timestamp_str, url, remove_link)
 
     response = CrawlHistory.read_properties_section("Response", all_properties)
     options = CrawlHistory.read_properties_section("Settings", all_properties)
