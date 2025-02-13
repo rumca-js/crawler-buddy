@@ -14,6 +14,8 @@ class UrlTest(FakeInternetTestCase):
         self.disable_web_pages()
 
     def test_get_cleaned_link(self):
+        MockRequestCounter.mock_page_requests = 0
+
         test_link = "https://my-server:8185/view/somethingsomething/"
 
         # call tested function
@@ -21,41 +23,62 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(link, "https://my-server:8185/view/somethingsomething")
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_cleaned_link__space(self):
+        MockRequestCounter.mock_page_requests = 0
+
         test_link = " https://my-server:8185/view/somethingsomething/"
 
         # call tested function
         link = Url.get_cleaned_link(test_link)
 
         self.assertEqual(link, "https://my-server:8185/view/somethingsomething")
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_cleaned_link__stupid_google_link(self):
+        MockRequestCounter.mock_page_requests = 0
+
         cleaned_link = Url.get_cleaned_link(
             "https://www.google.com/url?q=https://forum.ddopl.com/&sa=Udupa"
         )
 
         self.assertEqual(cleaned_link, "https://forum.ddopl.com/")
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_cleaned_link__stupid_google_link2(self):
+        MockRequestCounter.mock_page_requests = 0
+
         cleaned_link = Url.get_cleaned_link(
             "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://worldofwarcraft.blizzard.com/&ved=2ahUKEwjtx56Pn5WFAxU2DhAIHYR1CckQFnoECCkQAQ&usg=AOvVaw1pDkx5K7B5loKccvg_079-"
         )
 
         self.assertEqual(cleaned_link, "https://worldofwarcraft.blizzard.com/")
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_cleaned_link__stupid_youtube_link(self):
+        MockRequestCounter.mock_page_requests = 0
+
         cleaned_link = Url.get_cleaned_link(
             "https://www.youtube.com/redirect?event=lorum&redir_token=ipsum&q=https%3A%2F%2Fcorridordigital.com%2F&v=LeB9DcFT810"
         )
 
         self.assertEqual(cleaned_link, "https://corridordigital.com")
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_cleaned_link(self):
+        MockRequestCounter.mock_page_requests = 0
+
         cleaned_link = Url.get_cleaned_link("https://www.YouTube.com/Test")
         self.assertEqual(cleaned_link, "https://www.youtube.com/Test")
 
         cleaned_link = Url.get_cleaned_link("https://www.YouTube.com/Test/")
         self.assertEqual(cleaned_link, "https://www.youtube.com/Test")
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_handler_by_name(self):
         MockRequestCounter.mock_page_requests = 0
@@ -72,6 +95,8 @@ class UrlTest(FakeInternetTestCase):
         self.assertTrue(handler)
         self.assertNotEqual(handler, HttpPageHandler)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_handler__https_html_page(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -82,6 +107,8 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         self.assertEqual(type(url.get_handler().p), HtmlPage)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
     def test_get_handler__http_html_page(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -91,6 +118,8 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(type(url.get_handler()), HttpPageHandler)
         # call tested function
         self.assertEqual(type(url.get_handler().p), HtmlPage)
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_handler__ftp_page(self):
         MockRequestCounter.mock_page_requests = 0
@@ -106,6 +135,8 @@ class UrlTest(FakeInternetTestCase):
         self.assertTrue(expected_error)
         # self.assertEqual(url.get_handler(), None)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_handler__rss_page(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -115,6 +146,8 @@ class UrlTest(FakeInternetTestCase):
         handler = url.get_handler()
 
         self.assertTrue(type(handler), HttpPageHandler)
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_handler__youtube_channel(self):
         MockRequestCounter.mock_page_requests = 0
@@ -128,6 +161,8 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertTrue(type(handler), Url.youtube_channel_handler)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_handler__youtube_video(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -138,6 +173,8 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertTrue(type(handler), Url.youtube_video_handler)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_type__html_page(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -146,6 +183,8 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         self.assertEqual(type(handler), HtmlPage)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_handler__rss_page(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -153,6 +192,8 @@ class UrlTest(FakeInternetTestCase):
         handler = Url.get_type("https://www.codeproject.com/WebServices/NewsRSS.aspx")
 
         self.assertTrue(type(handler), HtmlPage)
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_handler__youtube_channel(self):
         MockRequestCounter.mock_page_requests = 0
@@ -717,6 +758,8 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertTrue(hash)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
     def test_get_contents_hash__rss(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -727,6 +770,8 @@ class UrlTest(FakeInternetTestCase):
         hash = url.get_contents_hash()
 
         self.assertTrue(hash)
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_contents_hash__youtube_video(self):
         MockRequestCounter.mock_page_requests = 0
@@ -750,6 +795,8 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertTrue(hash)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
     def test_get_contents_body_hash__html(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -766,6 +813,8 @@ class UrlTest(FakeInternetTestCase):
         print(url.get_contents())
 
         self.assertTrue(hash != main_hash)
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_contents_body_hash__rss(self):
         MockRequestCounter.mock_page_requests = 0
@@ -784,7 +833,11 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertTrue(hash != main_hash)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
     def test_get_urls__html__canonical(self):
+        MockRequestCounter.mock_page_requests = 0
+
         test_link = "https://page-with-canonical-link.com"
         test_canonical_link = "https://www.page-with-canonical-link.com"
 
@@ -798,7 +851,11 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_canonical_link)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
     def test_get_urls__reddit(self):
+        MockRequestCounter.mock_page_requests = 0
+
         url = Url("https://www.reddit.com/r/searchengines/.rss")
 
         # call tested function
@@ -809,7 +866,11 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(urls["link_request"], "https://www.reddit.com/r/searchengines/.rss")
         self.assertEqual(urls["link_canonical"], "https://www.reddit.com/r/searchengines/.rss")
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
     def test_get_urls__stupid_link(self):
+        MockRequestCounter.mock_page_requests = 0
+
         test_link = "https://www.youtube.com/redirect?event=lorum&redir_token=ipsum&q=https%3A%2F%2Fcorridordigital.com%2F&v=LeB9DcFT810"
 
         url = Url(test_link)
@@ -822,7 +883,11 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(urls["link_request"], "https://www.youtube.com/redirect?event=lorum&redir_token=ipsum&q=https%3A%2F%2Fcorridordigital.com%2F&v=LeB9DcFT810")
         self.assertEqual(urls["link_canonical"], "https://corridordigital.com")
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
     def test_get_urls__youtube_rss_channel(self):
+        MockRequestCounter.mock_page_requests = 0
+
         test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
         test_channel_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
 
@@ -836,7 +901,11 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_link)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_urls__youtube_channel_id(self):
+        MockRequestCounter.mock_page_requests = 0
+
         test_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
 
         url = Url(test_link)
@@ -849,7 +918,11 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_link)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_urls__youtube_channel_id_non_canonical(self):
+        MockRequestCounter.mock_page_requests = 0
+
         test_link = "https://youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
         test_canonical_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
 
@@ -863,7 +936,11 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_canonical_link)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_urls__youtube_video(self):
+        MockRequestCounter.mock_page_requests = 0
+
         test_link = "https://www.youtube.com/watch?v=1234"
 
         url = Url(test_link)
@@ -876,7 +953,11 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_link)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_get_urls__youtube_video__noncanonical(self):
+        MockRequestCounter.mock_page_requests = 0
+
         test_link = "https://m.youtube.com/watch?v=1234"
         test_canonical_link = "https://www.youtube.com/watch?v=1234"
 
@@ -889,3 +970,5 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(urls["link"], test_link)
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_canonical_link)
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
