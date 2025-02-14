@@ -35,13 +35,14 @@ Available Endpoints:
  - GET /findj - Retrieves the last crawl information for a specified URL.
     - Query parameter: url (string).
     - Response: Returns JSON with the last crawl details.
- - GET /socialj Provides social and dynamic information about a specified URL.
+ - GET /socialj - Provides social and dynamic information about a specified URL.
     - Query parameter: url (string).
     - Response: Returns JSON with social data.
- - GET /proxy Returns URL data as is, contents, status_code. Useful if you try to access page that is only accessible by selenium, or crawlee
+ - GET /proxy - Returns URL data as is, contents, status_code. Useful if you try to access page that is only accessible by selenium, or crawlee
     - Response: Passes contents of response, and status code as is
- - GET /linkj Provides link information - canonical links, etc.
- - GET /feedsj Provides feeds information
+ - GET /rss Returns RSS data for the link. If link does not contain RSS data, then an attempt to find RSS is made
+ - GET /linkj - Provides link information - canonical links, etc.
+ - GET /feedsj - Provides feeds information
 
 ## GET request
 

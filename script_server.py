@@ -18,13 +18,14 @@ from datetime import datetime
 from src import webtools
 from src.configuration import Configuration
 from src.crawler import Crawler
+from src.viewutils import get_entry_html, level2color, rssify, get_html
 from utils import CrawlHistory, PermanentLogger
 
 
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "2.1.6"
+__version__ = "2.1.7"
 
 
 app = Flask(__name__)
@@ -36,85 +37,6 @@ social_history = CrawlHistory(history_length)
 webtools.WebLogger.web_logger = PermanentLogger()
 configuration = Configuration()
 crawler_main = Crawler()
-
-
-def get_html(id, body, title="", index=False):
-    if not index:
-        if not id:
-            id = ""
-        body = '<a href="/?id={}">Back</a>'.format(id) + body
-
-    html = """<!DOCTYPE html>
-    <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{}</title>
-    </head>
-    <body>
-    {}
-    </body>
-    </html>
-    """.format(
-        title, body
-    )
-
-    return html
-
-
-def get_entry_html(id, index, url, timestamp, all_properties):
-    text = ""
-
-    if not id:
-        id = ""
-    find_link = "/findj?id={}&index={}".format(id, str(index))
-    remove_link = "/removej?id={}&index={}".format(id, str(index))
-
-    timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
-
-    text += """<a href="{}"><h2 style="margin-bottom:0px">[{}] {}</h2></a> <a href="{}">Remove</a>\n""".format(find_link, timestamp_str, url, remove_link)
-
-    response = CrawlHistory.read_properties_section("Response", all_properties)
-    options = CrawlHistory.read_properties_section("Settings", all_properties)
-    if response:
-        status_code = response["status_code"]
-        # TODO maybe create a better API
-        status_code = webtools.status_code_to_text(status_code)
-
-        charset = response["Charset"]
-        content_length = response["Content-Length"]
-        content_type = response["Content-Type"]
-
-        if (options
-            and "name" in options
-        ):
-            crawler_name = options["name"]
-        else:
-            crawler_name = ""
-        if (
-            options
-            and "crawler" in options
-        ):
-            crawler_crawler = options["crawler"]
-        else:
-            crawler_crawler = ""
-    else:
-        status_code = ""
-        charset = ""
-        content_length = ""
-        content_type = ""
-        crawler_name = ""
-        crawler_crawler = ""
-
-    text += "<div>Status code:{} charset:{} Content-Type:{} Content-Length:{} Crawler name:{} Crawler:{}</div>\n".format(
-        status_code,
-        charset,
-        content_type,
-        content_length,
-        crawler_name,
-        crawler_crawler,
-    )
-
-    return text
 
 
 @app.route("/")
@@ -146,6 +68,7 @@ def index():
     text += """<div><a href="/getj?id={}">Getj</a> - crawl a web page using GET method</div>""".format(id)
     text += """<div><a href="/socialj?id={}">Socialj</a> - dynamic social data JSON</div>""".format(id)
     text += """<div><a href="/proxy?id={}">Proxy</a> - makes GET request, then passes you the contents, as is</div>""".format(id)
+    text += """<div><a href="/rss?id={}">RSS</a> - if possible returns RSS contents for the link</div>""".format(id)
     text += """<div><a href="/linkj?id={}">Linkj</a> - return link info JSON</div>""".format(id)
     text += """<div><a href="/feedsj?id={}">Feedsj</a> - return feeds info JSON</div>""".format(id)
     text += """<div><a href="/archivesj?id={}">Archivesj</a> - return archive links info JSON</div>""".format(id)
@@ -274,8 +197,11 @@ def debug():
 
         info_text = html.escape(info_text)
 
+        color = level2color(level)
+
         text += '<div style="margin-bottom: 1em;">\n'
-        text += '<div>[{}] Level:{} info:{}</div>\n'.format(timestamp, level, info_text)
+        text += f'<div>[{timestamp}] <span style="background-color:{color}">Level:{level}</span> info:{info_text}</div>\n'
+
         if detail_text:
             detail_text = html.escape(detail_text)
             text += "<div>{}</div>\n".format(detail_text)
@@ -488,6 +414,53 @@ def getj():
             ),
             400,
         )
+
+
+@app.route("/rss", methods=["GET"])
+def rss():
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    url = request.args.get("url")
+
+    if not url:
+        return jsonify({"success": False, "error": "No url provided"}), 400
+
+    crawler_data = crawler_main.get_request_data(request)
+
+    if not crawler_data:
+        return jsonify({"success": False, "error": "Cannot obtain crawler data"}), 400
+
+    crawler_data["settings"]["headers"] = False
+    crawler_data["settings"]["ping"] = False
+
+    try:
+        webtools.WebConfig.start_display()
+        all_properties = crawler_main.get_crawl_properties(url, crawler_data)
+
+        properties = CrawlHistory.read_properties_section("Properties", all_properties)
+        entries = CrawlHistory.read_properties_section("Entries", all_properties)
+
+        if not entries or len(entries) == 0:
+            if "feeds" in properties:
+                for feed in properties["feeds"]:
+                    all_properties = crawler_main.get_crawl_properties(feed, crawler_data)
+                    if all_properties:
+                        break
+
+    except Exception as E:
+        webtools.WebLogger.exc(E, info_text="Exception when calling getj {} {}".format(url, crawler_data))
+        all_properties = None
+
+    if not all_properties:
+        return jsonify({"success": False, "error": "No properties found"}), 400
+
+    entries = CrawlHistory.read_properties_section("Entries", all_properties)
+    if not entries or len(entries) == 0:
+        return jsonify({"success": False, "error": "No entries found"}), 400
+
+    return Response(rssify(all_properties), mimetype='application/rss+xml')
 
 
 @app.route("/proxy", methods=["GET"])
