@@ -6,3 +6,6 @@ from utils.sqlmodel import (
    SourcesTable,
    SourcesTableController,
 )
+from utils.logger import (
+   PermanentLogger,
+)
