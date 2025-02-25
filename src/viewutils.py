@@ -1,4 +1,5 @@
-from utils import CrawlHistory, PermanentLogger
+from utils import PermanentLogger
+from src import CrawlHistory
 from src import webtools
 
 

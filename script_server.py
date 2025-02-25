@@ -19,13 +19,14 @@ from src import webtools
 from src.configuration import Configuration
 from src.crawler import Crawler
 from src.viewutils import get_entry_html, level2color, rssify, get_html
-from utils import CrawlHistory, PermanentLogger
+from utils import PermanentLogger
+from src import CrawlHistory
 
 
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "2.1.8"
+__version__ = "2.1.9"
 
 
 app = Flask(__name__)

@@ -8,7 +8,7 @@ from src.webtools import (
     PageResponseObject,
     HttpPageHandler,
 )
-from utils import CrawlHistory
+from src import CrawlHistory
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 

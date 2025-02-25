@@ -42,11 +42,11 @@ class RemoteServer(object):
 
             link = self.remote_server
             link = f"{link}/socialj?url={encoded_url}&crawler_data={encoded_crawler_data}"
-            print("RemoteServer: calling:{}".format(link))
+            #print("RemoteServer: calling:{}".format(link))
         else:
             link = self.remote_server
             link = f"{link}/socialj?url={encoded_url}"
-            print("RemoteServer: calling:{}".format(link))
+            #print("RemoteServer: calling:{}".format(link))
 
         timeout_s = 50
         if settings and "timeout_s" in settings:
@@ -69,7 +69,7 @@ class RemoteServer(object):
             print("No text")
             return
 
-        print("Calling:{}".format(link))
+        #print("Calling:{}".format(link))
 
         json_obj = None
         try:
@@ -129,7 +129,7 @@ class RemoteServer(object):
         # we make request longer - for the server to be able to respond in time
         timeout_s += 5
 
-        print("Calling:{}".format(link))
+        #print("Calling:{}".format(link))
 
         text = None
         try:

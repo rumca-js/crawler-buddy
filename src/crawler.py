@@ -6,7 +6,7 @@ from collections import OrderedDict
 from src import webtools
 from src.configuration import Configuration
 from src.entryrules import EntryRules
-from utils import CrawlHistory
+from src import CrawlHistory
 
 
 class CrawlerInfo(object):

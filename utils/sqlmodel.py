@@ -121,7 +121,7 @@ class Base(DeclarativeBase):
 
 
 class EntriesTable(Base):
-    __tablename__ = "entries"
+    __tablename__ = "linkdatamodel"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     link: Mapped[str] = mapped_column(String(30), unique=True)
@@ -130,24 +130,21 @@ class EntriesTable(Base):
     thumbnail: Mapped[Optional[str]]
     language: Mapped[Optional[str]]
     age: Mapped[int] = mapped_column(default=0)
-    date_created = mapped_column(DateTime, nullable=True)
-    date_published = mapped_column(DateTime, nullable=True)
-    date_update_last = mapped_column(DateTime, nullable=True)
-    date_dead_since = mapped_column(DateTime, nullable=True)
-    date_last_modified = mapped_column(DateTime, nullable=True)
+    date_created = mapped_column(DateTime(timezone=True), nullable=True)
+    date_published = mapped_column(DateTime(timezone=True), nullable=True)
+    date_update_last = mapped_column(DateTime(timezone=True), nullable=True)
+    date_dead_since = mapped_column(DateTime(timezone=True), nullable=True)
+    date_last_modified = mapped_column(DateTime(timezone=True), nullable=True)
     status_code: Mapped[int] = mapped_column(default=0)
     page_rating: Mapped[int] = mapped_column(default=0)
     page_rating_votes: Mapped[int] = mapped_column(default=0)
     page_rating_contents: Mapped[int] = mapped_column(default=0)
-    dead: Mapped[bool] = mapped_column(default=False)
     bookmarked: Mapped[bool] = mapped_column(default=False)
     permanent: Mapped[bool] = mapped_column(default=False)
-    source: Mapped[Optional[str]]
     author: Mapped[Optional[str]]
     album: Mapped[Optional[str]]
     # advanced / foreign
-    source_obj__id: Mapped[Optional[int]]
-    tags: Mapped[Optional[str]]
+    source : Mapped[Optional[int]]
 
 
 class EntriesTableController(object):
@@ -177,21 +174,14 @@ class EntriesTableController(object):
             session.commit()
 
     def add_entry(self, entry):
-        if "tags" in entry:
-            try:
-                if entry["tags"]:
-                    entry["tags"] = ", ".join(entry["tags"])
-            except Exception as E:
-                data["tags"] = None
-
-        if "feed_entry" in entry:
-            del entry["feed_entry"]
-
-        if "source_title" in entry:
-            del entry["source_title"]
-
+        # Get the set of column names from EntriesTable
+        valid_columns = {column.name for column in EntriesTable.__table__.columns}
+        
+        # Remove keys that are not in EntriesTable
+        entry = {key: value for key, value in entry.items() if key in valid_columns}
+        
         entry_obj = EntriesTable(**entry)
-
+        
         Session = self.get_session()
         with Session() as session:
             session.add(entry_obj)
@@ -199,7 +189,7 @@ class EntriesTableController(object):
 
 
 class SourcesTable(Base):
-    __tablename__ = "sources"
+    __tablename__ = "sourcedatamodel"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     enabled: Mapped[bool] = mapped_column(default=True)
@@ -215,6 +205,8 @@ class SourcesTable(Base):
     proxy_location: Mapped[Optional[str]]
     remove_after_days: Mapped[Optional[int]]
     source_type: Mapped[Optional[str]]
+    category_name: Mapped[Optional[str]]
+    subcategory_name: Mapped[Optional[str]]
 
 
 class SourcesTableController(object):
@@ -259,13 +251,27 @@ class SourcesTableController(object):
 
         return is_source
 
+    def add(self, source):
+        # Get the set of column names from EntriesTable
+        valid_columns = {column.name for column in SourcesTable.__table__.columns}
+        
+        # Remove keys that are not in EntriesTable
+        source = {key: value for key, value in source.items() if key in valid_columns}
+        
+        source_obj = SourcesTable(**source)
+        
+        Session = self.get_session()
+        with Session() as session:
+            session.add(source_obj)
+            session.commit()
+
 
 class SourceOperationalData(Base):
     __tablename__ = "sourceoperationaldata"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     date_fetched = mapped_column(DateTime, nullable=True)
-    source_obj_id: Mapped[int]
+    source : Mapped[int]
 
 
 class SourceOperationalDataController(object):
@@ -284,7 +290,7 @@ class SourceOperationalDataController(object):
         with Session() as session:
             rows = (
                 session.query(SourceOperationalData)
-                .filter(SourceOperationalData.source_obj_id == source.id)
+                .filter(SourceOperationalData.source== source.id)
                 .all()
             )
 
@@ -306,12 +312,12 @@ class SourceOperationalDataController(object):
         with Session() as session:
             op_data = (
                 session.query(SourceOperationalData)
-                .filter(SourceOperationalData.source_obj_id == source.id)
+                .filter(SourceOperationalData.source == source.id)
                 .all()
             )
             if len(op_data) == 0:
                 obj = SourceOperationalData(
-                    date_fetched=date_now, source_obj_id=source.id
+                    date_fetched=date_now, source=source.id
                 )
                 session.add(obj)
                 session.commit()
@@ -322,7 +328,7 @@ class SourceOperationalDataController(object):
 
 
 class UserTags(Base):
-    __tablename__ = "UserTags"
+    __tablename__ = "usertags"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     date = mapped_column(DateTime)
@@ -333,7 +339,7 @@ class UserTags(Base):
 
 
 class UserBookmarks(Base):
-    __tablename__ = "UserBookmarks"
+    __tablename__ = "userbookmarks"
     id: Mapped[int] = mapped_column(primary_key=True)
 
     date_bookmarked = mapped_column(DateTime)
@@ -343,7 +349,7 @@ class UserBookmarks(Base):
 
 
 class UserVotes(Base):
-    __tablename__ = "UserVotes"
+    __tablename__ = "uservotes"
     id: Mapped[int] = mapped_column(primary_key=True)
 
     user: Mapped[str] = mapped_column(String(1000))
@@ -354,7 +360,7 @@ class UserVotes(Base):
 
 
 class ReadMarkers(Base):
-    __tablename__ = "ReadMarkers"
+    __tablename__ = "readmarkers"
     id: Mapped[int] = mapped_column(primary_key=True)
     read_date = mapped_column(DateTime)
     source_object: Mapped[Optional[int]]

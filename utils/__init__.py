@@ -1,2 +1,8 @@
-from .crawlhistory import CrawlHistory
-from .logger import PrintLogger, PermanentLogger
+
+from utils.sqlmodel import (
+   SqlModel,
+   EntriesTableController,
+   EntriesTable,
+   SourcesTable,
+   SourcesTableController,
+)

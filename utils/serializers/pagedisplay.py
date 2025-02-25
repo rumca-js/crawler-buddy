@@ -17,15 +17,12 @@ class PageDisplay(object):
         else:
             verbose = False
 
-        page_url = Url(url)
-        options = page_url.get_init_page_options()
+        #if parser.args.remote_server:
+        #    options.mode_mapping = WebConfig.get_init_crawler_config(
+        #        remote_server=parser.args.remote_server
+        #    )
 
-        if parser.args.remote_server:
-            options.mode_mapping = WebConfig.get_init_crawler_config(
-                remote_server=parser.args.remote_server
-            )
-
-        u = Url(url, page_options=options)
+        u = Url(url)
         u.get_response()
 
         properties = u.get_properties(full=True)
