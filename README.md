@@ -16,14 +16,12 @@ The Crawling Server is an HTTP-based web crawler that delivers data in an easily
   <img alt="Meme" src="images/crawler_buddy.png" style="width:450px">
 </div>
 
-Available Endpoints:
-
+Main Available Endpoints:
  - GET / - Provides index page
  - GET /info - Displays information about available crawlers. Returns JSON with crawler properties.
  - GET /infoj - Similar to /info, but explicitly returns the information, in JSON format.
- - GET /history - Displays the crawl history.
- - GET /historyj - Displays the crawl history, in JSON format.
- - GET /queue - Displays information about the current queue.
+
+Endpoints:
  - GET /get - form for getj Endpoint.
  - GET /getj - Crawls a specified page. Accepts the following query parameters:
     - url (string): The URL to crawl.
@@ -31,18 +29,26 @@ Available Endpoints:
     - crawler (optional, string): The crawler type.
     - crawler_data (optional, string): Additional data for the crawler.
     - Response: Returns JSON with crawl properties.
+ - GET /feeds - Provides form for finding feeds for the specified URL
+ - GET /feedsj - Provides feeds information
+ - GET /socialj - Provides social and dynamic information about a specified URL.
+    - Query parameter: url (string).
+    - Response: Returns JSON with social data.
+ - GET /link - Provides for link information
+ - GET /linkj - Provides link information - canonical links, etc.
+ - GET /rss link data as RSS stream
+ - GET /proxy - Returns URL data as is, contents, status_code. Useful if you try to access page that is only accessible by selenium, or crawlee
+    - Response: Passes contents of response, and status code as is
+
+Operation Endpoints:
+ - GET /history - Displays the crawl history.
+ - GET /historyj - Displays the crawl history, in JSON format.
+ - GET /queue - Displays information about the current queue.
+ - GET /removej - removes history entry
  - GET /find - form for findj Endpoint.
  - GET /findj - Retrieves the last crawl information for a specified URL.
     - Query parameter: url (string).
     - Response: Returns JSON with the last crawl details.
- - GET /socialj - Provides social and dynamic information about a specified URL.
-    - Query parameter: url (string).
-    - Response: Returns JSON with social data.
- - GET /proxy - Returns URL data as is, contents, status_code. Useful if you try to access page that is only accessible by selenium, or crawlee
-    - Response: Passes contents of response, and status code as is
- - GET /rss Returns RSS data for the link. If link does not contain RSS data, then an attempt to find RSS is made
- - GET /linkj - Provides link information - canonical links, etc.
- - GET /feedsj - Provides feeds information
 
 ## GET request
 

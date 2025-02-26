@@ -26,7 +26,7 @@ from src import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "2.1.9"
+__version__ = "3.0.0"
 
 
 app = Flask(__name__)
@@ -57,21 +57,23 @@ def index():
         """<div><a href="/info?id={}">Info</a> - shows configuration</div>""".format(id)
     )
     text += """<div><a href="/infoj?id={}">Info JSON</a> - shows configuration JSON</div>""".format(id)
-    text += (
-        """<div><a href="/history?id={}">History</a> - shows history</div>""".format(id)
-    )
+
+    text += """<div><a href="/get?id={}">Get</a> - form for crawling a web page using GET method</div>""".format(id)
+    text += """<div><a href="/getj?id={}">Getj</a> - crawl a web page using GET method</div>""".format(id)
+    text += """<div><a href="/feeds?id={}">Feeds</a> - return form for finding feeds</div>""".format(id)
+    text += """<div><a href="/feedsj?id={}">Feedsj</a> - return feeds info JSON</div>""".format(id)
+    text += """<div><a href="/socialj?id={}">Socialj</a> - dynamic social data JSON</div>""".format(id)
+    text += """<div><a href="/link?id={}">Linkj</a> - provides form for link retrieval</div>""".format(id)
+    text += """<div><a href="/linkj?id={}">Linkj</a> - return link info JSON</div>""".format(id)
+    text += """<div><a href="/rss?id={}">RSS</a> - if possible returns RSS contents for the link</div>""".format(id)
+    text += """<div><a href="/proxy?id={}">Proxy</a> - makes GET request, then passes you the contents, as is</div>""".format(id)
+
+    text += """<div><a href="/history?id={}">History</a> - shows history</div>""".format(id)
     text += """<div><a href="/historyj?id={}">History JSON</a> - shows JSON history</div>""".format(id)
     text += """<div><a href="/queue?id={}">Queue</a> - shows currently processing queue</div>""".format( id)
     text += """<div><a href="/find?id={}">Find</a> - form for findj</div>""".format(id)
     text += """<div><a href="/findj?id={}">Find JSON</a> - returns information about history entry JSON</div>""".format(id)
     text += """<div><a href="/removej?id={}">Remove history</a> - removes history entry</div>""".format(id)
-    text += """<div><a href="/get?id={}">Get</a> - form for crawling a web page using GET method</div>""".format(id)
-    text += """<div><a href="/getj?id={}">Getj</a> - crawl a web page using GET method</div>""".format(id)
-    text += """<div><a href="/socialj?id={}">Socialj</a> - dynamic social data JSON</div>""".format(id)
-    text += """<div><a href="/proxy?id={}">Proxy</a> - makes GET request, then passes you the contents, as is</div>""".format(id)
-    text += """<div><a href="/rss?id={}">RSS</a> - if possible returns RSS contents for the link</div>""".format(id)
-    text += """<div><a href="/linkj?id={}">Linkj</a> - return link info JSON</div>""".format(id)
-    text += """<div><a href="/feedsj?id={}">Feedsj</a> - return feeds info JSON</div>""".format(id)
     text += """<div><a href="/archivesj?id={}">Archivesj</a> - return archive links info JSON</div>""".format(id)
 
     if configuration.is_set("debug"):
@@ -629,6 +631,40 @@ def linkj():
     return jsonify(properties)
 
 
+@app.route("/link", methods=["GET"])
+def link():
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    url = request.args.get("url")
+
+    if not url:
+        form_html = """
+            <h1>Submit</h1>
+            <form action="/link?id={}" method="get">
+                <label for="url">URL:</label><br>
+                <input type="text" id="url" name="url" required><br><br>
+                <button type="submit">Submit</button>
+            </form>
+            """.format(
+            id
+        )
+        return get_html(id=id, body=form_html, title="Feeds")
+
+    page_url = webtools.Url(url)
+
+    text = "<h1>Feeds</h1>"
+
+    text += '<div>Link: <a href="{}">{}</a></div>'.format(page_url.url, page_url.url)
+    text += '<div>Link request: <a href="{}">{}</a></div>'.format(page_url.request_url, page_url.request_url)
+    text += '<div>Link canonical: <a href="{}">{}</a></div>'.format(page_url.get_canonical_url(), page_url.get_canonical_url())
+
+    # TODO maybe we could add support for canonical links, maybe we could try reading fast, via requests?
+
+    return get_html(id=id, body=text, title="Error")
+
+
 @app.route("/feedsj", methods=["GET"])
 def feedsj():
     id = request.args.get("id")
@@ -650,6 +686,39 @@ def feedsj():
     # TODO maybe we could add support for canonical links, maybe we could try reading fast, via requests?
 
     return jsonify(properties)
+
+
+@app.route("/feeds", methods=["GET"])
+def feeds():
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    url = request.args.get("url")
+
+    if not url:
+        form_html = """
+            <h1>Submit</h1>
+            <form action="/feeds?id={}" method="get">
+                <label for="url">URL:</label><br>
+                <input type="text" id="url" name="url" required><br><br>
+                <button type="submit">Submit</button>
+            </form>
+            """.format(
+            id
+        )
+        return get_html(id=id, body=form_html, title="Feeds")
+
+    page_url = webtools.Url(url)
+
+    text = "<h1>Feeds</h1>"
+
+    for feed in page_url.get_feeds():
+        text += '<div>Feed: <a href="{}">{}</a></div>'.format(feed, feed)
+
+    # TODO maybe we could add support for canonical links, maybe we could try reading fast, via requests?
+
+    return get_html(id=id, body=text, title="Error")
 
 
 @app.route("/archivesj", methods=["GET"])
