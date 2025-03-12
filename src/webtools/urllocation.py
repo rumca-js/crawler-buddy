@@ -37,6 +37,10 @@ class UrlLocation(object):
             if domain_only.find("?") >= 0:
                 return False
 
+            parts = domain_only.split(".")
+            if parts[0].strip() == "":
+                return False
+
             return True
 
         return False
@@ -199,6 +203,9 @@ class UrlLocation(object):
 
         x = UrlLocation(text)
         if self.url and not x.is_protocolled_link():
+            return
+
+        if text.strip() == "http://" or text.strip() == "https://":
             return
 
         # if passed email, with user
