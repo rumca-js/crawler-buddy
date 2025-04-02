@@ -160,8 +160,21 @@ class UrlPropertyValidator(UrlContentsModerator):
 
         text = title + "\n" + description
 
-        keywords = ["casino", "lotter", "bingo", "slot", "poker", "jackpot",
-                "gacor", "bandar judi", "pagcor", "slotlara kadar", "canli bahis", "terpopuler", "deposit"]
+        keywords = [
+            "casino",
+            "lotter",
+            "bingo",
+            "slot",
+            "poker",
+            "jackpot",
+            "gacor",
+            "bandar judi",
+            "pagcor",
+            "slotlara kadar",
+            "canli bahis",
+            "terpopuler",
+            "deposit",
+        ]
 
         sum = 0
         for keyword in keywords:
@@ -191,7 +204,16 @@ class UrlAgeModerator(UrlContentsModerator):
     def get_age__sexual(self):
         text = self.get_descriptive_pulp()
 
-        keywords = ["sexua", "lesbian", "bisexual", "queer ", "drag quee", "fuck", "porn"]
+        keywords = [
+            "sexua",
+            "lesbian",
+            "bisexual",
+            "queer ",
+            "drag quee",
+            "fuck",
+            "porn",
+            "nsfw",
+        ]
 
         sum = 0
         for keyword in keywords:

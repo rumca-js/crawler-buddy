@@ -225,7 +225,10 @@ class Url(ContentInterface):
             self.handler = self.get_handler_implementation()
 
         if self.handler:
-            if "respect_robots_txt" in self.settings and self.settings["respect_robots_txt"]:
+            if (
+                "respect_robots_txt" in self.settings
+                and self.settings["respect_robots_txt"]
+            ):
                 if not self.is_allowed():
                     return
 
@@ -243,8 +246,8 @@ class Url(ContentInterface):
         # TODO implement
         pass
 
-    def ping(self, timeout_s=5):
-        return RequestsCrawler.ping(self.url)
+    def ping(self, timeout_s=20, user_agent=None):
+        return RequestsCrawler.ping(self.url, timeout_s = timeout_s, user_agent = user_agent)
 
     def get_handler_implementation(self):
         url = self.url
@@ -684,7 +687,10 @@ class Url(ContentInterface):
 
         respect_robots_txt = False
         is_allowed = True
-        if "respect_robots_txt" in self.settings and self.settings["respect_robots_txt"]:
+        if (
+            "respect_robots_txt" in self.settings
+            and self.settings["respect_robots_txt"]
+        ):
             respect_robots_txt = self.settings["respect_robots_txt"]
             is_allowed = self.is_allowed()
 
@@ -715,7 +721,9 @@ class Url(ContentInterface):
             else:
                 response_data["hash"] = ""
             if self.get_contents_body_hash():
-                response_data["body_hash"] = self.property_encode(self.get_contents_body_hash())
+                response_data["body_hash"] = self.property_encode(
+                    self.get_contents_body_hash()
+                )
             else:
                 response_data["body_hash"] = ""
 

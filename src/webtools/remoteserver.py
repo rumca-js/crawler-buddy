@@ -24,6 +24,7 @@ class RemoteServer(object):
     """
     Crawler buddy communication class
     """
+
     def __init__(self, remote_server, timeout_s=30):
         self.remote_server = remote_server
         self.timeout_s = timeout_s
@@ -41,12 +42,14 @@ class RemoteServer(object):
             encoded_crawler_data = urllib.parse.quote(crawler_data, safe="")
 
             link = self.remote_server
-            link = f"{link}/socialj?url={encoded_url}&crawler_data={encoded_crawler_data}"
-            #print("RemoteServer: calling:{}".format(link))
+            link = (
+                f"{link}/socialj?url={encoded_url}&crawler_data={encoded_crawler_data}"
+            )
+            # print("RemoteServer: calling:{}".format(link))
         else:
             link = self.remote_server
             link = f"{link}/socialj?url={encoded_url}"
-            #print("RemoteServer: calling:{}".format(link))
+            # print("RemoteServer: calling:{}".format(link))
 
         timeout_s = 50
         if settings and "timeout_s" in settings:
@@ -69,7 +72,7 @@ class RemoteServer(object):
             print("No text")
             return
 
-        #print("Calling:{}".format(link))
+        # print("Calling:{}".format(link))
 
         json_obj = None
         try:
@@ -95,6 +98,7 @@ class RemoteServer(object):
         @returns None in case of error
         """
         import requests
+
         url = url.strip()
 
         encoded_url = urllib.parse.quote(url, safe="")
@@ -129,7 +133,7 @@ class RemoteServer(object):
         # we make request longer - for the server to be able to respond in time
         timeout_s += 5
 
-        #print("Calling:{}".format(link))
+        # print("Calling:{}".format(link))
 
         text = None
         try:
@@ -162,7 +166,7 @@ class RemoteServer(object):
 
         return json_obj
 
-    def get_properties(self, url, name = "", settings=None):
+    def get_properties(self, url, name="", settings=None):
         json_obj = self.get_getj(url=url, name=name, settings=settings)
 
         if json_obj:
@@ -221,8 +225,13 @@ class RemoteServer(object):
             binary = base64.b64decode(binary_data["Contents"])
 
         if not response_data:
-            o = ResponseObject(url=properties["link"], text = text, binary=binary)
+            o = ResponseObject(url=properties["link"], text=text, binary=binary)
             return o
 
-        o = ResponseObject(url=properties["link"], text = text, binary=binary, status_code = response_data["status_code"])
+        o = ResponseObject(
+            url=properties["link"],
+            text=text,
+            binary=binary,
+            status_code=response_data["status_code"],
+        )
         return o

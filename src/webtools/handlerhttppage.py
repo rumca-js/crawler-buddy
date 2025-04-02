@@ -139,10 +139,10 @@ class HttpRequestBuilder(object):
         crawler = crawler_data["crawler"]
 
         WebLogger.debug(
-            info_text = "Url:{}: Running crawler {}\n{}".format(
+            info_text="Url:{}: Running crawler {}\n{}".format(
                 request.url, type(crawler), crawler_data
             ),
-            stack=False
+            stack=False,
         )
 
         crawler.set_settings(crawler_data)

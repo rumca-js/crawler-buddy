@@ -206,7 +206,7 @@ class RequestsCrawler(CrawlerInterface):
     """
 
     default_headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Charset": "utf-8,ISO-8859-1;q=0.7,*;q=0.3",
         "Accept-Encoding": "none",
@@ -430,10 +430,11 @@ class RequestsCrawler(CrawlerInterface):
             print(str(E))
             return False
 
-    def ping(url):
+    def ping(url, timeout_s = 20, user_agent=None):
         import requests
 
-        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"
+        if not user_agent:
+            user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
 
         headers = {
             "User-Agent": user_agent,
@@ -444,6 +445,9 @@ class RequestsCrawler(CrawlerInterface):
             "Connection": "keep-alive",
         }
 
+        # status code 403 means they do not like our user agent.
+        # status code 429 means you are rate limited.
+
         try:
             with requests.get(
                 url=url,
@@ -452,12 +456,15 @@ class RequestsCrawler(CrawlerInterface):
                 verify=False,
                 stream=True,
             ) as response:
-                if response.status_code >= 200 and response.status_code < 404:
+                if (response.status_code >= 200 and response.status_code < 400) \
+                   or response.status_code == 403 \
+                   or response.status_code == 429:
                     return True
                 else:
                     return False
 
         except Exception as E:
+            print("Exception: {}".format(str(E)))
             return False
 
 
