@@ -112,3 +112,21 @@ class HttpPageHandlerTest(FakeInternetTestCase):
         handler = HttpPageHandler(test_link, url_builder = Url)
 
         self.assertFalse(handler.is_handled_by())
+
+    def test_get_feeds__reddit(self):
+        test_link = "https://www.reddit.com/r/searchengines"
+        settings = Url(test_link).get_init_settings()
+
+        handler = HttpPageHandler(test_link, settings = settings, url_builder = Url)
+
+        # call tested function
+        self.assertIn("https://www.reddit.com/r/searchengines/.rss", handler.get_feeds())
+
+    def test_get_feeds__github(self):
+        test_link = "https://github.com/rumca-js/Django-link-archive"
+        settings = Url(test_link).get_init_settings()
+
+        handler = HttpPageHandler(test_link, settings = settings, url_builder = Url)
+
+        # call tested function
+        self.assertIn("https://github.com/rumca-js/Django-link-archive/commits.atom", handler.get_feeds())

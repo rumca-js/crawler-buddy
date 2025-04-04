@@ -148,17 +148,37 @@ class GitHubUrlHandler(DefaultUrlHandler):
 
     def input2code(self, input_string):
         p = UrlLocation(input_string)
-        if p.get_domain_only().find("github.com") >= 0:
+        domain_only = p.get_domain_only()
+
+        if domain_only.find("api.github.com") >= 0:
+            parts = p.split()
+            if len(parts) >= 6:
+                return [parts[4], parts[5]]
+        elif domain_only.find("github.com") >= 0:
             parts = p.split()
             if len(parts) >= 5:
                 return [parts[3], parts[4]]
 
+    def get_feeds(self):
+        """
+        even for post, or individual videos we might request feed url
+        """
+        feeds = []
+        elements = self.input2code(self.url)
+        if elements:
+            owner = elements[0]
+            repository = elements[1]
+            feeds.append("https://github.com/{}/{}/commits.atom".format(owner, repository))
+            feeds.append("https://github.com/{}/{}/releases.atom".format(owner, repository))
+
+        return feeds
+
     def get_json_url(self):
         elements = self.input2code(self.url)
         if elements:
-            element_0 = elements[0]
-            element_1 = elements[1]
-            return f"https://api.github.com/repos/{element_0}/{element_1}"
+            owner = elements[0]
+            repository = elements[1]
+            return f"https://api.github.com/repos/{owner}/{repository}"
         else:
             WebLogger.error("GitHub:did not found code {}".format(self.url))
 
