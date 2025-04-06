@@ -124,6 +124,17 @@ class WebConfig(object):
 
         return mapping
 
+    def get_crawlers(only_enabled=False):
+        result = []
+        mapping = WebConfig.get_init_crawler_config()
+        for crawler in mapping:
+            if only_enabled and crawler["enabled"]:
+                result.append(crawler)
+            else:
+                result.append(crawler)
+
+        return result
+
     def get_default_crawler(url):
         config = WebConfig.get_init_crawler_config()
         if config:

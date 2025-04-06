@@ -27,7 +27,7 @@ install:
 installsysdeps:
 	apt -y install wget id3v2 chromium-chromedriver xvfb
 
-run:
+server:
 	rm -rf storage
 	poetry run python script_server.py
 

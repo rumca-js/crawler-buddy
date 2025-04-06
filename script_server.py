@@ -26,7 +26,7 @@ from src import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "3.0.10"
+__version__ = "3.0.11"
 
 
 app = Flask(__name__)
@@ -38,6 +38,21 @@ social_history = CrawlHistory(history_length)
 webtools.WebLogger.web_logger = PermanentLogger()
 configuration = Configuration()
 crawler_main = Crawler()
+
+
+def get_crawler_text():
+    text = ""
+
+    config = configuration.get_crawler_config()
+    for item in config:
+        name = item["name"]
+        crawler = item["crawler"]
+        settings = item["settings"]
+        text += "<div>Name:{} Crawler:{} Settings:{}</div>\n".format(
+            name, crawler.__name__, settings
+        )
+
+    return text
 
 
 @app.route("/")
@@ -99,14 +114,7 @@ def info():
     <h1>Crawlers</h1>
     """
 
-    config = configuration.get_crawler_config()
-    for item in config:
-        name = item["name"]
-        crawler = item["crawler"]
-        settings = item["settings"]
-        text += "<div>Name:{} Crawler:{} Settings:{}</div>\n".format(
-            name, crawler.__name__, settings
-        )
+    text += get_crawler_text()
 
     return get_html(id=id, body=text, title="Configuration")
 
@@ -355,9 +363,11 @@ def get():
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-    form_html = """
+    crawlers_text = get_crawler_text()
+
+    form_html = f"""
         <h1>Submit Your Details</h1>
-        <form action="/getj?id={}" method="get">
+        <form action="/getj?id={id}" method="get">
             <label for="url">URL:</label><br>
             <input type="text" id="url" name="url" required><br><br>
 
@@ -369,11 +379,15 @@ def get():
 
             <button type="submit">Submit</button>
         </form>
-        """.format(
-        id
-    )
 
-    return get_html(id=id, body=form_html, title="Crawl")
+        <h1>Available crawlers:</h1>
+        <div style="margin-top:20px">
+        {crawlers_text}
+        </div>
+        """
+    print(form_html)
+
+    return get_html(id=id, body=form_html, title="Get")
 
 
 @app.route("/getj", methods=["GET"])
