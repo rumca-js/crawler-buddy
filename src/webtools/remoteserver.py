@@ -1,6 +1,7 @@
 import json
 import requests
 import urllib.parse
+import base64
 
 
 class ResponseObject(object):
@@ -65,11 +66,11 @@ class RemoteServer(object):
             with requests.get(url=link, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
-            print(str(E))
+            print("Remote error. " + str(E))
             return
 
         if not text:
-            print("No text")
+            print("Remote error. No text")
             return
 
         # print("Calling:{}".format(link))
@@ -78,16 +79,16 @@ class RemoteServer(object):
         try:
             json_obj = json.loads(text)
         except ValueError as E:
-            print("Url:{} Cannot read response".format(link, text))
+            print("Url:{} Remote error. Cannot read response".format(link, text))
             # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
             return
         except TypeError as E:
-            print("Url:{} Cannot read response".format(link, text))
+            print("Url:{} Remote error. Cannot read response".format(link, text))
             # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
             return
 
         if "success" in json_obj and not json_obj["success"]:
-            print("Not a success")
+            print("Url:{} Remote error. Not a success".format(link))
             # WebLogger.error(json_obj["error"])
             return False
 
@@ -112,17 +113,17 @@ class RemoteServer(object):
 
             link = self.remote_server
             link = f"{link}/getj?url={encoded_url}&crawler_data={encoded_crawler_data}"
-            # WebLogger.debug("RemoteServer: calling:{}".format(link))
+            print("RemoteServer: calling:{}".format(link))
         elif name != "":
             link = self.remote_server
             link = f"{link}/getj?url={encoded_url}&name={name}"
 
-            # WebLogger.debug("RemoteServer: calling:{}".format(link))
+            print("RemoteServer: calling:{}".format(link))
         else:
             link = self.remote_server
             link = f"{link}/getj?url={encoded_url}"
 
-            # WebLogger.debug("RemoteServer: calling:{}".format(link))
+            print("RemoteServer: calling:{}".format(link))
 
         timeout_s = 50
         if settings and "timeout_s" in settings:
@@ -140,27 +141,27 @@ class RemoteServer(object):
             with requests.get(url=link, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
-            print(str(E))
+            print("Url:{} Remote error. " + str(E))
             return
 
         if not text:
-            print("No text")
+            print("Url:{} Remote error. No text".format(link))
             return
 
         json_obj = None
         try:
             json_obj = json.loads(text)
         except ValueError as E:
-            print("Url:{} Cannot read response".format(link, text))
+            print("Url:{} Remote error. Cannot read response".format(link, text))
             # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
             return
         except TypeError as E:
-            print("Url:{} Cannot read response".format(link, text))
+            print("Url:{} Remote error. Cannot read response".format(link, text))
             # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
             return
 
         if "success" in json_obj and not json_obj["success"]:
-            print("Not a success")
+            print("Url:{} Remote error. Not a success".format(link))
             # WebLogger.error(json_obj["error"])
             return False
 
@@ -179,7 +180,7 @@ class RemoteServer(object):
             return
 
         if "success" in all_properties and not all_properties["success"]:
-            print("Not a success")
+            print("Url:{} Remote error. Not a success".format(link))
             # WebLogger.error(all_properties["error"])
             return False
 
@@ -222,7 +223,8 @@ class RemoteServer(object):
 
         binary = None
         if binary_data:
-            binary = base64.b64decode(binary_data["Contents"])
+            if binary_data["Contents"]:
+                binary = base64.b64decode(binary_data["Contents"])
 
         if not response_data:
             o = ResponseObject(url=properties["link"], text=text, binary=binary)
