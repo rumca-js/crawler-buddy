@@ -72,7 +72,11 @@ def index():
     text += (
         """<div><a href="/info?id={}">Info</a> - shows configuration</div>""".format(id)
     )
+
     text += """<div><a href="/infoj?id={}">Info JSON</a> - shows configuration JSON</div>""".format(id)
+
+    if configuration.is_set("debug"):
+        text += """<div><a href="/system?id={}">System monitoring</a> - shows system monitoring</div>""".format(id)
 
     text += """<div><a href="/get?id={}">Get</a> - form for crawling a web page using GET method</div>""".format(id)
     text += """<div><a href="/getj?id={}">Getj</a> - crawl a web page using GET method</div>""".format(id)
@@ -94,9 +98,6 @@ def index():
 
     if configuration.is_set("debug"):
         text += """<div><a href="/debug?id={}">Debug</a> - shows debug information</div>""".format(id)
-
-    if configuration.is_set("debug"):
-        text += """<div><a href="/system?id={}">System monitoring</a> - shows system monitoring</div>""".format(id)
 
     text += """<p>"""
     text += """Version:{}""".format(__version__)
