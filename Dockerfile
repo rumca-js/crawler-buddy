@@ -1,7 +1,7 @@
 # Adapted from https://gist.github.com/soof-golan/6ebb97a792ccd87816c0bda1e6e8b8c2
 # This is minimal startup of django app, which uses SQL lite, and no background task like celery
 
-FROM python:3.9 as python-base
+FROM python:3.11 as python-base
 
 # https://python-poetry.org/docs#ci-recommendations
 ENV POETRY_VERSION=1.5.0
