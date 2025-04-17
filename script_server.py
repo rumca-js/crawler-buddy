@@ -20,13 +20,14 @@ from src.configuration import Configuration
 from src.crawler import Crawler
 from src.viewutils import get_entry_html, level2color, rssify, get_html
 from utils import PermanentLogger
+from utils.systemmonitoring import get_hardware_info, get_process_info
 from src import CrawlHistory
 
 
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "3.0.12"
+__version__ = "3.0.13"
 
 
 app = Flask(__name__)
@@ -95,7 +96,7 @@ def index():
         text += """<div><a href="/debug?id={}">Debug</a> - shows debug information</div>""".format(id)
 
     if configuration.is_set("debug"):
-        text += """<div><a href="/processes?id={}">Processes</a> - shows processes</div>""".format(id)
+        text += """<div><a href="/system?id={}">System monitoring</a> - shows system monitoring</div>""".format(id)
 
     text += """<p>"""
     text += """Version:{}""".format(__version__)
@@ -785,8 +786,30 @@ def queue():
     return get_html(id=id, body=text, title="Queue")
 
 
-@app.route("/processes", methods=["GET"])
-def processes():
+def dict_to_html(data, indent=0):
+    html = ""
+    for key, value in data.items():
+        if isinstance(value, dict):
+            html += "  " * indent + f"<h{min(indent+2, 6)}>{key.capitalize()}</h{min(indent+2, 6)}>\n"
+            html += dict_to_html(value, indent + 1)
+        elif isinstance(value, list):
+            html += "  " * indent + f"<h{min(indent+2, 6)}>{key.capitalize()}</h{min(indent+2, 6)}>\n"
+            html += "  " * indent + "<ul>\n"
+            for item in value:
+                if isinstance(item, dict):
+                    html += "  " * (indent + 1) + "<li>\n"
+                    html += dict_to_html(item, indent + 2)
+                    html += "  " * (indent + 1) + "</li>\n"
+                else:
+                    html += "  " * (indent + 1) + f"<li>{item}</li>\n"
+            html += "  " * indent + "</ul>\n"
+        else:
+            html += "  " * indent + f"<p><strong>{key.capitalize()}:</strong> {value}</p>\n"
+    return html
+
+
+@app.route("/system", methods=["GET"])
+def system():
     id = request.args.get("id")
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -794,21 +817,12 @@ def processes():
     if not configuration.is_set("debug"):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-    process = subprocess.run(["top", "-b", "-n", "1"], capture_output=True, text=True)
+    text = "<h1>System monitoring</h1>\n"
 
-    out = process.stdout
+    info = get_hardware_info()
+    info["processes"] = get_process_info()
 
-    lines = out.split("\n")
-
-    text = "<h1>Chrome processes</h1>\n"
-    text += "<div>Number of chrom processes {}</div>\n".format(
-        webtools.WebConfig.count_chrom_processes()
-    )
-
-    text += "<h1>Processes</h1>\n"
-
-    for line in lines:
-        text += '<div style="margin-bottom:1em;">{}</div>\n'.format(line)
+    text = dict_to_html(info)
 
     return get_html(id=id, body=text, title="Processes")
 
