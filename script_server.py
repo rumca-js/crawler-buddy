@@ -804,7 +804,7 @@ def dict_to_html(data, indent=0):
                     html += "  " * (indent + 1) + f"<li>{item}</li>\n"
             html += "  " * indent + "</ul>\n"
         else:
-            html += "  " * indent + f"<p><strong>{key.capitalize()}:</strong> {value}</p>\n"
+            html += "  " * indent + f"<p><strong>{key}:</strong> {value}</p>\n"
     return html
 
 
