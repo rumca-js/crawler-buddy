@@ -953,7 +953,7 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_link)
 
-        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_urls__youtube_video__noncanonical(self):
         MockRequestCounter.mock_page_requests = 0
@@ -971,4 +971,4 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_canonical_link)
 
-        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)

@@ -513,6 +513,10 @@ class HttpPageHandler(HandlerInterface):
         result = []
         url = self.url
 
+        feeds = super().get_feeds()
+        if feeds and len(feeds) > 0:
+            result.extend(feeds)
+
         if not self.p:
             return result
 

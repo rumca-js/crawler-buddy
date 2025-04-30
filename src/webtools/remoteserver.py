@@ -180,7 +180,8 @@ class RemoteServer(object):
             return
 
         if "success" in all_properties and not all_properties["success"]:
-            print("Url:{} Remote error. Not a success".format(link))
+            #print("Url:{} Remote error. Not a success".format(link))
+            print("Remote error. Not a success")
             # WebLogger.error(all_properties["error"])
             return False
 

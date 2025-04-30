@@ -19,7 +19,7 @@ from .handlerhttppage import (
     HttpRequestBuilder,
     HttpPageHandler,
 )
-from .handlerscustom import (
+from .handlers import (
     RedditChannelHandler,
     RedditUrlHandler,
     GitHubUrlHandler,
