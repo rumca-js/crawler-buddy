@@ -9,12 +9,12 @@ from .webtools import (
 
 
 class RedditChannelHandler(DefaultChannelHandler):
-    def __init__(self, url=None, contents=None):
-        self.html = None  # channel html page contains useful info
-
+    def __init__(self, url=None, contents=None, settings=settings, url_builder=url_builder):
         super().__init__(
             url,
             contents=contents,
+            settings=settings,
+            url_builder=url_builder
         )
 
         if url:
@@ -44,10 +44,12 @@ class RedditUrlHandler(DefaultUrlHandler):
 
     """https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/.json"""
 
-    def __init__(self, url=None, contents=None):
+    def __init__(self, url=None, contents=None, settings=settings, url_builder=url_builder):
         super().__init__(
             url,
             contents=contents,
+            settings=settings,
+            url_builder=url_builder
         )
 
     def is_handled_by(self):
@@ -132,10 +134,12 @@ class RedditUrlHandler(DefaultUrlHandler):
 
 class GitHubUrlHandler(DefaultUrlHandler):
 
-    def __init__(self, url=None, contents=None):
+    def __init__(self, url=None, contents=None, settings=settings, url_builder=url_builder):
         super().__init__(
             url,
             contents=contents,
+            settings=settings,
+            url_builder=url_builder
         )
 
     def is_handled_by(self):
@@ -163,7 +167,8 @@ class GitHubUrlHandler(DefaultUrlHandler):
         """
         even for post, or individual videos we might request feed url
         """
-        feeds = []
+        feeds = super.().get_feeds()
+
         elements = self.input2code(self.url)
         if elements:
             owner = elements[0]
@@ -221,7 +226,7 @@ class GitHubUrlHandler(DefaultUrlHandler):
 
 
 class ReturnDislike(DefaultUrlHandler):
-    def __init__(self, video_code=None):
+    def __init__(self, video_code=None, settings=settings, url_builder=url_builder):
         self.code = video_code
         self.process()
 
@@ -267,10 +272,12 @@ class ReturnDislike(DefaultUrlHandler):
 
 class HackerNewsHandler(DefaultUrlHandler):
 
-    def __init__(self, url=None, contents=None):
+    def __init__(self, url=None, contents=None, settings=settings, url_builder=url_builder):
         super().__init__(
             url,
             contents=contents,
+            settings=settings,
+            url_builder=url_builder
         )
 
     def is_handled_by(self):
@@ -336,8 +343,13 @@ class HackerNewsHandler(DefaultUrlHandler):
 
 
 class InternetArchive(DefaultUrlHandler):
-    def __init__(self, url):
-        super().__init__(url)
+    def __init__(self, url, settings=settings, url_builder=url_builder):
+        super().__init__(url, settings=settings, url_builder=url_builder)
+
+    def is_handled_by(self):
+        p = UrlLocation(input_string)
+        if p.get_domain_only().find("archive.org") >= 0:
+            return True
 
     def get_archive_url(self, time=None):
         if not time:
@@ -346,3 +358,24 @@ class InternetArchive(DefaultUrlHandler):
         if time:
             time_str = time.strftime("%Y%m%d")
             return "https://web.archive.org/web/{}110000*/".format(time_str) + self.url
+
+
+class FourChanChannelHandler(DefaultChannelHandler):
+    def __init__(self, url=None, contents=None, settings=settings, url_builder=url_builder):
+        super().__init__(
+            url,
+            contents=contents,
+            settings=settings,
+            url_builder=url_builder
+        )
+
+        if url:
+            self.code = self.input2code(url)
+
+    def is_handled_by(self):
+        if not self.url:
+            return False
+
+        p = UrlLocation(self.url)
+        if p.get_domain_only().find("4chan.org") >= 0:
+            return True

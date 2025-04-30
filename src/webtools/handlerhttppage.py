@@ -510,22 +510,8 @@ class HttpPageHandler(HandlerInterface):
         return []
 
     def get_feeds(self):
-        # TODO ugly import
-        from .handlers import RedditChannelHandler
-        from .handlers import GitHubUrlHandler
-
         result = []
         url = self.url
-
-        additional_handlers = [RedditChannelHandler,
-                               GitHubUrlHandler, ]
-
-        for additional_handler in additional_handlers:
-            h = additional_handler(url)
-            if h.is_handled_by():
-                feeds = h.get_feeds()
-                if feeds and len(feeds) > 0:
-                    result.extend(feeds)
 
         if not self.p:
             return result

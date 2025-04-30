@@ -51,6 +51,7 @@ class UrlLocation(object):
             or self.url.startswith("https://")
             or self.url.startswith("smb://")
             or self.url.startswith("ftp://")
+            or self.url.startswith("email://")
             or self.url.startswith("//")
             or self.url.startswith("\\\\")
         ):

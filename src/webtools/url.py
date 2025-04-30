@@ -73,7 +73,12 @@ class Url(ContentInterface):
         YouTubeChannelHandler,
         OdyseeVideoHandler,
         OdyseeChannelHandler,
-        HttpPageHandler,
+        RedditUrlHandler,
+        ReturnDislike,
+        GitHubUrlHandler,
+        HackerNewsHandler,
+        InternetArchive,
+        HttpPageHandler, # default
     ]
 
     def __init__(self, url=None, settings=None, url_builder=None):
@@ -376,6 +381,7 @@ class Url(ContentInterface):
         return url
 
     def get_clean_url(self):
+        self.get_handler()
         if self.handler:
             return self.handler.get_url()
         else:

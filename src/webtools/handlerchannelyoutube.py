@@ -135,15 +135,6 @@ class YouTubeChannelHandler(DefaultChannelHandler):
         if self.code:
             return self.code2url(self.code)
 
-    def get_feeds(self):
-        from .webtools import WebLogger
-
-        result = []
-        if self.code:
-            result.append(self.code2feed(self.code))
-
-        return result
-
     def get_contents(self):
         """
         We obtain information about channel.
