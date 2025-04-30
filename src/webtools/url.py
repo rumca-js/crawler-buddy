@@ -764,38 +764,23 @@ class Url(ContentInterface):
         json_obj = {}
 
         if type(handler) == Url.youtube_video_handler:
+            # TODO move that to youtube handler?
             code = handler.get_video_code()
             h = ReturnDislike(code)
-            h.get_response()
-            json_obj["thumbs_up"] = h.get_thumbs_up()
-            json_obj["thumbs_down"] = h.get_thumbs_down()
-            json_obj["view_count"] = h.get_view_count()
-            json_obj["rating"] = h.get_rating()
-            json_obj["upvote_ratio"] = h.get_upvote_ratio()
-            json_obj["upvote_view_ratio"] = h.get_upvote_view_ratio()
+            handler_data = handler.get_json_data()
+        else:
+            handler_data = handler.get_json_data()
 
-        elif type(handler) == HtmlPage:
-            handlers = [
-                RedditUrlHandler(handler.url),
-                GitHubUrlHandler(handler.url),
-                HackerNewsHandler(handler.url),
+        if handler_data and "thumbs_up" in handler_data:
+            json_obj["thumbs_up"] = handler_data["thumbs_up"]
+        if handler_data and "thumbs_down" in handler_data:
+            json_obj["thumbs_down"] = handler_data["thumbs_down"]
+        if handler_data and "upvote_ratio" in handler_data:
+            json_obj["upvote_ratio"] = handler_data["upvote_ratio"]
+        if handler_data and "upvote_view_ratio" in handler_data:
+            json_obj["upvote_view_ratio"] = handler_data[
+                "upvote_view_ratio"
             ]
-
-            for handler in handlers:
-                if handler.is_handled_by():
-                    handler_data = handler.get_json_data()
-                    if handler_data and "thumbs_up" in handler_data:
-                        json_obj["thumbs_up"] = handler_data["thumbs_up"]
-                    if handler_data and "thumbs_down" in handler_data:
-                        json_obj["thumbs_down"] = handler_data["thumbs_down"]
-                    if handler_data and "upvote_ratio" in handler_data:
-                        json_obj["upvote_ratio"] = handler_data["upvote_ratio"]
-                    if handler_data and "upvote_view_ratio" in handler_data:
-                        json_obj["upvote_view_ratio"] = handler_data[
-                            "upvote_view_ratio"
-                        ]
-
-                    break
 
         return json_obj
 

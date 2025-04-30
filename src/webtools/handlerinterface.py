@@ -157,3 +157,7 @@ class HandlerInterface(DefaultContentPage):
 
         if thumbs_up and views:
             return thumbs_up / views
+
+    def get_json_data(self):
+        # TODO rename to get_social_data
+        return {}

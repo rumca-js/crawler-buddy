@@ -282,6 +282,20 @@ class ReturnDislike(DefaultUrlHandler):
         if self._json and "rating" in self._json:
             return self._json["rating"]
 
+    def get_json_data(self):
+        json_obj = {}
+
+        self.get_response()
+
+        json_obj["thumbs_up"] = h.get_thumbs_up()
+        json_obj["thumbs_down"] = h.get_thumbs_down()
+        json_obj["view_count"] = h.get_view_count()
+        json_obj["rating"] = h.get_rating()
+        json_obj["upvote_ratio"] = h.get_upvote_ratio()
+        json_obj["upvote_view_ratio"] = h.get_upvote_view_ratio()
+
+        return json_obj
+
 
 class HackerNewsHandler(DefaultUrlHandler):
 
