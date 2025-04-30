@@ -766,6 +766,7 @@ class Url(ContentInterface):
         if type(handler) == Url.youtube_video_handler:
             code = handler.get_video_code()
             h = ReturnDislike(code)
+            h.get_response()
             json_obj["thumbs_up"] = h.get_thumbs_up()
             json_obj["thumbs_down"] = h.get_thumbs_down()
             json_obj["view_count"] = h.get_view_count()

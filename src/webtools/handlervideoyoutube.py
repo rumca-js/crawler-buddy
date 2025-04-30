@@ -332,6 +332,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             from utils.serializers import ReturnDislike
 
             self.rd_ob = ReturnDislike(self.get_video_code())
+            self.rd_ob.get_response()
             if self.rd_text and not self.rd_ob.loads(self.rd_text):
                 return False
 
@@ -367,6 +368,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         from utils.serializers import ReturnDislike
 
         self.rd_ob = ReturnDislike(self.get_video_code())
+        self.rd_ob.get_response()
         if self.rd_text and not self.rd_ob.loads(self.rd_text):
             return False
 

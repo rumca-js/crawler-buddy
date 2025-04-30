@@ -135,14 +135,12 @@ class RedditUrlHandler(DefaultUrlHandler):
 class GitHubUrlHandler(DefaultUrlHandler):
 
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
-        print("Githu url:{}".format(url))
         super().__init__(
             url,
             contents=contents,
             settings=settings,
             url_builder=url_builder
         )
-        print("Githu url:{}".format(self.url))
 
     def is_handled_by(self):
         if not self.url:
@@ -228,11 +226,24 @@ class GitHubUrlHandler(DefaultUrlHandler):
 
 
 class ReturnDislike(DefaultUrlHandler):
-    def __init__(self, video_code=None, settings=None, url_builder=None):
+    def __init__(self, video_code=None, url=None, contents=None, settings=None, url_builder=None):
+        self.url = url
         self.code = video_code
-        self.process()
+        # self.process()
 
-    def process(self):
+    def is_handled_by(self):
+        return False
+
+    def input2code(self, input_string):
+        p = UrlLocation(input_string)
+        if p.get_domain_only().find("news.ycombinator.com") >= 0:
+            parts = p.split()
+            if len(parts) >= 5:
+                sp = parts[4].split("=")
+                if len(sp) > 1:
+                    return sp[1]
+
+    def get_response(self):
         data = self.read_data()
         self.loads(data)
 
@@ -349,7 +360,7 @@ class InternetArchive(DefaultUrlHandler):
         super().__init__(url, settings=settings, url_builder=url_builder)
 
     def is_handled_by(self):
-        p = UrlLocation(input_string)
+        p = UrlLocation(self.url)
         if p.get_domain_only().find("archive.org") >= 0:
             return True
 
