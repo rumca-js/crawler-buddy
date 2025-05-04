@@ -433,7 +433,15 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
     def get_view_count(self):
         if self.get_contents():
-            return self.rd_ob.get_view_count()
+            view_count = None
+
+            if not view_count and self.return_dislike:
+                view_count = self.rd_ob.get_view_count()
+
+            if not view_count and self.yt_ob:
+                view_count = self.yt_ob.get_view_count()
+
+            return view_count
 
     def get_thumbs_up(self):
         if self.get_contents():
