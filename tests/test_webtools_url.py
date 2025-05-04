@@ -972,3 +972,48 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(urls["link_canonical"], test_canonical_link)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
+    def test_get_social_properties__youtube(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://m.youtube.com/watch?v=1234"
+        test_canonical_link = "https://www.youtube.com/watch?v=1234"
+
+        url = Url(test_link)
+
+        # call tested function
+        properties = url.get_social_properties()
+
+        self.assertTrue(properties["view_count"])
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
+    def test_get_social_properties__github(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://github.com/watch?v=1234"
+        test_canonical_link = "https://github.com/watch?v=1234"
+
+        url = Url(test_link)
+
+        # call tested function
+        properties = url.get_social_properties()
+
+        self.assertTrue(properties["view_count"])
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
+    def test_get_social_properties__reddit(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://reddit.com/watch?v=1234"
+        test_canonical_link = "https://github.com/watch?v=1234"
+
+        url = Url(test_link)
+
+        # call tested function
+        properties = url.get_social_properties()
+
+        self.assertTrue(properties["view_count"])
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
