@@ -53,6 +53,7 @@ from .handlers import (
     GitHubUrlHandler,
     HackerNewsHandler,
     InternetArchive,
+    FourChanChannelHandler,
 )
 
 from utils.dateutils import DateUtils
@@ -78,6 +79,7 @@ class Url(ContentInterface):
         GitHubUrlHandler,
         HackerNewsHandler,
         InternetArchive,
+        FourChanChannelHandler,
         HttpPageHandler, # default
     ]
 
