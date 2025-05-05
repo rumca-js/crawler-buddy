@@ -417,4 +417,4 @@ class FourChanChannelHandler(DefaultChannelHandler):
                 return parts[3]
 
     def code2feed(self, code):
-        return "https://boards.4chan.org/{}/index.rss".format(code))
+        return "https://boards.4chan.org/{}/index.rss".format(code)
