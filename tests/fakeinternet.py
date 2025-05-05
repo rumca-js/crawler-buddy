@@ -194,6 +194,7 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
             "channel_id" : "1234-channel-id",
             "thumbnail" : "https://youtube.com/files/1234-thumbnail.png",
             "upload_date" : "${date}",
+            "view_count" : "2",
             "live_status" : "False"
             }""".replace("${date}", self.get_now())
             return True
@@ -209,6 +210,7 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
             "channel_id" : "JoYoe",
             "thumbnail" : "https://youtube.com/files/whatever.png",
             "upload_date" : "${date}",
+            "view_count" : "2",
             "live_status" : "True"
             }""".replace("${date}", self.get_now())
         if self.get_video_code() == "archived":
@@ -221,6 +223,7 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
             "channel_id" : "JoYoe",
             "thumbnail" : "https://youtube.com/files/whatever.png",
             "upload_date" : "20231113",
+            "view_count" : "2",
             "live_status" : "False"
             }""".replace("${date}", self.get_now())
         else:
@@ -233,6 +236,7 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
             "channel_id" : "JoYoe",
             "thumbnail" : "https://youtube.com/files/whatever.png",
             "upload_date" : "${date}",
+            "view_count" : "2",
             "live_status" : "False"
             }""".replace("${date}", self.get_now())
         return True
@@ -480,6 +484,18 @@ class TestResponseObject(PageResponseObject):
 
         elif url == "https://www.codeproject.com/WebServices/NewsRSS.aspx":
             return webpage_code_project_rss
+
+        elif url.find("https://api.github.com/repos") >= 0:
+            return """{stargazers_count : 5}"""
+
+        elif url.find("https://www.reddit.com/") >= 0 and url.endswith("json"):
+            return """{upvote_ratio : 5}"""
+
+        elif url.find("https://returnyoutubedislikeapi.com/votes") >= 0:
+            return """{likes : 5,
+                       dislikes : 5,
+                       viewCount : 5,
+                       rating: 5}"""
 
         elif url == "https://page-with-two-links.com":
             b = PageBuilder()

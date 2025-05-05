@@ -205,13 +205,13 @@ class RssPageTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_is_valid__geek_false(self):
+    def test_is_valid__geek_true(self):
         MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", geekwire_feed)
         entries = reader.get_entries()
 
         # call tested function
-        self.assertFalse(reader.is_valid())
+        self.assertTrue(reader.is_valid())
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
@@ -238,6 +238,28 @@ class RssPageTest(FakeInternetTestCase):
         self.assertTrue(entries)
         self.assertTrue(entries != "")
         self.assertEqual(hash, calculate_hash(entries))
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
+    def test_get_entries__rss(self):
+        MockRequestCounter.mock_page_requests = 0
+        reader = RssPage("https://linkedin.com/test", webpage_old_pubdate_rss)
+
+        # call tested function
+        entries = list(reader.get_entries())
+
+        self.assertTrue(len(entries) > 0)
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
+    def test_is_valid__geek_true(self):
+        MockRequestCounter.mock_page_requests = 0
+        reader = RssPage("https://linkedin.com/test", geekwire_feed)
+
+        # call tested function
+        entries = list(reader.get_entries())
+
+        self.assertTrue(len(entries) > 0)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 

@@ -984,6 +984,7 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         properties = url.get_social_properties()
 
+        self.assertIn("view_count", properties)
         self.assertTrue(properties["view_count"])
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
@@ -999,7 +1000,8 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         properties = url.get_social_properties()
 
-        self.assertTrue(properties["view_count"])
+        self.assertIn("thumbs_up", properties)
+        self.assertTrue(properties["thumbs_up"])
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
@@ -1014,6 +1016,7 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         properties = url.get_social_properties()
 
-        self.assertTrue(properties["view_count"])
+        self.assertIn("upvote_ratio", properties)
+        self.assertTrue(properties["upvote_ratio"])
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)

@@ -674,12 +674,6 @@ class RssPage(ContentInterface):
         """
         Workaround for https://warhammer-community.com/feed
         """
-        # TODO apply that woraround differently
-        # if contents:
-        #    wh = contents.find("<rss version")
-        #    if wh > 0:
-        #        contents = contents[wh:]
-
         super().__init__(url=url, contents=contents)
 
         if self.contents and not self.feed:
@@ -688,7 +682,7 @@ class RssPage(ContentInterface):
     def process_contents(self):
         self.try_to_parse()
 
-        if not self.feed or not self.feed.entries or len(self.feed.entries) == 0:
+        if not self.feed or not self.feed.entries:
             if self.contents.find("html") >= 0 and self.contents.find("rss") >= 0:
                 self.try_to_workaround()
         #    WebLogger.error("Feed does not have any entries {}".format(self.url))
@@ -701,8 +695,10 @@ class RssPage(ContentInterface):
             return None
 
         try:
-            return FeedReader.parse(contents)
+            self.feed = FeedReader.parse(contents)
+            return self.feed
         except Exception as E:
+            print(str(E))
             WebLogger.exc(E, "Url:{}. RssPage, when parsing.".format(self.url))
 
     def try_to_workaround(self):
