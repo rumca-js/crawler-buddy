@@ -416,14 +416,5 @@ class FourChanChannelHandler(DefaultChannelHandler):
             if len(parts) >= 3:
                 return parts[3]
 
-    def get_feeds(self):
-        """
-        even for post, or individual videos we might request feed url
-        """
-        feeds = super().get_feeds()
-
-        code = self.input2code(self.url)
-        if code:
-            feeds.append("https://boards.4chan.org/{}/index.rss".format(code))
-
-        return feeds
+    def code2feed(self, code):
+        return "https://boards.4chan.org/{}/index.rss".format(code))
