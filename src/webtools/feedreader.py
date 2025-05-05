@@ -94,12 +94,17 @@ class FeedReaderEntry(FeedObject):
         if not self.author:
             if "itunes" in self.ns:
                 self.author = self.get_prop("itunes:owner/itunes:name")
+        if not self.author:
+            if "dc" in self.ns:
+                self.author = self.try_to_get_field("dc:creator") # hackernews
+        if not self.author:
+            self.author = self.try_to_get_field("creator")
 
     def try_media_thumbnail(self):
         self.media_thumbnail = []
 
         if "media" in self.ns:
-            media_thumbnail = self.get_prop_attribute(".//media:thumbnail", "url")
+            media_thumbnail = self.get_prop_attribute(".//media:thumbnail", "url") # youtube
             if media_thumbnail:
                 self.media_thumbnail = [{"url": media_thumbnail}]
 
@@ -107,7 +112,7 @@ class FeedReaderEntry(FeedObject):
         self.media_content = []
 
         if "media" in self.ns:
-            media_content = self.get_prop_attribute(".//media:content", "url")
+            media_content = self.get_prop_attribute(".//media:content", "url") # youtube
             if media_content:
                 self.media_content = [{"url": media_content}]
 

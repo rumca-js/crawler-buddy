@@ -18,6 +18,12 @@ from tests.fake.geekwirecom import (
 from tests.fake.warhammercommunity import (
     warhammer_community_rss,
 )
+from tests.fake.hackernews import (
+    webpage_hackernews_rss,
+)
+from tests.fake.reddit import (
+    reddit_rss_text,
+)
 
 
 webpage_rss = """
@@ -61,6 +67,45 @@ webpage_rss = """
 class RssPageTest(FakeInternetTestCase):
     def setUp(self):
         self.disable_web_pages()
+
+    def test_is_valid__true_youtube(self):
+        MockRequestCounter.mock_page_requests = 0
+        reader = RssPage("https://linkedin.com/test", webpage_samtime_youtube_rss)
+
+        # call tested function
+        self.assertTrue(reader.is_valid())
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
+    def test_is_valid__true(self):
+        MockRequestCounter.mock_page_requests = 0
+        reader = RssPage("https://linkedin.com/test", webpage_old_pubdate_rss)
+        entries = reader.get_entries()
+
+        # call tested function
+        self.assertTrue(reader.is_valid())
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
+    def test_is_valid__geek_true(self):
+        MockRequestCounter.mock_page_requests = 0
+        reader = RssPage("https://linkedin.com/test", geekwire_feed)
+        entries = reader.get_entries()
+
+        # call tested function
+        self.assertTrue(reader.is_valid())
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
+    def test_is_valid__warhammer_true(self):
+        MockRequestCounter.mock_page_requests = 0
+        reader = RssPage("https://linkedin.com/test", warhammer_community_rss)
+        entries = reader.get_entries()
+
+        # call tested function
+        self.assertTrue(reader.is_valid())
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_title__rss(self):
         MockRequestCounter.mock_page_requests = 0
@@ -125,22 +170,24 @@ class RssPageTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_entries(self):
+    def test_get_entries__len(self):
         MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_rss)
+
+        # call tested function
         entries = reader.get_entries()
+
         entries = list(entries)
         self.assertEqual(len(entries), 15)
 
         entry = entries[0]
-        # call tested function
         self.assertEqual(entry["title"], "First entry title")
         self.assertEqual(entry["description"], "First entry description")
         self.assertTrue(reader.is_valid())
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_entry_old_date(self):
+    def test_get_entries__old_date(self):
         MockRequestCounter.mock_page_requests = 0
         # default language
         reader = RssPage("https://linkedin.com/test", webpage_old_pubdate_rss)
@@ -156,9 +203,11 @@ class RssPageTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_entry_no_date(self):
+    def test_get_entries__current_year(self):
         MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_no_pubdate_rss)
+
+        # call tested function
         entries = reader.get_entries()
         entries = list(entries)
 
@@ -167,7 +216,6 @@ class RssPageTest(FakeInternetTestCase):
         current_date_time = datetime.now()
 
         entry = entries[0]
-        # call tested function
         self.assertEqual(entry["title"], "First entry title")
         self.assertEqual(entry["description"], "First entry description")
         self.assertEqual(entry["date_published"].year, current_date_time.year)
@@ -175,9 +223,11 @@ class RssPageTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_entry_page_rating(self):
+    def test_get_entries__page_rating(self):
         MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_no_pubdate_rss)
+
+        # call tested function
         entries = reader.get_entries()
         entries = list(entries)
 
@@ -188,42 +238,52 @@ class RssPageTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_is_valid__true_youtube(self):
-        MockRequestCounter.mock_page_requests = 0
-        reader = RssPage("https://linkedin.com/test", webpage_samtime_youtube_rss)
-        self.assertTrue(reader.is_valid())
-
-        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
-
-    def test_is_valid__true(self):
+    def test_get_entries__rss(self):
         MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", webpage_old_pubdate_rss)
-        entries = reader.get_entries()
 
         # call tested function
-        self.assertTrue(reader.is_valid())
+        entries = list(reader.get_entries())
+
+        self.assertTrue(len(entries) > 0)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_is_valid__geek_true(self):
+    def test_get_entries__geek(self):
         MockRequestCounter.mock_page_requests = 0
         reader = RssPage("https://linkedin.com/test", geekwire_feed)
-        entries = reader.get_entries()
 
         # call tested function
-        self.assertTrue(reader.is_valid())
+        entries = list(reader.get_entries())
+
+        self.assertTrue(len(entries) > 0)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_is_valid__warhammer_true(self):
+    def test_get_entries__hackernews(self):
         MockRequestCounter.mock_page_requests = 0
-        reader = RssPage("https://linkedin.com/test", warhammer_community_rss)
-        entries = reader.get_entries()
+        reader = RssPage("https://linkedin.com/test", webpage_hackernews_rss)
 
         # call tested function
-        self.assertTrue(reader.is_valid())
+        entries = list(reader.get_entries())
+
+        self.assertTrue(len(entries) > 0)
+
+        self.assertIn("author", entries[0])
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
+    def test_get_entries__reddit(self):
+        MockRequestCounter.mock_page_requests = 0
+        reader = RssPage("https://linkedin.com/test", reddit_rss_text)
+
+        # call tested function
+        entries = list(reader.get_entries())
+
+        self.assertTrue(len(entries) > 0)
+
+        self.assertIn("author", entries[0])
+        self.assertTrue(entries[0]["author"])
 
     def test_get_contents_body_hash(self):
         MockRequestCounter.mock_page_requests = 0
@@ -241,27 +301,6 @@ class RssPageTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_get_entries__rss(self):
-        MockRequestCounter.mock_page_requests = 0
-        reader = RssPage("https://linkedin.com/test", webpage_old_pubdate_rss)
-
-        # call tested function
-        entries = list(reader.get_entries())
-
-        self.assertTrue(len(entries) > 0)
-
-        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
-
-    def test_is_valid__geek_true(self):
-        MockRequestCounter.mock_page_requests = 0
-        reader = RssPage("https://linkedin.com/test", geekwire_feed)
-
-        # call tested function
-        entries = list(reader.get_entries())
-
-        self.assertTrue(len(entries) > 0)
-
-        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     """
     feeder does not parses update time
