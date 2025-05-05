@@ -68,19 +68,8 @@ class FeedReaderEntry(FeedObject):
         if not self.published:
             self.published = self.try_to_get_field("published")
 
-        self.media_thumbnail = []
-
-        if "media" in self.ns:
-            media_thumbnail = self.get_prop_attribute(".//media:thumbnail", "url")
-            if media_thumbnail:
-                self.media_thumbnail = [{"url": media_thumbnail}]
-
-        self.media_content = []
-
-        if "media" in self.ns:
-            media_content = self.get_prop_attribute(".//media:content", "url")
-            if media_content:
-                self.media_content = [{"url": media_content}]
+        self.try_media_thumbnail()
+        self.try_media_content()
 
         self.author = self.try_to_get_fields("author", "name")
 
@@ -98,6 +87,22 @@ class FeedReaderEntry(FeedObject):
         if not source["url"]:
             source["url"] = self.try_to_get_fields("source", "url")
         self.source = source
+
+    def try_media_thumbnail(self):
+        self.media_thumbnail = []
+
+        if "media" in self.ns:
+            media_thumbnail = self.get_prop_attribute(".//media:thumbnail", "url")
+            if media_thumbnail:
+                self.media_thumbnail = [{"url": media_thumbnail}]
+
+    def try_media_content(self):
+        self.media_content = []
+
+        if "media" in self.ns:
+            media_content = self.get_prop_attribute(".//media:content", "url")
+            if media_content:
+                self.media_content = [{"url": media_content}]
 
     def try_to_get_field(self, field):
         value = self.get_prop("./" + field)
@@ -141,6 +146,75 @@ class FeedReaderFeed(FeedObject):
 
     def parse(self):
         return self.read()
+
+    def read(self):
+        if self.root is None:
+            self.title = None
+            self.subtitle = None
+            self.description = None
+            self.language = None
+            self.published = None
+            self.author = None
+            self.tags = []
+            self.image = {}
+            return
+
+        self.title = self.try_to_get_field("title")
+        self.try_reading_link()
+        self.subtitle = self.try_to_get_field("subtitle")
+        self.description = self.try_to_get_field("description")
+        self.language = self.try_to_get_field("language")
+
+        self.try_reading_date_published()
+        self.try_reading_author()
+        self.tags = self.try_to_get_field("tags")
+        self.try_reading_image()
+
+    def try_reading_link(self):
+        self.link = self.try_to_get_field("link")
+        if not self.link:
+            self.link = self.try_to_get_attribute("link", "href")
+
+    def try_reading_date_published(self):
+        self.published = self.try_to_get_field("published")
+        if not self.published:
+            self.published = self.try_to_get_field("pubDate")
+        if not self.published:
+            self.published = self.try_to_get_field("lastBuildDate")
+
+    def try_reading_author(self):
+        self.author = self.try_to_get_fields("author", "name")
+        if not self.author:
+            if "itunes" in self.ns:
+                self.author = self.get_prop(".//itunes:author")
+        if not self.author:
+            if "itunes" in self.ns:
+                self.author = self.get_prop("itunes:author")
+        if not self.author:
+            if "itunes" in self.ns:
+                self.author = self.get_prop("./channel/itunes:author")
+        if not self.author:
+            if "atom" in self.ns and "itunes" in self.ns:
+                self.author = self.get_prop("./atom:channel/itunes:author")
+
+    def try_reading_image(self):
+        image = {}
+        image["url"] = self.try_to_get_fields("image", "url")
+        if not image["url"]:
+            image["url"] = self.try_to_get_attribute("image", "url")
+
+        image["url"] = self.try_to_get_fields("image", "href")
+        if not image["url"]:
+            if "atom" in self.ns:
+                image["url"] = self.try_to_get_attribute("image", "href")
+
+        if not image["url"]:
+            image["url"] = self.try_to_get_field("logo") # reddit channel
+
+        image["width"] = self.try_to_get_fields("image", "width")
+        image["height"] = self.try_to_get_fields("image", "height")
+
+        self.image = image
 
     def try_to_get_field(self, field):
         value = self.get_prop("./" + field)
@@ -193,59 +267,6 @@ class FeedReaderFeed(FeedObject):
 
         return value
 
-    def read(self):
-        if self.root is None:
-            self.title = None
-            self.subtitle = None
-            self.description = None
-            self.language = None
-            self.published = None
-            self.author = None
-            self.tags = []
-            self.image = {}
-            return
-
-        self.title = self.try_to_get_field("title")
-        self.link = self.try_to_get_field("link")
-        if not self.link:
-            self.link = self.try_to_get_attribute("link", "href")
-        self.subtitle = self.try_to_get_field("subtitle")
-        self.description = self.try_to_get_field("description")
-        self.language = self.try_to_get_field("language")
-
-        self.published = self.try_to_get_field("published")
-        if not self.published:
-            self.published = self.try_to_get_field("pubDate")
-        if not self.published:
-            self.published = self.try_to_get_field("lastBuildDate")
-
-        self.author = self.try_to_get_fields("author", "name")
-        if not self.author:
-            if "itunes" in self.ns:
-                self.author = self.get_prop(".//itunes:author")
-        if not self.author:
-            if "itunes" in self.ns:
-                self.author = self.get_prop("itunes:author")
-        if not self.author:
-            if "itunes" in self.ns:
-                self.author = self.get_prop("./channel/itunes:author")
-        if not self.author:
-            if "atom" in self.ns and "itunes" in self.ns:
-                self.author = self.get_prop("./atom:channel/itunes:author")
-
-        self.tags = self.try_to_get_field("tags")
-
-        image = {}
-        image["url"] = self.try_to_get_fields("image", "url")
-        if not image["url"]:
-            image["url"] = self.try_to_get_attribute("image", "url")
-        image["href"] = self.try_to_get_fields("image", "href")
-        if not image["href"]:
-            if "atom" in self.ns:
-                image["href"] = self.try_to_get_attribute("image", "href")
-        image["width"] = self.try_to_get_fields("image", "width")
-        image["height"] = self.try_to_get_fields("image", "height")
-        self.image = image
 
     def __contains__(self, item):
         return True

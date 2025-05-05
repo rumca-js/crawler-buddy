@@ -406,3 +406,24 @@ class FourChanChannelHandler(DefaultChannelHandler):
         p = UrlLocation(self.url)
         if p.get_domain_only().find("4chan.org") >= 0:
             return True
+
+    def input2code(self, input_string):
+        p = UrlLocation(input_string)
+        domain_only = p.get_domain_only()
+
+        if domain_only.find("boards.4chan.org") >= 0:
+            parts = p.split()
+            if len(parts) >= 3:
+                return parts[3]
+
+    def get_feeds(self):
+        """
+        even for post, or individual videos we might request feed url
+        """
+        feeds = super().get_feeds()
+
+        code = self.input2code(self.url)
+        if code:
+            feeds.append("https://boards.4chan.org/{}/index.rss".format(code))
+
+        return feeds
