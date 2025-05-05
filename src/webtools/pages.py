@@ -491,6 +491,8 @@ class JsonPage(ContentInterface):
 
 class RssPageEntry(ContentInterface):
     def __init__(self, feed_index, feed_entry, url, contents, page_object_properties):
+        """
+        """
         self.feed_index = feed_index
         self.feed_entry = feed_entry
         self.url = url
@@ -640,8 +642,14 @@ class RssPageEntry(ContentInterface):
                 return DateUtils.get_datetime_now_utc()
 
     def get_author(self):
-        if "author" in self.page_object_properties:
-            return self.page_object_properties["author"]
+        author = None
+        if not author and hasattr(self.feed_entry, "author"):
+            author = self.feed_entry.author
+            
+        if not author and "author" in self.page_object_properties:
+            author = self.page_object_properties["author"]
+
+        return author
 
     def get_album(self):
         return ""

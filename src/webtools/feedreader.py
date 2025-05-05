@@ -54,6 +54,26 @@ class FeedReaderEntry(FeedObject):
 
         self.title = self.try_to_get_field("title")
         self.subtitle = self.try_to_get_field("subtitle")
+        self.try_description()
+        self.try_published()
+        self.try_media_thumbnail()
+        self.try_media_content()
+        self.try_author()
+
+        self.tags = self.try_to_get_field("tags")
+        self.try_source()
+
+    def try_source(self):
+        source = {}
+        source["href"] = self.try_to_get_attribute("source", "href")
+        if not source["href"]:
+            source["href"] = self.try_to_get_fields("source", "href")
+        source["url"] = self.try_to_get_attribute("source", "url")
+        if not source["url"]:
+            source["url"] = self.try_to_get_fields("source", "url")
+        self.source = source
+
+    def try_description(self):
         self.description = self.try_to_get_field("description")
         if not self.description:
             if "media" in self.ns:
@@ -64,29 +84,16 @@ class FeedReaderEntry(FeedObject):
             if "atom" in self.ns:
                 self.description = self.get_prop("atom:content")
 
+    def try_published(self):
         self.published = self.try_to_get_field("pubDate")
         if not self.published:
             self.published = self.try_to_get_field("published")
 
-        self.try_media_thumbnail()
-        self.try_media_content()
-
-        self.author = self.try_to_get_fields("author", "name")
-
+    def try_author(self):
+        self.author = self.try_to_get_fields("author", "name")  # reddit
         if not self.author:
             if "itunes" in self.ns:
                 self.author = self.get_prop("itunes:owner/itunes:name")
-
-        self.tags = self.try_to_get_field("tags")
-
-        source = {}
-        source["href"] = self.try_to_get_attribute("source", "href")
-        if not source["href"]:
-            source["href"] = self.try_to_get_fields("source", "href")
-        source["url"] = self.try_to_get_attribute("source", "url")
-        if not source["url"]:
-            source["url"] = self.try_to_get_fields("source", "url")
-        self.source = source
 
     def try_media_thumbnail(self):
         self.media_thumbnail = []
