@@ -690,15 +690,30 @@ class RssPage(ContentInterface):
         if contents is None:
             return None
 
+        self.try_to_parse()
+
+        if self.feed or not self.feed.entries or len(self.feed.entries) == 0:
+            if self.contents.find("html") >= 0 and self.contents.find("rss") >= 0:
+                self.try_to_workaround()
+        #    WebLogger.error("Feed does not have any entries {}".format(self.url))
+
+        return self.feed
+
+    def try_to_parse(self):
         try:
-            self.feed = FeedReader.parse(contents)
-            # if not self.feed.entries or len(self.feed.entries) == 0:
-            #    WebLogger.error("Feed does not have any entries {}".format(self.url))
-
-            return self.feed
-
+            return FeedReader.parse(contents)
         except Exception as E:
             WebLogger.exc(E, "Url:{}. RssPage, when parsing.".format(self.url))
+
+    def try_to_workaround(self):
+        start_idnex = self.contents.find("&lt;rss")
+        end_index = self.contents.rfind('&gt;')
+        if start_index == -1 or end_index == -1 or end_index <= start_index:
+
+        self.contents = self.contents[start_index:end_index + 4]
+        self.contents = html.unescape(self.contents)
+
+        self.try_to_parse()
 
     def get_entries(self):
         if self.feed is None:

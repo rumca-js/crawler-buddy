@@ -404,6 +404,9 @@ class TestResponseObject(PageResponseObject):
         if url.startswith("https://www.geekwire.com/feed"):
             return geekwire_feed
 
+        if url.startswith("https://www.rss-in-html.com/feed"):
+            return geekwire_feed
+
         if url.startswith(
             "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
         ):
