@@ -688,7 +688,7 @@ class RssPage(ContentInterface):
     def process_contents(self):
         self.try_to_parse()
 
-        if self.feed or not self.feed.entries or len(self.feed.entries) == 0:
+        if not self.feed or not self.feed.entries or len(self.feed.entries) == 0:
             if self.contents.find("html") >= 0 and self.contents.find("rss") >= 0:
                 self.try_to_workaround()
         #    WebLogger.error("Feed does not have any entries {}".format(self.url))
@@ -709,16 +709,13 @@ class RssPage(ContentInterface):
         if not self.contents:
             return
 
-        start_idnex = self.contents.find("&lt;rss")
+        start_index = self.contents.find("&lt;rss")
         end_index = self.contents.rfind('&gt;')
         if start_index == -1 or end_index == -1 or end_index <= start_index:
-            print("Could not find")
             return
 
         self.contents = self.contents[start_index:end_index + 4]
         self.contents = html.unescape(self.contents)
-
-        print(self.contents)
 
         self.try_to_parse()
 
