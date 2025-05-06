@@ -767,11 +767,24 @@ class Url(ContentInterface):
         if not handler:
             return json_obj
 
-        handler_data = handler.get_json_data()
-        if not handler_data:
-            return {}
+        json_obj = handler.get_json_data()
+        if not json_obj:
+            return json_obj
+
+        if "thumbs_up" not in json_obj:
+            json_obj["thumbs_up"] = None
+        if "thumbs_down" not in json_obj:
+            json_obj["thumbs_down"] = None
+        if "view_count" not in json_obj:
+            json_obj["view_count"] = None
+        if "rating" not in json_obj:
+            json_obj["rating"] = None
+        if "upvote_ratio" not in json_obj:
+            json_obj["upvote_ratio"] = None
+        if "upvote_view_ratio" not in json_obj:
+            json_obj["upvote_view_ratio"] = None
             
-        return handler_data
+        return json_obj
         
 
 class DomainCacheInfo(object):

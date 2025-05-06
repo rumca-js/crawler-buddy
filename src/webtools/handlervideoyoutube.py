@@ -413,28 +413,11 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if self.yt_text and not self.yt_ob.loads(self.yt_text):
             return False
 
-        if self.return_dislike:
-            from .handlers import ReturnDislike
-
-            dislike = ReturnDislike(video_code = self.get_video_code())
-            dislike.get_response()
-            self.rd_text = dislike.get_contents()
-            if not self.rd_text:
-                return False
-
-            dislike.load_response()
-            self.rd_ob = dislike
-
-            if not self.rd_ob:
-                return False
-
         return True
 
     def download_details(self):
         if not self.download_details_youtube():
             WebLogger.error("Cannot load youtube details. Is yt-dlp update required?")
-            return False
-        if not self.download_details_return_dislike():
             return False
 
         return True
@@ -452,9 +435,6 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         return True
 
     def download_details_return_dislike(self):
-        if not self.return_dislike:
-            return True
-
         if self.rd_text is not None:
             return True
 
@@ -492,7 +472,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if self.get_contents():
             view_count = None
 
-            if not view_count and self.return_dislike:
+            if not view_count and self.rd_ob:
                 view_count = self.rd_ob.get_view_count()
 
             if not view_count and self.yt_ob:
