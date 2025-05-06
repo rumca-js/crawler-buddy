@@ -155,6 +155,7 @@ No need to select methods manually, as some methods are already predefined and u
  - HackerNews - social media
  - GitHub - social media
  - Reddit - RSS feed discovery, social media data
+ - 4chan - RSS feed discovery
  - HTML pages - RSS feed discovery for links
 
 File support
