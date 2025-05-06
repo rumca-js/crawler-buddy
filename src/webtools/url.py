@@ -761,25 +761,18 @@ class Url(ContentInterface):
     def get_social_properties(self):
         url = self.url
 
-        handler = Url.get_type(url)
-
         json_obj = {}
 
+        handler = Url.get_type(url)
+        if not handler:
+            return json_obj
+
         handler_data = handler.get_json_data()
-
-        if handler_data and "thumbs_up" in handler_data:
-            json_obj["thumbs_up"] = handler_data["thumbs_up"]
-        if handler_data and "thumbs_down" in handler_data:
-            json_obj["thumbs_down"] = handler_data["thumbs_down"]
-        if handler_data and "upvote_ratio" in handler_data:
-            json_obj["upvote_ratio"] = handler_data["upvote_ratio"]
-        if handler_data and "upvote_view_ratio" in handler_data:
-            json_obj["upvote_view_ratio"] = handler_data[
-                "upvote_view_ratio"
-            ]
-
-        return json_obj
-
+        if not handler_data:
+            return {}
+            
+        return handler_data
+        
 
 class DomainCacheInfo(object):
     """
