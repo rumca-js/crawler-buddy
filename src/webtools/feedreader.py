@@ -88,6 +88,10 @@ class FeedReaderEntry(FeedObject):
         self.published = self.try_to_get_field("pubDate")
         if not self.published:
             self.published = self.try_to_get_field("published")
+        if not self.published and "dc" in self.ns:
+            self.published = self.try_to_get_field(".//dc:created")
+        if not self.published and "dc" in self.ns:
+            self.published = self.try_to_get_field(".//dc:date")
 
     def try_author(self):
         self.author = self.try_to_get_fields("author", "name")  # reddit
@@ -211,18 +215,22 @@ class FeedReaderFeed(FeedObject):
 
     def try_reading_image(self):
         image = {}
-        image["url"] = self.try_to_get_fields("image", "url")
-        if not image["url"]:
-            image["url"] = self.try_to_get_attribute("image", "url")
 
-        image["url"] = self.try_to_get_fields("image", "href")
-        if not image["url"]:
+        image_url = None
+
+        if not image_url:
+            image_url = self.try_to_get_fields("image", "url")
+        if not image_url:
+            image_url = self.try_to_get_attribute("image", "url")
+        if not image_url:
+            image_url = self.try_to_get_fields("image", "href")
+        if not image_url:
             if "atom" in self.ns:
-                image["url"] = self.try_to_get_attribute("image", "href")
+                image_url = self.try_to_get_attribute("image", "href")
+        if not image_url:
+            image_url = self.try_to_get_field("logo") # reddit channel
 
-        if not image["url"]:
-            image["url"] = self.try_to_get_field("logo") # reddit channel
-
+        image["url"] = image_url
         image["width"] = self.try_to_get_fields("image", "width")
         image["height"] = self.try_to_get_fields("image", "height")
 
@@ -318,6 +326,10 @@ class FeedReader(object):
 
         if self.root is not None:
             self.ns = self.root.nsmap
+
+        if 'dc' not in self.ns:
+            #self.ns["xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+            self.ns['dc'] = 'http://purl.org/dc/elements/1.1/'
 
         is_atom = "atom" in self.ns
 

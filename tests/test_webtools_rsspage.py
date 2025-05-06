@@ -270,6 +270,7 @@ class RssPageTest(FakeInternetTestCase):
         self.assertTrue(len(entries) > 0)
 
         self.assertIn("author", entries[0])
+        self.assertTrue(entries[0]["author"])
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 

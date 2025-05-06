@@ -987,6 +987,12 @@ class UrlTest(FakeInternetTestCase):
         self.assertIn("view_count", properties)
         self.assertTrue(properties["view_count"])
 
+        self.assertIn("thumbs_up", properties)
+        self.assertTrue(properties["thumbs_up"])
+
+        self.assertIn("thumbs_down", properties)
+        self.assertTrue(properties["thumbs_down"])
+
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_social_properties__github(self):

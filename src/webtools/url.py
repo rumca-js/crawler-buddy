@@ -765,13 +765,7 @@ class Url(ContentInterface):
 
         json_obj = {}
 
-        if type(handler) == Url.youtube_video_handler:
-            # TODO move that to youtube handler?
-            code = handler.get_video_code()
-            h = ReturnDislike(code)
-            handler_data = handler.get_json_data()
-        else:
-            handler_data = handler.get_json_data()
+        handler_data = handler.get_json_data()
 
         if handler_data and "thumbs_up" in handler_data:
             json_obj["thumbs_up"] = handler_data["thumbs_up"]

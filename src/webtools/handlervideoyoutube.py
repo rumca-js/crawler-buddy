@@ -231,7 +231,15 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
     def get_view_count(self):
         if self.get_contents():
-            return self.rd_ob.get_view_count()
+            view_count = None
+
+            if not view_count:
+                if self.yt_ob:
+                    view_count = self.yt_ob.get_view_count()
+            if not view_count:
+                if self.rd_ob:
+                    view_count = self.rd_ob.get_view_count()
+            return view_count
 
     def get_thumbs_up(self):
         if self.get_contents():
@@ -288,30 +296,22 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             return json_data
 
         if self.get_contents():
-            view_count = None
+            if self.rd_ob:
+                json_data = self.get_json_data_from_rd()
+            elif self.yt_ob:
+                json_data = self.get_json_data_from_yt()
+
             thumbs_up = None
             thumbs_down = None
+            view_count = None
 
-            if self.get_view_count() is not None:
-                try:
-                    view_count = int(self.get_view_count())
-                except ValueError as E:
-                    pass
+            if "thumbs_down" in json_data:
+                thumbs_down = json_data["thumbs_down"]
+            if "thumbs_up" in json_data:
+                thumbs_up = json_data["thumbs_up"]
+            if "view_count" in json_data:
+                view_count = json_data["view_count"]
 
-            if self.get_thumbs_up() is not None:
-                try:
-                    thumbs_up = int(self.get_thumbs_up())
-                except ValueError as E:
-                    pass
-            if self.get_thumbs_down() is not None:
-                try:
-                    thumbs_down = int(self.get_thumbs_down())
-                except ValueError as E:
-                    pass
-
-            json_data["view_count"] = view_count
-            json_data["thumbs_up"] = thumbs_up
-            json_data["thumbs_down"] = thumbs_down
             if thumbs_up and thumbs_down:
                 json_data["upvote_ratio"] = thumbs_up / (thumbs_up + thumbs_down)
             else:
@@ -322,6 +322,65 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
                 json_data["upvote_view_ratio"] = None
 
         return json_data
+
+    def get_json_data_from_yt(self):
+        json_data = {}
+
+        response = self.get_response()
+        if not response:
+            return json_data
+
+        if not self.rd_ob:
+            return {}
+
+        if self.get_contents():
+            view_count = None
+            thumbs_up = None
+            thumbs_down = None
+
+            try:
+                view_count = int(self.yt_ob.get_view_count())
+            except ValueError as E:
+                pass
+
+            json_data["view_count"] = view_count
+            return json_data
+
+    def get_json_data_from_rd(self):
+        json_data = {}
+
+        response = self.get_response()
+        if not response:
+            return json_data
+
+        if not self.rd_ob:
+            return {}
+
+        if self.get_contents():
+            view_count = None
+            thumbs_up = None
+            thumbs_down = None
+
+            try:
+                view_count = int(self.rd_ob.get_view_count())
+            except ValueError as E:
+                pass
+
+            try:
+                thumbs_up = int(self.rd_ob.get_thumbs_up())
+            except ValueError as E:
+                pass
+
+            try:
+                thumbs_down = int(self.rd_ob.get_thumbs_down())
+            except ValueError as E:
+                pass
+
+            json_data["view_count"] = view_count
+            json_data["thumbs_up"] = thumbs_up
+            json_data["thumbs_down"] = thumbs_down
+
+            return json_data
 
     def get_tags(self):
         if self.get_contents():
@@ -374,9 +433,15 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if self.return_dislike:
             from .handlers import ReturnDislike
 
-            self.rd_ob = ReturnDislike(video_code = self.get_video_code())
-            self.rd_ob.get_response()
-            if self.rd_text and not self.rd_ob.loads(self.rd_text):
+            dislike = ReturnDislike(video_code = self.get_video_code())
+            dislike.get_response()
+            self.rd_text = dislike.get_contents()
+            if not self.rd_text:
+                return False
+
+            self.rd_obj = dislike.load_response()
+
+            if not self.rd_ob:
                 return False
 
         return True

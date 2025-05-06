@@ -227,34 +227,27 @@ class GitHubUrlHandler(DefaultUrlHandler):
 
 class ReturnDislike(DefaultUrlHandler):
     def __init__(self, video_code=None, url=None, contents=None, settings=None, url_builder=None):
-        self.url = url
-        self.code = video_code
-        # self.process()
+
+        if video_code:
+            url = self.code2url(video_code)
+
+        super().__init__(
+            url=url,
+            contents=contents,
+            settings=settings,
+            url_builder=url_builder
+        )
+
+    def code2url(self, input_code):
+        return "https://returnyoutubedislikeapi.com/votes?videoId=" + input_code
 
     def is_handled_by(self):
         return False
 
-    def input2code(self, input_string):
-        p = UrlLocation(input_string)
-        if p.get_domain_only().find("news.ycombinator.com") >= 0:
-            parts = p.split()
-            if len(parts) >= 5:
-                sp = parts[4].split("=")
-                if len(sp) > 1:
-                    return sp[1]
-
-    def get_response(self):
-        data = self.read_data()
-        self.loads(data)
-
-    def read_data(self):
-        from .url import Url
-
-        url = "https://returnyoutubedislikeapi.com/votes?videoId=" + self.code
-
-        u = Url(url)
-        data = u.get_contents()
-        return data
+    def load_response(self):
+        self.get_response()
+        contents = self.get_contents()
+        return self.loads(contents)
 
     def loads(self, data):
         try:

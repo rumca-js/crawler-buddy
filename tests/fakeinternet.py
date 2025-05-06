@@ -14,8 +14,6 @@ from src.webtools import (
     YouTubeVideoHandler,
     YouTubeJsonHandler,
     YouTubeChannelHandler,
-    OdyseeVideoHandler,
-    OdyseeChannelHandler,
     HttpPageHandler,
     Url,
     HttpRequestBuilder,
@@ -486,16 +484,16 @@ class TestResponseObject(PageResponseObject):
             return webpage_code_project_rss
 
         elif url.find("https://api.github.com/repos") >= 0:
-            return """{stargazers_count : 5}"""
+            return """{"stargazers_count" : 5}"""
 
         elif url.find("https://www.reddit.com/") >= 0 and url.endswith("json"):
-            return """{upvote_ratio : 5}"""
+            return """{"upvote_ratio" : 5}"""
 
         elif url.find("https://returnyoutubedislikeapi.com/votes") >= 0:
-            return """{likes : 5,
-                       dislikes : 5,
-                       viewCount : 5,
-                       rating: 5}"""
+            return """{"likes" : 5,
+                       "dislikes" : 5,
+                       "viewCount" : 5,
+                       "rating": 5}"""
 
         elif url == "https://page-with-two-links.com":
             b = PageBuilder()
@@ -765,19 +763,10 @@ class FakeInternetTestCase(unittest.TestCase):
         MockRequestCounter.reset()
 
     def disable_web_pages(self):
-        # HttpRequestBuilder.get_contents_function = self.get_contents_function
         WebConfig.get_default_crawler = FakeInternetTestCase.get_default_crawler
 
         Url.youtube_video_handler = YouTubeJsonHandlerMock
-        # UrlHandler.youtube_video_handler = YouTubeJsonHandlerMock
-
-        Url.handlers = [
-            YouTubeJsonHandlerMock,
-            YouTubeChannelHandler,
-            OdyseeVideoHandler,
-            OdyseeChannelHandler,
-            HttpPageHandler,
-        ]
+        Url.handlers[0] = YouTubeJsonHandlerMock
 
         WebConfig.use_print_logging()
         WebConfig.get_crawler_from_mapping = FakeInternetTestCase.get_crawler_from_mapping
