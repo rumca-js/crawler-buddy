@@ -121,6 +121,10 @@ class YouTubeDownloader(object):
         simple_text = proc.stdout.decode("ascii", errors="ignore")
         return simple_text
 
+    def get_error_ignore(self, proc):
+        simple_text = proc.stderr.decode("ascii", errors="ignore")
+        return simple_text
+
     def process_link(self, link):
         wh = link.find("=")
         if wh == -1:

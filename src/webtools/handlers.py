@@ -247,7 +247,8 @@ class ReturnDislike(DefaultUrlHandler):
     def load_response(self):
         self.get_response()
         contents = self.get_contents()
-        return self.loads(contents)
+        self._json = self.loads(contents) 
+        return self._json
 
     def loads(self, data):
         try:

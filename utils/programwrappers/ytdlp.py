@@ -66,16 +66,15 @@ class YTDLP(YouTubeDownloader):
         proc = subprocess.run(cmds, capture_output=True, timeout=self.timeout_s)
 
         out = self.get_output_ignore(proc)
-
-        error = proc.stderr.decode("ascii", errors="ignore")
+        error = self.get_error_ignore(proc)
 
         # return code 101 is returned due to --max-downloads limit
         # everything is fine
 
         if proc.returncode != 0 and proc.returncode != 101:
+            print("yt-dlp problem. Url:{}. Return code:{}\nOut:{}\nErr:{}".format(self._url, proc.returncode, out, error))
             return None
 
-        out = self.get_output_ignore(proc)
         self._json_data = out.strip()
 
         if path is not None:
