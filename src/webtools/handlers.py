@@ -8,43 +8,17 @@ from .webtools import (
 )
 
 
-class RedditChannelHandler(DefaultChannelHandler):
-    def __init__(self, url=None, contents=None, settings=None, url_builder=None):
-        super().__init__(
-            url,
-            contents=contents,
-            settings=settings,
-            url_builder=url_builder
-        )
-
-        if url:
-            self.code = self.input2code(url)
-
-    def is_handled_by(self):
-        if not self.url:
-            return False
-
-        code = self.input2code(self.url)
-        if code:
-            return True
-
-    def input2code(self, input_string):
-        p = UrlLocation(input_string)
-        if p.get_domain_only().find("reddit.com") >= 0:
-            parts = p.split()
-            if len(parts) >= 4 and parts[3] == "r":
-                return parts[4]
-
-    def code2feed(self, code):
-        return "https://www.reddit.com/r/{}/.rss".format(code)
-
-
 class RedditUrlHandler(DefaultUrlHandler):
-    """https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/"""
-
-    """https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/.json"""
+    """
+    Url:
+    https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/
+    Url to JSON:
+    https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/.json"""
 
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
+        self.post_id = None
+        self.subreddit = None
+
         super().__init__(
             url,
             contents=contents,
@@ -56,24 +30,25 @@ class RedditUrlHandler(DefaultUrlHandler):
         if not self.url:
             return False
 
-        code = self.input2code(self.url)
-        if code:
-            return True
+        return self.input2code(self.url)
 
     def input2code(self, input_string):
         p = UrlLocation(input_string)
         if p.get_domain_only().find("reddit.com") >= 0:
             parts = p.split()
             if len(parts) >= 6 and parts[3] == "r" and parts[5] == "comments":
-                subreddit = parts[4]
-                post_id = parts[6]
+                self.subreddit = parts[4]
+                self.post_id = parts[6]
 
-                return post_id
+                return True
+            if len(parts) >= 4 and parts[3] == "r":
+                self.subreddit = parts[4]
+                return True
 
     def get_json_url(self):
-        post_id = self.input2code(self.url)
-        if post_id:
-            return f"https://www.reddit.com/{post_id}.json"
+        self.input2code(self.url)
+        if self.post_id:
+            return f"https://www.reddit.com/{self.post_id}.json"
         else:
             WebLogger.error("Reddit:did not found post id {}".format(self.url))
 
@@ -130,6 +105,9 @@ class RedditUrlHandler(DefaultUrlHandler):
             result["upvote_ratio"] = None
 
         return result
+
+    def code2feed(self, code):
+        return "https://www.reddit.com/r/{}/.rss".format(code)
 
 
 class GitHubUrlHandler(DefaultUrlHandler):

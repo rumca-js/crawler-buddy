@@ -2,8 +2,10 @@ from src.webtools import (
     Url,
     PageOptions,
     HtmlPage,
+    RssPage,
     PageResponseObject,
     HttpPageHandler,
+    RedditUrlHandler,
 )
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
@@ -121,6 +123,18 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
+    def test_get_handler__reddit(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        url = Url("https://www.reddit.com/r/searchengines/.rss")
+        url.get_response()
+
+        self.assertEqual(type(url.get_handler()), RedditUrlHandler)
+        # call tested function
+        self.assertEqual(type(url.get_handler().p), RssPage)
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
     def test_get_handler__ftp_page(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -172,6 +186,18 @@ class UrlTest(FakeInternetTestCase):
         handler = url.get_handler()
 
         self.assertTrue(type(handler), Url.youtube_video_handler)
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
+    def test_get_handler__https_html_page__norequest(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        url = Url("https://multiple-favicons.com/page.html")
+
+        # call tested function
+
+        self.assertEqual(type(url.get_handler()), HttpPageHandler)
+        self.assertEqual(url.get_handler().p, None)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
@@ -977,7 +1003,6 @@ class UrlTest(FakeInternetTestCase):
         MockRequestCounter.mock_page_requests = 0
 
         test_link = "https://m.youtube.com/watch?v=1234"
-        test_canonical_link = "https://www.youtube.com/watch?v=1234"
 
         url = Url(test_link)
 
@@ -998,8 +1023,7 @@ class UrlTest(FakeInternetTestCase):
     def test_get_social_properties__github(self):
         MockRequestCounter.mock_page_requests = 0
 
-        test_link = "https://github.com/watch?v=1234"
-        test_canonical_link = "https://github.com/watch?v=1234"
+        test_link = "https://github.com/rumca-js?tab=repositories"
 
         url = Url(test_link)
 
@@ -1014,8 +1038,7 @@ class UrlTest(FakeInternetTestCase):
     def test_get_social_properties__reddit(self):
         MockRequestCounter.mock_page_requests = 0
 
-        test_link = "https://reddit.com/watch?v=1234"
-        test_canonical_link = "https://github.com/watch?v=1234"
+        test_link = "https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/"
 
         url = Url(test_link)
 
@@ -1026,3 +1049,19 @@ class UrlTest(FakeInternetTestCase):
         self.assertTrue(properties["upvote_ratio"])
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
+    def test_get_social_properties__html(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://linkedin.com/watch?v=1234"
+
+        url = Url(test_link)
+
+        # call tested function
+        properties = url.get_social_properties()
+
+        self.assertIn("view_count", properties)
+        self.assertIn("thumbs_up", properties)
+        self.assertIn("thumbs_down", properties)
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)

@@ -239,10 +239,6 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
             }""".replace("${date}", self.get_now())
         return True
 
-    def download_details_return_dislike(self):
-        self.rd_text = """{}"""
-        return True
-
     def get_now(self):
         """
         format 20231113

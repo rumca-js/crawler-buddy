@@ -20,12 +20,12 @@ from .handlerhttppage import (
     HttpPageHandler,
 )
 from .handlers import (
-    RedditChannelHandler,
     RedditUrlHandler,
     GitHubUrlHandler,
     ReturnDislike,
     HackerNewsHandler,
     InternetArchive,
+    FourChanChannelHandler,
 )
 
 from .crawlers import (

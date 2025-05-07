@@ -15,6 +15,9 @@ class YouTubeVideoHandler(DefaultUrlHandler):
             url, contents=contents, settings=settings, url_builder=url_builder
         )
 
+        if not self.is_handled_by():
+            return
+
         self.url = self.input2url(url)
         self.code = self.input2code(url)
 
@@ -338,7 +341,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
     def get_json_data_from_rd(self):
         json_data = {}
 
-        self.download_details_return_dislike()
+        self.download_details_return_dislike():
 
         view_count = None
         thumbs_up = None
@@ -346,17 +349,17 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         try:
             view_count = int(self.rd_ob.get_view_count())
-        except ValueError as E:
+        except (ValueError, AttributeError) as E:
             pass
 
         try:
             thumbs_up = int(self.rd_ob.get_thumbs_up())
-        except ValueError as E:
+        except (ValueError, AttributeError) as E:
             pass
 
         try:
             thumbs_down = int(self.rd_ob.get_thumbs_down())
-        except ValueError as E:
+        except (ValueError, AttributeError) as E:
             pass
 
         json_data["view_count"] = view_count
