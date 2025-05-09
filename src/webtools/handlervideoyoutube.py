@@ -341,7 +341,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
     def get_json_data_from_rd(self):
         json_data = {}
 
-        self.download_details_return_dislike():
+        self.download_details_return_dislike()
 
         view_count = None
         thumbs_up = None

@@ -21,6 +21,7 @@ beautifulsoup4 = "^4.13.3"
 sympy = "^1.13.2"
 spacy = "3.7.5"
 lxml = "5.3.0"
+brutefeedparser="*"
 # [optional] - at least one of methods need to be running
 # example: crawlerrequests.py
 requests = "^2.32.3"

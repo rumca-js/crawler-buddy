@@ -4,6 +4,7 @@ import re
 import json
 from datetime import datetime
 from dateutil import parser
+from brutefeedparser import BruteFeedParser
 import html
 import lxml.etree as ET
 
@@ -15,7 +16,6 @@ from .webtools import (
     date_str_to_date,
 )
 from .urllocation import UrlLocation
-from .feedreader import FeedReader
 
 
 class ContentInterface(object):
@@ -695,7 +695,7 @@ class RssPage(ContentInterface):
             return None
 
         try:
-            self.feed = FeedReader.parse(contents)
+            self.feed = BruteFeedParser.parse(contents)
             return self.feed
         except Exception as E:
             print(str(E))
