@@ -13,7 +13,10 @@ class RedditUrlHandler(DefaultUrlHandler):
     Url:
     https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/
     Url to JSON:
-    https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/.json"""
+    https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/.json
+
+    Maybe we could use python redditapi
+    """
 
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         self.post_id = None
@@ -75,7 +78,7 @@ class RedditUrlHandler(DefaultUrlHandler):
             WebLogger.error("Reddit:no Url link")
 
     def get_json_value(self, json_text, var):
-        wh_start = json_text.find(var)
+        wh_start = json_text.find('"{}"'.format(var))
         if wh_start == -1:
             return
 
@@ -100,9 +103,24 @@ class RedditUrlHandler(DefaultUrlHandler):
 
         upvote_ratio = self.get_json_value(json_text, "upvote_ratio")
         try:
-            result["upvote_ratio"] = float(upvote_ratio)
+            upvote_ratio = float(upvote_ratio)
         except ValueError:
-            result["upvote_ratio"] = None
+            upvote_ratio = None
+
+        score = self.get_json_value(json_text, "score")
+        try:
+            score = float(score)
+        except ValueError:
+            score = None
+
+        result["upvote_ratio"] = upvote_ratio
+        # result["score"] = score
+
+        if upvote_ratio and score and upvote_ratio > 0 and score > 0:
+            thumbs_up = (upvote_ratio * score) / (2 * upvote_ratio - 1)
+            thumbs_down = thumbs_up - score
+            result["thumbs_up"] = thumbs_up
+            result["thumbs_down"] = thumbs_down
 
         return result
 

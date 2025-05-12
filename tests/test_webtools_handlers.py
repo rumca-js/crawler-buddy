@@ -20,6 +20,8 @@ class RedditUrlHandlerTest(FakeInternetTestCase):
         data = handler.get_json_data()
 
         self.assertIn("upvote_ratio", data)
+        self.assertIn("thumbs_up", data)
+        self.assertIn("thumbs_down", data)
 
 
 class GitHubUrlHandlerTest(FakeInternetTestCase):

@@ -159,14 +159,13 @@ class HandlerInterface(DefaultContentPage):
             return thumbs_up / views
 
     def get_json_data(self):
-        # TODO rename to get_social_data
         json_obj = {}
 
         json_obj["thumbs_up"] = None
         json_obj["thumbs_down"] = None
         json_obj["view_count"] = None
         json_obj["rating"] = None
-        json_obj["upvote_ratio"] = None
-        json_obj["upvote_view_ratio"] = None
+        json_obj["upvote_ratio"] = None         # (thumbs_up - thumbs_down)
+        json_obj["upvote_view_ratio"] = None    # (thumbs_up / views)
 
         return json_obj
