@@ -116,11 +116,11 @@ class RedditUrlHandler(DefaultUrlHandler):
         result["upvote_ratio"] = upvote_ratio
         # result["score"] = score
 
-        if upvote_ratio and score and upvote_ratio > 0 and score > 0:
-            thumbs_up = (upvote_ratio * score) / (2 * upvote_ratio - 1)
-            thumbs_down = thumbs_up - score
-            result["thumbs_up"] = thumbs_up
-            result["thumbs_down"] = thumbs_down
+        #if upvote_ratio and score and upvote_ratio > 0 and score > 0:
+        #    thumbs_up = (upvote_ratio * score) / (2 * upvote_ratio - 1)
+        #    thumbs_down = thumbs_up - score
+        #    result["thumbs_up"] = thumbs_up
+        #    result["thumbs_down"] = thumbs_down
 
         return result
 
@@ -408,3 +408,26 @@ class FourChanChannelHandler(DefaultChannelHandler):
 
     def code2feed(self, code):
         return "https://boards.4chan.org/{}/index.rss".format(code)
+
+
+class TwitterUrlHandler(DefaultUrlHandler):
+
+    def __init__(self, url=None, contents=None, settings=None, url_builder=None):
+        super().__init__(
+            url,
+            contents=contents,
+            settings=settings,
+            url_builder=url_builder
+        )
+        wh = self.url.find("?ref_src=")
+        if wh >= 0:
+            self.url = self.url[:wh]
+
+    def is_handled_by(self):
+        if not self.url:
+            return False
+
+        if self.url.find("https://x.com") >= 0:
+            return True
+        if self.url.find("https://twitter.com") >= 0:
+            return True

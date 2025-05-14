@@ -54,6 +54,7 @@ from .handlers import (
     HackerNewsHandler,
     InternetArchive,
     FourChanChannelHandler,
+    TwitterUrlHandler,
 )
 
 from utils.dateutils import DateUtils
@@ -80,6 +81,7 @@ class Url(ContentInterface):
         HackerNewsHandler,
         InternetArchive,
         FourChanChannelHandler,
+        TwitterUrlHandler,
         HttpPageHandler, # default
     ]
 

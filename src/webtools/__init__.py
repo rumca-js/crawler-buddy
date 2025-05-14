@@ -26,6 +26,7 @@ from .handlers import (
     HackerNewsHandler,
     InternetArchive,
     FourChanChannelHandler,
+    TwitterUrlHandler,
 )
 
 from .crawlers import (
