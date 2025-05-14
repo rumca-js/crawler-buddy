@@ -129,6 +129,16 @@ class Crawler(object):
         """
         TODO decide what can be copied from incoming crawler data
         """
+        new_mapping = self.get_crawler(url, crawler_data)
+        if not new_mapping:
+            return
+
+        print("Running:{}, with:{}".format(url, new_mapping))
+
+        page_url = webtools.Url(url, settings=new_mapping)
+        return page_url
+
+    def get_crawler(self, url, crawler_data):
         remote_server = crawler_data["settings"]["remote_server"]
 
         new_mapping = None
@@ -153,6 +163,7 @@ class Crawler(object):
                 new_mapping = self.configuration.get_crawler(name=crawler_name)
                 if not new_mapping:
                     webtools.WebLogger.error("Cannot find specified crawler in config: {}".format(crawler_name))
+                new_mapping["crawler"] = new_mapping["crawler"](url=url)
         else:
             new_mapping = self.configuration.get_crawler(name=crawler_data["name"])
             if not new_mapping:
@@ -172,18 +183,15 @@ class Crawler(object):
             new_mapping["settings"] = {}
         new_mapping["settings"]["remote-server"] = remote_server
 
-        print("Running:{}, with:{}".format(url, new_mapping))
-
         if "handler_class" in new_mapping:
             new_mapping["handler_class"] = Url.get_handler_by_name(new_mapping["handler_class"])
 
-        page_url = webtools.Url(url, settings=new_mapping)
-        return page_url
+        return new_mapping
 
     def get_default_crawler(self, url):
         default_crawler = self.configuration.get("default_crawler")
         if default_crawler:
-            new_mapping = self.get_crawler(name = default_crawler)
+            new_mapping = self.configuration.get_crawler(name = default_crawler)
             if new_mapping:
                 return new_mapping
 

@@ -7,6 +7,7 @@ from src.webtools import (
     HttpPageHandler,
 )
 from src.crawler import Crawler
+from src.entryrules import EntryRules
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 
@@ -144,6 +145,33 @@ class CrawlerTest(FakeInternetTestCase):
 
         self.assertIn("crawler", page_url.settings)
         self.assertEqual(type(page_url.settings["crawler"]).__name__, "DefaultCrawler")
+
+    def test_get_page_url__by_entry_rule(self):
+        crawler = Crawler()
+
+        rules = EntryRules()
+        self.assertEqual(rules.entry_rules["entryrules"][0]["browser"], "SeleniumChromeFull")
+
+        crawler.entry_rules = rules
+
+        test_url = "https://x.com"
+
+        crawler_data = {
+                "settings" : {
+                    "timeout_s" : 20,
+                    "remote_server": "https://",
+                }
+        }
+
+        # call tested function
+        page_url = crawler.get_page_url(test_url, crawler_data)
+        self.assertTrue(page_url)
+
+        self.assertIn("name", page_url.settings)
+        self.assertEqual(page_url.settings["name"], "SeleniumChromeFull")
+
+        self.assertIn("crawler", page_url.settings)
+        self.assertEqual(type(page_url.settings["crawler"]).__name__, "SeleniumChromeFull")
 
     def test_get_request_data__name(self):
         crawler = Crawler()
