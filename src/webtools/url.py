@@ -26,6 +26,7 @@ from .webtools import (
     URL_TYPE_HTML,
     URL_TYPE_FONT,
     URL_TYPE_UNKNOWN,
+    status_code_to_text,
 )
 from .webconfig import WebConfig
 from .urllocation import UrlLocation
@@ -709,6 +710,7 @@ class Url(ContentInterface):
 
         if response:
             response_data["status_code"] = response.get_status_code()
+            response_data["status_code_str"] = status_code_to_text(response.get_status_code())
 
             response_data["Content-Type"] = response.get_content_type()
             if page_handler == HttpPageHandler:
