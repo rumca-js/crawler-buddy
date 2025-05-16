@@ -443,7 +443,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         from .handlers import ReturnDislike
 
-        dislike = ReturnDislike(video_code = self.get_video_code())
+        dislike = ReturnDislike(video_code=self.get_video_code())
         dislike.get_response()
         self.rd_text = dislike.get_contents()
         if not self.rd_text:

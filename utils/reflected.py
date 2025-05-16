@@ -7,7 +7,9 @@ class ReflectedEntryTable(object):
 
     def get_table(self, table_name):
         destination_metadata = MetaData()
-        destination_table = Table(table_name, destination_metadata, autoload_with=self.engine)
+        destination_table = Table(
+            table_name, destination_metadata, autoload_with=self.engine
+        )
         return destination_table
 
     def truncate_table(self, table_name):
@@ -18,7 +20,9 @@ class ReflectedEntryTable(object):
 
     def get_entries(self):
         destination_metadata = MetaData()
-        destination_table = Table("linkdatamodel", destination_metadata, autoload_with=self.engine)
+        destination_table = Table(
+            "linkdatamodel", destination_metadata, autoload_with=self.engine
+        )
 
         entries_select = select(destination_table)
 
@@ -31,7 +35,9 @@ class ReflectedEntryTable(object):
 
     def get_source(self, source_id):
         destination_metadata = MetaData()
-        destination_table = Table("sourcedatamodel", destination_metadata, autoload_with=self.engine)
+        destination_table = Table(
+            "sourcedatamodel", destination_metadata, autoload_with=self.engine
+        )
 
         stmt = select(destination_table).where(destination_table.c.id == source_id)
 
@@ -43,7 +49,9 @@ class ReflectedEntryTable(object):
 
     def get_tags_string(self, entry_id):
         destination_metadata = MetaData()
-        destination_table = Table("usertags", destination_metadata, autoload_with=self.engine)
+        destination_table = Table(
+            "usertags", destination_metadata, autoload_with=self.engine
+        )
 
         stmt = select(destination_table).where(destination_table.c.entry_id == entry_id)
 
@@ -56,13 +64,15 @@ class ReflectedEntryTable(object):
                 if tags:
                     tags += ", "
 
-                tags += "#"+row.tag
+                tags += "#" + row.tag
 
         return tags
 
     def get_tags(self, entry_id):
         destination_metadata = MetaData()
-        destination_table = Table("usertags", destination_metadata, autoload_with=self.engine)
+        destination_table = Table(
+            "usertags", destination_metadata, autoload_with=self.engine
+        )
 
         stmt = select(destination_table).where(destination_table.c.entry_id == entry_id)
 
@@ -86,5 +96,7 @@ class ReflectedEntryTable(object):
 
         with self.engine.connect() as connection:
             for table in tables:
-                row_count = connection.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()
+                row_count = connection.execute(
+                    text(f"SELECT COUNT(*) FROM {table}")
+                ).scalar()
                 print(f"Table: {table}, Row count: {row_count}")

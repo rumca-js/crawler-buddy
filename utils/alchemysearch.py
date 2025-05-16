@@ -12,7 +12,7 @@ class AlchemySymbolEvaluator(SingleSymbolEvaluator):
     return 1 if true
     """
 
-    def __init__(self, table, ignore_case = False):
+    def __init__(self, table, ignore_case=False):
         self.table = table
         self.ignore_case = ignore_case
 
@@ -105,16 +105,22 @@ class AlchemySearch(object):
         destination_metadata = MetaData()
 
         if self.args and "table" in self.args:
-            destination_table = Table(self.args.table, destination_metadata, autoload_with=self.db)
+            destination_table = Table(
+                self.args.table, destination_metadata, autoload_with=self.db
+            )
         else:
-            destination_table = Table("linkdatamodel", destination_metadata, autoload_with=self.db)
+            destination_table = Table(
+                "linkdatamodel", destination_metadata, autoload_with=self.db
+            )
 
         ignore_case = False
         if self.args and self.args.ignore_case:
             ignore_case = True
 
         symbol_evaluator = AlchemySymbolEvaluator(destination_table, ignore_case)
-        equation_evaluator = AlchemyEquationEvaluator(self.search_term, symbol_evaluator)
+        equation_evaluator = AlchemyEquationEvaluator(
+            self.search_term, symbol_evaluator
+        )
 
         search = OmniSearch(self.search_term, equation_evaluator=equation_evaluator)
         combined_query_conditions = search.get_combined_query()
@@ -133,18 +139,27 @@ class AlchemySearch(object):
             if self.args:
                 # Determine sorting order
                 order_by_clause = (
-                    order_by_column.asc() if self.args.asc else order_by_column.desc()
-                    if self.args.desc else order_by_column.asc()
+                    order_by_column.asc()
+                    if self.args.asc
+                    else (
+                        order_by_column.desc()
+                        if self.args.desc
+                        else order_by_column.asc()
+                    )
                 )
             else:
                 order_by_clause = order_by_column.asc()
 
             # Use select() for SQLAlchemy Core
-            stmt = select(destination_table).where(combined_query_conditions).order_by(order_by_clause)
+            stmt = (
+                select(destination_table)
+                .where(combined_query_conditions)
+                .order_by(order_by_clause)
+            )
 
             # Execute the query
             result = connection.execute(stmt)
-            
+
             # Fetch all results
             rows = result.fetchall()
 

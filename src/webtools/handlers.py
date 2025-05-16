@@ -23,10 +23,7 @@ class RedditUrlHandler(DefaultUrlHandler):
         self.subreddit = None
 
         super().__init__(
-            url,
-            contents=contents,
-            settings=settings,
-            url_builder=url_builder
+            url, contents=contents, settings=settings, url_builder=url_builder
         )
 
     def is_handled_by(self):
@@ -116,7 +113,7 @@ class RedditUrlHandler(DefaultUrlHandler):
         result["upvote_ratio"] = upvote_ratio
         # result["score"] = score
 
-        #if upvote_ratio and score and upvote_ratio > 0 and score > 0:
+        # if upvote_ratio and score and upvote_ratio > 0 and score > 0:
         #    thumbs_up = (upvote_ratio * score) / (2 * upvote_ratio - 1)
         #    thumbs_down = thumbs_up - score
         #    result["thumbs_up"] = thumbs_up
@@ -132,10 +129,7 @@ class GitHubUrlHandler(DefaultUrlHandler):
 
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         super().__init__(
-            url,
-            contents=contents,
-            settings=settings,
-            url_builder=url_builder
+            url, contents=contents, settings=settings, url_builder=url_builder
         )
 
     def is_handled_by(self):
@@ -169,8 +163,12 @@ class GitHubUrlHandler(DefaultUrlHandler):
         if elements:
             owner = elements[0]
             repository = elements[1]
-            feeds.append("https://github.com/{}/{}/commits.atom".format(owner, repository))
-            feeds.append("https://github.com/{}/{}/releases.atom".format(owner, repository))
+            feeds.append(
+                "https://github.com/{}/{}/commits.atom".format(owner, repository)
+            )
+            feeds.append(
+                "https://github.com/{}/{}/releases.atom".format(owner, repository)
+            )
 
         return feeds
 
@@ -222,16 +220,15 @@ class GitHubUrlHandler(DefaultUrlHandler):
 
 
 class ReturnDislike(DefaultUrlHandler):
-    def __init__(self, video_code=None, url=None, contents=None, settings=None, url_builder=None):
+    def __init__(
+        self, video_code=None, url=None, contents=None, settings=None, url_builder=None
+    ):
 
         if video_code:
             url = self.code2url(video_code)
 
         super().__init__(
-            url=url,
-            contents=contents,
-            settings=settings,
-            url_builder=url_builder
+            url=url, contents=contents, settings=settings, url_builder=url_builder
         )
 
     def code2url(self, input_code):
@@ -243,7 +240,7 @@ class ReturnDislike(DefaultUrlHandler):
     def load_response(self):
         self.get_response()
         contents = self.get_contents()
-        self._json = self.loads(contents) 
+        self._json = self.loads(contents)
         return self._json
 
     def loads(self, data):
@@ -291,10 +288,7 @@ class HackerNewsHandler(DefaultUrlHandler):
 
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         super().__init__(
-            url,
-            contents=contents,
-            settings=settings,
-            url_builder=url_builder
+            url, contents=contents, settings=settings, url_builder=url_builder
         )
 
     def is_handled_by(self):
@@ -380,10 +374,7 @@ class InternetArchive(DefaultUrlHandler):
 class FourChanChannelHandler(DefaultChannelHandler):
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         super().__init__(
-            url,
-            contents=contents,
-            settings=settings,
-            url_builder=url_builder
+            url, contents=contents, settings=settings, url_builder=url_builder
         )
 
         if url:
@@ -414,10 +405,7 @@ class TwitterUrlHandler(DefaultUrlHandler):
 
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         super().__init__(
-            url,
-            contents=contents,
-            settings=settings,
-            url_builder=url_builder
+            url, contents=contents, settings=settings, url_builder=url_builder
         )
         wh = self.url.find("?ref_src=")
         if wh >= 0:

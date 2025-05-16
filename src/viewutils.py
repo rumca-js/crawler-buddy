@@ -56,7 +56,9 @@ def get_entry_html(id, index, url, timestamp, all_properties):
 
     timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
-    text += """<a href="{}"><h2 style="margin-bottom:0px">[{}] {}</h2></a> <a href="{}">Remove</a>\n""".format(find_link, timestamp_str, url, remove_link)
+    text += """<a href="{}"><h2 style="margin-bottom:0px">[{}] {}</h2></a> <a href="{}">Remove</a>\n""".format(
+        find_link, timestamp_str, url, remove_link
+    )
 
     response = CrawlHistory.read_properties_section("Response", all_properties)
     options = CrawlHistory.read_properties_section("Settings", all_properties)
@@ -69,16 +71,11 @@ def get_entry_html(id, index, url, timestamp, all_properties):
         content_length = response["Content-Length"]
         content_type = response["Content-Type"]
 
-        if (options
-            and "name" in options
-        ):
+        if options and "name" in options:
             crawler_name = options["name"]
         else:
             crawler_name = ""
-        if (
-            options
-            and "crawler" in options
-        ):
+        if options and "crawler" in options:
             crawler_crawler = options["crawler"]
         else:
             crawler_crawler = ""
@@ -92,14 +89,14 @@ def get_entry_html(id, index, url, timestamp, all_properties):
 
     color = status2color(status_code)
 
-    text += '<div>'
+    text += "<div>"
     text += f'<span style="color:{color}">Status code:{status_code_text}</span> '
-    text += f'charset:{charset} '
-    text += f'Content-Type:{content_type} '
-    text += f'Content-Length:{content_length} '
-    text += f'Crawler name:{crawler_name} '
-    text += f'Crawler:{crawler_crawler} '
-    text += '</div>\n'
+    text += f"charset:{charset} "
+    text += f"Content-Type:{content_type} "
+    text += f"Content-Length:{content_length} "
+    text += f"Crawler name:{crawler_name} "
+    text += f"Crawler:{crawler_crawler} "
+    text += "</div>\n"
 
     return text
 
@@ -108,7 +105,7 @@ def rssify(all_properties):
     properties = CrawlHistory.read_properties_section("Properties", all_properties)
     entries = CrawlHistory.read_properties_section("Entries", all_properties)
 
-    rss_template = '''<?xml version="1.0" encoding="UTF-8"?>
+    rss_template = """<?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:dc="http://purl.org/dc/elements/1.1/" 
      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
      xmlns:atom="http://www.w3.org/2005/Atom" 
@@ -118,8 +115,8 @@ def rssify(all_properties):
         {channel_info}
         {items}
     </channel>
-</rss>'''
-    
+</rss>"""
+
     channel_info = ""
     if properties.get("title"):
         channel_info += f"<title>{properties['title']}</title>\n"
@@ -135,7 +132,7 @@ def rssify(all_properties):
         channel_info += f"<published>{properties['date_published']}</published>\n"
     if properties.get("language"):
         channel_info += f"<language>{properties['language']}</language>\n"
-    
+
     items = ""
     for entry in entries:
         entry_info = "<item>\n"
@@ -145,7 +142,9 @@ def rssify(all_properties):
         if entry.get("link"):
             entry_info += f"<link><![CDATA[{entry['link']}]]></link>\n"
         if entry.get("description"):
-            entry_info += f"<description><![CDATA[{entry['description']}]]></description>\n"
+            entry_info += (
+                f"<description><![CDATA[{entry['description']}]]></description>\n"
+            )
         if entry.get("date_published"):
             entry_info += f"<pubDate><![CDATA[{entry['date_published']}]]></pubDate>\n"
         if entry.get("thumbnail"):
@@ -154,5 +153,5 @@ def rssify(all_properties):
         entry_info += "</item>\n"
 
         items += entry_info
-    
+
     return rss_template.format(channel_info=channel_info, items=items)

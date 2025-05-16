@@ -65,11 +65,15 @@ class Crawler(object):
         if "settings" not in parsed_crawler_data:
             parsed_crawler_data["settings"] = {}
 
-        remote_server = "http://"+str(request.host)
+        remote_server = "http://" + str(request.host)
 
-        if "ssl_verify" not in parsed_crawler_data["settings"] and self.configuration.is_set("ssl_verify"):
+        if "ssl_verify" not in parsed_crawler_data[
+            "settings"
+        ] and self.configuration.is_set("ssl_verify"):
             parsed_crawler_data["settings"]["ssl_verify"] = True
-        if "respect_robots_txt" not in parsed_crawler_data["settings"] and self.configuration.is_set("respect_robots_txt"):
+        if "respect_robots_txt" not in parsed_crawler_data[
+            "settings"
+        ] and self.configuration.is_set("respect_robots_txt"):
             parsed_crawler_data["settings"]["respect_robots_txt"] = True
 
         full = request.args.get("full")
@@ -77,7 +81,9 @@ class Crawler(object):
 
         parsed_crawler_data["settings"]["remote_server"] = remote_server
 
-        if "bytes_limit" not in parsed_crawler_data and self.configuration.is_set("bytes_limit"):
+        if "bytes_limit" not in parsed_crawler_data and self.configuration.is_set(
+            "bytes_limit"
+        ):
             parsed_crawler_data["bytes_limit"] = self.configuration.get("bytes_limit")
         else:
             parsed_crawler_data["bytes_limit"] = webtools.WebConfig.get_bytes_limit()
@@ -92,7 +98,9 @@ class Crawler(object):
         page_url = self.get_page_url(url, crawler_data)
 
         if not page_url:
-            webtools.WebLogger.error("Could not create page url for {} {}".format(url, crawler_data))
+            webtools.WebLogger.error(
+                "Could not create page url for {} {}".format(url, crawler_data)
+            )
             return
 
         request_headers = crawler_data["settings"]["headers"]
@@ -149,7 +157,9 @@ class Crawler(object):
                 return
             new_mapping["crawler"] = new_mapping["crawler"](url=url)
         elif "name" not in crawler_data and "crawler" in crawler_data:
-            new_mapping = self.configuration.get_crawler(crawler_name=crawler_data["crawler"])
+            new_mapping = self.configuration.get_crawler(
+                crawler_name=crawler_data["crawler"]
+            )
             if not new_mapping:
                 return
             new_mapping["crawler"] = new_mapping["crawler"](url=url)
@@ -162,7 +172,11 @@ class Crawler(object):
             else:
                 new_mapping = self.configuration.get_crawler(name=crawler_name)
                 if not new_mapping:
-                    webtools.WebLogger.error("Cannot find specified crawler in config: {}".format(crawler_name))
+                    webtools.WebLogger.error(
+                        "Cannot find specified crawler in config: {}".format(
+                            crawler_name
+                        )
+                    )
                 new_mapping["crawler"] = new_mapping["crawler"](url=url)
         else:
             new_mapping = self.configuration.get_crawler(name=crawler_data["name"])
@@ -184,14 +198,16 @@ class Crawler(object):
         new_mapping["settings"]["remote-server"] = remote_server
 
         if "handler_class" in new_mapping:
-            new_mapping["handler_class"] = Url.get_handler_by_name(new_mapping["handler_class"])
+            new_mapping["handler_class"] = Url.get_handler_by_name(
+                new_mapping["handler_class"]
+            )
 
         return new_mapping
 
     def get_default_crawler(self, url):
         default_crawler = self.configuration.get("default_crawler")
         if default_crawler:
-            new_mapping = self.configuration.get_crawler(name = default_crawler)
+            new_mapping = self.configuration.get_crawler(name=default_crawler)
             if new_mapping:
                 return new_mapping
 

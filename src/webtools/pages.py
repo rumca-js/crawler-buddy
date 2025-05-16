@@ -491,8 +491,7 @@ class JsonPage(ContentInterface):
 
 class RssPageEntry(ContentInterface):
     def __init__(self, feed_index, feed_entry, url, contents, page_object_properties):
-        """
-        """
+        """ """
         self.feed_index = feed_index
         self.feed_entry = feed_entry
         self.url = url
@@ -645,7 +644,7 @@ class RssPageEntry(ContentInterface):
         author = None
         if not author and hasattr(self.feed_entry, "author"):
             author = self.feed_entry.author
-            
+
         if not author and "author" in self.page_object_properties:
             author = self.page_object_properties["author"]
 
@@ -706,11 +705,11 @@ class RssPage(ContentInterface):
             return
 
         start_index = self.contents.find("&lt;rss")
-        end_index = self.contents.rfind('&gt;')
+        end_index = self.contents.rfind("&gt;")
         if start_index == -1 or end_index == -1 or end_index <= start_index:
             return
 
-        self.contents = self.contents[start_index:end_index + 4]
+        self.contents = self.contents[start_index : end_index + 4]
         self.contents = html.unescape(self.contents)
 
         self.try_to_parse()

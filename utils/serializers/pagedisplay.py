@@ -17,7 +17,7 @@ class PageDisplay(object):
         else:
             verbose = False
 
-        #if parser.args.remote_server:
+        # if parser.args.remote_server:
         #    options.mode_mapping = WebConfig.get_init_crawler_config(
         #        remote_server=parser.args.remote_server
         #    )

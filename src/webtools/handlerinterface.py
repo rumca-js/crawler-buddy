@@ -165,7 +165,7 @@ class HandlerInterface(DefaultContentPage):
         json_obj["thumbs_down"] = None
         json_obj["view_count"] = None
         json_obj["rating"] = None
-        json_obj["upvote_ratio"] = None         # (thumbs_up - thumbs_down)
-        json_obj["upvote_view_ratio"] = None    # (thumbs_up / views)
+        json_obj["upvote_ratio"] = None  # (thumbs_up - thumbs_down)
+        json_obj["upvote_view_ratio"] = None  # (thumbs_up / views)
 
         return json_obj

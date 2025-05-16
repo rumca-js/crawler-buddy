@@ -144,7 +144,7 @@ class EntriesTable(Base):
     author: Mapped[Optional[str]]
     album: Mapped[Optional[str]]
     # advanced / foreign
-    source : Mapped[Optional[int]]
+    source: Mapped[Optional[int]]
 
 
 class EntriesTableController(object):
@@ -176,12 +176,12 @@ class EntriesTableController(object):
     def add_entry(self, entry):
         # Get the set of column names from EntriesTable
         valid_columns = {column.name for column in EntriesTable.__table__.columns}
-        
+
         # Remove keys that are not in EntriesTable
         entry = {key: value for key, value in entry.items() if key in valid_columns}
-        
+
         entry_obj = EntriesTable(**entry)
-        
+
         Session = self.get_session()
         with Session() as session:
             session.add(entry_obj)
@@ -254,12 +254,12 @@ class SourcesTableController(object):
     def add(self, source):
         # Get the set of column names from EntriesTable
         valid_columns = {column.name for column in SourcesTable.__table__.columns}
-        
+
         # Remove keys that are not in EntriesTable
         source = {key: value for key, value in source.items() if key in valid_columns}
-        
+
         source_obj = SourcesTable(**source)
-        
+
         Session = self.get_session()
         with Session() as session:
             session.add(source_obj)
@@ -271,7 +271,7 @@ class SourceOperationalData(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     date_fetched = mapped_column(DateTime, nullable=True)
-    source : Mapped[int]
+    source: Mapped[int]
 
 
 class SourceOperationalDataController(object):
@@ -290,7 +290,7 @@ class SourceOperationalDataController(object):
         with Session() as session:
             rows = (
                 session.query(SourceOperationalData)
-                .filter(SourceOperationalData.source== source.id)
+                .filter(SourceOperationalData.source == source.id)
                 .all()
             )
 
@@ -316,9 +316,7 @@ class SourceOperationalDataController(object):
                 .all()
             )
             if len(op_data) == 0:
-                obj = SourceOperationalData(
-                    date_fetched=date_now, source=source.id
-                )
+                obj = SourceOperationalData(date_fetched=date_now, source=source.id)
                 session.add(obj)
                 session.commit()
             else:

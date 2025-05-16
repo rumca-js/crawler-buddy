@@ -430,7 +430,7 @@ class RequestsCrawler(CrawlerInterface):
             print(str(E))
             return False
 
-    def ping(url, timeout_s = 20, user_agent=None):
+    def ping(url, timeout_s=20, user_agent=None):
         import requests
 
         if not user_agent:
@@ -456,9 +456,11 @@ class RequestsCrawler(CrawlerInterface):
                 verify=False,
                 stream=True,
             ) as response:
-                if (response.status_code >= 200 and response.status_code < 400) \
-                   or response.status_code == 403 \
-                   or response.status_code == 429:
+                if (
+                    (response.status_code >= 200 and response.status_code < 400)
+                    or response.status_code == 403
+                    or response.status_code == 429
+                ):
                     return True
                 else:
                     return False

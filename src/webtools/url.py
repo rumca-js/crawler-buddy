@@ -83,7 +83,7 @@ class Url(ContentInterface):
         InternetArchive,
         FourChanChannelHandler,
         TwitterUrlHandler,
-        HttpPageHandler, # default
+        HttpPageHandler,  # default
     ]
 
     def __init__(self, url=None, settings=None, url_builder=None):
@@ -256,7 +256,9 @@ class Url(ContentInterface):
         pass
 
     def ping(self, timeout_s=20, user_agent=None):
-        return RequestsCrawler.ping(self.url, timeout_s = timeout_s, user_agent = user_agent)
+        return RequestsCrawler.ping(
+            self.url, timeout_s=timeout_s, user_agent=user_agent
+        )
 
     def get_handler_implementation(self):
         url = self.url
@@ -619,7 +621,12 @@ class Url(ContentInterface):
                 )
             elif response.get_binary():
                 all_properties.append(
-                    {"name": "Binary", "data": {"Contents": self.property_encode(response.get_binary())}}
+                    {
+                        "name": "Binary",
+                        "data": {
+                            "Contents": self.property_encode(response.get_binary())
+                        },
+                    }
                 )
 
         request_data = dict(self.settings)
@@ -710,7 +717,9 @@ class Url(ContentInterface):
 
         if response:
             response_data["status_code"] = response.get_status_code()
-            response_data["status_code_str"] = status_code_to_text(response.get_status_code())
+            response_data["status_code_str"] = status_code_to_text(
+                response.get_status_code()
+            )
 
             response_data["Content-Type"] = response.get_content_type()
             if page_handler == HttpPageHandler:
@@ -807,9 +816,9 @@ class Url(ContentInterface):
             json_obj["upvote_ratio"] = None
         if "upvote_view_ratio" not in json_obj:
             json_obj["upvote_view_ratio"] = None
-            
+
         return json_obj
-        
+
 
 class DomainCacheInfo(object):
     """
