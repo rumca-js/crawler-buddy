@@ -97,7 +97,7 @@ class WebLogger(object):
 
 def status_code_to_text(status_code):
     if not status_code:
-        return ""
+        return "UNKNOWN(0)"
 
     if status_code == 200:
         return "HTTP_STATUS_OK(200)"
