@@ -724,82 +724,140 @@ class SeleniumDriver(CrawlerInterface):
         """
         raise NotImplementedError("Provide selenium driver implementation!")
 
-    def get_selenium_status_code(self, driver):
-        status_code = 200
+    def run(self):
+        """
+        To obtain RSS page you have to run real, full blown browser.
+
+        It may require some magic things to make the browser running.
+
+        https://stackoverflow.com/questions/50642308/webdriverexception-unknown-error-devtoolsactiveport-file-doesnt-exist-while-t
+        """
+        if not self.is_valid():
+            return
+
         try:
-            logs = driver.get_log("performance")
-            status_code2 = self.get_selenium_status_code_from_logs(logs)
-            if status_code2:
-                status_code = status_code2
+            from selenium.common.exceptions import TimeoutException
         except Exception as E:
             print(str(E))
-        return status_code
+            selenium_feataure_enabled = False
 
-    def get_selenium_headers(self, driver):
+        self.driver = self.get_driver()
+        if not self.driver:
+            return
+
+        self.response = PageResponseObject(
+            self.request.url,
+            text=None,
+            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            request_url=self.request.url,
+        )
+
+        try:
+            # add 10 seconds for start of browser, etc.
+            selenium_timeout = self.timeout_s
+
+            self.driver.set_page_load_timeout(selenium_timeout)
+
+            self.driver.get(self.request.url)
+
+            if "settings" in self.settings and "delay_s" in self.settings["settings"]:
+                delay_s = self.settings["settings"]["delay_s"]
+                time.sleep(delay_s)
+
+            self.process_response()
+
+            if not self.is_response_valid():
+                return self.response
+
+        except TimeoutException:
+            error_text = traceback.format_exc()
+            print("Page timeout:{}\n{}".format(self.request.url, error_text))
+            WebLogger.debug("Page timeout:{}\n{}".format(self.request.url, error_text))
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_TIMEOUT,
+                request_url=self.request.url,
+            )
+        except Exception as E:
+            print(E, "Url:{}".format(self.request.url))
+            WebLogger.exc(E, "Url:{}".format(self.request.url))
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_EXCEPTION,
+                request_url=self.request.url,
+            )
+
+        return self.response
+
+    def process_response(self):
+
+        """
+        TODO - if webpage changes link, it should also update it in this object
+        """
+
+        page_source = self.driver.page_source
+
+        logs = self.driver.get_log("performance")
+        info = self.read_logs(logs)
+
         headers = {}
+        status_code = 200
+
+        if "status_code" in info:
+            status_code = info["status_code"]
+            print(status_code)
+        if "headers" in info:
+            headers = info["headers"]
+            print(headers)
+
+        self.response = PageResponseObject(
+            self.driver.current_url,
+            text=page_source,
+            status_code=status_code,
+            headers=headers,
+            request_url=self.request.url,
+        )
+
+        if len(info) == 0:
+            self.response.add_error("Cannot read driver logs")
+
+    def read_logs(self, logs):
+        info = {}
         try:
-            logs = driver.get_log("performance")
-            headers = self.get_selenium_headers_from_logs(logs)
-            return headers
+            info["status_code"] = self.get_selenium_status_code_from_logs(logs)
+            info["headers"] = self.get_selenium_headers_from_logs(logs)
         except Exception as E:
             print(str(E))
+        return info
 
-        return headers
+    def get_response_logs(self, logs):
+        # Parse the Chrome Performance logs
+        response = None
+        for log_entry in logs:
+            log_message = json.loads(log_entry["message"])["message"]
+            # Filter out HTTP responses
+            if log_message["method"] == "Network.responseReceived":
+                #self.responses.append(log_message["params"]["response"])
+                if log_message["params"]["type"] == "Document":
+                    return log_message["params"]["response"]
 
     def get_selenium_status_code_from_logs(self, logs):
         """
         Extracts the last HTTP status code for a specific URL from Selenium performance logs.
         """
-        url = self.request.url
-
-        last_status_code = 200  # default fallback
-
-        for log in logs:
-            try:
-                message = json.loads(log["message"])["message"]
-                if message["method"] != "Network.responseReceived":
-                    continue
-
-                response = message["params"]["response"]
-                response_url = response.get("url", "")
-                if url not in response_url:
-                    continue
-
-                headers = response.get("headers", {})
-                content_type = headers.get("content-type") or headers.get("Content-Type", "")
-                last_status_code = response.get("status", 200)
-            except Exception as E:
-                print(str(E))
-                continue  # Ignore malformed or irrelevant logs
-
-        return last_status_code
+        response = self.get_response_logs(logs)
+        if response:
+            return response["status"]
 
     def get_selenium_headers_from_logs(self, logs):
         """
         Extracts the last HTTP status code for a specific URL from Selenium performance logs.
         """
-        url = self.request.url
-
-        last_headers = {}  # default fallback
-
-        for log in logs:
-            try:
-                message = json.loads(log["message"])["message"]
-                if message["method"] != "Network.responseReceived":
-                    continue
-
-                response = message["params"]["response"]
-                response_url = response.get("url", "")
-                if url not in response_url:
-                    continue
-
-                headers = response.get("headers", {})
-                last_headers = dict(headers)
-            except Exception as E:
-                print(str(E))
-                continue
-
-        return last_headers
+        response = self.get_response_logs(logs)
+        if response:
+            return response["headers"]
 
     def close(self):
         """
@@ -885,83 +943,6 @@ class SeleniumChromeHeadless(SeleniumDriver):
             WebLogger.error(f"Failed to initialize WebDriver: {e}")
             return None
 
-    def run(self):
-        """
-        To obtain RSS page you have to run real, full blown browser.
-
-        Headless might not be enough to fool cloudflare.
-        """
-        if not self.is_valid():
-            return
-
-        self.driver = self.get_driver()
-        if not self.driver:
-            return
-
-        self.response = PageResponseObject(
-            self.request.url,
-            text=None,
-            status_code=HTTP_STATUS_CODE_EXCEPTION,
-            request_url=self.request.url,
-        )
-
-        WebLogger.debug("SeleniumChromeHeadless Driver:{}".format(self.request.url))
-
-        try:
-            # add 10 seconds for start of browser, etc.
-            selenium_timeout = self.timeout_s
-
-            self.driver.set_page_load_timeout(selenium_timeout)
-
-            self.driver.get(self.request.url)
-            """
-            TODO - if webpage changes link, it should also update it in this object
-            """
-
-            status_code = self.get_selenium_status_code(self.driver)
-
-            headers = self.get_selenium_headers(self.driver)
-            WebLogger.debug("Selenium headers:{}\n{}".format(self.request.url, headers))
-
-            html_content = self.driver.page_source
-
-            # TODO use selenium wire to obtain status code & headers?
-
-            self.response = PageResponseObject(
-                self.driver.current_url,
-                text=html_content,
-                status_code=status_code,
-                request_url=self.request.url,
-                headers=headers,
-            )
-
-            logs = self.driver.get_log("performance")
-            if len(logs) == 0:
-                self.response.add_error("Cannot read driver logs")
-
-            if not self.is_response_valid():
-                return self.response
-
-        except TimeoutException:
-            error_text = traceback.format_exc()
-            WebLogger.debug("Page timeout:{}\n{}".format(self.request.url, error_text))
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_TIMEOUT,
-                request_url=self.request.url,
-            )
-        except Exception as E:
-            WebLogger.exc(E, "Url:{}".format(self.request.url))
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_EXCEPTION,
-                request_url=self.request.url,
-            )
-
-        return self.response
-
     def is_valid(self):
         selenium_feataure_enabled = True
         try:
@@ -997,7 +978,7 @@ class SeleniumChromeFull(SeleniumDriver):
             selenium_feataure_enabled = False
         from selenium.webdriver.common.proxy import Proxy, ProxyType
 
-        capabilities = webdriver.DesiredCapabilities.CHROME.copy()
+        #capabilities = webdriver.DesiredCapabilities.CHROME.copy()
 
         # Proxy Configuration
         if self.settings and any(
@@ -1008,7 +989,10 @@ class SeleniumChromeFull(SeleniumDriver):
             prox.http_proxy = self.settings.get("http_proxy")
             prox.socks_proxy = self.settings.get("socks_proxy")
             prox.ssl_proxy = self.settings.get("ssl_proxy")
-            prox.add_to_capabilities(capabilities)
+            #prox.add_to_capabilities(capabilities)
+
+        #capabilities["goog:loggingPrefs"] = {"performance": "ALL"}
+        #capabilities["loggingPrefs"] = {"performance": "ALL"}
 
         # Validate Chromedriver Executable
         if self.driver_executable:
@@ -1031,8 +1015,8 @@ class SeleniumChromeFull(SeleniumDriver):
         # options.add_extension(path)
 
         # Add Proxy Capabilities
-        for key, value in capabilities.items():
-            options.set_capability(key, value)
+        #for key, value in capabilities.items():
+        #    options.set_capability(key, value)
 
         options.add_argument("start-maximized")
         options.add_argument("disable-infobars")
@@ -1049,101 +1033,6 @@ class SeleniumChromeFull(SeleniumDriver):
         except Exception as e:
             WebLogger.error(f"Failed to initialize WebDriver: {e}")
             return None
-
-    def run(self):
-        selenium_feataure_enabled = True
-        try:
-            from selenium import webdriver
-            from selenium.webdriver.chrome.service import Service
-            from selenium.common.exceptions import TimeoutException
-
-            from selenium.webdriver.support.ui import WebDriverWait
-            from selenium.webdriver.support import expected_conditions as EC
-        except Exception as E:
-            print(str(E))
-            selenium_feataure_enabled = False
-        """
-        To obtain RSS page you have to run real, full blown browser.
-
-        It may require some magic things to make the browser running.
-
-        https://stackoverflow.com/questions/50642308/webdriverexception-unknown-error-devtoolsactiveport-file-doesnt-exist-while-t
-        """
-        if not self.is_valid():
-            return
-
-        self.driver = self.get_driver()
-        if not self.driver:
-            return
-
-        self.response = PageResponseObject(
-            self.request.url,
-            text=None,
-            status_code=HTTP_STATUS_CODE_EXCEPTION,
-            request_url=self.request.url,
-        )
-
-        WebLogger.debug("SeleniumChromeFull Driver:{}".format(self.request.url))
-
-        try:
-            # add 10 seconds for start of browser, etc.
-            selenium_timeout = self.timeout_s
-
-            self.driver.set_page_load_timeout(selenium_timeout)
-
-            self.driver.get(self.request.url)
-
-            if "settings" in self.settings and "delay_s" in self.settings["settings"]:
-                delay_s = self.settings["settings"]["delay_s"]
-                time.sleep(delay_s)
-
-            status_code = self.get_selenium_status_code(self.driver)
-
-            headers = self.get_selenium_headers(self.driver)
-            WebLogger.debug("Selenium headers:{}\n{}".format(self.request.url, headers))
-
-            """
-            TODO - if webpage changes link, it should also update it in this object
-            """
-
-            page_source = self.driver.page_source
-
-            self.response = PageResponseObject(
-                self.driver.current_url,
-                text=page_source,
-                status_code=status_code,
-                headers=headers,
-                request_url=self.request.url,
-            )
-
-            logs = self.driver.get_log("performance")
-            if len(logs) == 0:
-                self.response.add_error("Cannot read driver logs")
-
-            if not self.is_response_valid():
-                return self.response
-
-        except TimeoutException:
-            error_text = traceback.format_exc()
-            print("Page timeout:{}\n{}".format(self.request.url, error_text))
-            WebLogger.debug("Page timeout:{}\n{}".format(self.request.url, error_text))
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_TIMEOUT,
-                request_url=self.request.url,
-            )
-        except Exception as E:
-            print(E, "Url:{}".format(self.request.url))
-            WebLogger.exc(E, "Url:{}".format(self.request.url))
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_EXCEPTION,
-                request_url=self.request.url,
-            )
-
-        return self.response
 
     def is_valid(self):
         selenium_feataure_enabled = True
@@ -1200,87 +1089,6 @@ class SeleniumUndetected(SeleniumDriver):
             )
             return
 
-    def run(self):
-        selenium_feataure_enabled = True
-        try:
-            from selenium import webdriver
-            from selenium.webdriver.chrome.service import Service
-            from selenium.common.exceptions import TimeoutException
-
-            from selenium.webdriver.support.ui import WebDriverWait
-            from selenium.webdriver.support import expected_conditions as EC
-        except Exception as E:
-            print(str(E))
-            selenium_feataure_enabled = False
-        """
-        To obtain RSS page you have to run real, full blown browser.
-
-        It may require some magic things to make the browser running.
-
-        This does not work on raspberry pi
-        """
-        if not self.is_valid():
-            return
-
-        self.driver = self.get_driver()
-        if not self.driver:
-            return
-
-        self.response = PageResponseObject(
-            self.request.url,
-            text=None,
-            status_code=HTTP_STATUS_CODE_EXCEPTION,
-            request_url=self.request.url,
-        )
-
-        WebLogger.debug("SeleniumUndetected Driver:{}".format(self.request.url))
-
-        try:
-            # add 10 seconds for start of browser, etc.
-            selenium_timeout = self.timeout_s
-
-            self.driver.set_page_load_timeout(selenium_timeout)
-
-            self.driver.get(self.request.url)
-
-            status_code = self.get_selenium_status_code(self.driver)
-
-            headers = self.get_selenium_headers(self.driver)
-            WebLogger.debug("Selenium headers:{}\n{}".format(self.request.url, headers))
-
-            """
-            TODO - if webpage changes link, it should also update it in this object
-            """
-
-            page_source = self.driver.page_source
-
-            self.response = PageResponseObject(
-                self.driver.current_url,
-                text=page_source,
-                status_code=status_code,
-                headers=headers,
-                request_url=self.request.url,
-            )
-
-            logs = self.driver.get_log("performance")
-            if len(logs) == 0:
-                self.response.add_error("Cannot read driver logs")
-
-            if not self.is_response_valid():
-                return self.response
-
-        except TimeoutException:
-            error_text = traceback.format_exc()
-            WebLogger.debug("Page timeout:{}\n{}".format(self.request.url, error_text))
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_TIMEOUT,
-                request_url=self.request.url,
-            )
-
-        return self.response
-
     def is_valid(self):
         try:
             import undetected_chromedriver as uc
@@ -1288,6 +1096,98 @@ class SeleniumUndetected(SeleniumDriver):
             return True
         except Exception as E:
             return False
+
+
+class SeleniumWireFull(SeleniumDriver):
+
+    def get_driver(self):
+        print("00000")
+        selenium_feature_enabled = True
+        try:
+            from selenium.webdriver.chrome.service import Service
+            from selenium.common.exceptions import TimeoutException
+            from selenium.webdriver.support.ui import WebDriverWait
+            from selenium.webdriver.support import expected_conditions as EC
+        except Exception as E:
+            print(str(E))
+            selenium_feature_enabled = False
+
+        print("0")
+
+        from seleniumwire import webdriver as wire_webdriver
+        from selenium.webdriver.common.proxy import Proxy, ProxyType
+
+        seleniumwire_options = {}
+        proxy_enabled = self.settings and any(
+            key in self.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]
+        )
+
+        if proxy_enabled:
+            proxy_str = self.settings.get("http_proxy") or self.settings.get("socks_proxy") or self.settings.get("ssl_proxy")
+            seleniumwire_options["proxy"] = {
+                "http": proxy_str,
+                "https": proxy_str,
+                "no_proxy": "localhost,127.0.0.1"  # Optional
+            }
+        print("1")
+
+        # Validate Chromedriver Executable
+        if self.driver_executable:
+            p = Path(self.driver_executable)
+            if not p.exists():
+                print(f"Chromedriver executable not found at: {self.driver_executable}")
+                WebLogger.error(f"Chromedriver executable not found at: {self.driver_executable}")
+                return None
+            service = Service(executable_path=self.driver_executable)
+        else:
+            service = Service()
+        print("2")
+
+        options = wire_webdriver.ChromeOptions()
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--lang=en-US")
+        options.add_argument("start-maximized")
+        options.add_argument("disable-infobars")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-gpu")
+        options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+
+        try:
+            print("3")
+            driver = wire_webdriver.Chrome(
+                service=service,
+                options=options,
+                seleniumwire_options=seleniumwire_options
+            )
+            print("4")
+            return driver
+        except Exception as e:
+            WebLogger.error(f"Failed to initialize WebDriver: {e}")
+            print(f"Failed to initialize WebDriver: {e}")
+            return None
+
+    def process_response(self):
+        last_status_code = 200
+        last_headers = {}
+
+        for request in self.driver.requests:
+            if request.response:
+                last_status_code = request.response.status_code
+                last_headers = dict(request.response.headers)
+
+        page_source = self.driver.page_source
+
+        self.response = PageResponseObject(
+            self.driver.current_url,
+            text=page_source,
+            status_code=last_status_code,
+            headers=last_headers,
+            request_url=self.request.url,
+        )
+
+    def is_valid(self):
+        return True
 
 
 class ScriptCrawler(CrawlerInterface):

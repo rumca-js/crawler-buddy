@@ -19,6 +19,7 @@ from .crawlers import (
     SeleniumUndetected,
     ScriptCrawler,
     SeleniumBase,
+    SeleniumWireFull,
     StealthRequestsCrawler,
     CurlCffiCrawler,
 )
@@ -45,6 +46,7 @@ class WebConfig(object):
             SeleniumUndetected,  # requires driver location
             ScriptCrawler,  # requires script
             SeleniumBase,
+            SeleniumWireFull,
             StealthRequestsCrawler,
             CurlCffiCrawler,
         ]
@@ -95,6 +97,7 @@ class WebConfig(object):
         mapping.append(WebConfig.get_seleniumheadless())
         mapping.append(WebConfig.get_seleniumfull())
 
+        mapping.append(WebConfig.get_default_browser_setup(SeleniumWireFull))
         mapping.append(WebConfig.get_default_browser_setup(StealthRequestsCrawler))
         mapping.append(WebConfig.get_default_browser_setup(CurlCffiCrawler))
 
@@ -266,7 +269,7 @@ class WebConfig(object):
             try:
                 if proc.info["name"] and proc.info["name"].lower().startswith("chrom"):
                     proc.kill()  # Kill the process
-                    webtools.WebLogger.error(
+                    WebLogger.error(
                         f"Killed process: {proc.info['name']} (PID: {proc.info['pid']})"
                     )
             except (
@@ -274,7 +277,7 @@ class WebConfig(object):
                 psutil.AccessDenied,
                 psutil.ZombieProcess,
             ) as e:
-                webtools.WebLogger.error(
+                WebLogger.error(
                     f"Could not kill process {proc.info.get('name', 'unknown')}: {e}"
                 )
 

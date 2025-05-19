@@ -29,6 +29,7 @@ pytz = "^2024.2"
 
 #  use things below if you want to use selenium
 selenium="4.29.0"
+selenium-wire="*"
 psutil="*"
 
 chardet = "^5.2.0"

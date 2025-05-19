@@ -70,6 +70,16 @@
     }
   },
   {
+    "crawler": "SeleniumWireFull",
+    "enabled": true,
+    "name": "SeleniumWireFull",
+    "settings": {
+      "driver_executable": "/usr/bin/chromedriver",
+      "timeout_s": 40,
+      "delay_s": 10
+    }
+  },
+  {
     "crawler": "SeleniumBase",
     "enabled": false,
     "name": "SeleniumBase",
