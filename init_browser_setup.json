@@ -62,6 +62,14 @@
     }
   },
   {
+    "crawler": "CurlCffiCrawler",
+    "enabled": true,
+    "name": "CurlCffiCrawler",
+    "settings": {
+      "timeout_s": 20
+    }
+  },
+  {
     "crawler": "SeleniumBase",
     "enabled": false,
     "name": "SeleniumBase",

@@ -89,6 +89,23 @@ class CrawlerInterface(object):
         """
         return self.response
 
+    def is_response_valid(self):
+        if not self.response:
+            return False
+
+        if not self.response.is_valid():
+            self.response.add_error("Response not valid")
+            return False
+
+        content_length = self.response.get_content_length()
+
+        if content_length is not None and "bytes_limit" in self.settings:
+            if content_length > self.settings["bytes_limit"]:
+                self.response.add_error("Page is too big")
+                return False
+
+        return True
+
     def response_to_bytes(self):
         all_bytes = bytearray()
 
@@ -248,18 +265,10 @@ class RequestsCrawler(CrawlerInterface):
                 headers=dict(request_result.headers),
                 request_url=self.request.url,
             )
-            if not self.response.is_valid():
+            if not self.is_response_valid():
                 request_result.close()
 
                 return self.response
-
-            content_length = self.response.get_content_length()
-
-            if "bytes_limit" in self.settings:
-                if content_length > self.settings["bytes_limit"]:
-                    self.response.add_error("Page is too big")
-                    request_result.close()
-                    return self.response
 
             if self.request.ping:
                 request_result.close()
@@ -277,7 +286,7 @@ class RequestsCrawler(CrawlerInterface):
                 """
                 IF we do not know the content type, or content type is supported
                 """
-                encoding = self.get_encoding(request_result, self.response)
+                encoding = self.get_encoding(self.response, request_result)
                 if encoding:
                     request_result.encoding = encoding
 
@@ -333,7 +342,7 @@ class RequestsCrawler(CrawlerInterface):
 
         return self.response
 
-    def get_encoding(self, request_result, response):
+    def get_encoding(self, response, request_result):
         """
         The default assumed content encoding for text/html is ISO-8859-1 aka Latin-1 :( See RFC-2854. UTF-8 was too young to become the default, it was born in 1993, about the same time as HTML and HTTP.
         Use .content to access the byte stream, or .text to access the decoded Unicode stream.
@@ -344,50 +353,58 @@ class RequestsCrawler(CrawlerInterface):
 
         url = self.request.url
 
-        encoding = response.get_content_type_charset()
+        encoding = response.get_encoding()
         if encoding:
             return encoding
 
         else:
+            text = request_result.text
             # There might be several encoding texts, if so we do not know which one to use
             if response.is_content_html():
-                p = HtmlPage(url, request_result.text)
+                p = HtmlPage(url, text)
                 if p.is_valid():
                     if p.get_charset():
                         return p.get_charset()
             if response.is_content_rss():
-                p = RssPage(url, request_result.text)
+                p = RssPage(url, text)
                 if p.is_valid():
                     if p.get_charset():
                         return p.get_charset()
 
             # TODO this might trigger download of a big file
-            text = request_result.text.lower()
+            text = text.lower()
 
             if text.count("encoding") == 1 and text.find('encoding="utf-8"') >= 0:
                 return "utf-8"
             elif text.count("charset") == 1 and text.find('charset="utf-8"') >= 0:
                 return "utf-8"
 
-    def build_requests(self):
+    def make_requests_call(self, url, headers, timeout, verify, stream):
         """
-        stream argument - will fetch page contents, when we access contents of page.
-
-        Note - sometimes timeout can not work
-        https://stackoverflow.com/questions/21965484/timeout-for-python-requests-get-entire-response
-        https://stackoverflow.com/questions/53242211/python-requests-timeout-not-working-properly
+        This method can be overridden in subclasses to change the request behavior.
         """
         import requests
 
+        return requests.get(
+            url,
+            headers=headers,
+            timeout=timeout,
+            verify=verify,
+            stream=stream,
+        )
+
+    def build_requests(self):
+        """
+        Perform an HTTP GET request with total timeout control using threading.
+
+        Notes:
+        - stream=True defers the content download until accessed.
+        - Overcomes the limitation of requests.get's timeout (which doesn't cover total duration).
+        """
+
         def request_with_timeout(url, headers, timeout, verify, stream, result):
             try:
-                result["response"] = requests.get(
-                    url,
-                    headers=headers,
-                    timeout=timeout,
-                    verify=verify,
-                    stream=stream,
-                )
+                result["response"] = self.make_requests_call(url, headers, timeout, verify, stream)
             except Exception as e:
                 result["exception"] = e
 
@@ -407,9 +424,7 @@ class RequestsCrawler(CrawlerInterface):
                 raise result["exception"]
             return result["response"]
 
-        headers = self.request.request_headers
-        if not headers:
-            headers = RequestsCrawler.default_headers
+        headers = self.request.request_headers or RequestsCrawler.default_headers
 
         response = make_request_with_threading(
             url=self.request.url,
@@ -418,8 +433,7 @@ class RequestsCrawler(CrawlerInterface):
             ssl_verify=self.request.ssl_verify,
             stream=True,
         )
-        if response is not None:
-            return response
+        return response
 
     def is_valid(self):
         try:
@@ -470,6 +484,104 @@ class RequestsCrawler(CrawlerInterface):
             return False
 
 
+class CurlCffiCrawler(CrawlerInterface):
+    """
+    Python steath requests
+    """
+
+    def run(self):
+        if not self.is_valid():
+            return
+
+        self.response = PageResponseObject(
+            self.request.url,
+            text=None,
+            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            request_url=self.request.url,
+        )
+
+        answer = self.build_requests()
+
+        if answer:
+            self.response = PageResponseObject(
+                self.request.url,
+                status_code=answer.status_code,
+                request_url=self.request.url,
+                headers=answer.headers,
+            )
+            if not self.is_response_valid():
+                return self.response
+
+        content = getattr(answer, 'content', None)
+        text = getattr(answer, 'text', None)
+
+        if answer and content:
+            self.response = PageResponseObject(
+                self.request.url,
+                binary=content,
+                status_code=answer.status_code,
+                request_url=self.request.url,
+                headers=answer.headers,
+            )
+
+            return self.response
+
+        elif text:
+            self.response = PageResponseObject(
+                self.request.url,
+                binary=None,
+                text=text,
+                status_code=answer.status_code,
+                request_url=self.request.url,
+                headers=answer.headers,
+            )
+
+        elif answer:
+            self.response = PageResponseObject(
+                self.request.url,
+                binary=None,
+                text=None,
+                status_code=answer.status_code,
+                request_url=self.request.url,
+                headers=answer.headers,
+            )
+
+        if self.response:
+            return self.response
+
+    def build_requests(self):
+        from curl_cffi import requests
+
+        headers = self.request.request_headers or RequestsCrawler.default_headers
+
+        try:
+            answer = requests.get(
+                self.request.url,
+                timeout=self.timeout_s,
+                verify=self.request.ssl_verify,
+                headers = headers,
+                #stream=True, # TODO
+            )
+            return answer
+        except Exception as E:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
+                request_url=self.request.url,
+            )
+            self.response.add_error("Url:{} Cannot create request".format(str(E)))
+
+    def is_valid(self):
+        try:
+            from curl_cffi import requests
+
+            return True
+        except Exception as E:
+            print(str(E))
+            return False
+
+
 class StealthRequestsCrawler(CrawlerInterface):
     """
     Python steath requests
@@ -486,24 +598,7 @@ class StealthRequestsCrawler(CrawlerInterface):
             request_url=self.request.url,
         )
 
-        import stealth_requests as requests
-
-        try:
-            answer = requests.get(
-                self.request.url,
-                timeout=self.timeout_s,
-                verify=self.request.ssl_verify,
-                # stream=True,   # does not work with it
-            )
-        except Exception as E:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Connection error".format(self.request.url))
-            return self.response
+        answer = self.build_requests()
 
         content = answer.content
         text = answer.text
@@ -537,6 +632,29 @@ class StealthRequestsCrawler(CrawlerInterface):
             )
 
             return self.response
+
+        if self.response:
+            return self.response
+
+    def build_requests(self):
+        import stealth_requests as requests
+
+        try:
+            answer = requests.get(
+                self.request.url,
+                timeout=self.timeout_s,
+                verify=self.request.ssl_verify,
+                # stream=True,   # TODO does not work with it
+            )
+            return answer
+        except Exception as E:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
+                request_url=self.request.url,
+            )
+            self.response.add_error("Url:{} Connection error".format(self.request.url))
 
     def is_valid(self):
         try:

@@ -20,6 +20,7 @@ from .crawlers import (
     ScriptCrawler,
     SeleniumBase,
     StealthRequestsCrawler,
+    CurlCffiCrawler,
 )
 
 
@@ -45,36 +46,10 @@ class WebConfig(object):
             ScriptCrawler,  # requires script
             SeleniumBase,
             StealthRequestsCrawler,
+            CurlCffiCrawler,
         ]
 
         return browsers
-
-    def get_browsers():
-        str_browsers = []
-        for browser in WebConfig.get_browsers_raw():
-            str_browsers.append(browser.__name__)
-
-        return str_browsers
-
-    def get_crawler_from_string(input_string):
-        """
-        TODO - apply generic approach
-        """
-        browsers = WebConfig.get_browsers_raw()
-        for browser in browsers:
-            if browser.__name__ == input_string:
-                return browser
-
-    def get_crawler_from_mapping(request, mapping_data):
-        crawler = mapping_data["crawler"]
-        if not crawler:
-            return
-
-        settings = mapping_data["settings"]
-
-        c = crawler(request=request, settings=settings)
-        if c.is_valid():
-            return c
 
     def get_init_crawler_config(headless_script=None, full_script=None, port=None):
         """
@@ -121,8 +96,36 @@ class WebConfig(object):
         mapping.append(WebConfig.get_seleniumfull())
 
         mapping.append(WebConfig.get_default_browser_setup(StealthRequestsCrawler))
+        mapping.append(WebConfig.get_default_browser_setup(CurlCffiCrawler))
 
         return mapping
+
+    def get_browsers():
+        str_browsers = []
+        for browser in WebConfig.get_browsers_raw():
+            str_browsers.append(browser.__name__)
+
+        return str_browsers
+
+    def get_crawler_from_string(input_string):
+        """
+        TODO - apply generic approach
+        """
+        browsers = WebConfig.get_browsers_raw()
+        for browser in browsers:
+            if browser.__name__ == input_string:
+                return browser
+
+    def get_crawler_from_mapping(request, mapping_data):
+        crawler = mapping_data["crawler"]
+        if not crawler:
+            return
+
+        settings = mapping_data["settings"]
+
+        c = crawler(request=request, settings=settings)
+        if c.is_valid():
+            return c
 
     def get_crawlers(only_enabled=False):
         result = []

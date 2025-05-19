@@ -731,8 +731,7 @@ class Url(ContentInterface):
 
             response_data["Content-Length"] = response.get_content_length()
             response_data["Last-Modified"] = response.get_last_modified()
-
-            response_data["Charset"] = response.get_content_type_charset()
+            response_data["Charset"] = response.get_encoding()
             if not response_data["Charset"]:
                 response_data["Charset"] = response.encoding
 
