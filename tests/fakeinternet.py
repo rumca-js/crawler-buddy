@@ -21,6 +21,7 @@ from src.webtools import (
     WebLogger,
     WebConfig,
     CrawlerInterface,
+    ResponseHeaders,
 )
 
 from tests.fakeinternetdata import (
@@ -274,7 +275,6 @@ class TestResponseObject(PageResponseObject):
 
         self.url = url
         self.request_url = url
-        self.headers = {}
 
         # encoding = chardet.detect(contents)['encoding']
         encoding = "utf-8"
@@ -287,6 +287,7 @@ class TestResponseObject(PageResponseObject):
         self.set_binary(url)
 
     def set_headers(self, url):
+        self.headers = {}
         if url == "https://page-with-last-modified-header.com":
             self.headers["Last-Modified"] = "Wed, 03 Apr 2024 09:39:30 GMT"
 
@@ -316,6 +317,8 @@ class TestResponseObject(PageResponseObject):
 
         elif url == "https://rss-page-with-broken-content-type.com/feed":
             self.headers["Content-Type"] = "text/html"
+
+        self.headers = ResponseHeaders(headers=self.headers)
 
     def set_status(self, url):
         if url.startswith("https://www.youtube.com/watch?v=666"):

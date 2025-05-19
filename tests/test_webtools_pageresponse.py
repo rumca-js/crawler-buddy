@@ -96,37 +96,21 @@ class PageResponseObjectTest(FakeInternetTestCase):
         # call tested function
         self.assertFalse(response.is_valid())
 
-    def test_is_headers_empty__true(self):
-        headers = {}
-        response = PageResponseObject(
-            "https://test.com", "", status_code=200, headers=headers
-        )
-
-        self.assertTrue(response.is_headers_empty())
-
-    def test_is_headers_empty__false(self):
-        headers = {"Content-Type": "text/html"}
-        response = PageResponseObject(
-            "https://test.com", "", status_code=200, headers=headers
-        )
-
-        self.assertFalse(response.is_headers_empty())
-
-    def test_get_charset__quotes(self):
+    def test_get_encoding__quotes(self):
         headers = {"Content-Type": 'text/html; charset="UTF-8"'}
         response = PageResponseObject(
             "https://test.com", "", status_code=200, headers=headers
         )
 
-        self.assertEqual(response.get_content_type_charset(), "UTF-8")
+        self.assertEqual(response.get_encoding(), "UTF-8")
 
-    def test_get_charset__no_quotes(self):
+    def test_get_encoding__no_quotes(self):
         headers = {"Content-Type": "text/html; charset=UTF-8"}
         response = PageResponseObject(
             "https://test.com", "", status_code=200, headers=headers
         )
 
-        self.assertEqual(response.get_content_type_charset(), "UTF-8")
+        self.assertEqual(response.get_encoding(), "UTF-8")
 
     def test_is_content_html(self):
         headers = {"Content-Type": "text/html; charset=UTF-8"}
