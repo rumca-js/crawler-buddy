@@ -609,17 +609,20 @@ class StealthRequestsCrawler(CrawlerInterface):
                 binary=content,
                 status_code=answer.status_code,
                 request_url=self.request.url,
+                headers=answer.headers,
             )
 
-            return self.response
+            if not self.is_response_valid():
+                return self.response
 
-        elif text:
+        elif answer and text:
             self.response = PageResponseObject(
                 self.request.url,
                 binary=None,
                 text=text,
                 status_code=answer.status_code,
                 request_url=self.request.url,
+                headers=answer.headers,
             )
 
         elif answer:
@@ -629,6 +632,7 @@ class StealthRequestsCrawler(CrawlerInterface):
                 text=None,
                 status_code=answer.status_code,
                 request_url=self.request.url,
+                headers=answer.headers,
             )
 
             return self.response
@@ -728,75 +732,74 @@ class SeleniumDriver(CrawlerInterface):
             if status_code2:
                 status_code = status_code2
         except Exception as E:
-            WebLogger.exc(E, "Chrome webdrider error.")
+            print(str(E))
         return status_code
-
-    def get_selenium_status_code_from_logs(self, logs):
-        """
-        https://stackoverflow.com/questions/5799228/how-to-get-status-code-by-using-selenium-py-python-code
-        TODO should we use selenium wire?
-
-        TODO this probably does not work "Correctly"
-        """
-        last_status_code = 200
-        for log in logs:
-            if log["message"]:
-                d = json.loads(log["message"])
-
-                content_type = ""
-                try:
-                    content_type = d["message"]["params"]["response"]["headers"][
-                        "content-type"
-                    ]
-                except Exception as E:
-                    pass
-                try:
-                    content_type = d["message"]["params"]["response"]["headers"][
-                        "Content-Type"
-                    ]
-                except Exception as E:
-                    pass
-
-                try:
-                    response_received = (
-                        d["message"]["method"] == "Network.responseReceived"
-                    )
-                    if content_type.find("text/html") >= 0 and response_received:
-                        last_status_code = d["message"]["params"]["response"]["status"]
-                except Exception as E:
-                    # we expect that some contents do not have this
-                    pass
-
-        return last_status_code
 
     def get_selenium_headers(self, driver):
         headers = {}
         try:
             logs = driver.get_log("performance")
-            headers = self.get_selenium_headers_logs(logs)
+            headers = self.get_selenium_headers_from_logs(logs)
             return headers
         except Exception as E:
-            WebLogger.exc(E, "Chrome webdrider error")
+            print(str(E))
 
         return headers
 
-    def get_selenium_headers_logs(self, logs):
+    def get_selenium_status_code_from_logs(self, logs):
         """
-        https://stackoverflow.com/questions/5799228/how-to-get-status-code-by-using-selenium-py-python-code
-        TODO should we use selenium wire?
+        Extracts the last HTTP status code for a specific URL from Selenium performance logs.
         """
-        headers = {}
+        url = self.request.url
+
+        last_status_code = 200  # default fallback
+
         for log in logs:
-            if log["message"]:
-                d = json.loads(log["message"])
+            try:
+                message = json.loads(log["message"])["message"]
+                if message["method"] != "Network.responseReceived":
+                    continue
 
-                content_type = ""
-                try:
-                    headers = d["message"]["params"]["response"]["headers"]
-                except Exception as E:
-                    pass
+                response = message["params"]["response"]
+                response_url = response.get("url", "")
+                if url not in response_url:
+                    continue
 
-        return headers
+                headers = response.get("headers", {})
+                content_type = headers.get("content-type") or headers.get("Content-Type", "")
+                last_status_code = response.get("status", 200)
+            except Exception as E:
+                print(str(E))
+                continue  # Ignore malformed or irrelevant logs
+
+        return last_status_code
+
+    def get_selenium_headers_from_logs(self, logs):
+        """
+        Extracts the last HTTP status code for a specific URL from Selenium performance logs.
+        """
+        url = self.request.url
+
+        last_headers = {}  # default fallback
+
+        for log in logs:
+            try:
+                message = json.loads(log["message"])["message"]
+                if message["method"] != "Network.responseReceived":
+                    continue
+
+                response = message["params"]["response"]
+                response_url = response.get("url", "")
+                if url not in response_url:
+                    continue
+
+                headers = response.get("headers", {})
+                last_headers = dict(headers)
+            except Exception as E:
+                print(str(E))
+                continue
+
+        return last_headers
 
     def close(self):
         """
@@ -929,7 +932,16 @@ class SeleniumChromeHeadless(SeleniumDriver):
                 text=html_content,
                 status_code=status_code,
                 request_url=self.request.url,
+                headers=headers,
             )
+
+            logs = self.driver.get_log("performance")
+            if len(logs) == 0:
+                self.response.add_error("Cannot read driver logs")
+
+            if not self.is_response_valid():
+                return self.response
+
         except TimeoutException:
             error_text = traceback.format_exc()
             WebLogger.debug("Page timeout:{}\n{}".format(self.request.url, error_text))
@@ -1087,6 +1099,9 @@ class SeleniumChromeFull(SeleniumDriver):
 
             status_code = self.get_selenium_status_code(self.driver)
 
+            headers = self.get_selenium_headers(self.driver)
+            WebLogger.debug("Selenium headers:{}\n{}".format(self.request.url, headers))
+
             """
             TODO - if webpage changes link, it should also update it in this object
             """
@@ -1097,11 +1112,20 @@ class SeleniumChromeFull(SeleniumDriver):
                 self.driver.current_url,
                 text=page_source,
                 status_code=status_code,
+                headers=headers,
                 request_url=self.request.url,
             )
 
+            logs = self.driver.get_log("performance")
+            if len(logs) == 0:
+                self.response.add_error("Cannot read driver logs")
+
+            if not self.is_response_valid():
+                return self.response
+
         except TimeoutException:
             error_text = traceback.format_exc()
+            print("Page timeout:{}\n{}".format(self.request.url, error_text))
             WebLogger.debug("Page timeout:{}\n{}".format(self.request.url, error_text))
             self.response = PageResponseObject(
                 self.request.url,
@@ -1110,6 +1134,7 @@ class SeleniumChromeFull(SeleniumDriver):
                 request_url=self.request.url,
             )
         except Exception as E:
+            print(E, "Url:{}".format(self.request.url))
             WebLogger.exc(E, "Url:{}".format(self.request.url))
             self.response = PageResponseObject(
                 self.request.url,
@@ -1220,6 +1245,9 @@ class SeleniumUndetected(SeleniumDriver):
 
             status_code = self.get_selenium_status_code(self.driver)
 
+            headers = self.get_selenium_headers(self.driver)
+            WebLogger.debug("Selenium headers:{}\n{}".format(self.request.url, headers))
+
             """
             TODO - if webpage changes link, it should also update it in this object
             """
@@ -1230,8 +1258,16 @@ class SeleniumUndetected(SeleniumDriver):
                 self.driver.current_url,
                 text=page_source,
                 status_code=status_code,
+                headers=headers,
                 request_url=self.request.url,
             )
+
+            logs = self.driver.get_log("performance")
+            if len(logs) == 0:
+                self.response.add_error("Cannot read driver logs")
+
+            if not self.is_response_valid():
+                return self.response
 
         except TimeoutException:
             error_text = traceback.format_exc()

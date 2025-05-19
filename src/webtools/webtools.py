@@ -393,8 +393,6 @@ class ResponseHeaders(object):
         if "Content-Length" in self.headers:
             return int(self.headers["Content-Length"])
 
-        return 0
-
     def get_redirect_url(self):
         if (
             "Location" in self.headers
