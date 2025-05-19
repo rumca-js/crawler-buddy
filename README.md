@@ -131,13 +131,14 @@ Please see init_browser_setup.json to know which crawling methods are supported.
 
 For example available are:
  - RequestsCrawler - python requests
- - CrawleeScript - crawlee beautifulsoup
- - PlaywrightScript - crawlee playwright
+ - CrawleeScript - [crawlee](https://github.com/apify/crawlee-python) beautifulsoup
+ - PlaywrightScript - [crawlee](https://github.com/apify/crawlee-python) playwright
  - SeleniumUndetected - selenium undetected
  - SeleniumChromeHeadless - selenium chrome headless
  - SeleniumChromeFull - selenium full mode
- - StealthRequestsCrawler - stealth requests
- - SeleniumBase - selenium base [disabled]
+ - CurlCffiCrawler - [curl-cffi](https://github.com/lexiforest/curl_cffi) crawler
+ - StealthRequestsCrawler - [stealth requests](https://github.com/jpjacobpadilla/Stealth-Requests)
+ - SeleniumBase - [SeleniumBase](https://github.com/seleniumbase/SeleniumBase) [disabled]
 
 These methods can be selected for each individual URL for crawling.
 
