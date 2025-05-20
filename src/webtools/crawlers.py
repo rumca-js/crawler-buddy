@@ -99,8 +99,8 @@ class CrawlerInterface(object):
 
         content_length = self.response.get_content_length()
 
-        if content_length is not None and "bytes_limit" in self.settings:
-            if content_length > self.settings["bytes_limit"]:
+        if content_length is not None and "bytes_limit" in self.settings["settings"]:
+            if content_length > self.settings["settings"]["bytes_limit"]:
                 self.response.add_error("Page is too big")
                 return False
 

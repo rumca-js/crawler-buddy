@@ -36,117 +36,98 @@ class CrawlerTest(FakeInternetTestCase):
     def setUp(self):
         self.disable_web_pages()
 
-    def test_get_page_url__by_name(self):
+    def test_get_request_data__by_name(self):
         crawler = Crawler()
 
-        test_url = "https://linkedin.com"
-
-        crawler_data = {
-                "name" : "RequestsCrawler",
-                "settings" : {
-                    "timeout_s" : 20,
-                    "remote_server": "https://",
-                }
-        }
+        request = FlaskRequest("http://192.168.0.0")
+        request.set("url", "https://test.com")
+        request.set("name", "RequestsCrawler")
 
         # call tested function
-        page_url = crawler.get_page_url(test_url, crawler_data)
-        self.assertTrue(page_url)
+        data = crawler.get_request_data(request)
 
-        self.assertIn("name", page_url.settings)
-        self.assertEqual(page_url.settings["name"], "RequestsCrawler")
+        self.assertEqual(data["name"], "RequestsCrawler")
 
-        self.assertIn("crawler", page_url.settings)
-        self.assertEqual(type(page_url.settings["crawler"]).__name__, "RequestsCrawler")
-
-    def test_get_page_url__by_crawler(self):
+    def test_get_request_data__crawler(self):
         crawler = Crawler()
 
-        test_url = "https://linkedin.com"
-
-        crawler_data = {
-                "crawler" : "RequestsCrawler",
-                "settings" : {
-                    "timeout_s" : 20,
-                    "remote_server": "https://",
-                }
-        }
+        request = FlaskRequest("http://192.168.0.0")
+        request.set("url", "https://test.com")
+        request.set("crawler", "RequestsCrawler")
 
         # call tested function
-        page_url = crawler.get_page_url(test_url, crawler_data)
-        self.assertTrue(page_url)
+        data = crawler.get_request_data(request)
 
-        self.assertIn("name", page_url.settings)
-        self.assertEqual(page_url.settings["name"], "RequestsCrawler")
+        self.assertEqual(type(data["crawler"]).__name__, "RequestsCrawler")
 
-        self.assertIn("crawler", page_url.settings)
-        self.assertEqual(type(page_url.settings["crawler"]).__name__, "RequestsCrawler")
+    def test_get_request_data__crawler_data(self):
+        crawler = Crawler()
 
-    def test_get_page_url__invalid(self):
+        crawler_data = """{
+                "name": "RequestsCrawler",
+                "crawler": "RequestsCrawler"
+        }"""
+
+        request = FlaskRequest("http://192.168.0.0")
+        request.set("url", "https://test.com")
+        request.set("crawler_data", crawler_data)
+
+        # call tested function
+        data = crawler.get_request_data(request)
+
+        self.assertTrue(data)
+        self.assertEqual(data["name"], "RequestsCrawler")
+        self.assertEqual(type(data["crawler"]).__name__, "RequestsCrawler")
+
+    def test_get_request_data__invalid(self):
         crawler = Crawler()
 
         test_url = "https://linkedin.com"
 
-        crawler_data = {
+        crawler_data = """{
                 "name" : "RequestsCrawlerDupa",
                 "crawler" : "RequestsCrawlerDupa",
                 "settings" : {
                     "timeout_s" : 20,
-                    "remote_server": "https://",
+                    "remote_server": "https://"
                 }
-        }
+        }"""
+
+        request = FlaskRequest("http://192.168.0.0")
+        request.set("url", "https://test.com")
+        request.set("crawler_data", crawler_data)
 
         # call tested function
-        page_url = crawler.get_page_url(test_url, crawler_data)
-        self.assertFalse(page_url)
+        data = crawler.get_request_data(request)
+        self.assertFalse(data)
 
-    def test_get_page_url__by_both(self):
+    def test_get_request_data__by_none(self):
         crawler = Crawler()
 
         test_url = "https://linkedin.com"
 
-        crawler_data = {
-                "name" : "RequestsCrawler",
-                "crawler" : "RequestsCrawler",
+        crawler_data = """{
                 "settings" : {
                     "timeout_s" : 20,
-                    "remote_server": "https://",
+                    "remote_server": "https://"
                 }
-        }
+        }"""
+
+        request = FlaskRequest("http://192.168.0.0")
+        request.set("url", "https://test.com")
+        request.set("crawler_data", crawler_data)
 
         # call tested function
-        page_url = crawler.get_page_url(test_url, crawler_data)
-        self.assertTrue(page_url)
+        data = crawler.get_request_data(request)
 
-        self.assertIn("name", page_url.settings)
-        self.assertEqual(page_url.settings["name"], "RequestsCrawler")
+        self.assertTrue(data)
+        self.assertIn("name", data)
+        self.assertEqual(data["name"], "DefaultCrawler")
 
-        self.assertIn("crawler", page_url.settings)
-        self.assertEqual(type(page_url.settings["crawler"]).__name__, "RequestsCrawler")
+        self.assertIn("crawler", data)
+        self.assertEqual(type(data["crawler"]).__name__, "DefaultCrawler")
 
-    def test_get_page_url__by_none(self):
-        crawler = Crawler()
-
-        test_url = "https://linkedin.com"
-
-        crawler_data = {
-                "settings" : {
-                    "timeout_s" : 20,
-                    "remote_server": "https://",
-                }
-        }
-
-        # call tested function
-        page_url = crawler.get_page_url(test_url, crawler_data)
-        self.assertTrue(page_url)
-
-        self.assertIn("name", page_url.settings)
-        self.assertEqual(page_url.settings["name"], "DefaultCrawler")
-
-        self.assertIn("crawler", page_url.settings)
-        self.assertEqual(type(page_url.settings["crawler"]).__name__, "DefaultCrawler")
-
-    def test_get_page_url__by_entry_rule(self):
+    def test_get_request_data__by_entry_rule(self):
         crawler = Crawler()
 
         rules = EntryRules()
@@ -156,67 +137,32 @@ class CrawlerTest(FakeInternetTestCase):
 
         test_url = "https://x.com"
 
-        crawler_data = {
+        crawler_data = """{
                 "settings" : {
                     "timeout_s" : 20,
-                    "remote_server": "https://",
+                    "remote_server": "https://"
                 }
-        }
-
-        # call tested function
-        page_url = crawler.get_page_url(test_url, crawler_data)
-        self.assertTrue(page_url)
-
-        self.assertIn("name", page_url.settings)
-        self.assertEqual(page_url.settings["name"], "SeleniumChromeFull")
-
-        self.assertIn("crawler", page_url.settings)
-        self.assertEqual(type(page_url.settings["crawler"]).__name__, "SeleniumChromeFull")
-
-    def test_get_request_data__name(self):
-        crawler = Crawler()
-
-        request = FlaskRequest("http://192.168.0.0")
-        request.set("name", "MMMMmm")
-
-        # call tested function
-        data = crawler.get_request_data(request)
-
-        self.assertEqual(data["name"], "MMMMmm")
-
-    def test_get_request_data__crawler(self):
-        crawler = Crawler()
-
-        request = FlaskRequest("http://192.168.0.0")
-        request.set("crawler", "MMMMmm")
-
-        # call tested function
-        data = crawler.get_request_data(request)
-
-        self.assertEqual(data["crawler"], "MMMMmm")
-
-    def test_get_request_data__crawler_data(self):
-        crawler = Crawler()
-
-        crawler_data = """{
-                "name": "Requests",
-                "crawler": "RequestsCrawler"
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
+        request.set("url", "https://x.com")
         request.set("crawler_data", crawler_data)
 
         # call tested function
         data = crawler.get_request_data(request)
 
-        self.assertEqual(data["name"], "Requests")
-        self.assertEqual(data["crawler"], "RequestsCrawler")
+        self.assertTrue(data)
+        self.assertIn("name", data)
+        self.assertEqual(data["name"], "SeleniumChromeFull")
+
+        self.assertIn("crawler", data)
+        self.assertEqual(type(data["crawler"]).__name__, "SeleniumChromeFull")
 
     def test_get_request_data__crawler_data__ssl_verify_True(self):
         crawler = Crawler()
 
         crawler_data = """{
-                "name": "Requests",
+                "name": "RequestsCrawler",
                 "crawler": "RequestsCrawler",
                 "settings": {
                    "ssl_verify": true,
@@ -225,13 +171,15 @@ class CrawlerTest(FakeInternetTestCase):
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
+        request.set("url", "https://test.com")
         request.set("crawler_data", crawler_data)
 
         # call tested function
         data = crawler.get_request_data(request)
 
-        self.assertEqual(data["name"], "Requests")
-        self.assertEqual(data["crawler"], "RequestsCrawler")
+        self.assertTrue(data)
+        self.assertEqual(data["name"], "RequestsCrawler")
+        self.assertEqual(type(data["crawler"]).__name__, "RequestsCrawler")
         self.assertEqual(data["settings"]["ssl_verify"], True)
         self.assertEqual(data["settings"]["respect_robots_txt"], True)
 
@@ -239,7 +187,7 @@ class CrawlerTest(FakeInternetTestCase):
         crawler = Crawler()
 
         crawler_data = """{
-                "name": "Requests",
+                "name": "RequestsCrawler",
                 "crawler": "RequestsCrawler",
                 "settings" : {
                    "ssl_verify" : false,
@@ -250,13 +198,15 @@ class CrawlerTest(FakeInternetTestCase):
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
+        request.set("url", "https://test.com")
         request.set("crawler_data", crawler_data)
 
         # call tested function
         data = crawler.get_request_data(request)
 
-        self.assertEqual(data["name"], "Requests")
-        self.assertEqual(data["crawler"], "RequestsCrawler")
+        self.assertTrue(data)
+        self.assertEqual(data["name"], "RequestsCrawler")
+        self.assertEqual(type(data["crawler"]).__name__, "RequestsCrawler")
         self.assertEqual(data["settings"]["ssl_verify"], False)
         self.assertEqual(data["settings"]["respect_robots_txt"], False)
         self.assertEqual(data["settings"]["timeout_s"], 60)
@@ -266,7 +216,7 @@ class CrawlerTest(FakeInternetTestCase):
         crawler = Crawler()
 
         crawler_data = """{
-                "name": "Requests",
+                "name": "RequestsCrawler",
                 "crawler": "RequestsCrawler",
                 "settings": {
                    "ssl_verify": true,
@@ -275,9 +225,56 @@ class CrawlerTest(FakeInternetTestCase):
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
+        request.set("url", "https://test.com")
         request.set("crawler_data", crawler_data)
 
         # call tested function
         data = crawler.get_request_data(request)
 
-        self.assertTrue(data["bytes_limit"])
+        self.assertTrue(data)
+        self.assertTrue(data["settings"]["bytes_limit"])
+
+    def test_get_request_data__accept_types(self):
+        crawler = Crawler()
+
+        crawler_data = """{
+                "name": "RequestsCrawler",
+                "crawler": "RequestsCrawler",
+                "settings": {
+                   "ssl_verify": true,
+                   "respect_robots_txt": true
+                }
+        }"""
+
+        request = FlaskRequest("http://192.168.0.0")
+        request.set("url", "https://test.com")
+        request.set("crawler_data", crawler_data)
+
+        # call tested function
+        data = crawler.get_request_data(request)
+
+        self.assertTrue(data)
+        self.assertTrue(data["settings"]["Accept"])
+        self.assertTrue(data["settings"]["Accept"].find("text/html") >= 0)
+
+    def test_get_page_url__by_name(self):
+        crawler = Crawler()
+
+        test_url = "https://linkedin.com"
+
+        crawler_data = {
+                "name" : "RequestsCrawler",
+                "crawler" : "RequestsCrawler",
+                "settings" : {
+                    "timeout_s" : 20,
+                    "remote_server": "https://",
+                }
+        }
+
+        # call tested function
+        page_url = crawler.get_page_url(test_url, crawler_data)
+        self.assertTrue(page_url)
+
+        self.assertIn("name", page_url.settings)
+        self.assertEqual(page_url.settings["name"], "RequestsCrawler")
+

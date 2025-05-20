@@ -27,7 +27,7 @@ from src import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "3.0.38"
+__version__ = "3.0.39"
 
 
 app = Flask(__name__)

@@ -43,108 +43,73 @@ class Crawler(object):
         return self.url_history
 
     def get_request_data(self, request):
+        """
+        Reads data from request
+        """
+        url = request.args.get("url")
+
+        crawler_data = self.get_request_data_from_request(request)
+        crawler_data = self.fill_crawler_data(url, crawler_data)
+        crawler_data = self.get_crawler(url, crawler_data)
+
+        if not crawler_data:
+            webtools.WebLogger.error("Url:{} Cannot run request without crawler".format(url))
+            return
+
+        return crawler_data
+
+    def get_request_data_from_request(self, request):
         crawler_data = request.args.get("crawler_data")
         crawler = request.args.get("crawler")
         name = request.args.get("name")
 
-        parsed_crawler_data = None
         if crawler_data:
             try:
-                parsed_crawler_data = json.loads(crawler_data)
+                crawler_data = json.loads(crawler_data)
             except json.JSONDecodeError as E:
                 print(str(E))
 
-        if parsed_crawler_data is None:
-            parsed_crawler_data = {}
+        if crawler_data is None:
+            crawler_data = {}
 
         if crawler:
-            parsed_crawler_data["crawler"] = crawler
+            crawler_data["crawler"] = crawler
         if name:
-            parsed_crawler_data["name"] = name
+            crawler_data["name"] = name
 
-        if "settings" not in parsed_crawler_data:
-            parsed_crawler_data["settings"] = {}
+        if "settings" not in crawler_data:
+            crawler_data["settings"] = {}
 
         remote_server = "http://" + str(request.host)
 
-        if "ssl_verify" not in parsed_crawler_data[
+        crawler_data["settings"]["full"] = request.args.get("full")
+        crawler_data["settings"]["headers"] = request.args.get("headers")
+        crawler_data["settings"]["ping"] = request.args.get("ping")
+        crawler_data["settings"]["remote_server"] = remote_server
+
+        return crawler_data
+
+    def fill_crawler_data(self, url, crawler_data):
+        if "ssl_verify" not in crawler_data[
             "settings"
         ] and self.configuration.is_set("ssl_verify"):
-            parsed_crawler_data["settings"]["ssl_verify"] = True
-        if "respect_robots_txt" not in parsed_crawler_data[
+            crawler_data["settings"]["ssl_verify"] = True
+        if "respect_robots_txt" not in crawler_data[
             "settings"
         ] and self.configuration.is_set("respect_robots_txt"):
-            parsed_crawler_data["settings"]["respect_robots_txt"] = True
+            crawler_data["settings"]["respect_robots_txt"] = True
 
-        full = request.args.get("full")
-        parsed_crawler_data["settings"]["full"] = full
-
-        parsed_crawler_data["settings"]["remote_server"] = remote_server
-
-        if "bytes_limit" not in parsed_crawler_data and self.configuration.is_set(
+        if "bytes_limit" not in crawler_data and self.configuration.is_set(
             "bytes_limit"
         ):
-            parsed_crawler_data["bytes_limit"] = self.configuration.get("bytes_limit")
+            crawler_data["settings"]["bytes_limit"] = self.configuration.get("bytes_limit")
         else:
-            parsed_crawler_data["bytes_limit"] = webtools.WebConfig.get_bytes_limit()
+            crawler_data["settings"]["bytes_limit"] = webtools.WebConfig.get_bytes_limit()
 
-        return parsed_crawler_data
+        if "Accept" not in crawler_data["settings"]:
+            crawler_data["settings"]["Accept"] = "Unknown,text,text/html,html,rss"
 
-    def run(self, url, crawler_data=None):
-        if not crawler_data:
-            webtools.WebLogger.error("Could not find crawler data")
-            return
-
-        page_url = self.get_page_url(url, crawler_data)
-
-        if not page_url:
-            webtools.WebLogger.error(
-                "Could not create page url for {} {}".format(url, crawler_data)
-            )
-            return
-
-        request_headers = crawler_data["settings"]["headers"]
-        request_ping = crawler_data["settings"]["ping"]
-        full = crawler_data["settings"]["full"]
-
-        if request_headers:
-            # TODO implement
-            headers = page_url.get_headers()
-            all_properties = [{"name": "Headers", "data": headers}]
-        elif request_ping:
-            # TODO implement
-            headers = page_url.get_headers()
-            all_properties = [{"name": "Headers", "data": headers}]
-        else:
-            # TODO what if there is exception
-            crawl_index = self.crawler_info.enter(url, crawler_data)
-
-            try:
-                response = page_url.get_response()
-                all_properties = page_url.get_properties(full=True, include_social=full)
-                self.crawler_info.leave(crawl_index)
-            except Exception as e:
-                self.crawler_info.leave(crawl_index)
-                raise
-
-        if webtools.WebConfig.count_chrom_processes() > 30:
-            webtools.WebLogger.error("Too many chrome processes")
-            webtools.WebConfig.kill_chrom_processes()
-
-        return all_properties
-
-    def get_page_url(self, url, crawler_data):
-        """
-        TODO decide what can be copied from incoming crawler data
-        """
-        new_mapping = self.get_crawler(url, crawler_data)
-        if not new_mapping:
-            return
-
-        print("Running:{}, with:{}".format(url, new_mapping))
-
-        page_url = webtools.Url(url, settings=new_mapping)
-        return page_url
+        return crawler_data
 
     def get_crawler(self, url, crawler_data):
         remote_server = crawler_data["settings"]["remote_server"]
@@ -190,8 +155,11 @@ class Crawler(object):
 
         # use what is not default by crawler buddy
         for key in crawler_data:
-            if key not in new_mapping:
+            if key != "settings" and key not in new_mapping:
                 new_mapping[key] = crawler_data[key]
+
+        for key in crawler_data["settings"]:
+            new_mapping["settings"][key] = crawler_data["settings"][key]
 
         if new_mapping["settings"] is None:
             new_mapping["settings"] = {}
@@ -203,17 +171,6 @@ class Crawler(object):
             )
 
         return new_mapping
-
-    def get_default_crawler(self, url):
-        default_crawler = self.configuration.get("default_crawler")
-        if default_crawler:
-            new_mapping = self.configuration.get_crawler(name=default_crawler)
-            if new_mapping:
-                return new_mapping
-
-        new_mapping = webtools.WebConfig.get_default_crawler(url)
-        if new_mapping:
-            return new_mapping
 
     def get_crawl_properties(self, url, crawler_data):
         """
@@ -243,3 +200,67 @@ class Crawler(object):
             all_properties = self.get_history().find(url=url)
 
         return all_properties
+
+    def run(self, url, crawler_data=None):
+        if not crawler_data:
+            webtools.WebLogger.error("Url:{} Cannot run request without crawler_data".format(url))
+            return
+
+        page_url = self.get_page_url(url, crawler_data)
+
+        if not page_url:
+            webtools.WebLogger.error(
+                "Could not create page url for {} {}".format(url, crawler_data)
+            )
+            return
+
+        request_headers = crawler_data["settings"]["headers"]
+        request_ping = crawler_data["settings"]["ping"]
+        full = crawler_data["settings"]["full"]
+
+        if request_headers:
+            # TODO implement
+            headers = page_url.get_headers()
+            all_properties = [{"name": "Headers", "data": headers}]
+        elif request_ping:
+            # TODO implement
+            headers = page_url.get_headers()
+            all_properties = [{"name": "Headers", "data": headers}]
+        else:
+            # TODO what if there is exception
+            crawl_index = self.crawler_info.enter(url, crawler_data)
+
+            try:
+                response = page_url.get_response()
+                all_properties = page_url.get_properties(full=True, include_social=full)
+                self.crawler_info.leave(crawl_index)
+            except Exception as e:
+                self.crawler_info.leave(crawl_index)
+                raise
+
+        if webtools.WebConfig.count_chrom_processes() > 30:
+            webtools.WebLogger.error("Too many chrome processes")
+            webtools.WebConfig.kill_chrom_processes()
+
+        return all_properties
+
+    def get_page_url(self, url, crawler_data):
+        """
+        """
+
+        print("Running:{}, with:{}".format(url, crawler_data))
+
+        page_url = webtools.Url(url, settings=crawler_data)
+        return page_url
+
+    def get_default_crawler(self, url):
+        default_crawler = self.configuration.get("default_crawler")
+        if default_crawler:
+            new_mapping = self.configuration.get_crawler(name=default_crawler)
+            if new_mapping:
+                return new_mapping
+
+        new_mapping = webtools.WebConfig.get_default_crawler(url)
+        if new_mapping:
+            return new_mapping
+
