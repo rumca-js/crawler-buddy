@@ -272,6 +272,7 @@ class TestResponseObject(PageResponseObject):
     def __init__(self, url, headers, timeout):
         self.status_code = 200
         self.errors = []
+        self.crawl_time_s = 10
 
         self.url = url
         self.request_url = url
@@ -287,38 +288,38 @@ class TestResponseObject(PageResponseObject):
         self.set_binary(url)
 
     def set_headers(self, url):
-        self.headers = {}
+        headers = {}
         if url == "https://page-with-last-modified-header.com":
-            self.headers["Last-Modified"] = "Wed, 03 Apr 2024 09:39:30 GMT"
+            headers["Last-Modified"] = "Wed, 03 Apr 2024 09:39:30 GMT"
 
         elif url == "https://page-with-rss-link.com/feed":
-            self.headers["Content-Type"] = "application/+rss"
+            headers["Content-Type"] = "application/+rss"
 
         elif url.startswith("https://warhammer-community.com/feed"):
-            self.headers["Content-Type"] = "application/+rss"
+            headers["Content-Type"] = "application/+rss"
 
         elif url.startswith("https://thehill.com/feed"):
-            self.headers["Content-Type"] = "application/+rss"
+            headers["Content-Type"] = "application/+rss"
 
         elif url.find("instance.com") >= 0 and url.find("json") >= 0:
-            self.headers["Content-Type"] = "json"
+            headers["Content-Type"] = "json"
 
         elif url.startswith("https://binary") and url.find("jpg") >= 0:
-            self.headers["Content-Type"] = "image/jpg"
+            headers["Content-Type"] = "image/jpg"
 
         elif url.startswith("https://image"):
-            self.headers["Content-Type"] = "image/jpg"
+            headers["Content-Type"] = "image/jpg"
 
         elif url.startswith("https://audio"):
-            self.headers["Content-Type"] = "audio/midi"
+            headers["Content-Type"] = "audio/midi"
 
         elif url.startswith("https://video"):
-            self.headers["Content-Type"] = "video/mp4"
+            headers["Content-Type"] = "video/mp4"
 
         elif url == "https://rss-page-with-broken-content-type.com/feed":
-            self.headers["Content-Type"] = "text/html"
+            headers["Content-Type"] = "text/html"
 
-        self.headers = ResponseHeaders(headers=self.headers)
+        self.headers = ResponseHeaders(headers=headers)
 
     def set_status(self, url):
         if url.startswith("https://www.youtube.com/watch?v=666"):

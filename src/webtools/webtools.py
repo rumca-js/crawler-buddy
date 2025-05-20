@@ -426,6 +426,7 @@ class PageResponseObject(object):
         self.request_url = request_url
         self.status_code = status_code
         self.crawler_data = None
+        self.crawl_time_s = None
 
         self.binary = None
         self.text = None

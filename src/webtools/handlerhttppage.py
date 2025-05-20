@@ -120,12 +120,6 @@ class HttpRequestBuilder(object):
 
     def get_contents_internal(self, request):
         """
-        There are 3 levels of scraping:
-         - requests (fast)
-         - if above fails we can use headless browser
-         - if above fails we can use full browser (most advanced, resource consuming)
-
-        First configured thing provides return value
         """
         crawler_data = self.settings
 
@@ -147,13 +141,18 @@ class HttpRequestBuilder(object):
 
         crawler.set_settings(crawler_data)
 
+        start_time = time.time()
         crawler.run()
+        end_time = time.time()
+
         response = crawler.get_response()
         if response:
             response.set_crawler(crawler_data)
             if response.errors:
                 for error in response.errors:
                     WebLogger.debug("Url:{}: {}".format(request.url, error))
+
+            response.crawl_time_s = end_time - start_time
         crawler.close()
 
         WebLogger.debug(

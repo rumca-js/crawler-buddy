@@ -721,6 +721,8 @@ class Url(ContentInterface):
                 response.get_status_code()
             )
 
+            response_data["crawl_time_s"] = response.crawl_time_s
+
             response_data["Content-Type"] = response.get_content_type()
             if page_handler == HttpPageHandler:
                 if page_handler.p:
