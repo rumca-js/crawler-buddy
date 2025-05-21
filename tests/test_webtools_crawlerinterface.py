@@ -1,0 +1,77 @@
+from src.webtools import (
+   CrawlerInterface,
+)
+
+from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter, TestResponseObject
+
+
+class CrawlerInterfaceTest(FakeInternetTestCase):
+    def setUp(self):
+        self.disable_web_pages()
+
+    def test_constructor__user_agent(self):
+        crawler = None
+        url = "https://test.com"
+        response_file = None
+
+        settings = {}
+        settings["name"] = "Test"
+        settings["crawler"] = "Crawler"
+        settings["settings"] = {}
+        settings["settings"]["User-Agent"] = "Test-User-Agent"
+
+        crawler = CrawlerInterface(request=None, url=url, response_file=None, settings=settings)
+
+        self.assertIn("User-Agent", crawler.request_headers)
+        self.assertEqual(crawler.request_headers["User-Agent"], "Test-User-Agent")
+
+    def test_constructor__accept(self):
+        crawler = None
+        url = "https://test.com"
+        response_file = None
+
+        settings = {}
+        settings["name"] = "Test"
+        settings["crawler"] = "Crawler"
+        settings["settings"] = {}
+        settings["settings"]["Accept"] = "text/html,application/xhtml+xml,application/xml,application/rss;q=0.9,*/*;q=0.8"
+
+        crawler = CrawlerInterface(request=None, url=url, response_file=None, settings=settings)
+
+        self.assertIn("Accept", crawler.request_headers)
+        self.assertEqual(sorted(crawler.get_accept_types()), ['application', 'html', 'rss', 'text', 'xhtml', 'xml'])
+
+    def test_is_response_valid__true(self):
+        crawler = None
+        url = "https://test.com"
+        response_file = None
+
+        settings = {}
+        settings["name"] = "Test"
+        settings["crawler"] = "Crawler"
+        settings["settings"] = {}
+        settings["settings"]["Accept"] = "text/html,application/xhtml+xml,application/xml,application/rss;q=0.9,*/*;q=0.8"
+
+        crawler = CrawlerInterface(request=None, url=url, response_file=None, settings=settings)
+
+        crawler.response = TestResponseObject(url, {}, 20)
+
+        self.assertTrue(crawler.is_response_valid())
+
+    def test_is_response_valid__false(self):
+        crawler = None
+        url = "https://test.com"
+        response_file = None
+
+        settings = {}
+        settings["name"] = "Test"
+        settings["crawler"] = "Crawler"
+        settings["settings"] = {}
+        settings["settings"]["Accept"] = "text/html,application/xhtml+xml,application/xml,application/rss;q=0.9,*/*;q=0.8"
+
+        crawler = CrawlerInterface(request=None, url=url, response_file=None, settings=settings)
+
+        crawler.response = TestResponseObject(url, {}, 20)
+        crawler.response.headers.headers["Content-Type"] = "jpeg"
+
+        self.assertFalse(crawler.is_response_valid())
