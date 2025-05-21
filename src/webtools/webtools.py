@@ -101,8 +101,32 @@ def status_code_to_text(status_code):
 
     if status_code == 200:
         return "HTTP_STATUS_OK(200)"
+    elif status_code == 401:
+        return "HTTP_STATUS_UNAUTHORIZED(401)"
     elif status_code == 403:
         return "HTTP_STATUS_USER_AGENT(403)"
+    elif status_code == 404:
+        return "HTTP_STATUS_NOT_FOUND(404)"
+    elif status_code == 406:
+        return "HTTP_STATUS_NOT_ACCEPTABLE(406)"
+    elif status_code == 409:
+        return "HTTP_STATUS_CONFLICT(409)"
+    elif status_code == 410:
+        return "HTTP_STATUS_GONE(410)"
+    elif status_code == 418:
+        return "HTTP_STATUS_IM_A_TEAPOT(418)"
+    elif status_code == 451:
+        return "HTTP_STATUS_UNAVAILABLE_LEGAL_REASONS(451)"
+    elif status_code == 500:
+        return "HTTP_STATUS_INTERNAL_SERVER(500)"
+    elif status_code == 501:
+        return "HTTP_STATUS_NOT_IMPLEMENTED(501)"
+    elif status_code == 502:
+        return "HTTP_STATUS_BAD_GATEWAY(502)"
+    elif status_code == 503:
+        return "HTTP_STATUS_SERVICE_UNAVAILABLE(503)"
+    elif status_code == 521:
+        return "HTTP_STATUS_WEB_SERVER_IS_DOWN(521)"
     elif status_code == 600:
         return "HTTP_STATUS_CODE_EXCEPTION(600)"
     elif status_code == 603:
@@ -307,6 +331,15 @@ class ResponseHeaders(object):
         if "content-type" in self.headers:
             return self.headers["content-type"]
 
+    def get_content_type_keys(self):
+        content_type = self.get_content_type()
+        if content_type:
+            semicolon = content_type.find(";")
+            if semicolon >= 0:
+                content_type = content_type[:semicolon]
+            content_type = content_type.replace("+", "/")
+            return content_type.split("/")
+
     def get_last_modified(self):
         date = None
 
@@ -483,6 +516,9 @@ class PageResponseObject(object):
     def get_content_type(self):
         return self.headers.get_content_type()
 
+    def get_content_type_keys(self):
+        return self.headers.get_content_type_keys()
+
     def get_last_modified(self):
         return self.headers.get_last_modified()
 
@@ -533,7 +569,7 @@ class PageResponseObject(object):
 
         return 0
 
-    def is_content_type_supported(self):
+    def is_content_type_text(self):
         """
         You can preview on a browser headers. Ctr-shift-i on ff
         """

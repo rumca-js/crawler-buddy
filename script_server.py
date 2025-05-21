@@ -27,7 +27,7 @@ from src import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "3.0.40"
+__version__ = "3.0.41"
 
 
 app = Flask(__name__)
@@ -217,7 +217,7 @@ def debug():
 
         if detail_text:
             detail_text = html.escape(detail_text)
-            text += "<div>{}</div>\n".format(detail_text)
+            text += "<pre>{}</pre>\n".format(detail_text)
         text += "</div>\n"
 
     return get_html(id=id, body=text, title="Debug")

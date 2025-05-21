@@ -39,6 +39,16 @@ from .ipc import (
 )
 
 
+default_headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0",
+    "Accept": "text/html,application/xhtml+xml,application/xml,application/rss;q=0.9,*/*;q=0.8",
+    "Accept-Charset": "utf-8,ISO-8859-1;q=0.7,*;q=0.3",
+    "Accept-Encoding": "none",
+    "Accept-Language": "en-US,en;q=0.8",
+    "Connection": "keep-alive",
+}
+
+
 class WebToolsTimeoutException(Exception):
     """Custom exception to indicate a request timeout."""
 
@@ -77,6 +87,40 @@ class CrawlerInterface(object):
     def set_settings(self, settings):
         self.settings = settings
 
+        if self.request and self.request.request_headers:
+            self.request_headers = self.request.request_headers
+        else:
+            self.request_headers = default_headers
+
+        self.copy_settings_field("User-Agent")
+        self.copy_settings_field("Accept")
+        self.copy_settings_field("Accept-Charset")
+        self.copy_settings_field("Accept-Encoding")
+        self.copy_settings_field("Accept-Language")
+
+    def copy_settings_field(self, field):
+        if self.settings and "settings" in self.settings and field in self.settings["settings"]:
+            self.request_headers[field] = self.settings["settings"][field]
+
+    def get_accept_types(self):
+        accept_string = self.request_headers.get("Accept", "")
+        
+        semicolon_index = accept_string.find(";")
+        if semicolon_index >= 0:
+            accept_string = accept_string[:semicolon_index]
+
+        result = set()
+        # Split by comma to separate media types
+        media_types = accept_string.split(",")
+        for media in media_types:
+            # Further split each media type by '/' and '+'
+            parts = media.strip().replace('+', '/').split('/')
+            for part in parts:
+                if part:
+                    result.add(part.strip())
+        
+        return list(result)
+
     def run(self):
         """
          - does its job
@@ -101,7 +145,26 @@ class CrawlerInterface(object):
 
         if content_length is not None and "bytes_limit" in self.settings["settings"]:
             if content_length > self.settings["settings"]["bytes_limit"]:
-                self.response.add_error("Page is too big")
+                WebLogger.debug("Page is too big: ".format(content_length))
+                self.response.add_error("Page is too big: ".format(content_length))
+                return False
+
+        content_type = self.response.get_content_type_keys()
+        content_type_keys = self.response.get_content_type_keys()
+        if content_type_keys:
+            if "any" in self.get_accept_types():
+                return True
+            if "unknown" in self.get_accept_types():
+                return True
+
+            match_count = 0
+            for item in content_type_keys:
+                if item in self.get_accept_types():
+                    match_count += 1
+
+            if match_count == 0:
+                WebLogger.debug("Response type is not supported:{}".format(content_type))
+                self.response.add_error("Response type is not supported:{}".format(content_type))
                 return False
 
         return True
@@ -222,15 +285,6 @@ class RequestsCrawler(CrawlerInterface):
     Python requests
     """
 
-    default_headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Charset": "utf-8,ISO-8859-1;q=0.7,*;q=0.3",
-        "Accept-Encoding": "none",
-        "Accept-Language": "en-US,en;q=0.8",
-        "Connection": "keep-alive",
-    }
-
     def run(self):
         if not self.is_valid():
             return
@@ -278,14 +332,11 @@ class RequestsCrawler(CrawlerInterface):
 
             content_type = self.response.get_content_type()
 
-            if content_type and not self.response.is_content_type_supported():
+            if content_type and not self.response.is_content_type_text():
                 self.response.binary = request_result.content
                 request_result.close()
                 return self.response
             else:
-                """
-                IF we do not know the content type, or content type is supported
-                """
                 encoding = self.get_encoding(self.response, request_result)
                 if encoding:
                     request_result.encoding = encoding
@@ -303,6 +354,7 @@ class RequestsCrawler(CrawlerInterface):
                 request_result.close()
 
         except requests.Timeout:
+            WebLogger.debug("Url:{} timeout".format(self.request.url))
             self.response = PageResponseObject(
                 self.request.url,
                 text=None,
@@ -312,6 +364,7 @@ class RequestsCrawler(CrawlerInterface):
             self.response.add_error("Url:{} Page timeout".format(self.request.url))
 
         except WebToolsTimeoutException:
+            WebLogger.debug("Url:{} timeout".format(self.request.url))
             self.response = PageResponseObject(
                 self.request.url,
                 text=None,
@@ -321,6 +374,7 @@ class RequestsCrawler(CrawlerInterface):
             self.response.add_error("Url:{} Page timeout".format(self.request.url))
 
         except requests.exceptions.ConnectionError:
+            WebLogger.debug("Url:{} connection error".format(self.request.url))
             self.response = PageResponseObject(
                 self.request.url,
                 text=None,
@@ -424,7 +478,7 @@ class RequestsCrawler(CrawlerInterface):
                 raise result["exception"]
             return result["response"]
 
-        headers = self.request.request_headers or RequestsCrawler.default_headers
+        headers = self.request_headers
 
         response = make_request_with_threading(
             url=self.request.url,
@@ -450,14 +504,8 @@ class RequestsCrawler(CrawlerInterface):
         if not user_agent:
             user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
 
-        headers = {
-            "User-Agent": user_agent,
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Charset": "utf-8,ISO-8859-1;q=0.7,*;q=0.3",
-            "Accept-Encoding": "none",
-            "Accept-Language": "en-US,en;q=0.8",
-            "Connection": "keep-alive",
-        }
+        headers = default_headers
+        headers["User-Agent"] = user_agent
 
         # status code 403 means they do not like our user agent.
         # status code 429 means you are rate limited.
@@ -552,7 +600,7 @@ class CurlCffiCrawler(CrawlerInterface):
     def build_requests(self):
         from curl_cffi import requests
 
-        headers = self.request.request_headers or RequestsCrawler.default_headers
+        headers = self.request_headers
 
         try:
             answer = requests.get(
@@ -698,6 +746,8 @@ class SeleniumDriver(CrawlerInterface):
         self.driver_executable = driver_executable
 
     def set_settings(self, settings):
+        super().set_settings(settings)
+
         if (
             settings
             and "settings" in settings
@@ -705,8 +755,6 @@ class SeleniumDriver(CrawlerInterface):
             and settings["settings"]["driver_executable"]
         ):
             self.driver_executable = settings["settings"]["driver_executable"]
-
-        self.settings = settings
 
     def get_driver(self):
         """
@@ -772,13 +820,14 @@ class SeleniumDriver(CrawlerInterface):
         except TimeoutException:
             error_text = traceback.format_exc()
             print("Page timeout:{}\n{}".format(self.request.url, error_text))
-            WebLogger.debug("Page timeout:{}\n{}".format(self.request.url, error_text))
+            WebLogger.debug(info_text="Page timeout:{}".format(self.request.url), detail_text=error_text)
             self.response = PageResponseObject(
                 self.request.url,
                 text=None,
                 status_code=HTTP_STATUS_CODE_TIMEOUT,
                 request_url=self.request.url,
             )
+            self.response.add_error("Url:{} Page timeout".format(self.request.url))
         except Exception as E:
             print(E, "Url:{}".format(self.request.url))
             WebLogger.exc(E, "Url:{}".format(self.request.url))
@@ -788,6 +837,7 @@ class SeleniumDriver(CrawlerInterface):
                 status_code=HTTP_STATUS_CODE_EXCEPTION,
                 request_url=self.request.url,
             )
+            self.response.add_error("Url:{} exception".format(self.request.url))
 
         return self.response
 
@@ -1112,8 +1162,6 @@ class SeleniumWireFull(SeleniumDriver):
             print(str(E))
             selenium_feature_enabled = False
 
-        print("0")
-
         from seleniumwire import webdriver as wire_webdriver
         from selenium.webdriver.common.proxy import Proxy, ProxyType
 
@@ -1129,7 +1177,6 @@ class SeleniumWireFull(SeleniumDriver):
                 "https": proxy_str,
                 "no_proxy": "localhost,127.0.0.1"  # Optional
             }
-        print("1")
 
         # Validate Chromedriver Executable
         if self.driver_executable:
@@ -1141,7 +1188,6 @@ class SeleniumWireFull(SeleniumDriver):
             service = Service(executable_path=self.driver_executable)
         else:
             service = Service()
-        print("2")
 
         options = wire_webdriver.ChromeOptions()
         options.add_argument("--no-sandbox")
@@ -1154,13 +1200,11 @@ class SeleniumWireFull(SeleniumDriver):
         options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
 
         try:
-            print("3")
             driver = wire_webdriver.Chrome(
                 service=service,
                 options=options,
                 seleniumwire_options=seleniumwire_options
             )
-            print("4")
             return driver
         except Exception as e:
             WebLogger.error(f"Failed to initialize WebDriver: {e}")

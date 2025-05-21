@@ -74,7 +74,7 @@ class CrawlHistory(object):
                 and "crawler" in settings
                 and settings["crawler"]
             ):
-                if crawler != response["crawler"]:
+                if crawler != settings["crawler"]:
                     continue
 
             return inner_index, timestamp, all_properties

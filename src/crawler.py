@@ -107,7 +107,7 @@ class Crawler(object):
             crawler_data["settings"]["bytes_limit"] = webtools.WebConfig.get_bytes_limit()
 
         if "Accept" not in crawler_data["settings"]:
-            crawler_data["settings"]["Accept"] = "Unknown,text,text/html,html,rss"
+            crawler_data["settings"]["Accept"] = "text/html,application/xhtml+xml,application/xml"
 
         return crawler_data
 

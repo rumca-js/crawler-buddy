@@ -53,6 +53,9 @@ class ContentInterface(object):
     def get_canonical_url(self):
         return self.url
 
+    def get_feeds(self):
+        return []
+
     def get_page_rating(self):
         """
         Default behavior
