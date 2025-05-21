@@ -27,7 +27,7 @@ from src import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "3.0.39"
+__version__ = "3.0.40"
 
 
 app = Flask(__name__)
@@ -787,6 +787,14 @@ def queue():
     return get_html(id=id, body=text, title="Queue")
 
 
+def dict_flat_to_html(data):
+    html = ""
+    for key, value in data.items():
+        pair_html = "<strong>{}</strong>: {}".format(key, value)
+        html += pair_html + ","
+
+    return html
+
 def dict_to_html(data, indent=0):
     html = ""
     for key, value in data.items():
@@ -799,7 +807,7 @@ def dict_to_html(data, indent=0):
             for item in value:
                 if isinstance(item, dict):
                     html += "  " * (indent + 1) + "<li>\n"
-                    html += dict_to_html(item, indent + 2)
+                    html += dict_flat_to_html(item)
                     html += "  " * (indent + 1) + "</li>\n"
                 else:
                     html += "  " * (indent + 1) + f"<li>{item}</li>\n"
