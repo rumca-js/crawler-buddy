@@ -126,7 +126,7 @@ Answer: I have provided some initial work for proxy, for Selenium. I do not howe
 
 For enhanced safety and ease of use, it's recommended to use the provided Docker image, as specified in the docker-compose configuration. Running browsers like Selenium within a containerized environment helps isolate them from the host operating system, offering an added layer of security.
 
-Docker image is available at: https://hub.docker.com/repository/docker/rozbujnik/crawler-buddy.
+Docker image is available at: https://hub.docker.com/r/rozbujnik/crawler-buddy.
 
 ## Crawling methods
 
