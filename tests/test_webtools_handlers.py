@@ -3,6 +3,7 @@ from src.webtools import (
    GitHubUrlHandler,
    HackerNewsHandler,
    TwitterUrlHandler,
+   FourChanChannelHandler,
 )
 from tests.fakeinternet import (
    FakeInternetTestCase, MockRequestCounter, YouTubeJsonHandlerMock
@@ -158,3 +159,16 @@ class TwitterUrlHandlerTest(FakeInternetTestCase):
 
         # call tested function
         self.assertEqual(handler.url, expected_link)
+
+
+class FourChanChannelHandlerTest(FakeInternetTestCase):
+    def setUp(self):
+        self.disable_web_pages()
+
+    def test_input2code(self):
+        test_link = "https://4chan.org/test/"
+
+        handler = FourChanChannelHandler(test_link)
+
+        # call tested function
+        self.assertEqual("test", handler.code)

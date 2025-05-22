@@ -40,8 +40,6 @@ class HandlerInterface(DefaultContentPage):
         """
         even for post, or individual videos we might request feed url
         """
-        if self.code:
-            return [self.code2feed(self.code)]
         return []
 
     def input2code(self, input_string):

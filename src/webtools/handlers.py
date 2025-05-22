@@ -407,9 +407,23 @@ class FourChanChannelHandler(DefaultChannelHandler):
             parts = p.split()
             if len(parts) >= 3:
                 return parts[3]
+        elif domain_only.find("4chan.org") >= 0:
+            parts = p.split()
+            if len(parts) >= 3:
+                return parts[3]
 
-    def code2feed(self, code):
-        return "https://boards.4chan.org/{}/index.rss".format(code)
+    def get_feeds(self):
+        """
+        even for post, or individual videos we might request feed url
+        """
+        feeds = super().get_feeds()
+
+        if self.subreddit:
+            feeds.append(
+                "https://boards.4chan.org/{}/index.rss".format(self.code)
+            )
+
+        return feeds
 
 
 class TwitterUrlHandler(DefaultUrlHandler):
