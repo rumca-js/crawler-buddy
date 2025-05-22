@@ -121,8 +121,19 @@ class RedditUrlHandler(DefaultUrlHandler):
 
         return result
 
-    def code2feed(self, code):
-        return "https://www.reddit.com/r/{}/.rss".format(code)
+    def get_feeds(self):
+        """
+        even for post, or individual videos we might request feed url
+        """
+        feeds = super().get_feeds()
+
+        if self.subreddit:
+            feeds.append(
+                "https://www.reddit.com/r/{}/.rss".format(self.subreddit)
+            )
+
+        return feeds
+
 
 
 class GitHubUrlHandler(DefaultUrlHandler):

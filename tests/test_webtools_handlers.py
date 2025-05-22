@@ -24,6 +24,34 @@ class RedditUrlHandlerTest(FakeInternetTestCase):
         #self.assertIn("thumbs_up", data)
         #self.assertIn("thumbs_down", data)
 
+    def test_input2code(self):
+        test_link = "https://www.reddit.com/r/CursedAI"
+
+        handler = RedditUrlHandler(test_link)
+
+        # call tested function
+        self.assertEqual("CursedAI", handler.subreddit)
+
+    def test_get_feeds__channel(self):
+        test_link = "https://www.reddit.com/r/CursedAI"
+
+        handler = RedditUrlHandler(test_link)
+
+        # call tested function
+        feeds = handler.get_feeds()
+
+        self.assertIn("https://www.reddit.com/r/CursedAI/.rss", feeds)
+
+    def test_get_feeds__comments(self):
+        test_link = "https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my"
+
+        handler = RedditUrlHandler(test_link)
+
+        # call tested function
+        feeds = handler.get_feeds()
+
+        self.assertIn("https://www.reddit.com/r/redditdev/.rss", feeds)
+
 
 class GitHubUrlHandlerTest(FakeInternetTestCase):
     def setUp(self):

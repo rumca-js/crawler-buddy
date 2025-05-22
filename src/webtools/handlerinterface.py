@@ -45,7 +45,7 @@ class HandlerInterface(DefaultContentPage):
         return []
 
     def input2code(self, input_string):
-        raise NotImplementedError
+        pass
 
     def input2url(self, input_string):
         raise NotImplementedError
@@ -54,10 +54,10 @@ class HandlerInterface(DefaultContentPage):
         raise NotImplementedError
 
     def code2url(self, input_code):
-        raise NotImplementedError
+        pass
 
     def code2feed(self, code):
-        raise NotImplementedError
+        pass
 
     def get_name(self):
         raise NotImplementedError
