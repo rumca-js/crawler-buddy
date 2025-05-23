@@ -103,7 +103,10 @@ class CrawlerInterface(object):
             self.request_headers[field] = self.settings["settings"][field]
 
     def get_accept_types(self):
-        accept_string = self.request_headers.get("Accept", "")
+        if "settings" not in self.settings:
+            return
+
+        accept_string = self.settings["settings"].get("accept_contents_types", "all")
         
         semicolon_index = accept_string.find(";")
         if semicolon_index >= 0:
@@ -152,9 +155,7 @@ class CrawlerInterface(object):
         content_type = self.response.get_content_type_keys()
         content_type_keys = self.response.get_content_type_keys()
         if content_type_keys:
-            if "any" in self.get_accept_types():
-                return True
-            if "unknown" in self.get_accept_types():
+            if "all" in self.get_accept_types():
                 return True
 
             match_count = 0

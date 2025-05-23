@@ -43,7 +43,7 @@ example_requests_properties = """
       "enabled": true,
       "name": "RequestsCrawler",
       "settings": {
-        "remote-server": "http://127.0.0.1:3000",
+        "remote_server": "http://127.0.0.1:3000",
         "timeout_s": 20
       }
     },
@@ -64,9 +64,7 @@ example_requests_properties = """
           "headers": false,
           "name": "RequestsCrawler",
           "ping": false,
-          "remote-server": "http://192.168.0.200:3000",
           "remote_server": "http://192.168.0.200:3000",
-          "timeout": 10,
           "timeout_s": 20
         }
       },

@@ -127,6 +127,12 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertIn("crawler", data)
         self.assertEqual(type(data["crawler"]).__name__, "DefaultCrawler")
 
+        self.assertIn("settings", data)
+        self.assertIn("timeout_s", data["settings"])
+        self.assertIn("remote_server", data["settings"])
+
+        self.assertNotIn("timeout_s", data)
+
     def test_get_request_data__by_entry_rule(self):
         crawler = Crawler()
 
@@ -183,6 +189,11 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertEqual(data["settings"]["ssl_verify"], True)
         self.assertEqual(data["settings"]["respect_robots_txt"], True)
 
+        self.assertIn("settings", data)
+        self.assertIn("remote_server", data["settings"])
+
+        self.assertNotIn("timeout_s", data)
+
     def test_get_request_data__crawler_data__ssl_verify_False(self):
         crawler = Crawler()
 
@@ -211,6 +222,8 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertEqual(data["settings"]["respect_robots_txt"], False)
         self.assertEqual(data["settings"]["timeout_s"], 60)
         self.assertEqual(data["settings"]["delay_s"], 10)
+
+        self.assertNotIn("timeout_s", data)
 
     def test_get_request_data__bytes_limit(self):
         crawler = Crawler()

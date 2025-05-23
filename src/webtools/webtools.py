@@ -277,8 +277,8 @@ class PageOptions(object):
 
         settings = first_mode["settings"]
 
-        if "timeout" in settings:
-            timeout_crawler = settings["timeout"]
+        if "timeout_s" in settings:
+            timeout_crawler = settings["timeout_s"]
             return timeout_crawler
 
         return timeout_s

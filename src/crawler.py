@@ -106,8 +106,8 @@ class Crawler(object):
         else:
             crawler_data["settings"]["bytes_limit"] = webtools.WebConfig.get_bytes_limit()
 
-        if "Accept" not in crawler_data["settings"]:
-            crawler_data["settings"]["Accept"] = "text/html,application/xhtml+xml,application/xml"
+        if "accept_content_types" not in crawler_data["settings"]:
+            crawler_data["settings"]["accept_content_types"] = "text,html,application,xhtml,xml,rss"
 
         return crawler_data
 
@@ -163,7 +163,7 @@ class Crawler(object):
 
         if new_mapping["settings"] is None:
             new_mapping["settings"] = {}
-        new_mapping["settings"]["remote-server"] = remote_server
+        new_mapping["settings"]["remote_server"] = remote_server
 
         if "handler_class" in new_mapping:
             new_mapping["handler_class"] = Url.get_handler_by_name(
