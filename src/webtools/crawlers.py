@@ -75,12 +75,16 @@ class CrawlerInterface(object):
         else:
             self.settings = settings
 
-        if self.request.timeout_s and settings and "timeout_s" in settings:
-            self.timeout_s = max(self.request.timeout_s, settings["timeout_s"])
+        real_settings = {}
+        if settings and "settings" in settings:
+            real_settings = settings["settings"]
+
+        if self.request.timeout_s and "timeout_s" in real_settings:
+            self.timeout_s = max(self.request.timeout_s, real_settings["timeout_s"])
         elif self.request.timeout_s:
             self.timeout_s = self.request.timeout_s
-        elif settings and "timeout_s" in settings:
-            self.timeout_s = settings["timeout_s"]
+        elif "timeout_s" in real_settings:
+            self.timeout_s = real_settings["timeout_s"]
         else:
             self.timeout_s = 10
 
@@ -106,7 +110,7 @@ class CrawlerInterface(object):
         if "settings" not in self.settings:
             return
 
-        accept_string = self.settings["settings"].get("accept_contents_types", "all")
+        accept_string = self.settings["settings"].get("accept_content_types", "all")
         
         semicolon_index = accept_string.find(";")
         if semicolon_index >= 0:

@@ -27,7 +27,7 @@ from src import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "3.0.44"
+__version__ = "3.0.45"
 
 
 app = Flask(__name__)
@@ -77,7 +77,12 @@ def index():
 
     if configuration.is_set("debug"):
         text += """<div><a href="/system?id={}">System monitoring</a> - shows system monitoring</div>""".format(id)
+    text += """<div><a href="/history?id={}">History</a> - shows history</div>""".format(id)
+    text += """<div><a href="/historyj?id={}">History JSON</a> - shows JSON history</div>""".format(id)
+    if configuration.is_set("debug"):
+        text += """<div><a href="/debug?id={}">Debug</a> - shows debug information</div>""".format(id)
 
+    text += "<h2>Operational</h2>"
     text += """<div><a href="/get?id={}">Get</a> - form for crawling a web page using GET method</div>""".format(id)
     text += """<div><a href="/getj?id={}">Getj</a> - crawl a web page using GET method</div>""".format(id)
     text += """<div><a href="/feeds?id={}">Feeds</a> - return form for finding feeds</div>""".format(id)
@@ -85,19 +90,15 @@ def index():
     text += """<div><a href="/socialj?id={}">Socialj</a> - dynamic social data JSON</div>""".format(id)
     text += """<div><a href="/link?id={}">Linkj</a> - provides form for link retrieval</div>""".format(id)
     text += """<div><a href="/linkj?id={}">Linkj</a> - return link info JSON</div>""".format(id)
+    text += """<div><a href="/archivesj?id={}">Archivesj</a> - return archive links info JSON</div>""".format(id)
     text += """<div><a href="/rss?id={}">RSS</a> - if possible returns RSS contents for the link</div>""".format(id)
     text += """<div><a href="/proxy?id={}">Proxy</a> - makes GET request, then passes you the contents, as is</div>""".format(id)
 
-    text += """<div><a href="/history?id={}">History</a> - shows history</div>""".format(id)
-    text += """<div><a href="/historyj?id={}">History JSON</a> - shows JSON history</div>""".format(id)
-    text += """<div><a href="/queue?id={}">Queue</a> - shows currently processing queue</div>""".format( id)
+    text += "<h2>Management</h2>"
     text += """<div><a href="/find?id={}">Find</a> - form for findj</div>""".format(id)
     text += """<div><a href="/findj?id={}">Find JSON</a> - returns information about history entry JSON</div>""".format(id)
+    text += """<div><a href="/queue?id={}">Queue</a> - shows currently processing queue</div>""".format( id)
     text += """<div><a href="/removej?id={}">Remove history</a> - removes history entry</div>""".format(id)
-    text += """<div><a href="/archivesj?id={}">Archivesj</a> - return archive links info JSON</div>""".format(id)
-
-    if configuration.is_set("debug"):
-        text += """<div><a href="/debug?id={}">Debug</a> - shows debug information</div>""".format(id)
 
     text += """<p>"""
     text += """Version:{}""".format(__version__)

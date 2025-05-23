@@ -13,7 +13,7 @@
     "name": "CrawleeScript",
     "settings": {
       "script": "poetry run python crawleebeautifulsoup.py",
-      "timeout_s": 40
+      "timeout_s": 50
     }
   },
   {
@@ -22,7 +22,7 @@
     "name": "PlaywrightScript",
     "settings": {
       "script": "poetry run python crawleeplaywright.py",
-      "timeout_s": 40
+      "timeout_s": 50
     }
   },
   {
@@ -31,7 +31,7 @@
     "name": "SeleniumUndetected",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
-      "timeout_s": 40
+      "timeout_s": 60
     }
   },
   {
@@ -40,7 +40,7 @@
     "name": "SeleniumChromeHeadless",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
-      "timeout_s": 40
+      "timeout_s": 60
     }
   },
   {
@@ -49,7 +49,7 @@
     "name": "SeleniumChromeFull",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
-      "timeout_s": 40,
+      "timeout_s": 60,
       "delay_s": 10
     }
   },
@@ -58,7 +58,7 @@
     "enabled": true,
     "name": "StealthRequestsCrawler",
     "settings": {
-      "timeout_s": 20
+      "timeout_s": 40
     }
   },
   {
@@ -66,7 +66,7 @@
     "enabled": true,
     "name": "CurlCffiCrawler",
     "settings": {
-      "timeout_s": 20
+      "timeout_s": 40
     }
   },
   {
@@ -75,7 +75,7 @@
     "name": "SeleniumWireFull",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
-      "timeout_s": 40,
+      "timeout_s": 60,
       "delay_s": 10
     }
   },
@@ -83,6 +83,9 @@
     "crawler": "SeleniumBase",
     "enabled": false,
     "name": "SeleniumBase",
-    "settings": {}
+    "settings": {
+      "timeout_s": 60,
+      "delay_s": 10
+    }
   }
 ]

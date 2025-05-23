@@ -267,8 +267,11 @@ class CrawlerTest(FakeInternetTestCase):
         data = crawler.get_request_data(request)
 
         self.assertTrue(data)
-        self.assertTrue(data["settings"]["Accept"])
-        self.assertTrue(data["settings"]["Accept"].find("text/html") >= 0)
+        self.assertIn("settings", data)
+        self.assertNotIn("Accept", data["settings"])
+        self.assertIn("accept_content_types", data["settings"])
+
+        self.assertNotIn("timeout_s", data)
 
     def test_get_page_url__by_name(self):
         crawler = Crawler()

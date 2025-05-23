@@ -154,7 +154,7 @@ class WebConfig(object):
             "enabled": enabled,
             "name": browser.__name__,
             "crawler": browser,
-            "settings": {"timeout_s": 20},
+            "settings": {"timeout_s": 30},
         }
 
     def get_requests():
@@ -162,7 +162,7 @@ class WebConfig(object):
             "enabled": True,
             "name": "RequestsCrawler",
             "crawler": RequestsCrawler,
-            "settings": {"timeout_s": 20},
+            "settings": {"timeout_s": 40},
         }
 
     def get_scriptcralwer(script, name=""):
@@ -171,14 +171,14 @@ class WebConfig(object):
                 "enabled": True,
                 "name": name,
                 "crawler": ScriptCrawler,
-                "settings": {"script": script, "timeout_s": 40},
+                "settings": {"script": script, "timeout_s": 50},
             }
         else:
             return {
                 "enabled": False,
                 "name": name,
                 "crawler": ScriptCrawler,
-                "settings": {"script": script, "timeout_s": 40},
+                "settings": {"script": script, "timeout_s": 50},
             }
 
     def get_seleniumheadless():
@@ -191,7 +191,7 @@ class WebConfig(object):
                 "crawler": SeleniumChromeHeadless,
                 "settings": {
                     "driver_executable": str(chromedriver_path),
-                    "timeout_s": 30,
+                    "timeout_s": 60,
                 },
             }
         else:
@@ -199,7 +199,7 @@ class WebConfig(object):
                 "enabled": True,
                 "name": "SeleniumChromeHeadless",
                 "crawler": SeleniumChromeHeadless,
-                "settings": {"driver_executable": None, "timeout_s": 40},
+                "settings": {"driver_executable": None, "timeout_s": 60},
             }
 
     def get_seleniumfull():
@@ -220,7 +220,7 @@ class WebConfig(object):
                 "enabled": False,
                 "name": "SeleniumChromeFull",
                 "crawler": SeleniumChromeFull,
-                "settings": {"driver_executable": None, "timeout_s": 40},
+                "settings": {"driver_executable": None, "timeout_s": 60},
             }
 
     def get_seleniumundetected():
@@ -233,7 +233,7 @@ class WebConfig(object):
                 "crawler": SeleniumUndetected,
                 "settings": {
                     "driver_executable": str(chromedriver_path),
-                    "timeout_s": 30,
+                    "timeout_s": 60,
                 },
             }
         else:
@@ -241,7 +241,7 @@ class WebConfig(object):
                 "enabled": False,
                 "name": "SeleniumUndetected",
                 "crawler": SeleniumUndetected,
-                "settings": {"driver_executable": None, "timeout_s": 40},
+                "settings": {"driver_executable": None, "timeout_s": 60},
             }
 
     def get_seleniumbase():

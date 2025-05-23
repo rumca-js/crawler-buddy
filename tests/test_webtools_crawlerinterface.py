@@ -25,7 +25,7 @@ class CrawlerInterfaceTest(FakeInternetTestCase):
         self.assertIn("User-Agent", crawler.request_headers)
         self.assertEqual(crawler.request_headers["User-Agent"], "Test-User-Agent")
 
-    def test_constructor__accept(self):
+    def test_constructor__get_accept_types(self):
         crawler = None
         url = "https://test.com"
         response_file = None
@@ -34,12 +34,29 @@ class CrawlerInterfaceTest(FakeInternetTestCase):
         settings["name"] = "Test"
         settings["crawler"] = "Crawler"
         settings["settings"] = {}
-        settings["settings"]["Accept"] = "text/html,application/xhtml+xml,application/xml,application/rss;q=0.9,*/*;q=0.8"
+        settings["settings"]["accept_content_types"] = "text/html,application/xhtml+xml,application/xml,application/rss;q=0.9,*/*;q=0.8"
 
         crawler = CrawlerInterface(request=None, url=url, response_file=None, settings=settings)
 
         self.assertIn("Accept", crawler.request_headers)
+        self.assertIn("accept_content_types", crawler.settings["settings"])
+
         self.assertEqual(sorted(crawler.get_accept_types()), ['application', 'html', 'rss', 'text', 'xhtml', 'xml'])
+
+    def test_constructor__timeout_s(self):
+        crawler = None
+        url = "https://test.com"
+        response_file = None
+
+        settings = {}
+        settings["name"] = "Test"
+        settings["crawler"] = "Crawler"
+        settings["settings"] = {}
+        settings["settings"]["timeout_s"] = 120
+
+        crawler = CrawlerInterface(request=None, url=url, response_file=None, settings=settings)
+
+        self.assertEqual(crawler.timeout_s, 120)
 
     def test_is_response_valid__true(self):
         crawler = None
@@ -67,7 +84,7 @@ class CrawlerInterfaceTest(FakeInternetTestCase):
         settings["name"] = "Test"
         settings["crawler"] = "Crawler"
         settings["settings"] = {}
-        settings["settings"]["Accept"] = "text/html,application/xhtml+xml,application/xml,application/rss;q=0.9,*/*;q=0.8"
+        settings["settings"]["accept_content_types"] = "text/html,application/xhtml+xml,application/xml,application/rss;q=0.9,*/*;q=0.8"
 
         crawler = CrawlerInterface(request=None, url=url, response_file=None, settings=settings)
 
