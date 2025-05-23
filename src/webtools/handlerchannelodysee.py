@@ -26,7 +26,7 @@ class OdyseeChannelHandler(DefaultChannelHandler):
 
         if short_url.startswith("odysee.com/@"):
             return True
-        if short_url.startswith("odysee.com/$/rss"):
+        elif short_url.startswith("odysee.com/$/rss"):
             return True
 
     def input2url(self, item):
@@ -38,6 +38,15 @@ class OdyseeChannelHandler(DefaultChannelHandler):
 
     def code2feed(self, code):
         return "https://odysee.com/$/rss/{}".format(code)
+
+    def get_feeds(self):
+        feeds = super().get_feeds()
+        if self.code:
+            feeds.append(
+                "https://odysee.com/$/rss/{}".format(self.code)
+            )
+
+        return feeds
 
     def is_channel_name(self):
         short_url = UrlLocation(self.url).get_protocolless()
@@ -101,14 +110,6 @@ class OdyseeChannelHandler(DefaultChannelHandler):
 
     def get_channel_feed(self):
         return self.code2feed(self.code)
-
-    def get_feeds(self):
-        result = []
-        if self.code:
-            result.append(self.code2feed(self.code))
-            return result
-        else:
-            return []
 
     def get_entries(self):
         rss_url = self.get_rss_url()

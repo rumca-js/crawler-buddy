@@ -605,6 +605,9 @@ class PageResponseObject(object):
         """
         This function informs that status code is so bad, that further communication does not make any sense
         """
+        if self.status_code is None:
+            return True
+
         if self.is_this_status_redirect():
             return False
 

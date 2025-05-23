@@ -40,12 +40,10 @@ class HandlerInterface(DefaultContentPage):
         """
         even for post, or individual videos we might request feed url
         """
-        if self.code:
-            return [self.code2feed(self.code)]
         return []
 
     def input2code(self, input_string):
-        raise NotImplementedError
+        pass
 
     def input2url(self, input_string):
         raise NotImplementedError
@@ -54,10 +52,10 @@ class HandlerInterface(DefaultContentPage):
         raise NotImplementedError
 
     def code2url(self, input_code):
-        raise NotImplementedError
+        pass
 
     def code2feed(self, code):
-        raise NotImplementedError
+        pass
 
     def get_name(self):
         raise NotImplementedError
