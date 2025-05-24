@@ -112,3 +112,21 @@ class HttpPageHandlerTest(FakeInternetTestCase):
         handler = HttpPageHandler(test_link, url_builder = Url)
 
         self.assertFalse(handler.is_handled_by())
+
+    def test_get_response__calls_crawler(self):
+        MockRequestCounter.reset()
+
+        test_link = "https://x.com/feed"
+        settings = Url(test_link).get_init_settings()
+        settings["settings"]["timeout_s"] = 120
+
+        handler = HttpPageHandler(test_link, settings = settings, url_builder = Url)
+        response = handler.get_response()
+
+        self.assertEqual(len(MockRequestCounter.request_history), 1)
+        self.assertIn("url", MockRequestCounter.request_history[0])
+        self.assertEqual(MockRequestCounter.request_history[0]["url"], test_link)
+        self.assertIn("crawler_data", MockRequestCounter.request_history[0])
+        self.assertIn("settings", MockRequestCounter.request_history[0]["crawler_data"])
+        self.assertIn("timeout_s", MockRequestCounter.request_history[0]["crawler_data"]["settings"])
+        self.assertEqual(MockRequestCounter.request_history[0]["crawler_data"]["settings"]["timeout_s"], 120)

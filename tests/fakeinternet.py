@@ -157,11 +157,11 @@ class MockRequestCounter(object):
     mock_page_requests = 0
     request_history = []
 
-    def requested(url, info=None):
+    def requested(url, info=None, crawler_data=None):
         """
         Info can be a dict
         """
-        MockRequestCounter.request_history.append([url, info])
+        MockRequestCounter.request_history.append({"url": url, "info" : info, "crawler_data": crawler_data})
         MockRequestCounter.mock_page_requests += 1
         #MockRequestCounter.debug_lines()
 
@@ -747,7 +747,7 @@ class DefaultCrawler(CrawlerInterface):
         else:
             print("FakeInternet:Url:{}".format(self.request.url))
 
-        MockRequestCounter.requested(request.url, info=self.settings)
+        MockRequestCounter.requested(request.url, crawler_data=self.settings)
 
         self.response = TestResponseObject(request.url, request.headers, request.timeout_s)
 

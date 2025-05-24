@@ -574,7 +574,7 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(len(MockRequestCounter.request_history), 1)
 
-        self.assertEqual(MockRequestCounter.request_history[0][0], "https://page-with-http-status-500.com")
+        self.assertEqual(MockRequestCounter.request_history[0]["url"], "https://page-with-http-status-500.com")
 
     def test_is_valid__html(self):
         MockRequestCounter.mock_page_requests = 0
