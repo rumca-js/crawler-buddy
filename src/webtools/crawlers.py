@@ -75,19 +75,6 @@ class CrawlerInterface(object):
         else:
             self.settings = settings
 
-        real_settings = {}
-        if settings and "settings" in settings:
-            real_settings = settings["settings"]
-
-        if self.request.timeout_s and "timeout_s" in real_settings:
-            self.timeout_s = max(self.request.timeout_s, real_settings["timeout_s"])
-        elif self.request.timeout_s:
-            self.timeout_s = self.request.timeout_s
-        elif "timeout_s" in real_settings:
-            self.timeout_s = real_settings["timeout_s"]
-        else:
-            self.timeout_s = 10
-
     def set_settings(self, settings):
         self.settings = settings
 
@@ -101,6 +88,19 @@ class CrawlerInterface(object):
         self.copy_settings_field("Accept-Charset")
         self.copy_settings_field("Accept-Encoding")
         self.copy_settings_field("Accept-Language")
+
+        real_settings = {}
+        if settings and "settings" in settings:
+            real_settings = settings["settings"]
+
+        if self.request.timeout_s and "timeout_s" in real_settings:
+            self.timeout_s = max(self.request.timeout_s, real_settings["timeout_s"])
+        elif self.request.timeout_s:
+            self.timeout_s = self.request.timeout_s
+        elif "timeout_s" in real_settings:
+            self.timeout_s = real_settings["timeout_s"]
+        else:
+            self.timeout_s = 10
 
     def copy_settings_field(self, field):
         if self.settings and "settings" in self.settings and field in self.settings["settings"]:
