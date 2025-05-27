@@ -23,12 +23,9 @@ Main Available Endpoints:
 
 Endpoints:
  - GET /get - form for getj Endpoint.
- - GET /getj - Crawls a specified page. Accepts the following query parameters:
-    - url (string): The URL to crawl.
-    - name (optional, string): The name of the crawler.
-    - crawler (optional, string): The crawler type.
-    - crawler_data (optional, string): Additional data for the crawler.
-    - Response: Returns JSON with crawl properties.
+ - GET /getj - Crawls a specified page. Returns JSON
+ - GET /contents - form for contentsr Endpoint
+ - GET /contentsr - Returns contents of URL, and status code as is
  - GET /feeds - Provides form for finding feeds for the specified URL
  - GET /feedsj - Provides feeds information
  - GET /socialj - Provides social and dynamic information about a specified URL.
@@ -36,9 +33,8 @@ Endpoints:
     - Response: Returns JSON with social data.
  - GET /link - Provides for link information
  - GET /linkj - Provides link information - canonical links, etc.
- - GET /rss link data as RSS stream
- - GET /proxy - Returns URL data as is, contents, status_code. Useful if you try to access page that is only accessible by selenium, or crawlee
-    - Response: Passes contents of response, and status code as is
+ - GET /rssify - form for rssifyr Endpoint
+ - GET /rssifyr - returns RSS data for link
 
 Operation Endpoints:
  - GET /history - Displays the crawl history.
