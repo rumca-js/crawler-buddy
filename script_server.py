@@ -27,7 +27,7 @@ from src import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "3.0.46"
+__version__ = "4.0.0"
 
 
 app = Flask(__name__)
@@ -54,6 +54,46 @@ def get_crawler_text():
         )
 
     return text
+
+
+def get_crawling_form(title, action_url, id=""):
+    crawlers_text = get_crawler_text()
+
+    form_html = f"""
+        <h1>{title}</h1>
+        <form action="{action_url}?id={id}" method="get">
+            <label for="url">URL:</label><br>
+            <input type="text" id="url" name="url" required><br><br>
+
+            <label for="name">Name (optional):</label><br>
+            <input type="text" id="name" name="name"><br><br>
+
+            <label for="crawler">Crawler (optional):</label><br>
+            <input type="text" id="crawler" name="crawler"><br><br>
+
+            <button type="submit">Submit</button>
+        </form>
+
+        <h1>Available crawlers:</h1>
+        <div style="margin-top:20px">
+        {crawlers_text}
+        </div>
+        """
+
+    return form_html
+
+
+def get_link_form(title, action_url, id=""):
+    form_html = f"""
+        <h1>{title}</h1>
+        <form action="{action_url}?id={id}" method="get">
+            <label for="url">URL:</label><br>
+            <input type="text" id="url" name="url" required><br><br>
+            <button type="submit">Submit</button>
+        </form>
+        """
+
+    return form_html
 
 
 @app.route("/")
@@ -83,16 +123,18 @@ def index():
         text += """<div><a href="/debug?id={}">Debug</a> - shows debug information</div>""".format(id)
 
     text += "<h2>Operational</h2>"
-    text += """<div><a href="/get?id={}">Get</a> - form for crawling a web page using GET method</div>""".format(id)
-    text += """<div><a href="/getj?id={}">Getj</a> - crawl a web page using GET method</div>""".format(id)
-    text += """<div><a href="/feeds?id={}">Feeds</a> - return form for finding feeds</div>""".format(id)
-    text += """<div><a href="/feedsj?id={}">Feedsj</a> - return feeds info JSON</div>""".format(id)
+    text += """<div><a href="/get?id={}">Get</a> - form for getting web page JSON information</div>""".format(id)
+    text += """<div><a href="/getj?id={}">Getj</a> - web page JSON information</div>""".format(id)
+    text += """<div><a href="/contents?id={}">Contents Form</a> - Form for getting web page contents</div>""".format(id)
+    text += """<div><a href="/contentsr?id={}">Contents response</a> - Page contents, as if read by the browser</div>""".format(id)
+    text += """<div><a href="/feeds?id={}">Feeds</a> - form for finding feeds</div>""".format(id)
+    text += """<div><a href="/feedsj?id={}">Feedsj</a> - feeds info JSON information</div>""".format(id)
     text += """<div><a href="/socialj?id={}">Socialj</a> - dynamic social data JSON</div>""".format(id)
     text += """<div><a href="/link?id={}">Linkj</a> - provides form for link retrieval</div>""".format(id)
-    text += """<div><a href="/linkj?id={}">Linkj</a> - return link info JSON</div>""".format(id)
-    text += """<div><a href="/archivesj?id={}">Archivesj</a> - return archive links info JSON</div>""".format(id)
-    text += """<div><a href="/rss?id={}">RSS</a> - if possible returns RSS contents for the link</div>""".format(id)
-    text += """<div><a href="/proxy?id={}">Proxy</a> - makes GET request, then passes you the contents, as is</div>""".format(id)
+    text += """<div><a href="/linkj?id={}">Linkj</a> - returns link info JSON</div>""".format(id)
+    text += """<div><a href="/archivesj?id={}">Archivesj</a> - returns archive links info JSON</div>""".format(id)
+    text += """<div><a href="/rssify?id={}">RSSify</a> - Form for RSSification. RSSification returns RSS contents for input link</div>""".format(id)
+    text += """<div><a href="/rssifyr?id={}">RSSifyr</a> - RSSification response</div>""".format(id)
 
     text += "<h2>Management</h2>"
     text += """<div><a href="/find?id={}">Find</a> - form for findj</div>""".format(id)
@@ -366,31 +408,9 @@ def get():
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-    crawlers_text = get_crawler_text()
+    form_text = get_crawling_form("Get JSON information", "/getj", id)
 
-    form_html = f"""
-        <h1>Submit Your Details</h1>
-        <form action="/getj?id={id}" method="get">
-            <label for="url">URL:</label><br>
-            <input type="text" id="url" name="url" required><br><br>
-
-            <label for="name">Name (optional):</label><br>
-            <input type="text" id="name" name="name"><br><br>
-
-            <label for="crawler">Crawler (optional):</label><br>
-            <input type="text" id="crawler" name="crawler"><br><br>
-
-            <button type="submit">Submit</button>
-        </form>
-
-        <h1>Available crawlers:</h1>
-        <div style="margin-top:20px">
-        {crawlers_text}
-        </div>
-        """
-    print(form_html)
-
-    return get_html(id=id, body=form_html, title="Get")
+    return get_html(id=id, body=form_text, title="Get")
 
 
 @app.route("/getj", methods=["GET"])
@@ -436,8 +456,19 @@ def getj():
         )
 
 
-@app.route("/rss", methods=["GET"])
-def rss():
+@app.route("/rssify", methods=["GET"])
+def rssify_this():
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    form_text = get_crawling_form("Get RSS for link", "/rssifyr", id)
+
+    return get_html(id=id, body=form_text, title="Get")
+
+
+@app.route("/rssifyr", methods=["GET"])
+def rssifyr():
     id = request.args.get("id")
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -474,17 +505,28 @@ def rss():
         all_properties = None
 
     if not all_properties:
-        return jsonify({"success": False, "error": "No properties found"}), 400
+        return jsonify({"success": False, "error": "No properties found - no properties"}), 400
 
     entries = CrawlHistory.read_properties_section("Entries", all_properties)
     if not entries or len(entries) == 0:
-        return jsonify({"success": False, "error": "No entries found"}), 400
+        return jsonify({"success": False, "error": "No entries found - no entries"}), 400
 
     return Response(rssify(all_properties), mimetype='application/rss+xml')
 
 
-@app.route("/proxy", methods=["GET"])
-def proxy():
+@app.route("/contents", methods=["GET"])
+def contents():
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    form_text = get_crawling_form("Get link contents", "/contentsr", id)
+
+    return get_html(id=id, body=form_text, title="Get")
+
+
+@app.route("/contentsr", methods=["GET"])
+def contentsr():
     id = request.args.get("id")
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -507,7 +549,7 @@ def proxy():
     if not all_properties:
         return jsonify({"success": False, "error": "No properties found"}), 400
 
-    contents_data = CrawlHistory.read_properties_section("Contents", all_properties)
+    contents_data = CrawlHistory.read_properties_section("Text", all_properties)
     if "Contents" in contents_data:
         contents = contents_data["Contents"]
     else:
@@ -657,16 +699,7 @@ def link():
     url = request.args.get("url")
 
     if not url:
-        form_html = """
-            <h1>Submit</h1>
-            <form action="/link?id={}" method="get">
-                <label for="url">URL:</label><br>
-                <input type="text" id="url" name="url" required><br><br>
-                <button type="submit">Submit</button>
-            </form>
-            """.format(
-            id
-        )
+        form_html = get_link_form("Get link information", "/linkj", id)
         return get_html(id=id, body=form_html, title="Feeds")
 
     page_url = webtools.Url(url)
@@ -714,16 +747,7 @@ def feeds():
     url = request.args.get("url")
 
     if not url:
-        form_html = """
-            <h1>Submit</h1>
-            <form action="/feeds?id={}" method="get">
-                <label for="url">URL:</label><br>
-                <input type="text" id="url" name="url" required><br><br>
-                <button type="submit">Submit</button>
-            </form>
-            """.format(
-            id
-        )
+        form_html = get_link_form("Find feeds information", "feedsj", id)
         return get_html(id=id, body=form_html, title="Feeds")
 
     page_url = webtools.Url(url)
