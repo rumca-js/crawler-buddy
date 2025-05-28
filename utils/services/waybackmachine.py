@@ -4,7 +4,7 @@ from datetime import datetime, date, timedelta
 
 from waybackpy import WaybackMachineCDXServerAPI, WaybackMachineSaveAPI
 
-from src.webtools import UrlLocation, HttpRequestBuilder, HttpPageHandler
+from src.webtools import UrlLocation, HttpPageHandler
 from utils.logger import get_logger
 
 
@@ -16,7 +16,7 @@ class WaybackMachine(object):
         if self.url != url:
             self.url = url
 
-            user_agent = HttpRequestBuilder.user_agent
+            user_agent = HttpPageHandler.user_agent
 
             cdx_api = WaybackMachineCDXServerAPI(url, user_agent)
 
@@ -34,7 +34,7 @@ class WaybackMachine(object):
             if self.oldest.date() > time or self.newest.date() < time:
                 return
 
-        user_agent = HttpRequestBuilder.user_agent
+        user_agent = HttpPageHandler.user_agent
 
         cdx_api = WaybackMachineCDXServerAPI(url, user_agent)
         handle = cdx_api.near(year=time.year, month=time.month, day=time.day, hour=12)

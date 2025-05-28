@@ -38,7 +38,6 @@ from .pages import (
 )
 from .handlerhttppage import (
     HttpPageHandler,
-    HttpRequestBuilder,
 )
 from .crawlers import (
     RequestsCrawler,

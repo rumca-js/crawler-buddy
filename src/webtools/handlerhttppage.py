@@ -42,21 +42,15 @@ class HttpRequestBuilder(object):
     It should not be called directly, nor used
     """
 
-    # use headers from https://www.supermonitoring.com/blog/check-browser-http-headers/
-
-    def __init__(self, url=None, settings=None, request=None, url_builder=None):
+    def __init__(self, url=None, settings=None, url_builder=None):
         """
         @param url URL
         @param contents URL page contents
         @param use_selenium decides if selenium is used
         """
-        self.request = request
         self.response = None
-        self.timeout_s = 10
-
         self.url = url
         self.settings = settings
-        self.robots_contents = None
 
         # Flag to not retry same contents requests for things we already know are dead
         self.dead = False
@@ -74,29 +68,6 @@ class HttpRequestBuilder(object):
             self.protocol = "http"
         else:
             self.protocol = "https"
-
-        self.user_agent = None
-        if request:
-            if request.user_agent:
-                self.user_agent = request.user_agent
-
-        if not self.user_agent:
-            self.user_agent = HttpPageHandler.user_agent
-
-        self.headers = None
-        if request:
-            if request.request_headers:
-                self.headers = request.request_headers
-
-        if not self.headers:
-            self.headers = {
-                "User-Agent": self.user_agent,
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "Accept-Charset": "utf-8,ISO-8859-1;q=0.7,*;q=0.3",
-                "Accept-Encoding": "none",
-                "Accept-Language": "en-US,en;q=0.8",
-                "Connection": "keep-alive",
-            }
 
     def get_response(self):
         if self.response:
@@ -119,7 +90,7 @@ class HttpRequestBuilder(object):
         if response:
             return response.get_binary()
 
-    def get_contents_internal(self, request):
+    def get_contents_internal(self):
         """
         """
         crawler_data = self.settings
@@ -128,18 +99,19 @@ class HttpRequestBuilder(object):
             return
 
         if "crawler" not in crawler_data:
-            WebLogger.error("Url:{} No crawler in crawler data".format(request.url))
+            WebLogger.error("Url:{} No crawler in crawler data".format(self.url))
             return
 
         crawler = crawler_data["crawler"]
 
         WebLogger.debug(
             info_text="Url:{}: Running crawler {}\n{}".format(
-                request.url, type(crawler), crawler_data
+                self.url, type(crawler), crawler_data
             ),
             stack=False,
         )
 
+        crawler.set_url(self.url)
         crawler.set_settings(crawler_data)
 
         start_time = time.time()
@@ -151,14 +123,14 @@ class HttpRequestBuilder(object):
             response.set_crawler(crawler_data)
             if response.errors:
                 for error in response.errors:
-                    WebLogger.debug("Url:{}: {}".format(request.url, error))
+                    WebLogger.debug("Url:{}: {}".format(self.url, error))
 
             response.crawl_time_s = end_time - start_time
         crawler.close()
 
         WebLogger.debug(
             "Url:{}: Running crawler {}\n{} DONE".format(
-                request.url, type(crawler), crawler_data
+                self.url, type(crawler), crawler_data
             )
         )
 
@@ -166,70 +138,19 @@ class HttpRequestBuilder(object):
             return response
 
         self.dead = True
-        WebLogger.debug("Url:{} No response from crawler".format(request.url))
+        WebLogger.debug("Url:{} No response from crawler".format(self.url))
 
         self.response = PageResponseObject(
-            request.url,
+            self.url,
             text=None,
             status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-            request_url=request.url,
+            request_url=self.url,
         )
         return self.response
-
-    def ping(self, timeout_s=5):
-        url = self.url
-
-        if url is None:
-            stack_lines = traceback.format_stack()
-            stack_str = "".join(stack_lines)
-
-            WebLogger.error("Passed incorrect url {}".format(stack_str))
-            return
-
-        o = PageRequestObject(
-            url=url,
-            request_headers=self.headers,
-            timeout_s=timeout_s,
-            ping=True,
-        )
-
-        response = self.get_contents_internal(request=o)
-
-        return response and response.is_valid()
-
-    def get_headers_response(self, timeout_s=5):
-        url = self.url
-
-        if url is None:
-            stack_lines = traceback.format_stack()
-            stack_str = "".join(stack_lines)
-
-            WebLogger.error("Passed incorrect url {}".format(stack_str))
-            return
-
-        try:
-            o = PageRequestObject(
-                url=url,
-                headers=self.headers,
-                timeout_s=timeout_s,
-                ping=True,
-            )
-
-            response = self.get_contents_internal(request=o)
-            if response and response.is_valid():
-                return response
-
-        except Exception as E:
-            WebLogger.exc(E, "Url:{}. Header request error\n".format(url))
-            return None
 
     def get_response_implementation(self):
         if self.response and self.response.text:
             return self.response
-
-        if not self.user_agent or self.user_agent == "":
-            self.dead = True
-            return None
 
         if self.dead:
             return None
@@ -245,25 +166,9 @@ class HttpRequestBuilder(object):
             self.dead = True
             return None
 
-        request = PageRequestObject(
-            url=self.url,
-            headers=self.headers,
-            timeout_s=self.timeout_s,
-        )
-
-        self.response = self.get_contents_internal(request=request)
+        self.response = self.get_contents_internal()
 
         return self.response
-
-    @lazy_load_content
-    def is_valid(self):
-        if not self.response:
-            return False
-
-        if self.response.is_this_status_ok() or self.response.is_this_status_redirect():
-            return True
-        else:
-            return False
 
     def is_url_valid(self):
         if self.url == None:
@@ -274,18 +179,6 @@ class HttpRequestBuilder(object):
             return False
 
         return True
-
-    def try_decode(self, thebytes):
-        try:
-            return thebytes.decode("UTF-8", errors="replace")
-        except Exception as e:
-            pass
-
-    def is_this_status_ok(self, status_code):
-        if status_code == 0:
-            return False
-
-        return status_code >= 200 and status_code < 300
 
 
 class HttpPageHandler(HandlerInterface):
@@ -347,9 +240,6 @@ class HttpPageHandler(HandlerInterface):
                 self.response = builder.get_response()
 
                 if not self.response:
-                    return
-
-                if not builder.is_valid():
                     return
 
         else:
@@ -530,7 +420,3 @@ class HttpPageHandler(HandlerInterface):
             result.extend(feeds)
 
         return result
-
-    def ping(self, timeout_s=120):
-        builder = HttpRequestBuilder(url=self.url, settings=self.settings)
-        return builder.ping()

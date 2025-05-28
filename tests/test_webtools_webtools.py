@@ -1,6 +1,5 @@
 import hashlib
 from src.webtools import (
-   HttpRequestBuilder,
    InputContent,
    PageOptions,
    calculate_hash,
@@ -127,23 +126,6 @@ class PageOptionsTest(FakeInternetTestCase):
 
         self.assertEqual(o.mode_mapping[0]["crawler"], "test2")
         self.assertEqual(o.mode_mapping[1]["crawler"], "test1")
-
-
-class HttpRequestBuilderTest(FakeInternetTestCase):
-    def setUp(self):
-        self.disable_web_pages()
-
-    def test_calculate_hash(self):
-        self.assertEqual(
-            HttpRequestBuilder.calculate_hash(webpage_links),
-            hashlib.md5(text.encode("utf-8")).digest(),
-        )
-
-    def test_calculate_hash(self):
-        self.assertEqual(
-            calculate_hash(webpage_links),
-            hashlib.md5(webpage_links.encode("utf-8")).digest(),
-        )
 
 
 class InputContentTest(FakeInternetTestCase):

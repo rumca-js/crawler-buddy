@@ -102,6 +102,9 @@ class CrawlerInterface(object):
         else:
             self.timeout_s = 10
 
+    def set_url(self, url):
+        self.request.url = url
+
     def copy_settings_field(self, field):
         if self.settings and "settings" in self.settings and field in self.settings["settings"]:
             self.request_headers[field] = self.settings["settings"][field]
