@@ -20,25 +20,29 @@ Main Available Endpoints:
  - GET / - Provides index page
  - GET /info - Displays information about available crawlers. Returns JSON with crawler properties.
  - GET /infoj - Similar to /info, but explicitly returns the information, in JSON format.
+ - GET /system - Information about system.
+ - GET /history - Displays the crawl history.
+ - GET /historyj - Displays the crawl history, in JSON format.
+ - GET /debug - debug information
 
 Endpoints:
  - GET /get - form for getj Endpoint.
  - GET /getj - Crawls a specified page. Returns JSON
  - GET /contents - form for contentsr Endpoint
  - GET /contentsr - Returns contents of URL, and status code as is
- - GET /feeds - Provides form for finding feeds for the specified URL
- - GET /feedsj - Provides feeds information
+ - GET /feeds - form for finding feeds for the specified URL
+ - GET /feedsj - feeds information JSON
  - GET /socialj - Provides social and dynamic information about a specified URL.
     - Query parameter: url (string).
     - Response: Returns JSON with social data.
- - GET /link - Provides for link information
+ - GET /link - form for link information
  - GET /linkj - Provides link information - canonical links, etc.
- - GET /rssify - form for rssifyr Endpoint
+ - GET /archivesj - Provides archives links (to web archive etc)
+ - GET /rssify - form for RSS contents
  - GET /rssifyr - returns RSS data for link
 
 Operation Endpoints:
- - GET /history - Displays the crawl history.
- - GET /historyj - Displays the crawl history, in JSON format.
+
  - GET /queue - Displays information about the current queue.
  - GET /removej - removes history entry
  - GET /find - form for findj Endpoint.
