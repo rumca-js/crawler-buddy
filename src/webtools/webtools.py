@@ -461,6 +461,9 @@ class PageResponseObject(object):
         self.crawler_data = None
         self.crawl_time_s = None
 
+        if self.status_code is None:
+            self.status_code = 0
+
         self.binary = None
         self.text = None
 
@@ -588,6 +591,9 @@ class PageResponseObject(object):
 
     def is_this_status_ok(self):
         if self.status_code == 0:
+            return False
+
+        if self.status_code == None:
             return False
 
         return self.status_code >= 200 and self.status_code < 300
