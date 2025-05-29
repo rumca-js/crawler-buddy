@@ -96,10 +96,13 @@ class UrlPropertyValidator(UrlContentsModerator):
             or title.find("404 not found") >= 0
             or title.find("404: not found") >= 0
             or title.find("404 not_found") >= 0
-            or title.find("error 404") >= 0
+            or title.find("404 - not found") >= 0
             or title.find("404 error") >= 0
             or title.find("404 page") >= 0
             or title.find("404 file not found") >= 0
+            or title.find("error 404") >= 0
+            or title.find("purged account") >= 0
+            or title.find("410 gone") >= 0
             or title.find("squarespace - website expired") >= 0
             or title.find("domain name for sale") >= 0
             or title.find("account suspended") >= 0

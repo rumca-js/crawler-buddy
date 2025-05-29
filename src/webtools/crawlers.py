@@ -908,6 +908,8 @@ class SeleniumDriver(CrawlerInterface):
         response = self.get_response_logs(logs)
         if response:
             return response["status"]
+        else:
+            return 0
 
     def get_selenium_headers_from_logs(self, logs):
         """
