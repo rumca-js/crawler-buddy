@@ -50,7 +50,7 @@ Operation Endpoints:
     - Query parameter: url (string).
     - Response: Returns JSON with the last crawl details.
 
-## GET request
+## /getj request
 
 The getj Entpoint request arguments
 
@@ -73,7 +73,7 @@ settings is a dict, with settings:
  - byte_limit (int): content length limit. Sometime I just don't want to download 1GB of data before checking what's in it. Default value is 5MB
  - script (string): string informing which script should be used. Useful if ScriptCrawler is used
 
-## GET response JSON
+## /getj response
 
 Fields:
 
