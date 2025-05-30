@@ -2,9 +2,9 @@
 # export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring
 
 [tool.poetry]
-name = "linklibrary"
-version = "0.10.4"
-description = "Link Archive"
+name = "crawler-buddy"
+version = "4.0.4"
+description = "Internet Crawler"
 authors = ["Iwan Grozny <renegat@renegat0x0.ddns.net>"]
 license = "GPL3"
 readme = "README.md"
@@ -43,7 +43,8 @@ undetected-chromedriver = "^3.5.5"
 crawlee="0.1.1"
 playwright="*"
 
-stealth_requests = "*"
+stealth_requests = "^1.2.3"
+httpx = "*"
 
 flask="*"
 
