@@ -471,6 +471,7 @@ class HttpxCrawler(CrawlerInterface):
                 timeout=self.timeout_s,
                 verify=self.request.ssl_verify,
                 headers = headers,
+                follow_redirects=True,
                 #stream=True, # TODO
             )
             return answer
