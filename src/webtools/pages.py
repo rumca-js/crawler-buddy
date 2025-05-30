@@ -1,3 +1,7 @@
+"""
+Provides interface and page types Html, RSS, JSON etc.
+"""
+
 from time import strptime
 from bs4 import BeautifulSoup
 import re

@@ -22,6 +22,7 @@ from .crawlers import (
     SeleniumWireFull,
     StealthRequestsCrawler,
     CurlCffiCrawler,
+    HttpxCrawler,
 )
 
 
@@ -49,6 +50,7 @@ class WebConfig(object):
             SeleniumWireFull,
             StealthRequestsCrawler,
             CurlCffiCrawler,
+            HttpxCrawler,
         ]
 
         return browsers
@@ -100,6 +102,7 @@ class WebConfig(object):
         mapping.append(WebConfig.get_default_browser_setup(SeleniumWireFull))
         mapping.append(WebConfig.get_default_browser_setup(StealthRequestsCrawler))
         mapping.append(WebConfig.get_default_browser_setup(CurlCffiCrawler))
+        mapping.append(WebConfig.get_default_browser_setup(HttpxCrawler))
 
         return mapping
 

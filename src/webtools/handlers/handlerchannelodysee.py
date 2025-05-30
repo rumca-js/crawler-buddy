@@ -1,6 +1,8 @@
-from .defaulturlhandler import DefaultChannelHandler
-from .urllocation import UrlLocation
+from ..webtools import WebLogger
+from ..urllocation import UrlLocation
+
 from .handlerhttppage import HttpPageHandler
+from .defaulturlhandler import DefaultChannelHandler
 
 
 class OdyseeChannelHandler(DefaultChannelHandler):
@@ -119,7 +121,6 @@ class OdyseeChannelHandler(DefaultChannelHandler):
             return []
 
     def get_rss_url(self):
-        from .webtools import WebLogger
 
         if self.rss_url:
             return self.rss_url

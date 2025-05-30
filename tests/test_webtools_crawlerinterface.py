@@ -22,8 +22,8 @@ class CrawlerInterfaceTest(FakeInternetTestCase):
 
         crawler = CrawlerInterface(request=None, url=url, response_file=None, settings=settings)
 
-        self.assertIn("User-Agent", crawler.request_headers)
-        self.assertEqual(crawler.request_headers["User-Agent"], "Test-User-Agent")
+        self.assertIn("User-Agent", crawler.get_request_headers())
+        self.assertEqual(crawler.get_request_headers()["User-Agent"], "Test-User-Agent")
 
     def test_constructor__get_accept_types(self):
         crawler = None
@@ -38,7 +38,7 @@ class CrawlerInterfaceTest(FakeInternetTestCase):
 
         crawler = CrawlerInterface(request=None, url=url, response_file=None, settings=settings)
 
-        self.assertIn("Accept", crawler.request_headers)
+        self.assertIn("Accept", crawler.get_request_headers())
         self.assertIn("accept_content_types", crawler.settings["settings"])
 
         self.assertEqual(sorted(crawler.get_accept_types()), ['application', 'html', 'rss', 'text', 'xhtml', 'xml'])

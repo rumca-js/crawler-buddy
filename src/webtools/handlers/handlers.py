@@ -1,11 +1,13 @@
 import json
 
-from .defaulturlhandler import DefaultUrlHandler, DefaultChannelHandler
-from .urllocation import UrlLocation
-from .pages import RssPage
-from .webtools import (
+from ..urllocation import UrlLocation
+from ..pages import RssPage
+from ..webtools import (
     WebLogger,
 )
+
+from .handlerhttppage import HttpPageHandler
+from .defaulturlhandler import DefaultUrlHandler, DefaultChannelHandler
 
 
 class RedditUrlHandler(DefaultUrlHandler):
@@ -60,11 +62,12 @@ class RedditUrlHandler(DefaultUrlHandler):
 
         Instead we manually read values.
         """
-        from .url import Url
-
         url_link = self.get_json_url()
         if url_link:
-            url = Url(url_link)
+
+            settings = {}
+            settings["handler_class"] = HttpPageHandler
+            url = self.url_builder(url=url_link, settings=settings)
             contents = url.get_contents()
 
             if contents:
@@ -200,11 +203,12 @@ class GitHubUrlHandler(DefaultUrlHandler):
 
         Instead we manually read values.
         """
-        from .url import Url
 
         url_link = self.get_json_url()
         if url_link:
-            url = Url(url_link)
+            settings = {}
+            settings["handler_class"] = HttpPageHandler
+            url = self.url_builder(url=url_link, settings=settings)
             contents = url.get_contents()
 
             if contents:
@@ -334,11 +338,12 @@ class HackerNewsHandler(DefaultUrlHandler):
 
         Instead we manually read values.
         """
-        from .url import Url
 
         url_link = self.get_json_url()
         if url_link:
-            url = Url(url_link)
+            settings = {}
+            settings["handler_class"] = HttpPageHandler
+            url = self.url_builder(url=url_link, settings=settings)
             contents = url.get_contents()
 
             if contents:

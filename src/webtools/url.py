@@ -1,9 +1,8 @@
 """
-Url class
+Main Url handling class
 
 @example
-options = Url.get_url_options("https://google.com")
-url = Url(link = "https://google.com", page_options=options)
+url = Url(link = "https://google.com")
 response = url.get_response()
 
 options.request.url
@@ -36,18 +35,16 @@ from .pages import (
     RssPage,
     HtmlPage,
 )
-from .handlerhttppage import (
-    HttpPageHandler,
-)
 from .crawlers import (
     RequestsCrawler,
 )
 
-from .handlervideoyoutube import YouTubeJsonHandler
-from .handlervideoodysee import OdyseeVideoHandler
-from .handlerchannelyoutube import YouTubeChannelHandler
-from .handlerchannelodysee import OdyseeChannelHandler
 from .handlers import (
+    YouTubeJsonHandler,
+    OdyseeVideoHandler,
+    YouTubeChannelHandler,
+    OdyseeChannelHandler,
+
     RedditUrlHandler,
     ReturnDislike,
     GitHubUrlHandler,
@@ -55,6 +52,8 @@ from .handlers import (
     InternetArchive,
     FourChanChannelHandler,
     TwitterUrlHandler,
+
+    HttpPageHandler,
 )
 
 from utils.dateutils import DateUtils

@@ -11,7 +11,7 @@ from datetime import timedelta
 
 from utils.dateutils import DateUtils
 
-from .webtools import (
+from ..webtools import (
     WebLogger,
     PageRequestObject,
     PageResponseObject,
@@ -24,14 +24,15 @@ from .webtools import (
     HTTP_STATUS_CODE_PAGE_UNSUPPORTED,
     HTTP_STATUS_CODE_SERVER_ERROR,
 )
-from .urllocation import UrlLocation
-from .pages import (
+from ..urllocation import UrlLocation
+from ..pages import (
     HtmlPage,
     RssPage,
     PageFactory,
 )
+from ..webconfig import WebConfig
+
 from .handlerinterface import HandlerInterface
-from .webconfig import WebConfig
 
 
 class HttpRequestBuilder(object):

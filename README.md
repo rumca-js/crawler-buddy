@@ -140,6 +140,7 @@ For example available are:
  - SeleniumChromeHeadless - selenium chrome headless
  - SeleniumChromeFull - selenium full mode
  - CurlCffiCrawler - [curl-cffi](https://github.com/lexiforest/curl_cffi) crawler
+ - HttpxCrawler - [httpx](https://github.com/projectdiscovery/httpx) crawler
  - StealthRequestsCrawler - [stealth requests](https://github.com/jpjacobpadilla/Stealth-Requests)
  - SeleniumBase - [SeleniumBase](https://github.com/seleniumbase/SeleniumBase) [disabled]
 

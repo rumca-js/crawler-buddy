@@ -1,5 +1,5 @@
-from .pages import DefaultContentPage
-from .webtools import calculate_hash_binary, calculate_hash
+from ..pages import DefaultContentPage
+from ..webtools import calculate_hash_binary, calculate_hash
 
 
 class HandlerInterface(DefaultContentPage):

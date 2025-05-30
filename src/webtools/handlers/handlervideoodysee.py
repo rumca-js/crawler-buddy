@@ -1,5 +1,6 @@
+from ..urllocation import UrlLocation
+
 from .defaulturlhandler import DefaultUrlHandler
-from .urllocation import UrlLocation
 
 
 class OdyseeVideoHandler(DefaultUrlHandler):

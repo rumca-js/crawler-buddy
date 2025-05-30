@@ -1,7 +1,6 @@
 from utils.dateutils import DateUtils
 
-from .pages import DefaultContentPage
-from .handlerinterface import HandlerInterface
+from ..pages import DefaultContentPage
 from .handlerhttppage import HttpPageHandler
 
 

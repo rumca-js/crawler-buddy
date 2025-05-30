@@ -15,11 +15,16 @@ from .url import (
     fetch_all_urls,
 )
 
-from .handlerhttppage import (
+from .handlers import (
     HttpRequestBuilder,
     HttpPageHandler,
-)
-from .handlers import (
+
+    YouTubeChannelHandler,
+    YouTubeVideoHandler, 
+    YouTubeJsonHandler,
+    OdyseeChannelHandler,
+    OdyseeVideoHandler,
+
     RedditUrlHandler,
     GitHubUrlHandler,
     ReturnDislike,
@@ -44,11 +49,6 @@ from .crawlerscript import (
     ScriptCrawlerInterface,
 )
 
-from .handlerchannelyoutube import YouTubeChannelHandler
-from .handlervideoyoutube import YouTubeVideoHandler, YouTubeJsonHandler
-
-from .handlerchannelodysee import OdyseeChannelHandler
-from .handlervideoodysee import OdyseeVideoHandler
 
 from .feedclient import FeedClient, FeedClientParser
 

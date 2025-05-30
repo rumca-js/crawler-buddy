@@ -13,14 +13,11 @@ import subprocess
 import threading
 import urllib.parse
 
-from utils.dateutils import DateUtils
 from utils.basictypes import fix_path_for_os
 
-from .webtools import (
-    PageRequestObject,
+from ..webtools import (
     PageResponseObject,
     WebLogger,
-    get_request_to_bytes,
     get_response_from_bytes,
     HTTP_STATUS_CODE_EXCEPTION,
     HTTP_STATUS_CODE_CONNECTION_ERROR,
@@ -29,24 +26,11 @@ from .webtools import (
     HTTP_STATUS_CODE_PAGE_UNSUPPORTED,
     HTTP_STATUS_CODE_SERVER_ERROR,
 )
-from .pages import (
+from ..pages import (
     RssPage,
     HtmlPage,
 )
-
-from .ipc import (
-    string_to_command,
-)
-
-
-default_headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0",
-    "Accept": "text/html,application/xhtml+xml,application/xml,application/rss;q=0.9,*/*;q=0.8",
-    "Accept-Charset": "utf-8,ISO-8859-1;q=0.7,*;q=0.3",
-    "Accept-Encoding": "none",
-    "Accept-Language": "en-US,en;q=0.8",
-    "Connection": "keep-alive",
-}
+from .crawlerinterface import CrawlerInterface
 
 
 class WebToolsTimeoutException(Exception):
@@ -56,241 +40,14 @@ class WebToolsTimeoutException(Exception):
         super().__init__(message)
 
 
-class CrawlerInterface(object):
-    def __init__(self, request=None, url=None, response_file=None, settings=None):
-        """
-        @param response_file If set, response is stored in a file
-        @param settings passed settings
-        """
-        if not request and url:
-            request = PageRequestObject(url)
-        elif not request and not url:
-            raise TypeError("Incorrect crawler use")
-
-        self.request = request
-        self.response = None
-        self.response_file = response_file
-        if settings:
-            self.set_settings(settings)
-        else:
-            self.settings = settings
-
-    def set_settings(self, settings):
-        self.settings = settings
-
-        if self.request and self.request.request_headers:
-            self.request_headers = self.request.request_headers
-        else:
-            self.request_headers = default_headers
-
-        self.copy_settings_field("User-Agent")
-        self.copy_settings_field("Accept")
-        self.copy_settings_field("Accept-Charset")
-        self.copy_settings_field("Accept-Encoding")
-        self.copy_settings_field("Accept-Language")
-
-        real_settings = {}
-        if settings and "settings" in settings:
-            real_settings = settings["settings"]
-
-        if self.request.timeout_s and "timeout_s" in real_settings:
-            self.timeout_s = max(self.request.timeout_s, real_settings["timeout_s"])
-        elif self.request.timeout_s:
-            self.timeout_s = self.request.timeout_s
-        elif "timeout_s" in real_settings:
-            self.timeout_s = real_settings["timeout_s"]
-        else:
-            self.timeout_s = 10
-
-    def set_url(self, url):
-        self.request.url = url
-
-    def copy_settings_field(self, field):
-        if self.settings and "settings" in self.settings and field in self.settings["settings"]:
-            self.request_headers[field] = self.settings["settings"][field]
-
-    def get_accept_types(self):
-        if "settings" not in self.settings:
-            return
-
-        accept_string = self.settings["settings"].get("accept_content_types", "all")
-        
-        semicolon_index = accept_string.find(";")
-        if semicolon_index >= 0:
-            accept_string = accept_string[:semicolon_index]
-
-        result = set()
-        # Split by comma to separate media types
-        media_types = accept_string.split(",")
-        for media in media_types:
-            # Further split each media type by '/' and '+'
-            parts = media.strip().replace('+', '/').split('/')
-            for part in parts:
-                if part:
-                    result.add(part.strip())
-        
-        return list(result)
-
-    def run(self):
-        """
-         - does its job
-         - sets self.response
-         - clears everything from memory, it created
-
-        if crawler can access web, then should return response (may be invalid)
-
-        @return response, None if feature is not available
-        """
-        return self.response
-
-    def is_response_valid(self):
-        if not self.response:
-            return False
-
-        if not self.response.is_valid():
-            self.response.add_error("Response not valid")
-            return False
-
-        content_length = self.response.get_content_length()
-
-        if content_length is not None and "bytes_limit" in self.settings["settings"]:
-            if content_length > self.settings["settings"]["bytes_limit"]:
-                WebLogger.debug("Page is too big: ".format(content_length))
-                self.response.add_error("Page is too big: ".format(content_length))
-                return False
-
-        content_type = self.response.get_content_type_keys()
-        content_type_keys = self.response.get_content_type_keys()
-        if content_type_keys:
-            if "all" in self.get_accept_types():
-                return True
-
-            match_count = 0
-            for item in content_type_keys:
-                if item in self.get_accept_types():
-                    match_count += 1
-
-            if match_count == 0:
-                WebLogger.debug("Response type is not supported:{}".format(content_type))
-                self.response.add_error("Response type is not supported:{}".format(content_type))
-                return False
-
-        return True
-
-    def response_to_bytes(self):
-        all_bytes = bytearray()
-
-        if not self.response:
-            return all_bytes
-
-        # same as PageResponseObject
-        bytes1 = string_to_command("PageResponseObject.__init__", "OK")
-        all_bytes.extend(bytes1)
-        bytes2 = string_to_command("PageResponseObject.url", self.response.url)
-        all_bytes.extend(bytes2)
-
-        if self.response and self.response.request_url:
-            thebytes = string_to_command(
-                "PageResponseObject.request_url", self.response.request_url
-            )
-            all_bytes.extend(thebytes)
-
-        bytes4 = string_to_command(
-            "PageResponseObject.status_code", str(self.response.status_code)
-        )
-        all_bytes.extend(bytes4)
-
-        if self.response and self.response.text:
-            bytes5 = string_to_command("PageResponseObject.text", self.response.text)
-            all_bytes.extend(bytes5)
-
-        bytes6 = string_to_command(
-            "PageResponseObject.headers", json.dumps(self.response.headers)
-        )
-        all_bytes.extend(bytes6)
-
-        bytes7 = string_to_command("PageResponseObject.__del__", "OK")
-        all_bytes.extend(bytes7)
-
-        return all_bytes
-
-    def get_response(self):
-        return self.response
-
-    def save_response(self):
-        if not self.response:
-            if self.request:
-                WebLogger.error(
-                    "Url:{} Have not received response".format(self.request.url)
-                )
-            else:
-                WebLogger.error("Have not received response")
-            return False
-
-        if self.response_file:
-            self.save_response_file(self.response_file)
-
-        if self.settings and "remote_server" in self.settings:
-            self.save_response_remote(self.settings["remote_server"])
-
-        return True
-
-    def save_response_file(self, file_name):
-        if not file_name:
-            return
-
-        all_bytes = self.response_to_bytes()
-
-        path = Path(self.response_file)
-        if not path.parent.exists():
-            path.parent.mkdir(parents=True, exist_ok=True)
-
-        with open(self.response_file, "wb") as fh:
-            fh.write(all_bytes)
-
-    def save_response_remote(self, remote_server):
-        import requests
-
-        if not self.response:
-            return
-
-        payload = {}
-        payload["url"] = self.response.url
-        payload["request_url"] = self.response.request_url
-        payload["Contents"] = self.response.get_text()
-        payload["Headers"] = self.response.get_headers()
-        payload["status_code"] = self.response.status_code
-
-        try:
-            response = requests.post(remote_server + "/set", json=payload)
-
-            if response.status_code == 200:
-                print("Response successfully sent to the remote server.")
-                return response.json()  # Assuming the server responds with JSON
-            else:
-                print(f"Failed to send response. Status code: {response.status_code}")
-                print(f"Response text: {response.text}")
-                return None
-        except requests.RequestException as e:
-            # Handle any exceptions raised by the requests library
-            print(f"An error occurred while sending the response: {e}")
-            return None
-
-    def is_valid(self):
-        return False
-
-    def close(self):
-        pass
-
-    def get_main_path(self):
-        file_path = os.path.realpath(__file__)
-        full_path = Path(file_path)
-        return full_path.parents[2]
-
-
 class RequestsCrawler(CrawlerInterface):
     """
-    Python requests
+    Python requests are based.
+
+    Quirks:
+     - timeout in requests defines timeout for stalled communication.
+       this means you can be stuck if you read 1byte/second.
+       This means we have to start a thread, and make timeout ourselves
     """
 
     def run(self):
@@ -486,7 +243,7 @@ class RequestsCrawler(CrawlerInterface):
                 raise result["exception"]
             return result["response"]
 
-        headers = self.request_headers
+        headers = self.get_request_headers()
 
         response = make_request_with_threading(
             url=self.request.url,
@@ -510,9 +267,9 @@ class RequestsCrawler(CrawlerInterface):
         import requests
 
         if not user_agent:
-            user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
+            user_agent = self.get_user_agent()
 
-        headers = default_headers
+        headers = self.get_request_headers()
         headers["User-Agent"] = user_agent
 
         # status code 403 means they do not like our user agent.
@@ -608,7 +365,7 @@ class CurlCffiCrawler(CrawlerInterface):
     def build_requests(self):
         from curl_cffi import requests
 
-        headers = self.request_headers
+        headers = self.get_request_headers()
 
         try:
             answer = requests.get(
@@ -631,6 +388,104 @@ class CurlCffiCrawler(CrawlerInterface):
     def is_valid(self):
         try:
             from curl_cffi import requests
+
+            return True
+        except Exception as E:
+            print(str(E))
+            return False
+
+
+class HttpxCrawler(CrawlerInterface):
+    """
+    Python httpx
+    """
+
+    def run(self):
+        if not self.is_valid():
+            return
+
+        self.response = PageResponseObject(
+            self.request.url,
+            text=None,
+            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            request_url=self.request.url,
+        )
+
+        answer = self.build_requests()
+
+        if answer:
+            self.response = PageResponseObject(
+                self.request.url,
+                status_code=answer.status_code,
+                request_url=self.request.url,
+                headers=answer.headers,
+            )
+            if not self.is_response_valid():
+                return self.response
+
+        content = getattr(answer, 'content', None)
+        text = getattr(answer, 'text', None)
+
+        if answer and content:
+            self.response = PageResponseObject(
+                self.request.url,
+                binary=content,
+                status_code=answer.status_code,
+                request_url=self.request.url,
+                headers=answer.headers,
+            )
+
+            return self.response
+
+        elif text:
+            self.response = PageResponseObject(
+                self.request.url,
+                binary=None,
+                text=text,
+                status_code=answer.status_code,
+                request_url=self.request.url,
+                headers=answer.headers,
+            )
+
+        elif answer:
+            self.response = PageResponseObject(
+                self.request.url,
+                binary=None,
+                text=None,
+                status_code=answer.status_code,
+                request_url=self.request.url,
+                headers=answer.headers,
+            )
+
+        if self.response:
+            return self.response
+
+    def build_requests(self):
+        import httpx
+
+        headers = self.get_request_headers()
+
+        try:
+            answer = httpx.get(
+                self.request.url,
+                timeout=self.timeout_s,
+                verify=self.request.ssl_verify,
+                headers = headers,
+                #stream=True, # TODO
+            )
+            return answer
+        except Exception as E:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
+                request_url=self.request.url,
+            )
+            self.response.add_error("Url:{} Cannot create request".format(str(E)))
+
+    def is_valid(self):
+        try:
+            import httpx
 
             return True
         except Exception as E:
@@ -729,6 +584,11 @@ class StealthRequestsCrawler(CrawlerInterface):
 class SeleniumDriver(CrawlerInterface):
     """
     Everybody uses selenium
+
+    Quirks:
+     - status_code cannot be easily read, there is some code that "may" work
+     - we may want to wait some time after reading page for javascript to kick in and do it's job
+     - full browser may require some additional OS shananigans, for example xvfb
 
     Note:
      - how can we make for the driver to be persistent? we do not want to start driver again and again
@@ -1547,7 +1407,7 @@ class ScriptCrawler(CrawlerInterface):
 
 class SeleniumBase(CrawlerInterface):
     """
-    This is based
+    Missing many things
     """
 
     def __init__(
@@ -1595,3 +1455,80 @@ class SeleniumBase(CrawlerInterface):
 
     def is_valid(self):
         return True
+
+
+class BotasaurusCrawler(CrawlerInterface):
+    """
+    Web crawler using Botasaurus
+    """
+
+    def run(self):
+        if not self.is_valid():
+            return
+
+        self.response = PageResponseObject(
+            self.request.url,
+            text=None,
+            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            request_url=self.request.url,
+        )
+
+        try:
+            result = self.build_browser_request()
+
+            if not result:
+                return self.response
+
+            html = result.get("html")
+            status_code = result.get("status_code", 200)
+            headers = result.get("headers", {})
+
+            self.response = PageResponseObject(
+                self.request.url,
+                text=html,
+                status_code=status_code,
+                request_url=self.request.url,
+                headers=headers,
+            )
+
+            if not self.is_response_valid():
+                return self.response
+
+            return self.response
+
+        except Exception as e:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
+                request_url=self.request.url,
+            )
+            self.response.add_error(f"Url: {str(e)} Cannot render or fetch with Botasaurus")
+            return self.response
+
+    def build_browser_request(self):
+        from botasaurus import bts
+
+        """
+        Launch Botasaurus and retrieve HTML content
+        """
+        @bts.default
+        def get_html(driver):
+            driver.get(self.request.url)
+            html = driver.page_source
+            return {
+                "html": html,
+                "status_code": 200,  # Botsaurus doesn't expose this, assume OK
+                "headers": {},       # You could mock or skip headers if irrelevant
+            }
+
+        return get_html()
+
+    def is_valid(self):
+        try:
+            from botasaurus import bts
+
+            return True
+        except Exception as E:
+            print(str(E))
+            return False

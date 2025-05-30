@@ -70,6 +70,14 @@
     }
   },
   {
+    "crawler": "HttpxCrawler",
+    "enabled": true,
+    "name": "HttpxCrawler",
+    "settings": {
+      "timeout_s": 40
+    }
+  },
+  {
     "crawler": "SeleniumWireFull",
     "enabled": true,
     "name": "SeleniumWireFull",

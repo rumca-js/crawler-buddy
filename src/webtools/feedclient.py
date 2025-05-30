@@ -25,7 +25,7 @@ from .webtools import PageOptions
 from .webconfig import WebConfig
 from .pages import RssPage
 from .url import Url
-from .handlerhttppage import HttpPageHandler
+from .handlers import HttpPageHandler
 
 from utils.dateutils import DateUtils
 from utils.serializers import HtmlExporter, JsonImporter
