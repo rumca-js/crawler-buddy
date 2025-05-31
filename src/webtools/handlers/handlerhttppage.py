@@ -92,8 +92,7 @@ class HttpRequestBuilder(object):
             return response.get_binary()
 
     def get_contents_internal(self):
-        """
-        """
+        """ """
         crawler_data = self.settings
 
         if not crawler_data:

@@ -1,4 +1,3 @@
-
 from ..webtools import (
     PageRequestObject,
     PageResponseObject,
@@ -9,7 +8,9 @@ from ..ipc import (
     string_to_command,
 )
 
-default_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
+default_user_agent = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
+)
 
 default_headers = {
     "User-Agent": default_user_agent,
@@ -45,9 +46,17 @@ class CrawlerInterface(object):
     def set_settings(self, settings):
         self.settings = settings
 
-        if self.settings and "headers" in self.settings and len(self.settings["headers"]) > 0:
+        if (
+            self.settings
+            and "headers" in self.settings
+            and len(self.settings["headers"]) > 0
+        ):
             self.request_headers = self.settings["headers"]
-        elif self.request and self.request.request_headers and len(self.request.request_headers) > 0:
+        elif (
+            self.request
+            and self.request.request_headers
+            and len(self.request.request_headers) > 0
+        ):
             self.request_headers = self.request.request_headers
         else:
             self.request_headers = default_headers
@@ -73,7 +82,7 @@ class CrawlerInterface(object):
             return
 
         accept_string = self.settings["settings"].get("accept_content_types", "all")
-        
+
         semicolon_index = accept_string.find(";")
         if semicolon_index >= 0:
             accept_string = accept_string[:semicolon_index]
@@ -83,11 +92,11 @@ class CrawlerInterface(object):
         media_types = accept_string.split(",")
         for media in media_types:
             # Further split each media type by '/' and '+'
-            parts = media.strip().replace('+', '/').split('/')
+            parts = media.strip().replace("+", "/").split("/")
             for part in parts:
                 if part:
                     result.add(part.strip())
-        
+
         return list(result)
 
     def run(self):
@@ -130,8 +139,12 @@ class CrawlerInterface(object):
                     match_count += 1
 
             if match_count == 0:
-                WebLogger.debug("Response type is not supported:{}".format(content_type))
-                self.response.add_error("Response type is not supported:{}".format(content_type))
+                WebLogger.debug(
+                    "Response type is not supported:{}".format(content_type)
+                )
+                self.response.add_error(
+                    "Response type is not supported:{}".format(content_type)
+                )
                 return False
 
         return True

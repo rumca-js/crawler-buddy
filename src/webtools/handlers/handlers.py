@@ -131,12 +131,9 @@ class RedditUrlHandler(DefaultUrlHandler):
         feeds = super().get_feeds()
 
         if self.subreddit:
-            feeds.append(
-                "https://www.reddit.com/r/{}/.rss".format(self.subreddit)
-            )
+            feeds.append("https://www.reddit.com/r/{}/.rss".format(self.subreddit))
 
         return feeds
-
 
 
 class GitHubUrlHandler(DefaultUrlHandler):
@@ -424,9 +421,7 @@ class FourChanChannelHandler(DefaultChannelHandler):
         feeds = super().get_feeds()
 
         if self.subreddit:
-            feeds.append(
-                "https://boards.4chan.org/{}/index.rss".format(self.code)
-            )
+            feeds.append("https://boards.4chan.org/{}/index.rss".format(self.code))
 
         return feeds
 

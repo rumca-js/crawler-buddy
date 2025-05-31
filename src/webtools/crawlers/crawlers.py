@@ -223,7 +223,9 @@ class RequestsCrawler(CrawlerInterface):
 
         def request_with_timeout(url, headers, timeout, verify, stream, result):
             try:
-                result["response"] = self.make_requests_call(url, headers, timeout, verify, stream)
+                result["response"] = self.make_requests_call(
+                    url, headers, timeout, verify, stream
+                )
             except Exception as e:
                 result["exception"] = e
 
@@ -325,8 +327,8 @@ class CurlCffiCrawler(CrawlerInterface):
             if not self.is_response_valid():
                 return self.response
 
-        content = getattr(answer, 'content', None)
-        text = getattr(answer, 'text', None)
+        content = getattr(answer, "content", None)
+        text = getattr(answer, "text", None)
 
         if answer and content:
             self.response = PageResponseObject(
@@ -372,8 +374,8 @@ class CurlCffiCrawler(CrawlerInterface):
                 self.request.url,
                 timeout=self.timeout_s,
                 verify=self.request.ssl_verify,
-                headers = headers,
-                #stream=True, # TODO
+                headers=headers,
+                # stream=True, # TODO
             )
             return answer
         except Exception as E:
@@ -423,8 +425,8 @@ class HttpxCrawler(CrawlerInterface):
             if not self.is_response_valid():
                 return self.response
 
-        content = getattr(answer, 'content', None)
-        text = getattr(answer, 'text', None)
+        content = getattr(answer, "content", None)
+        text = getattr(answer, "text", None)
 
         if answer and content:
             self.response = PageResponseObject(
@@ -470,9 +472,9 @@ class HttpxCrawler(CrawlerInterface):
                 self.request.url,
                 timeout=self.timeout_s,
                 verify=self.request.ssl_verify,
-                headers = headers,
+                headers=headers,
                 follow_redirects=True,
-                #stream=True, # TODO
+                # stream=True, # TODO
             )
             return answer
         except Exception as E:
@@ -689,7 +691,10 @@ class SeleniumDriver(CrawlerInterface):
         except TimeoutException:
             error_text = traceback.format_exc()
             print("Page timeout:{}\n{}".format(self.request.url, error_text))
-            WebLogger.debug(info_text="Page timeout:{}".format(self.request.url), detail_text=error_text)
+            WebLogger.debug(
+                info_text="Page timeout:{}".format(self.request.url),
+                detail_text=error_text,
+            )
             self.response = PageResponseObject(
                 self.request.url,
                 text=None,
@@ -711,7 +716,6 @@ class SeleniumDriver(CrawlerInterface):
         return self.response
 
     def process_response(self):
-
         """
         TODO - if webpage changes link, it should also update it in this object
         """
@@ -758,7 +762,7 @@ class SeleniumDriver(CrawlerInterface):
             log_message = json.loads(log_entry["message"])["message"]
             # Filter out HTTP responses
             if log_message["method"] == "Network.responseReceived":
-                #self.responses.append(log_message["params"]["response"])
+                # self.responses.append(log_message["params"]["response"])
                 if log_message["params"]["type"] == "Document":
                     return log_message["params"]["response"]
 
@@ -899,7 +903,7 @@ class SeleniumChromeFull(SeleniumDriver):
             selenium_feataure_enabled = False
         from selenium.webdriver.common.proxy import Proxy, ProxyType
 
-        #capabilities = webdriver.DesiredCapabilities.CHROME.copy()
+        # capabilities = webdriver.DesiredCapabilities.CHROME.copy()
 
         # Proxy Configuration
         if self.settings and any(
@@ -910,10 +914,10 @@ class SeleniumChromeFull(SeleniumDriver):
             prox.http_proxy = self.settings.get("http_proxy")
             prox.socks_proxy = self.settings.get("socks_proxy")
             prox.ssl_proxy = self.settings.get("ssl_proxy")
-            #prox.add_to_capabilities(capabilities)
+            # prox.add_to_capabilities(capabilities)
 
-        #capabilities["goog:loggingPrefs"] = {"performance": "ALL"}
-        #capabilities["loggingPrefs"] = {"performance": "ALL"}
+        # capabilities["goog:loggingPrefs"] = {"performance": "ALL"}
+        # capabilities["loggingPrefs"] = {"performance": "ALL"}
 
         # Validate Chromedriver Executable
         if self.driver_executable:
@@ -936,7 +940,7 @@ class SeleniumChromeFull(SeleniumDriver):
         # options.add_extension(path)
 
         # Add Proxy Capabilities
-        #for key, value in capabilities.items():
+        # for key, value in capabilities.items():
         #    options.set_capability(key, value)
 
         options.add_argument("start-maximized")
@@ -1042,11 +1046,15 @@ class SeleniumWireFull(SeleniumDriver):
         )
 
         if proxy_enabled:
-            proxy_str = self.settings.get("http_proxy") or self.settings.get("socks_proxy") or self.settings.get("ssl_proxy")
+            proxy_str = (
+                self.settings.get("http_proxy")
+                or self.settings.get("socks_proxy")
+                or self.settings.get("ssl_proxy")
+            )
             seleniumwire_options["proxy"] = {
                 "http": proxy_str,
                 "https": proxy_str,
-                "no_proxy": "localhost,127.0.0.1"  # Optional
+                "no_proxy": "localhost,127.0.0.1",  # Optional
             }
 
         # Validate Chromedriver Executable
@@ -1054,7 +1062,9 @@ class SeleniumWireFull(SeleniumDriver):
             p = Path(self.driver_executable)
             if not p.exists():
                 print(f"Chromedriver executable not found at: {self.driver_executable}")
-                WebLogger.error(f"Chromedriver executable not found at: {self.driver_executable}")
+                WebLogger.error(
+                    f"Chromedriver executable not found at: {self.driver_executable}"
+                )
                 return None
             service = Service(executable_path=self.driver_executable)
         else:
@@ -1074,7 +1084,7 @@ class SeleniumWireFull(SeleniumDriver):
             driver = wire_webdriver.Chrome(
                 service=service,
                 options=options,
-                seleniumwire_options=seleniumwire_options
+                seleniumwire_options=seleniumwire_options,
             )
             return driver
         except Exception as e:
@@ -1504,7 +1514,9 @@ class BotasaurusCrawler(CrawlerInterface):
                 status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
                 request_url=self.request.url,
             )
-            self.response.add_error(f"Url: {str(e)} Cannot render or fetch with Botasaurus")
+            self.response.add_error(
+                f"Url: {str(e)} Cannot render or fetch with Botasaurus"
+            )
             return self.response
 
     def build_browser_request(self):
@@ -1513,6 +1525,7 @@ class BotasaurusCrawler(CrawlerInterface):
         """
         Launch Botasaurus and retrieve HTML content
         """
+
         @bts.default
         def get_html(driver):
             driver.get(self.request.url)
@@ -1520,7 +1533,7 @@ class BotasaurusCrawler(CrawlerInterface):
             return {
                 "html": html,
                 "status_code": 200,  # Botsaurus doesn't expose this, assume OK
-                "headers": {},       # You could mock or skip headers if irrelevant
+                "headers": {},  # You could mock or skip headers if irrelevant
             }
 
         return get_html()

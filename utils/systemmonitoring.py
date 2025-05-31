@@ -5,6 +5,10 @@ import subprocess
 import time
 
 
+# fmt: off
+
+
+
 def get_kernel_info():
     return {
         "kernel_version": os.uname().release,
@@ -135,6 +139,8 @@ def get_hardware_info():
         "disk_io_counters": get_disk_io_counters(),
         "net_io_counters": get_net_io_counters(),
     }
+
+# fmt: on
 
 
 if __name__ == "__main__":

@@ -44,7 +44,6 @@ from .handlers import (
     OdyseeVideoHandler,
     YouTubeChannelHandler,
     OdyseeChannelHandler,
-
     RedditUrlHandler,
     ReturnDislike,
     GitHubUrlHandler,
@@ -52,7 +51,6 @@ from .handlers import (
     InternetArchive,
     FourChanChannelHandler,
     TwitterUrlHandler,
-
     HttpPageHandler,
 )
 

@@ -53,7 +53,9 @@ class Crawler(object):
         crawler_data = self.get_crawler(url, crawler_data)
 
         if not crawler_data:
-            webtools.WebLogger.error("Url:{} Cannot run request without crawler".format(url))
+            webtools.WebLogger.error(
+                "Url:{} Cannot run request without crawler".format(url)
+            )
             return
 
         return crawler_data
@@ -92,9 +94,9 @@ class Crawler(object):
         return crawler_data
 
     def fill_crawler_data(self, url, crawler_data):
-        if "ssl_verify" not in crawler_data[
-            "settings"
-        ] and self.configuration.is_set("ssl_verify"):
+        if "ssl_verify" not in crawler_data["settings"] and self.configuration.is_set(
+            "ssl_verify"
+        ):
             crawler_data["settings"]["ssl_verify"] = True
         if "respect_robots_txt" not in crawler_data[
             "settings"
@@ -104,9 +106,13 @@ class Crawler(object):
         if "bytes_limit" not in crawler_data and self.configuration.is_set(
             "bytes_limit"
         ):
-            crawler_data["settings"]["bytes_limit"] = self.configuration.get("bytes_limit")
+            crawler_data["settings"]["bytes_limit"] = self.configuration.get(
+                "bytes_limit"
+            )
         else:
-            crawler_data["settings"]["bytes_limit"] = webtools.WebConfig.get_bytes_limit()
+            crawler_data["settings"][
+                "bytes_limit"
+            ] = webtools.WebConfig.get_bytes_limit()
 
         if "accept_content_types" not in crawler_data["settings"]:
             crawler_data["settings"]["accept_content_types"] = "all"
@@ -205,7 +211,9 @@ class Crawler(object):
 
     def run(self, url, crawler_data=None):
         if not crawler_data:
-            webtools.WebLogger.error("Url:{} Cannot run request without crawler_data".format(url))
+            webtools.WebLogger.error(
+                "Url:{} Cannot run request without crawler_data".format(url)
+            )
             return
 
         page_url = self.get_page_url(url, crawler_data)
@@ -247,8 +255,7 @@ class Crawler(object):
         return all_properties
 
     def get_page_url(self, url, crawler_data):
-        """
-        """
+        """ """
 
         print("Running:{}, with:{}".format(url, crawler_data))
 
@@ -265,4 +272,3 @@ class Crawler(object):
         new_mapping = webtools.WebConfig.get_default_crawler(url)
         if new_mapping:
             return new_mapping
-

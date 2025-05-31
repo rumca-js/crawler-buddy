@@ -81,7 +81,9 @@ class YouTubeChannelHandler(DefaultChannelHandler):
         feeds = super().get_feeds()
         if self.code:
             feeds.append(
-                "https://www.youtube.com/feeds/videos.xml?channel_id={}".format(self.code)
+                "https://www.youtube.com/feeds/videos.xml?channel_id={}".format(
+                    self.code
+                )
             )
 
         return feeds

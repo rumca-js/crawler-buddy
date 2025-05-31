@@ -102,9 +102,10 @@ def index():
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-
     if not id:
         id = ""
+
+    # fmt: off
 
     command_links = []
     command_links.append({"link" : "/info", "name":"Info", "description":"shows configuration"})
@@ -134,21 +135,28 @@ def index():
     mgmt_links.append({"link" : "/queue", "name":"Queue", "description":"shows current queue"})
     mgmt_links.append({"link" : "/removej", "name":"Remove history", "description":"Removes history entry"})
 
+    # fmt: on
 
     text = """<h1>Commands</h1>"""
 
     for link_data in command_links:
-        text += """<div><a href="{}?id={}">{}</a> - {}</div>""".format(link_data["link"], id, link_data["name"], link_data["description"])
+        text += """<div><a href="{}?id={}">{}</a> - {}</div>""".format(
+            link_data["link"], id, link_data["name"], link_data["description"]
+        )
 
     text += "<h2>Operational</h2>"
 
     for link_data in operational_links:
-        text += """<div><a href="{}?id={}">{}</a> - {}</div>""".format(link_data["link"], id, link_data["name"], link_data["description"])
+        text += """<div><a href="{}?id={}">{}</a> - {}</div>""".format(
+            link_data["link"], id, link_data["name"], link_data["description"]
+        )
 
     text += "<h2>Management</h2>"
 
     for link_data in mgmt_links:
-        text += """<div><a href="{}?id={}">{}</a> - {}</div>""".format(link_data["link"], id, link_data["name"], link_data["description"])
+        text += """<div><a href="{}?id={}">{}</a> - {}</div>""".format(
+            link_data["link"], id, link_data["name"], link_data["description"]
+        )
 
     text += """<p>"""
     text += """Version:{}""".format(__version__)
@@ -170,7 +178,9 @@ def info():
     text += get_crawler_text()
 
     text += "<h2>Default user agent</h2>"
-    text += "<div>Default user agent:{}</div>".format(webtools.crawlers.default_user_agent)
+    text += "<div>Default user agent:{}</div>".format(
+        webtools.crawlers.default_user_agent
+    )
 
     text += "<h2>Default headers</h2>"
     for key in webtools.crawlers.default_headers:
@@ -284,8 +294,8 @@ def debug():
 
 @app.route("/set", methods=["POST"])
 def set_response():
-    #id = request.args.get("id")
-    #if not configuration.is_allowed(id):
+    # id = request.args.get("id")
+    # if not configuration.is_allowed(id):
     #    return get_html(id=id, body="Cannot access this view", title="Error")
 
     data = request.json
@@ -360,7 +370,9 @@ def find():
 
         return get_html(id=id, body=form_html, title="Find")
     else:
-        things = crawler_main.get_history().find(url=url, crawler_name=name, crawler=crawler)
+        things = crawler_main.get_history().find(
+            url=url, crawler_name=name, crawler=crawler
+        )
 
         if not things:
             return get_html(
@@ -388,7 +400,9 @@ def findj():
     if index:
         index = int(index)
 
-    things = crawler_main.get_history().find(index=index, url=url, crawler_name=name, crawler=crawler)
+    things = crawler_main.get_history().find(
+        index=index, url=url, crawler_name=name, crawler=crawler
+    )
 
     if not things:
         return jsonify({"success": False, "error": "No properties found"}), 400
@@ -452,7 +466,9 @@ def getj():
         webtools.WebConfig.start_display()
         all_properties = crawler_main.get_crawl_properties(url, crawler_data)
     except Exception as E:
-        webtools.WebLogger.exc(E, info_text="Exception when calling getj {} {}".format(url, crawler_data))
+        webtools.WebLogger.exc(
+            E, info_text="Exception when calling getj {} {}".format(url, crawler_data)
+        )
         all_properties = None
 
     if not all_properties:
@@ -512,22 +528,32 @@ def rssifyr():
         if not entries or len(entries) == 0:
             if "feeds" in properties:
                 for feed in properties["feeds"]:
-                    all_properties = crawler_main.get_crawl_properties(feed, crawler_data)
+                    all_properties = crawler_main.get_crawl_properties(
+                        feed, crawler_data
+                    )
                     if all_properties:
                         break
 
     except Exception as E:
-        webtools.WebLogger.exc(E, info_text="Exception when calling getj {} {}".format(url, crawler_data))
+        webtools.WebLogger.exc(
+            E, info_text="Exception when calling getj {} {}".format(url, crawler_data)
+        )
         all_properties = None
 
     if not all_properties:
-        return jsonify({"success": False, "error": "No properties found - no properties"}), 400
+        return (
+            jsonify({"success": False, "error": "No properties found - no properties"}),
+            400,
+        )
 
     entries = CrawlHistory.read_properties_section("Entries", all_properties)
     if not entries or len(entries) == 0:
-        return jsonify({"success": False, "error": "No entries found - no entries"}), 400
+        return (
+            jsonify({"success": False, "error": "No entries found - no entries"}),
+            400,
+        )
 
-    return Response(rssify(all_properties), mimetype='application/rss+xml')
+    return Response(rssify(all_properties), mimetype="application/rss+xml")
 
 
 @app.route("/contents", methods=["GET"])
@@ -723,8 +749,12 @@ def link():
     text = "<h1>Feeds</h1>"
 
     text += '<div>Link: <a href="{}">{}</a></div>'.format(page_url.url, page_url.url)
-    text += '<div>Link request: <a href="{}">{}</a></div>'.format(page_url.request_url, page_url.request_url)
-    text += '<div>Link canonical: <a href="{}">{}</a></div>'.format(page_url.get_canonical_url(), page_url.get_canonical_url())
+    text += '<div>Link request: <a href="{}">{}</a></div>'.format(
+        page_url.request_url, page_url.request_url
+    )
+    text += '<div>Link canonical: <a href="{}">{}</a></div>'.format(
+        page_url.get_canonical_url(), page_url.get_canonical_url()
+    )
 
     # TODO maybe we could add support for canonical links, maybe we could try reading fast, via requests?
 
@@ -744,7 +774,7 @@ def feedsj():
 
     page_url = webtools.Url(url)
 
-    properties = {"feeds" : []}
+    properties = {"feeds": []}
 
     for feed in page_url.get_feeds():
         properties["feeds"].append(feed)
@@ -791,7 +821,7 @@ def archivesj():
 
     page_url = webtools.Url(url)
 
-    properties = {"links" : []}
+    properties = {"links": []}
 
     for archive_link in page_url.get_urls_archive():
         properties["links"].append(archive_link)
@@ -822,8 +852,10 @@ def queue():
         timestamp, url, crawler_data = things
 
         timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
-        
-        text += '<div style="margin-bottom:1em;">{} {} {} {}</div>\n'.format(index, timestamp_str, url, crawler_data)
+
+        text += '<div style="margin-bottom:1em;">{} {} {} {}</div>\n'.format(
+            index, timestamp_str, url, crawler_data
+        )
 
     return get_html(id=id, body=text, title="Queue")
 
@@ -836,14 +868,21 @@ def dict_flat_to_html(data):
 
     return html
 
+
 def dict_to_html(data, indent=0):
     html = ""
     for key, value in data.items():
         if isinstance(value, dict):
-            html += "  " * indent + f"<h{min(indent+2, 6)}>{key.capitalize()}</h{min(indent+2, 6)}>\n"
+            html += (
+                "  " * indent
+                + f"<h{min(indent+2, 6)}>{key.capitalize()}</h{min(indent+2, 6)}>\n"
+            )
             html += dict_to_html(value, indent + 1)
         elif isinstance(value, list):
-            html += "  " * indent + f"<h{min(indent+2, 6)}>{key.capitalize()}</h{min(indent+2, 6)}>\n"
+            html += (
+                "  " * indent
+                + f"<h{min(indent+2, 6)}>{key.capitalize()}</h{min(indent+2, 6)}>\n"
+            )
             html += "  " * indent + "<ul>\n"
             for item in value:
                 if isinstance(item, dict):
@@ -925,7 +964,13 @@ if __name__ == "__main__":
     if p.args.cert_file and p.args.cert_key:
         context = (p.args.cert_file, p.args.cert_key)
 
-        app.run(debug=True, host=p.args.host, port=p.args.port, threaded=True, ssl_context=context)
+        app.run(
+            debug=True,
+            host=p.args.host,
+            port=p.args.port,
+            threaded=True,
+            ssl_context=context,
+        )
     else:
         app.run(debug=True, host=p.args.host, port=p.args.port, threaded=True)
 

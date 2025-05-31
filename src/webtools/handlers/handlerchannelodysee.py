@@ -44,9 +44,7 @@ class OdyseeChannelHandler(DefaultChannelHandler):
     def get_feeds(self):
         feeds = super().get_feeds()
         if self.code:
-            feeds.append(
-                "https://odysee.com/$/rss/{}".format(self.code)
-            )
+            feeds.append("https://odysee.com/$/rss/{}".format(self.code))
 
         return feeds
 
