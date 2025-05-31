@@ -35,26 +35,22 @@ class CrawlerInterface(object):
         self.request = request
         self.response = None
         self.response_file = response_file
+        self.request_headers = None
+
         if settings:
             self.set_settings(settings)
         else:
             self.settings = settings
 
-        self.request_headers = None
-
     def set_settings(self, settings):
         self.settings = settings
 
-        if self.request and self.request.request_headers:
+        if self.settings and "headers" in self.settings and len(self.settings["headers"]) > 0:
+            self.request_headers = self.settings["headers"]
+        elif self.request and self.request.request_headers and len(self.request.request_headers) > 0:
             self.request_headers = self.request.request_headers
         else:
             self.request_headers = default_headers
-
-        self.copy_settings_field("User-Agent")
-        self.copy_settings_field("Accept")
-        self.copy_settings_field("Accept-Charset")
-        self.copy_settings_field("Accept-Encoding")
-        self.copy_settings_field("Accept-Language")
 
         real_settings = {}
         if settings and "settings" in settings:
@@ -71,10 +67,6 @@ class CrawlerInterface(object):
 
     def set_url(self, url):
         self.request.url = url
-
-    def copy_settings_field(self, field):
-        if self.settings and "settings" in self.settings and field in self.settings["settings"]:
-            self.request_headers[field] = self.settings["settings"][field]
 
     def get_accept_types(self):
         if "settings" not in self.settings:

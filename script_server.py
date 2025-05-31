@@ -27,7 +27,7 @@ from src import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "4.0.6"
+__version__ = "4.0.7"
 
 
 app = Flask(__name__)
@@ -102,45 +102,53 @@ def index():
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-    text = """
-    <h1>Commands</h1>
-    """
 
     if not id:
         id = ""
 
-    text += (
-        """<div><a href="/info?id={}">Info</a> - shows configuration</div>""".format(id)
-    )
+    command_links = []
+    command_links.append({"link" : "/info", "name":"Info", "description":"shows configuration"})
+    command_links.append({"link" : "/infoj", "name":"Info JSON", "description":"configuration JSON information"})
+    command_links.append({"link" : "/system", "name":"System monitoring", "description":"system monitoring"})
+    command_links.append({"link" : "/history", "name":"History", "description":"crawl history"})
+    command_links.append({"link" : "/historyj", "name":"History JSON", "description":"shows history JSON"})
+    command_links.append({"link" : "/debug", "name":"Debug", "description":"shows debug information"})
 
-    text += """<div><a href="/infoj?id={}">Info JSON</a> - shows configuration JSON</div>""".format(id)
+    operational_links = []
+    operational_links.append({"link" : "/get", "name":"Get", "description":"form for getting web page crawl JSON information"})
+    operational_links.append({"link" : "/getj", "name":"Get JSON", "description":"JSON crawling response"})
+    operational_links.append({"link" : "/contents", "name":"Contents form", "description":"Form for getting web page contents"})
+    operational_links.append({"link" : "/contentsr", "name":"Contents response", "description":"returns page contents, as if read by a browser"})
+    operational_links.append({"link" : "/feeds", "name":"Feeds", "description":"form for finding feeds"})
+    operational_links.append({"link" : "/feedsj", "name":"Feeds JSON", "description":"feeds information JSON"})
+    operational_links.append({"link" : "/socialj", "name":"Social data JSON", "description":"Social data JSON, likes"})
+    operational_links.append({"link" : "/link", "name":"Link", "description":"form for obtaining links, canonical, etc."})
+    operational_links.append({"link" : "/linkj", "name":"Link JSON", "description":"link information JSON"})
+    operational_links.append({"link" : "/archivesj", "name":"Archive links JSON", "description":"JSON with links to archives, digital libraries"})
+    operational_links.append({"link" : "/rssify", "name":"RSSify", "description":"form for RSSfication. RSSfication returns RSS contents for input link"})
+    operational_links.append({"link" : "/rssifyr", "name":"RSSifyr", "description":"RSSfication response"})
 
-    if configuration.is_set("debug"):
-        text += """<div><a href="/system?id={}">System monitoring</a> - shows system monitoring</div>""".format(id)
-    text += """<div><a href="/history?id={}">History</a> - shows history</div>""".format(id)
-    text += """<div><a href="/historyj?id={}">History JSON</a> - shows JSON history</div>""".format(id)
-    if configuration.is_set("debug"):
-        text += """<div><a href="/debug?id={}">Debug</a> - shows debug information</div>""".format(id)
+    mgmt_links = []
+    mgmt_links.append({"link" : "/find", "name":"Find", "description":"form for finding response"})
+    mgmt_links.append({"link" : "/findj", "name":"Find JSON", "description":"returns information about history entry JSON"})
+    mgmt_links.append({"link" : "/queue", "name":"Queue", "description":"shows current queue"})
+    mgmt_links.append({"link" : "/removej", "name":"Remove history", "description":"Removes history entry"})
+
+
+    text = """<h1>Commands</h1>"""
+
+    for link_data in command_links:
+        text += """<div><a href="{}?id={}">{}</a> - {}</div>""".format(link_data["link"], id, link_data["name"], link_data["description"])
 
     text += "<h2>Operational</h2>"
-    text += """<div><a href="/get?id={}">Get</a> - form for getting web page JSON information</div>""".format(id)
-    text += """<div><a href="/getj?id={}">Getj</a> - web page JSON information</div>""".format(id)
-    text += """<div><a href="/contents?id={}">Contents Form</a> - Form for getting web page contents</div>""".format(id)
-    text += """<div><a href="/contentsr?id={}">Contents response</a> - Page contents, as if read by the browser</div>""".format(id)
-    text += """<div><a href="/feeds?id={}">Feeds</a> - form for finding feeds</div>""".format(id)
-    text += """<div><a href="/feedsj?id={}">Feedsj</a> - feeds info JSON information</div>""".format(id)
-    text += """<div><a href="/socialj?id={}">Socialj</a> - dynamic social data JSON</div>""".format(id)
-    text += """<div><a href="/link?id={}">Linkj</a> - provides form for link retrieval</div>""".format(id)
-    text += """<div><a href="/linkj?id={}">Linkj</a> - returns link info JSON</div>""".format(id)
-    text += """<div><a href="/archivesj?id={}">Archivesj</a> - returns archive links info JSON</div>""".format(id)
-    text += """<div><a href="/rssify?id={}">RSSify</a> - Form for RSSification. RSSification returns RSS contents for input link</div>""".format(id)
-    text += """<div><a href="/rssifyr?id={}">RSSifyr</a> - RSSification response</div>""".format(id)
+
+    for link_data in operational_links:
+        text += """<div><a href="{}?id={}">{}</a> - {}</div>""".format(link_data["link"], id, link_data["name"], link_data["description"])
 
     text += "<h2>Management</h2>"
-    text += """<div><a href="/find?id={}">Find</a> - form for findj</div>""".format(id)
-    text += """<div><a href="/findj?id={}">Find JSON</a> - returns information about history entry JSON</div>""".format(id)
-    text += """<div><a href="/queue?id={}">Queue</a> - shows currently processing queue</div>""".format( id)
-    text += """<div><a href="/removej?id={}">Remove history</a> - removes history entry</div>""".format(id)
+
+    for link_data in mgmt_links:
+        text += """<div><a href="{}?id={}">{}</a> - {}</div>""".format(link_data["link"], id, link_data["name"], link_data["description"])
 
     text += """<p>"""
     text += """Version:{}""".format(__version__)
@@ -160,6 +168,14 @@ def info():
     """
 
     text += get_crawler_text()
+
+    text += "<h2>Default user agent</h2>"
+    text += "<div>Default user agent:{}</div>".format(webtools.crawlers.default_user_agent)
+
+    text += "<h2>Default headers</h2>"
+    for key in webtools.crawlers.default_headers:
+        value = webtools.crawlers.default_headers[key]
+        text += "<div>{}:{}</div>".format(key, value)
 
     return get_html(id=id, body=text, title="Configuration")
 

@@ -62,6 +62,7 @@ class Crawler(object):
         crawler_data = request.args.get("crawler_data")
         crawler = request.args.get("crawler")
         name = request.args.get("name")
+        headers = request.args.get("headers")
 
         if crawler_data:
             try:
@@ -86,6 +87,7 @@ class Crawler(object):
         crawler_data["settings"]["headers"] = request.args.get("headers")
         crawler_data["settings"]["ping"] = request.args.get("ping")
         crawler_data["settings"]["remote_server"] = remote_server
+        crawler_data["headers"] = headers
 
         return crawler_data
 
