@@ -394,17 +394,18 @@ cffi = ">=1.0.0"
 
 [[package]]
 name = "brutefeedparser"
-version = "0.10.4"
+version = "0.10.5"
 description = "Brute Feed Parser"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "brutefeedparser-0.10.4-py3-none-any.whl", hash = "sha256:151b143246550504bd183c7df12c4e13f6cfcc5429aa2270160e2e38d71297e5"},
-    {file = "brutefeedparser-0.10.4.tar.gz", hash = "sha256:60d466e0b59ee1d9fb0b67c35291e2e383ce8e719446a1d46e073e6774ccb86f"},
+    {file = "brutefeedparser-0.10.5-py3-none-any.whl", hash = "sha256:910af96bc973ab35bf48efcab03dc3ac4d2379a30ee2f8817e6d541fcb807f3b"},
+    {file = "brutefeedparser-0.10.5.tar.gz", hash = "sha256:d8f51d3a8f71a02f69bf7b6213da57acc7674cc3149e3198e1413ae8bbfab56a"},
 ]
 
 [package.dependencies]
-lxml = "5.3.0"
+beautifulsoup4 = ">=4.13.3,<5.0.0"
+lxml = ">=5.3.0,<6.0.0"
 
 [[package]]
 name = "catalogue"
@@ -3571,4 +3572,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "7f5352029cb2cb98d85dc0eb4d480110cc14a14bbe911232684d603e56faf8aa"
+content-hash = "c451de39271433aad781b2f40572c65d8e152d59df040fee92f6c3735d3156c5"
