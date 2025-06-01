@@ -605,6 +605,13 @@ class RssPageEntry(ContentInterface):
                     return thumb["url"]
                 else:
                     return str(thumb)
+        if hasattr(self.feed_entry, "images"):
+            if len(self.feed_entry.images) > 0:
+                thumb = self.feed_entry.images[0]
+                if "url" in thumb:
+                    return thumb["url"]
+                else:
+                    return str(thumb)
 
         return None
 
