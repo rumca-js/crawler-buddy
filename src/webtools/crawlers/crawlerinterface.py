@@ -49,6 +49,7 @@ class CrawlerInterface(object):
         if (
             self.settings
             and "headers" in self.settings
+            and self.settings["headers"]
             and len(self.settings["headers"]) > 0
         ):
             self.request_headers = self.settings["headers"]
