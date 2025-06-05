@@ -1143,7 +1143,8 @@ class ScriptCrawler(CrawlerInterface):
         self.script = script
 
     def set_settings(self, settings):
-        self.settings = settings
+        super().set_settings(settings)
+
         inner = self.settings["settings"]
 
         if inner and "script" in inner and inner["script"]:

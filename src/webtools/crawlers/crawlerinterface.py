@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 from ..webtools import (
     PageRequestObject,
     PageResponseObject,
@@ -258,7 +261,7 @@ class CrawlerInterface(object):
     def get_main_path(self):
         file_path = os.path.realpath(__file__)
         full_path = Path(file_path)
-        return full_path.parents[2]
+        return full_path.parents[3]
 
     def get_request_headers(self):
         if self.request_headers:

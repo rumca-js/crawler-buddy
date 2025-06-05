@@ -26,6 +26,8 @@ pytz = "^2024.2"
 psutil="*"
 flask="*"
 
+# Enable and crawlers as needed
+
 # [Requests]
 requests = "^2.32.3"
 
@@ -51,7 +53,7 @@ httpx = "*"
 # botasaurus = "*"
 #
 # [scrapy]
-# scrapy = "*"
+scrapy = "*"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"

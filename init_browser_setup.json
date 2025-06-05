@@ -8,24 +8,6 @@
     }
   },
   {
-    "crawler": "ScriptCrawler",
-    "enabled": true,
-    "name": "CrawleeScript",
-    "settings": {
-      "script": "poetry run python crawleebeautifulsoup.py",
-      "timeout_s": 50
-    }
-  },
-  {
-    "crawler": "ScriptCrawler",
-    "enabled": true,
-    "name": "PlaywrightScript",
-    "settings": {
-      "script": "poetry run python crawleeplaywright.py",
-      "timeout_s": 50
-    }
-  },
-  {
     "crawler": "SeleniumUndetected",
     "enabled": true,
     "name": "SeleniumUndetected",
@@ -75,6 +57,33 @@
     "name": "HttpxCrawler",
     "settings": {
       "timeout_s": 40
+    }
+  },
+  {
+    "crawler": "ScriptCrawler",
+    "enabled": true,
+    "name": "CrawleeScript",
+    "settings": {
+      "script": "poetry run python crawleebeautifulsoup.py",
+      "timeout_s": 50
+    }
+  },
+  {
+    "crawler": "ScriptCrawler",
+    "enabled": true,
+    "name": "PlaywrightScript",
+    "settings": {
+      "script": "poetry run python crawleeplaywright.py",
+      "timeout_s": 50
+    }
+  },
+  {
+    "crawler": "ScriptCrawler",
+    "enabled": true,
+    "name": "ScrapyCrawler",
+    "settings": {
+      "script": "poetry run python crawlerscrapy.py",
+      "timeout_s": 50
     }
   },
   {

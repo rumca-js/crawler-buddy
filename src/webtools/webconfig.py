@@ -73,27 +73,16 @@ class WebConfig(object):
 
             c.close()
 
-        try:
-            import os
-            from crawlee.beautifulsoup_crawler import BeautifulSoupCrawler
-
-            poetry_path = ""
-            if "POETRY_ENV" in os.environ:
-                poetry_path = os.environ["POETRY_ENV"] + "/bin/"
-
-            if full_script is None:
-                full_script = poetry_path + "poetry run python crawleebeautifulsoup.py"
-            if headless_script is None:
-                headless_script = (
-                    poetry_path + "poetry run python crawleebeautifulsoup.py"
-                )
-        except:
-            pass
+        headless_script = WebConfig.get_script_path("crawleebeautifulsoup.py")
+        full_script = WebConfig.get_script_path("crawleeplaywright.py")
+        scrapy_script = WebConfig.get_script_path("cralwerscrapy.py")
 
         mapping.append(WebConfig.get_default_browser_setup(RequestsCrawler))
 
         mapping.append(WebConfig.get_scriptcralwer(headless_script, "CrawleeScript"))
         mapping.append(WebConfig.get_scriptcralwer(full_script, "PlaywrightScript"))
+        mapping.append(WebConfig.get_scriptcralwer(scrapy_script, "ScrapyScript"))
+
         mapping.append(WebConfig.get_seleniumundetected())
         mapping.append(WebConfig.get_seleniumbase())
         mapping.append(WebConfig.get_seleniumheadless())
@@ -105,6 +94,20 @@ class WebConfig(object):
         mapping.append(WebConfig.get_default_browser_setup(HttpxCrawler))
 
         return mapping
+
+    def get_script_path(script_relative):
+        """
+        script_relative example crawleebeautifulsoup.py
+        """
+        import os
+
+        poetry_path = ""
+        if "POETRY_ENV" in os.environ:
+            poetry_path = os.environ["POETRY_ENV"] + "/bin/"
+
+        script_relative = poetry_path + "poetry run python {}".format(script_relative)
+
+        return script_relative
 
     def get_browsers():
         str_browsers = []
@@ -169,20 +172,12 @@ class WebConfig(object):
         }
 
     def get_scriptcralwer(script, name=""):
-        if script:
-            return {
-                "enabled": True,
-                "name": name,
-                "crawler": ScriptCrawler,
-                "settings": {"script": script, "timeout_s": 50},
-            }
-        else:
-            return {
-                "enabled": False,
-                "name": name,
-                "crawler": ScriptCrawler,
-                "settings": {"script": script, "timeout_s": 50},
-            }
+        return {
+            "enabled": True,
+            "name": name,
+            "crawler": ScriptCrawler,
+            "settings": {"script": script, "timeout_s": 50},
+        }
 
     def get_seleniumheadless():
         chromedriver_path = Path("/usr/bin/chromedriver")
