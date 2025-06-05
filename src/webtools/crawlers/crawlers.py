@@ -1142,8 +1142,26 @@ class ScriptCrawler(CrawlerInterface):
         self.cwd = cwd
         self.script = script
 
+    def set_response_file(self):
+        if "response_file" in self.settings["settings"]:
+            self.response_file = self.settings["settings"]["response_file"]
+
+        if not self.response_file:
+            from ..webconfig import WebConfig
+
+            if WebConfig.script_responses_directory is not None:
+                response_dir = Path(WebConfig.script_responses_directory)
+            else:
+                response_dir = Path("storage")
+
+            self.response_file = (
+                self.get_main_path() / response_dir / self.get_response_file_name()
+            )
+
     def set_settings(self, settings):
         super().set_settings(settings)
+
+        self.set_response_file()
 
         inner = self.settings["settings"]
 
@@ -1158,18 +1176,6 @@ class ScriptCrawler(CrawlerInterface):
 
         if inner and "remote_server" in inner:
             return
-
-        if not self.response_file:
-            from .webconfig import WebConfig
-
-            if WebConfig.script_responses_directory is not None:
-                response_dir = Path(WebConfig.script_responses_directory)
-            else:
-                response_dir = Path("storage")
-
-            self.response_file = (
-                self.get_main_path() / response_dir / self.get_response_file_name()
-            )
 
     def run(self):
         if not self.is_valid():
@@ -1198,6 +1204,8 @@ class ScriptCrawler(CrawlerInterface):
         # WebLogger.error("CWD:{}".format(self.cwd))
         # WebLogger.error("maintl:{}".format(self.get_main_path()))
         # WebLogger.error("script:{}".format(script))
+
+        print("Running CWD:{} script:{}".format(self.cwd, script))
 
         try:
             p = subprocess.run(
@@ -1242,25 +1250,22 @@ class ScriptCrawler(CrawlerInterface):
             )
 
         import requests
+        from ..remoteserver import RemoteServer
 
-        url = f"{remote_server}/find?url={self.request.url}"
+        url = f"{remote_server}/findj?url={self.request.url}"
         response = requests.get(url)
 
         if response.status_code == 200:
             try:
                 data = response.json()
-                if len(data) > 0:
-                    contents = data[1]["data"]["Contents"]
-                if len(data) > 3:
-                    headers = data[4]["data"]
 
-                self.response = PageResponseObject(
-                    url=url, request_url=url, text=contents, headers=headers
-                )
+                server = RemoteServer("")
+                self.response = server.get_response(data)
+
                 return self.response
 
-            except ValueError:
-                print("Response content is not valid JSON.")
+            except ValueError as E:
+                print("Response content is not valid JSON. {}".format(E))
         else:
             WebLogger.error(
                 f"Url:{self.request.url}: Failed to fetch data. Status code: {response.status_code}"
@@ -1282,6 +1287,7 @@ class ScriptCrawler(CrawlerInterface):
         )
 
         response_file_location = Path(self.response_file)
+        print("Running via file {}".format(response_file_location))
 
         if len(response_file_location.parents) > 1:
             response_dir = response_file_location.parents[1]
@@ -1300,6 +1306,7 @@ class ScriptCrawler(CrawlerInterface):
         # WebLogger.error("CWD:{}".format(self.cwd))
         # WebLogger.error("maintl:{}".format(self.get_main_path()))
         # WebLogger.error("script:{}".format(script))
+        print("Running script:{}".format(script))
 
         try:
             p = subprocess.run(
@@ -1415,6 +1422,30 @@ class ScriptCrawler(CrawlerInterface):
             return False
 
         return True
+
+
+class ScriptCrawlerInterface(CrawlerInterface):
+    """
+    Interface that can be inherited by any browser, browser engine, crawler
+    """
+
+    def __init__(self, parser, request):
+        settings = None
+        self.parser = parser
+
+        if parser.args.remote_server:
+            settings = {"remote_server": parser.args.remote_server}
+
+        super().__init__(
+            request, response_file=parser.args.output_file, settings=settings
+        )
+
+    def save_response(self):
+        if self.parser.args.verbose:
+            if self.response:
+                print(self.response)
+
+        super().save_response()
 
 
 class SeleniumBase(CrawlerInterface):

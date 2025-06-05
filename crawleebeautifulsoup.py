@@ -73,7 +73,7 @@ async def main() -> None:
     if parser.args.verbose:
         print("Running request:{} with BeautifulSoupCrawler".format(request))
 
-    interface = webtools.ScriptCrawlerInterface(parser, request)
+    interface = webtools.crawlers.ScriptCrawlerInterface(parser, request)
     response = webtools.PageResponseObject(request.url)
 
     if parser.args.proxy_address:
@@ -114,7 +114,9 @@ async def main() -> None:
             response.url = context.request.loaded_url
             response.request_url = request.url
             response.status_code = context.http_response.status_code
-            response.headers = headers
+            response.set_headers(headers)
+
+            interface.response = response
 
             if request.ping:
                 on_close(interface, response)
@@ -124,24 +126,15 @@ async def main() -> None:
                 on_close(interface, response)
                 return
 
-            if response.get_content_length() > webtools.PAGE_TOO_BIG_BYTES:
-                print("Response too big")
-
-                response.status_code = webtools.HTTP_STATUS_CODE_FILE_TOO_BIG
-
-                on_close(interface, response)
-
-            content_type = response.get_content_type()
-            if content_type and not response.is_content_type_supported():
-                print("Content not supported")
-                response.status_code = webtools.HTTP_STATUS_CODE_PAGE_UNSUPPORTED
-
+            if not interface.is_response_valid():
+                print("Response is not valid")
                 on_close(interface, response)
                 return
 
             response.set_text(str(context.soup))
 
             print(f"Processing {context.request.url} ...DONE")
+            print(response)
 
             on_close(interface, response)
             return

@@ -1,3 +1,4 @@
+import os
 from src.webtools import (
    CrawlerInterface,
 )
@@ -21,6 +22,7 @@ class CrawlerInterfaceTest(FakeInternetTestCase):
         settings["headers"]["User-Agent"] = "Test-User-Agent"
         settings["settings"] = {}
 
+        # call tested function
         crawler = CrawlerInterface(request=None, url=url, response_file=None, settings=settings)
 
         self.assertIn("User-Agent", crawler.get_request_headers())
@@ -37,6 +39,7 @@ class CrawlerInterfaceTest(FakeInternetTestCase):
         settings["settings"] = {}
         settings["settings"]["accept_content_types"] = "text/html,application/xhtml+xml,application/xml,application/rss;q=0.9,*/*;q=0.8"
 
+        # call tested function
         crawler = CrawlerInterface(request=None, url=url, response_file=None, settings=settings)
 
         self.assertIn("Accept", crawler.get_request_headers())
@@ -55,6 +58,7 @@ class CrawlerInterfaceTest(FakeInternetTestCase):
         settings["settings"] = {}
         settings["settings"]["timeout_s"] = 120
 
+        # call tested function
         crawler = CrawlerInterface(request=None, url=url, response_file=None, settings=settings)
 
         self.assertEqual(crawler.timeout_s, 120)
@@ -74,6 +78,7 @@ class CrawlerInterfaceTest(FakeInternetTestCase):
 
         crawler.response = TestResponseObject(url, {}, 20)
 
+        # call tested function
         self.assertTrue(crawler.is_response_valid())
 
     def test_is_response_valid__false(self):
@@ -92,4 +97,15 @@ class CrawlerInterfaceTest(FakeInternetTestCase):
         crawler.response = TestResponseObject(url, {}, 20)
         crawler.response.headers.headers["Content-Type"] = "jpeg"
 
+        # call tested function
         self.assertFalse(crawler.is_response_valid())
+
+    def test_get_main_path(self):
+        pwd = os.getcwd()
+
+        settings = {}
+
+        crawler = CrawlerInterface(request=None, url="https://www.youtube", response_file=None, settings=settings)
+
+        # call tested function
+        self.assertEqual(str(crawler.get_main_path()), pwd)

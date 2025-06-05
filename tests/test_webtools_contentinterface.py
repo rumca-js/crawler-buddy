@@ -1,3 +1,4 @@
+import os
 from src.webtools import ContentInterface
 
 from tests.fakeinternet import FakeInternetTestCase

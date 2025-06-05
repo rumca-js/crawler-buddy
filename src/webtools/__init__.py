@@ -44,7 +44,6 @@ from .crawlers import (
 from .remoteserver import RemoteServer
 from .crawlerscript import (
     ScriptCrawlerParser,
-    ScriptCrawlerInterface,
 )
 
 

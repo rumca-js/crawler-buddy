@@ -421,10 +421,14 @@ class ResponseHeaders(object):
             return True
 
     def get_content_length(self):
+        content_len = None
         if "content-length" in self.headers:
-            return int(self.headers["content-length"])
+            content_len = self.headers["content-length"]
         if "Content-Length" in self.headers:
-            return int(self.headers["Content-Length"])
+            content_len = self.headers["Content-Length"]
+
+        if content_len:
+            return int(content_len)
 
     def get_redirect_url(self):
         if "Location" in self.headers and self.headers["Location"]:
@@ -508,6 +512,9 @@ class PageResponseObject(object):
                     E, "Cannot properly encode ansower from {}".format(self.url)
                 )
                 self.binary = self.text.encode(self.encoding, errors="ignore")
+
+    def set_headers(self, headers):
+        self.headers = ResponseHeaders(headers=headers)
 
     def set_crawler(self, crawler_data):
         self.crawler_data = dict(crawler_data)

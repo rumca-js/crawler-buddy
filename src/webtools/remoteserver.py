@@ -2,14 +2,18 @@ import json
 import requests
 import urllib.parse
 import base64
+from .webtools import PageResponseObject
 
 
+"""
 class ResponseObject(object):
+    TODO should it be removed?
     def __init__(self, url, text, binary, status_code):
         self.url = url
         self.text = text
         self.binary = binary
         self.status_code = status_code
+        self.errors = []
 
     def get_text(self):
         return self.text
@@ -19,6 +23,10 @@ class ResponseObject(object):
 
     def get_status_code(self):
         return self.status_code
+
+    def set_crawler(self, crawler_data):
+        self.crawler_data = crawler_data
+"""
 
 
 class RemoteServer(object):
@@ -228,10 +236,10 @@ class RemoteServer(object):
                 binary = base64.b64decode(binary_data["Contents"])
 
         if not response_data:
-            o = ResponseObject(url=properties["link"], text=text, binary=binary)
+            o = PageResponseObject(url=properties["link"], text=text, binary=binary)
             return o
 
-        o = ResponseObject(
+        o = PageResponseObject(
             url=properties["link"],
             text=text,
             binary=binary,

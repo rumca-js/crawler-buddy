@@ -1,4 +1,6 @@
+import json
 import os
+import base64
 from pathlib import Path
 
 from ..webtools import (
@@ -42,9 +44,11 @@ class CrawlerInterface(object):
         self.request_headers = None
 
         if settings:
+            if "settings" not in settings:
+                settings["settings"] = {}
             self.set_settings(settings)
         else:
-            self.settings = settings
+            self.settings = {"settings": {}}
 
     def set_settings(self, settings):
         self.settings = settings
@@ -181,7 +185,7 @@ class CrawlerInterface(object):
             all_bytes.extend(bytes5)
 
         bytes6 = string_to_command(
-            "PageResponseObject.headers", json.dumps(self.response.headers)
+            "PageResponseObject.headers", json.dumps(self.response.headers.headers)
         )
         all_bytes.extend(bytes6)
 
@@ -230,10 +234,17 @@ class CrawlerInterface(object):
         if not self.response:
             return
 
+        raw_content = self.response.get_text()
+        if raw_content:
+            raw_content_bytes = raw_content.encode(self.response.encoding or 'utf-8', errors='replace')
+            encoded_content = base64.b64encode(raw_content_bytes).decode('ascii')
+        else:
+            encoded_content = ""
+
         payload = {}
         payload["url"] = self.response.url
         payload["request_url"] = self.response.request_url
-        payload["Contents"] = self.response.get_text()
+        payload["Contents"] = encoded_content
         payload["Headers"] = self.response.get_headers()
         payload["status_code"] = self.response.status_code
 

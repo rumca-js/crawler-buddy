@@ -110,7 +110,9 @@ async def main() -> None:
 
             # result['loaded_url'] = context.page.url
             response.status_code = context.response.status
-            response.headers = headers
+            response.set_headers(headers)
+
+            interface.response = response
 
             if request.ping:
                 on_close(interface, response)
@@ -120,18 +122,7 @@ async def main() -> None:
                 on_close(interface, response)
                 return
 
-            if response.get_content_length() > webtools.PAGE_TOO_BIG_BYTES:
-                print("Response too big")
-
-                response.status_code = webtools.HTTP_STATUS_CODE_FILE_TOO_BIG
-
-                on_close(interface, response)
-
-            content_type = response.get_content_type()
-            if content_type and not response.is_content_type_supported():
-                print("Content not supported")
-                response.status_code = webtools.HTTP_STATUS_CODE_PAGE_UNSUPPORTED
-
+            if not interface.is_response_valid():
                 on_close(interface, response)
                 return
 

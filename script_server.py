@@ -12,6 +12,7 @@ import json
 import html
 import subprocess
 import argparse
+import base64
 import traceback
 from datetime import datetime
 
@@ -27,7 +28,7 @@ from src import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "4.0.8"
+__version__ = "4.0.9"
 
 
 app = Flask(__name__)
@@ -308,31 +309,19 @@ def set_response():
     headers = data["Headers"]
     status_code = data["status_code"]
 
-    print("Received data about {}".format(url))
+    content_bytes = base64.b64decode(contents)
 
-    response = {}
-    if headers and "Charset" in headers:
-        response["Charset"] = headers["Charset"]
-    else:
-        response["Charset"] = None
-    if headers and "Content-Length" in headers:
-        response["Content-Length"] = headers["Content-Length"]
-    else:
-        response["Content-Length"] = None
+    print("Server set_response:{}".format(url))
 
-    if headers and "Content-Type" in headers:
-        response["Content-Type"] = headers["Content-Type"]
-    else:
-        response["Content-Type"] = None
+    response = webtools.PageResponseObject(url = url, headers = headers, binary=content_bytes, status_code = status_code)
 
-    response["status_code"] = status_code
+    u = webtools.Url(url)
+    u.handler = webtools.HttpPageHandler(url)
+    u.handler.response = response
+    u.handler.get_page_handler()
 
-    all_properties = []
-    all_properties.append({})
-    all_properties.append({"name": "Contents", "data": {"Contents": contents}})
-    all_properties.append({})
-    all_properties.append({"name": "Response", "data": response})
-    all_properties.append({"name": "Headers", "data": headers})
+    all_properties = u.get_properties(full=True)
+    print(all_properties)
 
     crawler_main.get_history().add((url, all_properties))
 

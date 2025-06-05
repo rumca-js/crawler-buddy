@@ -20,13 +20,19 @@ class StatusSpider(scrapy.Spider):
 
     def parse(self, response: HtmlResponse):
         page_obj = webtools.PageResponseObject(self.request.url)
-        page_obj.headers = dict(response.headers)
         page_obj.status_code = response.status
-        page_obj.set_text(response.text)
+        page_obj.set_headers(response.headers)
         page_obj.url = response.url
 
         # Use interface to pass data out
         self.interface.response = page_obj
+
+        if not self.interface.is_response_valid():
+            self.interface.save_response()
+            return
+
+        page_obj.set_text(response.text)
+
         self.interface.save_response()
 
         # Optionally yield for debug or live viewing
@@ -56,7 +62,7 @@ def main():
     if parser.args.verbose:
         print(f"Running request: {request} with Scrapy")
 
-    interface = webtools.ScriptCrawlerInterface(parser, request)
+    interface = webtools.crawlers.ScriptCrawlerInterface(parser, request)
 
     configure_logging({'LOG_LEVEL': 'ERROR'})
 
