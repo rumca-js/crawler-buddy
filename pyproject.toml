@@ -3,7 +3,7 @@
 
 [tool.poetry]
 name = "crawler-buddy"
-version = "4.0.4"
+version = "4.0.8"
 description = "Internet Crawler"
 authors = ["Iwan Grozny <renegat@renegat0x0.ddns.net>"]
 license = "GPL3"
@@ -22,31 +22,36 @@ sympy = "^1.13.2"
 spacy = "3.7.5"
 lxml = "5.3.0"
 brutefeedparser="^0.10.5"
-# [optional] - at least one of methods need to be running
-# example: crawlerrequests.py
-requests = "^2.32.3"
 pytz = "^2024.2"
+psutil="*"
+flask="*"
 
-#  use things below if you want to use selenium
+# [Requests]
+requests = "^2.32.3"
+
+# [Selenium]
 selenium="4.29.0"
 selenium-wire="*"
-psutil="*"
-
 chardet = "^5.2.0"
 # psycopg2 = "*"
 pyvirtualdisplay = "^3.0"
-
-# use things below if you want undetected chrome driver
 undetected-chromedriver = "^3.5.5"
 
-#  use things below if you want to use crawlee
+# [Crawlee]
 crawlee="0.1.1"
 playwright="*"
 
+# [Stealth requests]
 stealth_requests = "^1.2.3"
+
+# [Httpx]
 httpx = "*"
 
-flask="*"
+# [botasaurus]
+# botasaurus = "*"
+#
+# [scrapy]
+# scrapy = "*"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"

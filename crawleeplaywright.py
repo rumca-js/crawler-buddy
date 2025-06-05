@@ -48,7 +48,7 @@ except Exception as E:
     crawlee_feataure_enabled = False
 
 
-def on_close(interface, response, status_code=0):
+def on_close(interface, response):
     interface.response = response
     interface.save_response()
     cleanup_storage()
@@ -148,7 +148,7 @@ async def main() -> None:
             print(error_text)
 
             response.status_code = webtools.HTTP_STATUS_CODE_EXCEPTION
-            on_close(interface, response, 1)
+            on_close(interface, response)
             return
 
     try:
@@ -160,7 +160,7 @@ async def main() -> None:
         print(error_text)
 
         response.status_code = webtools.HTTP_STATUS_CODE_EXCEPTION
-        on_close(interface, response, 1)
+        on_close(interface, response)
         return
 
 

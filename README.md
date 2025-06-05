@@ -144,6 +144,10 @@ For example available are:
  - StealthRequestsCrawler - [stealth requests](https://github.com/jpjacobpadilla/Stealth-Requests)
  - SeleniumBase - [SeleniumBase](https://github.com/seleniumbase/SeleniumBase) [disabled]
 
+Partial unverified support:
+ - botasaurus
+ - scrapy
+
 These methods can be selected for each individual URL for crawling.
 
 Crawling methods like /crawlj can be called with crawl settings, which commonly are:
