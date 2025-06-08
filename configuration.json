@@ -6,6 +6,8 @@
     "prefer_non_www" : false,
     "debug" : true,
     "default_crawler" : null,
+    "host" : "127.0.0.1",
+    "port" : 3000,
     "allowed_ids" : [
     ]
 }

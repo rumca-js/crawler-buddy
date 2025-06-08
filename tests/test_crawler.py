@@ -109,7 +109,7 @@ class CrawlerTest(FakeInternetTestCase):
         crawler_data = """{
                 "settings" : {
                     "timeout_s" : 20,
-                    "remote_server": "https://"
+                    "remote_server": "http://8.8.8.8:3000"
                 }
         }"""
 
@@ -130,6 +130,8 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertIn("settings", data)
         self.assertIn("timeout_s", data["settings"])
         self.assertIn("remote_server", data["settings"])
+
+        self.assertEqual(data["settings"]["remote_server"], "http://8.8.8.8:3000")
 
         self.assertNotIn("timeout_s", data)
 
@@ -270,6 +272,39 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertIn("settings", data)
         self.assertNotIn("Accept", data["settings"])
         self.assertIn("accept_content_types", data["settings"])
+
+        self.assertNotIn("timeout_s", data)
+
+    def test_get_request_data__remote_server__default(self):
+        crawler = Crawler()
+
+        test_url = "https://linkedin.com"
+
+        crawler_data = """{
+                "settings" : {
+                    "timeout_s" : 20
+                }
+        }"""
+
+        request = FlaskRequest("http://192.168.0.0")
+        request.set("url", "https://test.com")
+        request.set("crawler_data", crawler_data)
+
+        # call tested function
+        data = crawler.get_request_data(request)
+
+        self.assertTrue(data)
+        self.assertIn("name", data)
+        self.assertEqual(data["name"], "DefaultCrawler")
+
+        self.assertIn("crawler", data)
+        self.assertEqual(type(data["crawler"]).__name__, "DefaultCrawler")
+
+        self.assertIn("settings", data)
+        self.assertIn("timeout_s", data["settings"])
+        self.assertIn("remote_server", data["settings"])
+
+        self.assertEqual(data["settings"]["remote_server"], "http://127.0.0.1:3000")
 
         self.assertNotIn("timeout_s", data)
 

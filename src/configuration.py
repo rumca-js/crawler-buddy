@@ -17,6 +17,8 @@ class Configuration(object):
         self.data["prefer_non_www"] = False  # TODO use that
         self.data["debug"] = True  # TODO use that
         self.data["default_crawler"] = None
+        self.data["host"] = "127.0.0.1"
+        self.data["port"] = "3000"
 
         self.crawler_config = None
 
@@ -69,6 +71,8 @@ class Configuration(object):
         self.read_json_config_field(json_config, "allowed_ids")
         self.read_json_config_field(json_config, "default_crawler")
         self.read_json_config_field(json_config, "bytes_limit")
+        self.read_json_config_field(json_config, "host")
+        self.read_json_config_field(json_config, "port")
 
     def read_json_config_field(self, json_config, field):
         if field in json_config:

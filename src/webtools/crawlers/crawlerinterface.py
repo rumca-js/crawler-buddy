@@ -247,6 +247,7 @@ class CrawlerInterface(object):
         payload["Contents"] = encoded_content
         payload["Headers"] = self.response.get_headers()
         payload["status_code"] = self.response.status_code
+        payload["crawler_data"] = self.settings
 
         try:
             response = requests.post(remote_server + "/set", json=payload)

@@ -253,6 +253,9 @@ class HttpPageHandler(HandlerInterface):
               We must manually check what kind of data it is.
               For speed - we check first what is suggested by content-type
         """
+        if self.p:
+            return self.p
+
         contents = None
         if self.response and self.response.get_text():
             contents = self.response.get_text()
@@ -262,7 +265,8 @@ class HttpPageHandler(HandlerInterface):
 
         url = self.url
 
-        return PageFactory.get(self.response, contents)
+        self.p = PageFactory.get(self.response, contents)
+        return self.p
 
     def get_title(self):
         if not self.p:

@@ -1436,6 +1436,10 @@ class ScriptCrawlerInterface(CrawlerInterface):
         if parser.args.remote_server:
             settings = {"remote_server": parser.args.remote_server}
 
+        settings["name"] = ScriptCrawler.__name__
+        settings["crawler"] = ScriptCrawler.__name__
+        settings["timeout_s"] = request.timeout_s
+
         super().__init__(
             request, response_file=parser.args.output_file, settings=settings
         )

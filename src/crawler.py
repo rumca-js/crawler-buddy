@@ -83,12 +83,16 @@ class Crawler(object):
         if "settings" not in crawler_data:
             crawler_data["settings"] = {}
 
-        remote_server = "http://" + str(request.host)
-
         crawler_data["settings"]["full"] = request.args.get("full")
         crawler_data["settings"]["headers"] = request.args.get("headers")
         crawler_data["settings"]["ping"] = request.args.get("ping")
-        crawler_data["settings"]["remote_server"] = remote_server
+
+        host = self.configuration.get("host")
+        port = self.configuration.get("port")
+
+        if "remote_server" not in crawler_data["settings"]:
+            crawler_data["settings"]["remote_server"] = "http://" + host + ":" + str(port)
+
         crawler_data["headers"] = headers
 
         return crawler_data

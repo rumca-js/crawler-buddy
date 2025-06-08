@@ -28,7 +28,7 @@ from src import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "4.0.9"
+__version__ = "4.0.10"
 
 
 app = Flask(__name__)
@@ -308,20 +308,22 @@ def set_response():
     contents = data["Contents"]
     headers = data["Headers"]
     status_code = data["status_code"]
+    crawler_data = data["crawler_data"]
 
     content_bytes = base64.b64decode(contents)
 
     print("Server set_response:{}".format(url))
 
-    response = webtools.PageResponseObject(url = url, headers = headers, binary=content_bytes, status_code = status_code)
+    response = webtools.PageResponseObject(url = url, headers = headers, binary=content_bytes, status_code = status_code, request_url=url)
 
-    u = webtools.Url(url)
+    u = webtools.Url(url, settings=crawler_data)
+    u.settings = crawler_data
     u.handler = webtools.HttpPageHandler(url)
     u.handler.response = response
-    u.handler.get_page_handler()
+
+    p = u.handler.get_page_handler()
 
     all_properties = u.get_properties(full=True)
-    print(all_properties)
 
     crawler_main.get_history().add((url, all_properties))
 
@@ -913,9 +915,6 @@ class CommandLineParser(object):
     def parse(self):
         self.parser = argparse.ArgumentParser(description="Remote server options")
         self.parser.add_argument(
-            "--port", default=3000, type=int, help="Port number to be used"
-        )
-        self.parser.add_argument(
             "-l",
             "--history-length",
             default=200,
@@ -929,7 +928,6 @@ class CommandLineParser(object):
             type=int,
             help="Time cache in minutes",
         )
-        self.parser.add_argument("--host", default="0.0.0.0", help="Host")
         self.parser.add_argument("--cert-file", help="Host")
         self.parser.add_argument("--cert-key", help="Host")
 
@@ -945,6 +943,9 @@ if __name__ == "__main__":
     crawler_main.get_history().set_size(history_length)
     crawler_main.get_history().set_time_cache(p.args.time_cache_minutes)
 
+    port = configuration.get("port")
+    host = configuration.get("host")
+
     socket.setdefaulttimeout(40)
 
     webtools.WebConfig.start_display()
@@ -955,12 +956,12 @@ if __name__ == "__main__":
 
         app.run(
             debug=True,
-            host=p.args.host,
-            port=p.args.port,
+            host=host,
+            port=port,
             threaded=True,
             ssl_context=context,
         )
     else:
-        app.run(debug=True, host=p.args.host, port=p.args.port, threaded=True)
+        app.run(debug=True, host=host, port=port, threaded=True)
 
     webtools.WebConfig.stop_display()

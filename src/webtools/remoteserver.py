@@ -5,30 +5,6 @@ import base64
 from .webtools import PageResponseObject
 
 
-"""
-class ResponseObject(object):
-    TODO should it be removed?
-    def __init__(self, url, text, binary, status_code):
-        self.url = url
-        self.text = text
-        self.binary = binary
-        self.status_code = status_code
-        self.errors = []
-
-    def get_text(self):
-        return self.text
-
-    def get_binary(self):
-        return self.binary
-
-    def get_status_code(self):
-        return self.status_code
-
-    def set_crawler(self, crawler_data):
-        self.crawler_data = crawler_data
-"""
-
-
 class RemoteServer(object):
     """
     Crawler buddy communication class
@@ -222,7 +198,6 @@ class RemoteServer(object):
     def get_response(self, all_properties):
         properties = self.read_properties_section("Properties", all_properties)
         response_data = self.read_properties_section("Response", all_properties)
-
         text_data = self.read_properties_section("Text", all_properties)
         binary_data = self.read_properties_section("Binary", all_properties)
 
