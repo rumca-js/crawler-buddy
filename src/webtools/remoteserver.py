@@ -214,10 +214,13 @@ class RemoteServer(object):
             o = PageResponseObject(url=properties["link"], text=text, binary=binary)
             return o
 
+        url = properties["link"]
+
         o = PageResponseObject(
-            url=properties["link"],
+            url= url,
             text=text,
             binary=binary,
             status_code=response_data["status_code"],
+            request_url = url,
         )
         return o
