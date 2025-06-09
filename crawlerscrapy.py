@@ -21,8 +21,10 @@ class StatusSpider(scrapy.Spider):
     def parse(self, response: HtmlResponse):
         page_obj = webtools.PageResponseObject(self.request.url)
         page_obj.status_code = response.status
-        page_obj.set_headers(response.headers)
         page_obj.url = response.url
+        page_obj.request_url = self.request.url
+        # TODO reenable the headers - problem, they were binary, and could not be encoded
+        # page_obj.set_headers(dict(response.headers))
 
         # Use interface to pass data out
         self.interface.response = page_obj

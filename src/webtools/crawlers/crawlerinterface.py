@@ -259,9 +259,12 @@ class CrawlerInterface(object):
                 print(f"Failed to send response. Status code: {response.status_code}")
                 print(f"Response text: {response.text}")
                 return None
-        except requests.RequestException as e:
+        except requests.RequestException as E:
             # Handle any exceptions raised by the requests library
-            print(f"An error occurred while sending the response: {e}")
+            print(f"An error occurred while sending the response: {E}")
+            return None
+        except TypeError as E:
+            print("Cannot post payload\n{}".format(payload))
             return None
 
     def is_valid(self):

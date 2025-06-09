@@ -649,10 +649,10 @@ class PageResponseObject(object):
                 self.encoding = "utf-8"
 
         self.text = text
-        self.content = text.encode(self.encoding)
+        self.binary = text.encode(self.encoding)
 
     def set_binary(self, binary, encoding="utf-8"):
-        self.content = binary
+        self.binary = binary
         self.text = binary.decode(encoding)
 
     def add_error(self, error_text):

@@ -87,7 +87,10 @@ class Crawler(object):
         crawler_data["settings"]["headers"] = request.args.get("headers")
         crawler_data["settings"]["ping"] = request.args.get("ping")
 
-        host = self.configuration.get("host")
+        # TODO host is 0.0.0.0 because we want to listen to "any".
+        # host = self.configuration.get("host")
+        # here - we want to report back to crawler server with results
+        host = "127.0.0.1"
         port = self.configuration.get("port")
 
         if "remote_server" not in crawler_data["settings"]:
