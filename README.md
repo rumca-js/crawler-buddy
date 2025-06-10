@@ -184,7 +184,7 @@ This repository provides the following programs:
 # Script server CLI
 
 ```
-usage: script_server.py [-h] [--port PORT] [-l HISTORY_LENGTH] [--host HOST]
+usage: script_server.py [-h] [-l HISTORY_LENGTH]
 
 Remote server options
 
@@ -192,4 +192,3 @@ options:
   -h, --help            show this help message and exit
   -l HISTORY_LENGTH, --history-length HISTORY_LENGTH
                         Length of history
-  --host HOST           Host
