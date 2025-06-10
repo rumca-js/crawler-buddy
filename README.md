@@ -18,7 +18,7 @@ The Crawling Server is an HTTP-based web crawler that delivers data in an easily
 
 Main Available Endpoints:
  - GET / - Provides index page
- - GET /info - Displays information about available crawlers. Returns JSON with crawler properties.
+ - GET /info - Displays information about available crawlers.
  - GET /infoj - Similar to /info, but explicitly returns the information, in JSON format.
  - GET /system - Information about system.
  - GET /history - Displays the crawl history.
