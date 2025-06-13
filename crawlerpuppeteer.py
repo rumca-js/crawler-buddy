@@ -44,7 +44,7 @@ async def main() -> None:
 
     await browser.close()
 
-    c = crawlerscript.ScriptCrawlerInterface(parser, None)
+    c = crawlerscript.ScriptCrawlerInterface(parser, None, __file__)
     c.response = this_response
     c.save_response()
 

@@ -1429,26 +1429,28 @@ class ScriptCrawlerInterface(CrawlerInterface):
     Interface that can be inherited by any browser, browser engine, crawler
     """
 
-    def __init__(self, parser, request):
+    def __init__(self, parser, request, file_name, scraper_name):
         settings = None
         self.parser = parser
 
         if parser.args.remote_server:
             settings = {"remote_server": parser.args.remote_server}
+        elif not settings:
+            settings = {}
 
-        settings["name"] = ScriptCrawler.__name__
+        file_name = os.path.relpath(file_name, os.getcwd())
+
+        settings["name"] = scraper_name
         settings["crawler"] = ScriptCrawler.__name__
-        settings["timeout_s"] = request.timeout_s
+        settings["settings"] = {}
+        settings["settings"]["timeout_s"] = request.timeout_s
+        settings["settings"]["script"] = file_name
 
         super().__init__(
             request, response_file=parser.args.output_file, settings=settings
         )
 
     def save_response(self):
-        if self.parser.args.verbose:
-            if self.response:
-                print(self.response)
-
         super().save_response()
 
 

@@ -133,20 +133,20 @@ Docker image is available at: https://hub.docker.com/r/rozbujnik/crawler-buddy.
 Please see init_browser_setup.json to know which crawling methods are supported.
 
 For example available are:
- - RequestsCrawler - python requests
- - CrawleeScript - [crawlee](https://github.com/apify/crawlee-python) beautifulsoup
- - PlaywrightScript - [crawlee](https://github.com/apify/crawlee-python) playwright
- - SeleniumUndetected - selenium undetected
- - SeleniumChromeHeadless - selenium chrome headless
- - SeleniumChromeFull - selenium full mode
+ - RequestsCrawler - python [requests](https://github.com/psf/requests)
+ - SeleniumUndetected - [selenium undetected](https://github.com/ultrafunkamsterdam/undetected-chromedriver)
+ - SeleniumChromeHeadless - [selenium](https://github.com/SeleniumHQ/selenium) chrome headless
+ - SeleniumChromeFull - [selenium](https://github.com/SeleniumHQ/selenium) full mode
  - CurlCffiCrawler - [curl-cffi](https://github.com/lexiforest/curl_cffi) crawler
  - HttpxCrawler - [httpx](https://github.com/projectdiscovery/httpx) crawler
  - StealthRequestsCrawler - [stealth requests](https://github.com/jpjacobpadilla/Stealth-Requests)
+ - CrawleeScript - [crawlee](https://github.com/apify/crawlee-python) beautifulsoup
+ - PlaywrightScript - [crawlee](https://github.com/apify/crawlee-python) playwright
+ - ScrapyScript - [scrapy](https://github.com/scrapy/scrapy)
  - SeleniumBase - [SeleniumBase](https://github.com/seleniumbase/SeleniumBase) [disabled]
 
 Partial unverified support:
  - botasaurus
- - scrapy
 
 These methods can be selected for each individual URL for crawling.
 

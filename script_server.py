@@ -28,7 +28,7 @@ from src import CrawlHistory
 # increment major version digit for releases, or link name changes
 # increment minor version digit for JSON data changes
 # increment last digit for small changes
-__version__ = "4.0.12"
+__version__ = "4.0.13"
 
 
 app = Flask(__name__)
@@ -295,13 +295,29 @@ def debug():
 
 @app.route("/set", methods=["POST"])
 def set_response():
+    data = request.json
+    if not data or "Contents" not in data:
+        return jsonify({"success": False, "error": "Missing 'Contents'"}), 400
+
+    u = set_response_impl(request)
+
+    p = u.handler.get_page_handler()
+
+    all_properties = u.get_properties(full=True)
+
+    crawler_main.get_history().add((url, all_properties))
+
+    return jsonify({"success": True, "received": contents})
+
+
+def set_response_impl(request):
     # id = request.args.get("id")
     # if not configuration.is_allowed(id):
     #    return get_html(id=id, body="Cannot access this view", title="Error")
 
     data = request.json
     if not data or "Contents" not in data:
-        return jsonify({"success": False, "error": "Missing 'Contents'"}), 400
+        return None
 
     # url = data['url']
     url = data["request_url"]
@@ -309,6 +325,9 @@ def set_response():
     headers = data["Headers"]
     status_code = data["status_code"]
     crawler_data = data["crawler_data"]
+    crawler = crawler_data.get("crawler", None)
+    if crawler and crawler == "ScriptCrawler":
+        crawler_data["crawler"] = webtools.ScriptCrawler(url=url)
 
     content_bytes = base64.b64decode(contents)
 
@@ -321,13 +340,7 @@ def set_response():
     u.handler = webtools.HttpPageHandler(url)
     u.handler.response = response
 
-    p = u.handler.get_page_handler()
-
-    all_properties = u.get_properties(full=True)
-
-    crawler_main.get_history().add((url, all_properties))
-
-    return jsonify({"success": True, "received": contents})
+    return u
 
 
 @app.route("/find", methods=["GET"])

@@ -18,32 +18,53 @@ class StatusSpider(scrapy.Spider):
         self.request = request
         self.interface = interface
 
-    def parse(self, response: HtmlResponse):
+    def to_clean_headers(self, headers):
+        result = {}
+        for key, value in headers.items():
+            if isinstance(key, bytes):
+                key = key.decode('utf-8', errors='replace')
+            if isinstance(value, bytes):
+                value = value.decode('utf-8', errors='replace')
+            if isinstance(value, list):
+                str_value = ""
+                for item in value:
+                    str_value += item.decode("utf-8", errors="replace")
+                value = str_value
+
+            result[key] = value
+        return result
+
+    def save_response(self, response):
         page_obj = webtools.PageResponseObject(self.request.url)
         page_obj.status_code = response.status
         page_obj.url = response.url
         page_obj.request_url = self.request.url
-        # TODO reenable the headers - problem, they were binary, and could not be encoded
-        # page_obj.set_headers(dict(response.headers))
 
-        # Use interface to pass data out
+        clean_headers = self.to_clean_headers(response.headers)
+        page_obj.set_headers(clean_headers)
+
         self.interface.response = page_obj
 
         if not self.interface.is_response_valid():
             self.interface.save_response()
-            return
+            return page_obj
 
         page_obj.set_text(response.text)
 
         self.interface.save_response()
 
+        return page_obj
+
+    def parse(self, response: HtmlResponse):
+        page_obj = self.save_response(response)
+
         # Optionally yield for debug or live viewing
-        yield {
-            'url': page_obj.url,
-            'status': page_obj.status_code,
-            'headers': page_obj.headers,
-            'text': page_obj.text,
-        }
+        #yield {
+        #    'url': page_obj.url,
+        #    'status': page_obj.status_code,
+        #    'headers': page_obj.headers,
+        #    'text': page_obj.text,
+        #}
 
 
 def main():
@@ -64,7 +85,7 @@ def main():
     if parser.args.verbose:
         print(f"Running request: {request} with Scrapy")
 
-    interface = webtools.crawlers.ScriptCrawlerInterface(parser, request)
+    interface = webtools.crawlers.ScriptCrawlerInterface(parser, request, __file__, webtools.webconfig.SCRAPY_SCRIPT)
 
     configure_logging({'LOG_LEVEL': 'ERROR'})
 

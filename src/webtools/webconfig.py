@@ -26,6 +26,11 @@ from .crawlers import (
 )
 
 
+CRAWLEE_BEAUTIFUL_SCRIPT = "CrawleeScript"
+CRAWLEE_PLAYWRIGHT_SCRIPT = "PlaywrightScript"
+SCRAPY_SCRIPT = "ScrapyScript"
+
+
 class WebConfig(object):
     """
     API to configure webtools
@@ -79,9 +84,9 @@ class WebConfig(object):
 
         mapping.append(WebConfig.get_default_browser_setup(RequestsCrawler))
 
-        mapping.append(WebConfig.get_scriptcralwer(headless_script, "CrawleeScript"))
-        mapping.append(WebConfig.get_scriptcralwer(full_script, "PlaywrightScript"))
-        mapping.append(WebConfig.get_scriptcralwer(scrapy_script, "ScrapyScript"))
+        mapping.append(WebConfig.get_scriptcralwer(headless_script, CRAWLEE_BEAUTIFUL_SCRIPT))
+        mapping.append(WebConfig.get_scriptcralwer(full_script, CRAWLEE_PLAYWRIGHT_SCRIPT))
+        mapping.append(WebConfig.get_scriptcralwer(scrapy_script, SCRAPY_SCRIPT))
 
         mapping.append(WebConfig.get_seleniumundetected())
         mapping.append(WebConfig.get_seleniumbase())

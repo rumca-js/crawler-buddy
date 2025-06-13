@@ -73,7 +73,7 @@ async def main() -> None:
     if parser.args.verbose:
         print("Running request:{} with BeautifulSoupCrawler".format(request))
 
-    interface = webtools.crawlers.ScriptCrawlerInterface(parser, request)
+    interface = webtools.crawlers.ScriptCrawlerInterface(parser, request, __file__, webtools.webconfig.CRAWLEE_BEAUTIFUL_SCRIPT)
     response = webtools.PageResponseObject(request.url)
 
     if parser.args.proxy_address:
