@@ -366,6 +366,7 @@ class CurlCffiCrawler(CrawlerInterface):
 
     def build_requests(self):
         from curl_cffi import requests
+        from curl_cffi.requests.errors import ConnectionError
 
         headers = self.get_request_headers()
 
@@ -378,11 +379,19 @@ class CurlCffiCrawler(CrawlerInterface):
                 # stream=True, # TODO
             )
             return answer
-        except Exception as E:
+        except ConnectionError as E:
             self.response = PageResponseObject(
                 self.request.url,
                 text=None,
                 status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
+                request_url=self.request.url,
+            )
+            self.response.add_error("Url:{} Cannot create request".format(str(E)))
+        except Exception as E:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_EXCEPTION,
                 request_url=self.request.url,
             )
             self.response.add_error("Url:{} Cannot create request".format(str(E)))
