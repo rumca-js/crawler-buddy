@@ -86,15 +86,23 @@ class YTDLP(YouTubeDownloader):
 
         return self._json_data
 
-    def get_channel_video_list(self, newest=True):
+    def get_video_list(self, newest=True):
+        json = self.get_video_list_json(newest=newest)
+
+        result = []
+
+        for item in json:
+            if "url" in item and item["url"] is not None:
+                result.append(item["url"])
+
+        if newest == True:
+            result.reverse()
+
+        return result
+
+    def get_video_list_json(self, newest=True):
         """
-        TODO
-        add argument ascending / descending. Which is default?
-
         https://www.reddit.com/r/youtubedl/comments/si624k/is_there_any_tool_to_generate_a_list_of_all/
-
-        yt-dlp --print "%(id)s;%(title)s" "URL" > file.csv
-        we could also try non json list
         """
 
         def add_commas(json_text):
@@ -130,17 +138,7 @@ class YTDLP(YouTubeDownloader):
         json_text = "[" + json_text + "]"
 
         json = json.loads(json_text)
-
-        result = []
-
-        for item in json:
-            if "url" in item and item["url"] is not None:
-                result.append(item["url"])
-
-        if newest == True:
-            result.reverse()
-
-        return result
+        return json
 
     @staticmethod
     def validate():

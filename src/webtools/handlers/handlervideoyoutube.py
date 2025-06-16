@@ -19,7 +19,6 @@ class YouTubeVideoHandler(DefaultUrlHandler):
         if not self.is_handled_by():
             return
 
-        self.url = self.input2url(url)
         self.code = self.input2code(url)
 
     def is_handled_by(self):
@@ -530,3 +529,49 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
     def get_tags(self):
         if self.get_contents():
             return self.yt_ob.get_tags()
+
+    def get_entries(self):
+        from utils.programwrappers import ytdlp
+        from utils.serializers import YouTubeJson
+
+        entries = []
+
+        location = UrlLocation(self.url)
+        params = location.get_params()
+
+        if params and "list" in params:
+            yt = ytdlp.YTDLP(self.url)
+            json = yt.get_video_list_json()
+
+            if not json:
+                return entries
+
+            for video in json:
+                j = YouTubeJson()
+                j._json = video
+
+                if "url" in video and video["url"] is not None:
+                    url = j.get_link()
+                    title = j.get_title()
+                    description = j.get_description()
+                    channel_url = j.get_channel_url()
+                    date_published = j.get_date_published()
+                    view_count = j.get_view_count()
+                    live_status = j.is_live()
+                    thumbnail = j.get_thumbnail()
+
+                    entry_data = {
+                            "link": url,
+                            "title" : title,
+                            "description" : description,
+                            "date_published" : date_published,
+                            "thumbnail" : thumbnail,
+                            "live" : live_status,
+                            "view_count" : view_count,
+                            "channel_url" : channel_url,
+                            "source_url" : channel_url,
+                            }
+
+                    entries.append(entry_data)
+
+        return entries

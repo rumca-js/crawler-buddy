@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+from datetime import datetime
 
 
 class YouTubeJson(object):
@@ -55,13 +56,21 @@ class YouTubeJson(object):
         if len(self._json) > 0:
             return self._json["duration"]
 
+    def get_link(self):
+        if len(self._json) > 0:
+            return self._json["url"]
+
     def get_title(self):
         if len(self._json) > 0:
             return self._json["title"]
 
     def get_thumbnail(self):
         if len(self._json) > 0:
-            return self._json["thumbnail"]
+            if "thumbnail" in self._json:
+                return self._json["thumbnail"]
+            else:
+                if "thumbnails" in self._json:
+                    return self._json["thumbnails"][0]["url"]
 
     def get_stretched_ratio(self):
         if len(self._json) > 0:
@@ -82,7 +91,16 @@ class YouTubeJson(object):
 
     def get_date_published(self):
         if len(self._json) > 0:
-            return self._json["upload_date"]
+            if "upload_date" in self._json:
+                return self._json["upload_date"]
+            if "epoch" in self._json:
+                epoch = self._json["epoch"]
+                if epoch:
+                    date_utc = datetime.utcfromtimestamp(epoch)
+                    if date_utc:
+                        return date_utc
+            if "timestamp" in self._json:
+                return self._json["timestamp"]
 
     def get_channel_url(self):
         if len(self._json) > 0:

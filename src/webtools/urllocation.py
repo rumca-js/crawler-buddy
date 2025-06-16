@@ -1,3 +1,4 @@
+from urllib.parse import urlparse, parse_qs
 from .webtools import (
     URL_TYPE_RSS,
     URL_TYPE_CSS,
@@ -591,3 +592,8 @@ class UrlLocation(object):
                 result = result + "/" + part
 
         return result
+
+    def get_params(self):
+        parsed_url = urlparse(self.url)
+        params = parse_qs(parsed_url.query)
+        return params
