@@ -271,7 +271,7 @@ class RequestsCrawler(CrawlerInterface):
         if not user_agent:
             user_agent = RequestsCrawler.get_user_agent()
 
-        headers = self.get_request_headers()
+        headers = RequestsCrawler.get_request_headers_default()
         headers["User-Agent"] = user_agent
 
         # status code 403 means they do not like our user agent.
