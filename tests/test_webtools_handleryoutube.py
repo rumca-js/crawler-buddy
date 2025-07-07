@@ -26,10 +26,30 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         self.assertEqual(handler.url, test_link)
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_get_vide_code__watch(self):
+    def test_is_handled_by_video(self):
         MockRequestCounter.mock_page_requests = 0
 
         handler = YouTubeVideoHandler("https://www.youtube.com/watch?v=1234")
+        self.assertTrue(handler.is_handled_by())
+
+    def test_is_handled_by_short(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        handler = YouTubeVideoHandler("https://www.youtube.com/shorts/1234")
+        self.assertTrue(handler.is_handled_by())
+
+    def test_get_vide_code__video(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        handler = YouTubeVideoHandler("https://www.youtube.com/watch?v=1234")
+        self.assertEqual(handler.get_video_code(), "1234")
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
+    def test_get_vide_code__short(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        handler = YouTubeVideoHandler("https://www.youtube.com/shorts/1234")
         self.assertEqual(handler.get_video_code(), "1234")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
@@ -211,6 +231,31 @@ class YouTubeChannelHandlerTest(FakeInternetTestCase):
 
         # +1 - obtains channel code from HTML
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
+    def test_is_handled_by__channel(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://www.youtube.com/channel/1234"
+        # call tested function
+        handler = YouTubeChannelHandler(test_link, url_builder=Url)
+        self.assertTrue(handler.is_handled_by())
+
+    def test_is_handled_by__user(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://www.youtube.com/user/1234"
+        # call tested function
+        handler = YouTubeChannelHandler(test_link, url_builder=Url)
+        self.assertTrue(handler.is_handled_by())
+
+    def test_is_handled_by__feed(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=SAMTIMESAMTIMESAMTIMESAM"
+
+        # call tested function
+        handler = YouTubeChannelHandler(test_link, url_builder=Url)
+        self.assertTrue(handler.is_handled_by())
 
     def test_source_input2code_channel(self):
         MockRequestCounter.mock_page_requests = 0
