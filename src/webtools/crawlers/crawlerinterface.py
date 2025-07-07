@@ -284,7 +284,7 @@ class CrawlerInterface(object):
 
         return default_headers
 
-    def get_request_headers_default(self):
+    def get_request_headers_default():
         return default_headers
 
     def get_user_agent():
