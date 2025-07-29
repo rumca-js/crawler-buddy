@@ -21,7 +21,7 @@ PORT=3000
 
 install:
 	poetry install
-	poetry run python -m spacy download en_core_web_sm
+	#poetry run python -m spacy download en_core_web_sm
 	poetry run playwright install
 
 installsysdeps:
