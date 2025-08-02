@@ -663,22 +663,23 @@ class SeleniumDriver(CrawlerInterface):
         if not self.is_valid():
             return
 
-        try:
-            from selenium.common.exceptions import TimeoutException
-        except Exception as E:
-            print(str(E))
-            selenium_feataure_enabled = False
-
-        self.driver = self.get_driver()
-        if not self.driver:
-            return
-
         self.response = PageResponseObject(
             self.request.url,
             text=None,
             status_code=HTTP_STATUS_CODE_EXCEPTION,
             request_url=self.request.url,
         )
+
+        try:
+            from selenium.common.exceptions import TimeoutException
+        except Exception as E:
+            self.response.add_error(str(E))
+            print(str(E))
+            selenium_feataure_enabled = False
+
+        self.driver = self.get_driver()
+        if not self.driver:
+            return
 
         try:
             # add 10 seconds for start of browser, etc.
@@ -873,8 +874,9 @@ class SeleniumChromeHeadless(SeleniumDriver):
         try:
             driver = webdriver.Chrome(service=service, options=options)
             return driver
-        except Exception as e:
-            WebLogger.error(f"Failed to initialize WebDriver: {e}")
+        except Exception as E:
+            WebLogger.error(f"Failed to initialize WebDriver: {E}")
+            self.response.add_error(str(E))
             return None
 
     def is_valid(self):
