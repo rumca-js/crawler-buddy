@@ -1006,6 +1006,8 @@ class UrlTest(FakeInternetTestCase):
 
         url = Url(test_link)
 
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
         # call tested function
         properties = url.get_social_properties()
 
@@ -1018,7 +1020,8 @@ class UrlTest(FakeInternetTestCase):
         self.assertIn("thumbs_down", properties)
         self.assertTrue(properties["thumbs_down"])
 
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        # return dislike + youtube json
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_social_properties__github(self):
         MockRequestCounter.mock_page_requests = 0
@@ -1030,8 +1033,8 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         properties = url.get_social_properties()
 
-        self.assertIn("thumbs_up", properties)
-        self.assertTrue(properties["thumbs_up"])
+        self.assertIn("stars", properties)
+        self.assertTrue(properties["stars"])
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 

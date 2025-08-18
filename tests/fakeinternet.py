@@ -68,6 +68,7 @@ from tests.fake.thehill import (
 from tests.fake.reddit import (
     reddit_rss_text,
     reddit_entry_json,
+    reddit_subreddit_json,
 )
 from tests.fake.githubcom import (
     github_json,
@@ -162,6 +163,8 @@ class MockRequestCounter(object):
         """
         MockRequestCounter.request_history.append({"url": url, "info" : info, "crawler_data": crawler_data})
         MockRequestCounter.mock_page_requests += 1
+
+        print(f"Requested: {url}")
         #MockRequestCounter.debug_lines()
 
     def reset():
@@ -415,6 +418,9 @@ class TestResponseObject(PageResponseObject):
 
         if url.startswith("https://www.youtube.com/feeds"):
             return webpage_samtime_youtube_rss
+
+        if url == "https://www.reddit.com/r/InternetIsBeautiful/.json":
+            return reddit_subreddit_json
 
         if url.startswith("https://www.reddit.com/r/") and url.endswith(".rss"):
             return reddit_rss_text

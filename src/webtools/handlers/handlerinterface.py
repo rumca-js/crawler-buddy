@@ -134,6 +134,9 @@ class HandlerInterface(DefaultContentPage):
         """ """
         return
 
+    def get_rating(self):
+        return
+
     def get_thumbs_up(self):
         return
 
@@ -156,14 +159,34 @@ class HandlerInterface(DefaultContentPage):
         if thumbs_up and views:
             return thumbs_up / views
 
+    def get_user_stars(self):
+        """
+        stars / favourites
+        """
+        pass
+
+    def get_followers_count(self):
+        """
+        followers / subscribers
+        """
+        pass
+
     def get_json_data(self):
+        """
+        Called to obtain link json data (dynamic data)
+        """
+        pass
+
+    def get_social_data(self):
         json_obj = {}
 
-        json_obj["thumbs_up"] = None
-        json_obj["thumbs_down"] = None
-        json_obj["view_count"] = None
-        json_obj["rating"] = None
-        json_obj["upvote_ratio"] = None  # (thumbs_up - thumbs_down)
-        json_obj["upvote_view_ratio"] = None  # (thumbs_up / views)
+        json_obj["thumbs_up"] = self.get_thumbs_up()
+        json_obj["thumbs_down"] = self.get_thumbs_down()
+        json_obj["view_count"] = self.get_view_count()
+        json_obj["rating"] = self.get_rating()
+        json_obj["upvote_ratio"] = self.get_upvote_ratio()
+        json_obj["upvote_view_ratio"] = self.get_upvote_view_ratio()
+        json_obj["stars"] = self.get_user_stars()
+        json_obj["followers_count"] = self.get_followers_count()
 
         return json_obj

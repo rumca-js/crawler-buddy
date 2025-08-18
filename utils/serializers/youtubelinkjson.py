@@ -85,10 +85,6 @@ class YouTubeJson(object):
         if len(self._json) > 0:
             return self._json["categories"]
 
-    def get_channel_name(self):
-        if len(self._json) > 0:
-            return self._json["channel"]
-
     def get_date_published(self):
         if len(self._json) > 0:
             if "upload_date" in self._json:
@@ -101,10 +97,6 @@ class YouTubeJson(object):
                         return date_utc
             if "timestamp" in self._json:
                 return self._json["timestamp"]
-
-    def get_channel_url(self):
-        if len(self._json) > 0:
-            return self._json["channel_url"]
 
     def get_description(self):
         if len(self._json) > 0:
@@ -124,13 +116,17 @@ class YouTubeJson(object):
         if len(self._json) > 0:
             return self._json["channel"]
 
+    def get_channel_url(self):
+        if len(self._json) > 0:
+            return self._json["channel_url"]
+
     def get_channel_code(self):
         if len(self._json) > 0:
             return self._json["channel_id"]
 
-    def get_channel_url(self):
+    def get_followers_count(self):
         if len(self._json) > 0:
-            return self._json["channel_url"]
+            return self._json["channel_follower_count"]
 
     def get_channel_feed_url(self):
         if len(self._json) > 0:

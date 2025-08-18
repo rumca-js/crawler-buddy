@@ -25,12 +25,6 @@ from utils.systemmonitoring import get_hardware_info, get_process_info
 from src import CrawlHistory
 
 
-# increment major version digit for releases, or link name changes
-# increment minor version digit for JSON data changes
-# increment last digit for small changes
-__version__ = "4.0.18"
-
-
 app = Flask(__name__)
 
 
@@ -160,7 +154,7 @@ def index():
         )
 
     text += """<p>"""
-    text += """Version:{}""".format(__version__)
+    text += """Version:{}""".format(configuration.__version__)
     text += """</p>"""
 
     return get_html(id=id, body=text, title="Crawler Buddy", index=True)

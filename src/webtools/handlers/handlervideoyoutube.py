@@ -167,6 +167,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         """
         super().__init__(url=url, settings=settings, url_builder=url_builder)
 
+        self.social_data = {}
         self.yt_text = None
         self.yt_ob = None
 
@@ -319,34 +320,18 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             return self.yt_ob.get_json_data()
 
     def get_json_data(self):
-        json_data = {}
+        if self.social_data != {}:
+            return self.social_data
+
+        self.social_data = {}
 
         if self.return_dislike:
-            json_data = self.get_json_data_from_rd()
+            self.social_data = self.get_json_data_from_rd()
         else:
-            json_data = self.get_json_data_from_yt()
+            # TODO we should extend with Return dislike data
+            self.social_data = self.get_json_data_from_yt()
 
-        thumbs_up = None
-        thumbs_down = None
-        view_count = None
-
-        if "thumbs_down" in json_data:
-            thumbs_down = json_data["thumbs_down"]
-        if "thumbs_up" in json_data:
-            thumbs_up = json_data["thumbs_up"]
-        if "view_count" in json_data:
-            view_count = json_data["view_count"]
-
-        if thumbs_up and thumbs_down:
-            json_data["upvote_ratio"] = thumbs_up / (thumbs_up + thumbs_down)
-        else:
-            json_data["upvote_ratio"] = None
-        if thumbs_up and view_count:
-            json_data["upvote_view_ratio"] = thumbs_up / view_count
-        else:
-            json_data["upvote_view_ratio"] = None
-
-        return json_data
+        return self.social_data
 
     def get_json_data_from_yt(self):
         json_data = {}
@@ -403,26 +388,21 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if not self.get_contents():
             return {}
 
-        youtube_props = super().get_properties()
+        youtube_props = ContentInterface.get_properties(self)
 
         yt_json = self.yt_ob._json
 
         if yt_json:
-            if "webpage_url" in yt_json:
-                youtube_props["webpage_url"] = yt_json["webpage_url"]
-            if "uploader_url" in yt_json:
-                youtube_props["uploader_url"] = yt_json["uploader_url"]
+            youtube_props["webpage_url"] = yt_json.get("webpage_url")
+            youtube_props["uploader_url"] = yt_json.get("uploader_url")
+            youtube_props["view_count"] = self.yt_ob.get_view_count()
+            youtube_props["like_count"] = self.yt_ob.get_thumbs_up()
+            youtube_props["duration"] = yt_json.get("duration_string")
+
             youtube_props["channel_id"] = self.yt_ob.get_channel_code()
             youtube_props["channel"] = self.yt_ob.get_channel_name()
             youtube_props["channel_url"] = self.yt_ob.get_channel_url()
-            if "channel_follower_count" in yt_json:
-                youtube_props["channel_follower_count"] = yt_json[
-                    "channel_follower_count"
-                ]
-            youtube_props["view_count"] = self.yt_ob.get_view_count()
-            youtube_props["like_count"] = self.yt_ob.get_thumbs_up()
-            if "duration_string" in yt_json:
-                youtube_props["duration"] = yt_json["duration_string"]
+            youtube_props["channel_follower_count"] = self.yt_ob.get_followers_count()
 
         youtube_props["embed_url"] = self.get_link_embed()
         youtube_props["valid"] = self.is_valid()

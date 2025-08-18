@@ -54,6 +54,36 @@ class RedditUrlHandlerTest(FakeInternetTestCase):
 
         self.assertIn("https://www.reddit.com/r/redditdev/.rss", feeds)
 
+    def test_get_json_data__comment(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/"
+
+        url = RedditUrlHandler(test_link, url_builder=Url)
+
+        # call tested function
+        properties = url.get_json_data()
+
+        self.assertIn("upvote_ratio", properties)
+        self.assertTrue(properties["upvote_ratio"])
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
+    def test_get_json_data__subreddit(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://www.reddit.com/r/InternetIsBeautiful"
+
+        url = RedditUrlHandler(test_link, url_builder=Url)
+
+        # call tested function
+        properties = url.get_json_data()
+
+        self.assertIn("followers_count", properties)
+        self.assertTrue(properties["followers_count"])
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+
 
 class GitHubUrlHandlerTest(FakeInternetTestCase):
     def setUp(self):
@@ -121,7 +151,7 @@ class GitHubUrlHandlerTest(FakeInternetTestCase):
         # call tested function
         data = handler.get_json_data()
 
-        self.assertIn("thumbs_up", data)
+        self.assertIn("stars", data)
 
 
 class HackerNewsHandlerTest(FakeInternetTestCase):

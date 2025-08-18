@@ -124,7 +124,7 @@ class CrawlerInterface(object):
             return False
 
         if not self.response.is_valid():
-            self.response.add_error("Response not valid")
+            self.response.add_error(f"Response not valid. Status:{self.response.status_code}")
             return False
 
         content_length = self.response.get_content_length()

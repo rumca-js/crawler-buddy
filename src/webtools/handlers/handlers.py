@@ -23,6 +23,7 @@ class RedditUrlHandler(DefaultUrlHandler):
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         self.post_id = None
         self.subreddit = None
+        self.social_data = {}
 
         super().__init__(
             url, contents=contents, settings=settings, url_builder=url_builder
@@ -51,6 +52,8 @@ class RedditUrlHandler(DefaultUrlHandler):
         self.input2code(self.url)
         if self.post_id:
             return f"https://www.reddit.com/{self.post_id}.json"
+        elif self.subreddit:
+            return f"https://www.reddit.com/r/{self.subreddit}/.json"
         else:
             WebLogger.error("Reddit:did not found post id {}".format(self.url))
 
@@ -94,35 +97,47 @@ class RedditUrlHandler(DefaultUrlHandler):
         return text
 
     def get_json_data(self):
-        result = {}
+        if self.social_data != {}:
+            return self.social_data
 
         json_text = self.get_json_text()
 
         if not json_text:
-            return result
+            return self.social_data
 
-        upvote_ratio = self.get_json_value(json_text, "upvote_ratio")
-        try:
-            upvote_ratio = float(upvote_ratio)
-        except ValueError:
-            upvote_ratio = None
+        if self.post_id:
+            upvote_ratio = self.get_json_value(json_text, "upvote_ratio")
+            try:
+                upvote_ratio = float(upvote_ratio)
+            except ValueError:
+                upvote_ratio = None
 
-        score = self.get_json_value(json_text, "score")
-        try:
-            score = float(score)
-        except ValueError:
-            score = None
+            score = self.get_json_value(json_text, "score")
+            try:
+                score = float(score)
+            except ValueError:
+                score = None
 
-        result["upvote_ratio"] = upvote_ratio
-        # result["score"] = score
+            self.social_data["upvote_ratio"] = upvote_ratio
+            self.social_data["rating"] = score
+        elif self.subreddit:
+            subscribers = self.get_json_value(json_text, "subreddit_subscribers")
+            try:
+                subscribers = int(subscribers)
+            except ValueError:
+                subscribers = None
 
-        # if upvote_ratio and score and upvote_ratio > 0 and score > 0:
-        #    thumbs_up = (upvote_ratio * score) / (2 * upvote_ratio - 1)
-        #    thumbs_down = thumbs_up - score
-        #    result["thumbs_up"] = thumbs_up
-        #    result["thumbs_down"] = thumbs_down
+            self.social_data["followers_count"] = subscribers
 
-        return result
+        return self.social_data
+
+    def get_upvote_ratio(self):
+        if self.social_data:
+            return self.social_data.get("upvote_ratio")
+
+    def get_followers_count(self):
+        if self.social_data:
+            return self.social_data.get("followers_count")
 
     def get_feeds(self):
         """
@@ -139,6 +154,8 @@ class RedditUrlHandler(DefaultUrlHandler):
 class GitHubUrlHandler(DefaultUrlHandler):
 
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
+        self.social_data = {}
+
         super().__init__(
             url, contents=contents, settings=settings, url_builder=url_builder
         )
@@ -221,14 +238,20 @@ class GitHubUrlHandler(DefaultUrlHandler):
             WebLogger.error("GitHub:no Url link")
 
     def get_json_data(self):
-        result = {}
+        if self.social_data != {}:
+            return self.social_data
+
+        self.social_data = {}
 
         json = self.get_json_object()
 
         if json:
-            result["thumbs_up"] = json["stargazers_count"]
+            self.social_data["stars"] = json["stargazers_count"]
 
-        return result
+        return self.social_data
+
+    def get_user_stars(self):
+        return self.social_data.get("stars")
 
 
 class ReturnDislike(DefaultUrlHandler):
@@ -266,39 +289,29 @@ class ReturnDislike(DefaultUrlHandler):
         return self._json
 
     def get_thumbs_up(self):
-        if self._json and "likes" in self._json:
-            return self._json["likes"]
+        if self._json:
+            return self._json.get("likes")
 
     def get_thumbs_down(self):
-        if self._json and "dislikes" in self._json:
-            return self._json["dislikes"]
+        if self._json:
+            return self._json.get("dislikes")
 
     def get_view_count(self):
-        if self._json and "viewCount" in self._json:
-            return self._json["viewCount"]
+        if self._json:
+            return self._json.get("viewCount")
 
     def get_rating(self):
-        if self._json and "rating" in self._json:
-            return self._json["rating"]
+        if self._json:
+            return self._json.get("rating")
 
     def get_json_data(self):
-        json_obj = {}
-
         self.get_response()
-
-        json_obj["thumbs_up"] = h.get_thumbs_up()
-        json_obj["thumbs_down"] = h.get_thumbs_down()
-        json_obj["view_count"] = h.get_view_count()
-        json_obj["rating"] = h.get_rating()
-        json_obj["upvote_ratio"] = h.get_upvote_ratio()
-        json_obj["upvote_view_ratio"] = h.get_upvote_view_ratio()
-
-        return json_obj
 
 
 class HackerNewsHandler(DefaultUrlHandler):
 
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
+        self.social_data = {}
         super().__init__(
             url, contents=contents, settings=settings, url_builder=url_builder
         )
@@ -356,14 +369,21 @@ class HackerNewsHandler(DefaultUrlHandler):
             WebLogger.error("GitHub:no Url link")
 
     def get_json_data(self):
-        result = {}
+        if self.social_data != {}:
+            return self.social_data
+
+        self.social_data = {}
 
         json = self.get_json_object()
 
         if json:
-            result["upvote_ratio"] = json["score"]
+            self.social_data["upvote_ratio"] = json["score"]
 
-        return result
+        return self.social_data
+
+    def get_upvote_ratio(self):
+        if "upvote_ratio" in self.social_data:
+            return self.social_data["upvote_ratio"]
 
 
 class InternetArchive(DefaultUrlHandler):

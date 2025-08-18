@@ -18,6 +18,7 @@ class YouTubeChannelHandler(DefaultChannelHandler):
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         self.html_url = None  # channel html page contains useful info
         self.rss_url = None
+        self.social_data = {}
 
         super().__init__(
             url,
@@ -61,6 +62,7 @@ class YouTubeChannelHandler(DefaultChannelHandler):
         if (
             short_url.startswith("www.youtube.com/@")
             or short_url.startswith("youtube.com/@")
+            or short_url.startswith("m.youtube.com/@")
             or short_url.startswith("www.youtube.com/user")
             or short_url.startswith("youtube.com/user")
         ):
@@ -271,3 +273,21 @@ class YouTubeChannelHandler(DefaultChannelHandler):
             return self.url
         else:
             return self.get_channel_url()
+
+    def get_json_data(self):
+        entries = self.get_entries()
+        for entry in entries:
+            u = self.url_builder(url = entry["link"])
+            u.get_response()
+            h = u.get_handler()
+            if h:
+                props = h.get_properties()
+                if props:
+                    self.social_data["followers_count"] = props.get("channel_follower_count")
+                    if self.social_data["followers_count"]:
+                        return
+
+            return # TODO?
+
+    def get_followers_count(self):
+        return self.social_data.get("followers_count")
