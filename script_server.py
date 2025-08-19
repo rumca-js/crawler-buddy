@@ -58,7 +58,7 @@ def get_crawling_form(title, action_url, id=""):
         <h1>{title}</h1>
         <form action="{action_url}?id={id}" method="get">
             <label for="url">URL:</label><br>
-            <input type="text" id="url" name="url" required><br><br>
+            <input type="text" id="url" name="url" required autofocus><br><br>
 
             <label for="name">Name (optional):</label><br>
             <input type="text" id="name" name="name"><br><br>
@@ -83,7 +83,7 @@ def get_link_form(title, action_url, id=""):
         <h1>{title}</h1>
         <form action="{action_url}?id={id}" method="get">
             <label for="url">URL:</label><br>
-            <input type="text" id="url" name="url" required><br><br>
+            <input type="text" id="url" name="url" required autofocus><br><br>
             <button type="submit">Submit</button>
         </form>
         """
@@ -352,7 +352,7 @@ def find():
             <h1>Submit Your Details</h1>
             <form action="/findj?id={}" method="get">
                 <label for="url">URL:</label><br>
-                <input type="text" id="url" name="url" required><br><br>
+                <input type="text" id="url" name="url" required autofocus><br><br>
 
                 <label for="name">Name (optional):</label><br>
                 <input type="text" id="name" name="name"><br><br>
