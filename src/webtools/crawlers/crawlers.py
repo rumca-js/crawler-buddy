@@ -712,16 +712,28 @@ class SeleniumDriver(CrawlerInterface):
                 request_url=self.request.url,
             )
             self.response.add_error("Url:{} Page timeout".format(self.request.url))
+
         except Exception as E:
-            print(E, "Url:{}".format(self.request.url))
-            WebLogger.exc(E, "Url:{}".format(self.request.url))
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_EXCEPTION,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} exception".format(self.request.url))
+            str_exc = str(E)
+            if str_exc.find("net::ERR_NAME_NOT_RESOLVED") >= 0:
+                WebLogger.debug("Url:{} connection error".format(self.request.url))
+                self.response = PageResponseObject(
+                    self.request.url,
+                    text=None,
+                    status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
+                    request_url=self.request.url,
+                )
+                self.response.add_error("Url:{} Connection error".format(self.request.url))
+            else:
+                print(E, "Url:{}".format(self.request.url))
+                WebLogger.exc(E, "Url:{}".format(self.request.url))
+                self.response = PageResponseObject(
+                    self.request.url,
+                    text=None,
+                    status_code=HTTP_STATUS_CODE_EXCEPTION,
+                    request_url=self.request.url,
+                )
+                self.response.add_error("Url:{} exception".format(self.request.url))
 
         return self.response
 
