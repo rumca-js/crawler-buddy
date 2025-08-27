@@ -19,7 +19,12 @@ from datetime import datetime
 from src import webtools
 from src.configuration import Configuration
 from src.crawler import Crawler
-from src.viewutils import get_entry_html, level2color, rssify, get_html
+from src.views import (
+   get_entry_html,
+   level2color,
+   rssify,
+   get_html,
+)
 from utils import PermanentLogger
 from utils.systemmonitoring import get_hardware_info, get_process_info
 from src import CrawlHistory
@@ -58,7 +63,7 @@ def get_crawling_form(title, action_url, id=""):
         <h1>{title}</h1>
         <form action="{action_url}?id={id}" method="get">
             <label for="url">URL:</label><br>
-            <input type="text" id="url" name="url" required autofocus><br><br>
+            <input type="url" id="url" name="url" required autofocus><br><br>
 
             <label for="name">Name (optional):</label><br>
             <input type="text" id="name" name="name"><br><br>

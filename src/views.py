@@ -3,6 +3,22 @@ from src import CrawlHistory
 from src import webtools
 
 
+def get_template(name, context=None):
+    with open("static/templates/" + name) as fh:
+        data = fh.read()
+        if context:
+            for item in context:
+                value = context[item]
+                key = "{"+item+ "}"
+                if value is None:
+                    value = ""
+                else:
+                    value = str(value)
+                data = data.replace(key, value)
+
+        return data
+
+
 def get_html(id, body, title="", index=False):
     if not index:
         if not id:
@@ -14,6 +30,7 @@ def get_html(id, body, title="", index=False):
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{}</title>
+        <link rel="stylesheet" href="static/css.css"/>
     </head>
     <body>
     {}

@@ -1,0 +1,83 @@
+/* Base form styles */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.75em 1em;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  /* box-sizing: border-box;*/
+  appearance: none;
+  font-family: inherit;
+}
+
+/* Focus effect */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+  outline: none;
+}
+
+/* Placeholder styling */
+input::placeholder,
+textarea::placeholder {
+  color: #aaa;
+}
+
+/* Disabled state */
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Label styling */
+label {
+  /* display: block; */
+  margin: 0.0em;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Form group wrapper */
+.form-group {
+  margin-bottom: 0.01rem;
+}
+
+/* Optional: nicer select arrow (for modern browsers) */
+select {
+  background-image: url('data:image/svg+xml;charset=UTF-8,<svg fill="%23666" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+  padding-right: 2.5em;
+}
+
+/* Optional: textarea resize */
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Specifically target the URL input to be wider */
+input[type="url"] {
+  width: 100%;
+  min-width: 300px;
+  max-width: 100%;
+}
+
+.form-group.link-input {
+  display: flex;
+  flex-direction: column;
+}
