@@ -12,6 +12,7 @@ import os
 import subprocess
 import threading
 import urllib.parse
+import tempfile
 
 from utils.basictypes import fix_path_for_os
 
@@ -875,6 +876,10 @@ class SeleniumChromeHeadless(SeleniumDriver):
         options.add_argument("--headless=new")
         options.add_argument("--lang=en-US")
 
+        # sometimes two selenium browser clash when accessing user data directory
+        temp_user_data_dir = tempfile.mkdtemp()
+        options.add_argument(f"--user-data-dir={temp_user_data_dir}")
+
         # options to enable performance log, to read status code
         options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
 
@@ -971,6 +976,10 @@ class SeleniumChromeFull(SeleniumDriver):
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-gpu")
 
+        # sometimes two selenium browser clash when accessing user data directory
+        temp_user_data_dir = tempfile.mkdtemp()
+        options.add_argument(f"--user-data-dir={temp_user_data_dir}")
+
         # options to enable performance log, to read status code
         options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
 
@@ -1027,6 +1036,10 @@ class SeleniumUndetected(SeleniumDriver):
 
         options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
         options.add_argument("--lang={}".format("en-US"))
+
+        # sometimes two selenium browser clash when accessing user data directory
+        temp_user_data_dir = tempfile.mkdtemp()
+        options.add_argument(f"--user-data-dir={temp_user_data_dir}")
 
         try:
             return uc.Chrome(options=options)
@@ -1101,6 +1114,11 @@ class SeleniumWireFull(SeleniumDriver):
         options.add_argument("disable-infobars")
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-gpu")
+
+        # sometimes two selenium browser clash when accessing user data directory
+        temp_user_data_dir = tempfile.mkdtemp()
+        options.add_argument(f"--user-data-dir={temp_user_data_dir}")
+
         options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
 
         try:
