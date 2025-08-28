@@ -14,15 +14,26 @@ class RemoteServer(object):
         self.remote_server = remote_server
         self.timeout_s = timeout_s
 
-    def get_socialj(self, url, settings=None):
+    def get_getj(self, url, name="", settings=None):
         """
         @returns None in case of error
         """
         url = url.strip()
-
         encoded_url = urllib.parse.quote(url, safe="")
 
+        link = self.remote_server
+        link = f"{link}/getj"
+
+        args = None
+
         if settings:
+            if name != "":
+                settings["name"] = name
+
+            crawler = settings.get("crawler", None)
+            if crawler:
+                settings["crawler"] = str(crawler)
+
             try:
                 crawler_data = json.dumps(settings)
             except Exception as E:
@@ -31,32 +42,59 @@ class RemoteServer(object):
 
             encoded_crawler_data = urllib.parse.quote(crawler_data, safe="")
 
-            link = self.remote_server
-            link = (
-                f"{link}/socialj?url={encoded_url}&crawler_data={encoded_crawler_data}"
-            )
-            # print("RemoteServer: calling:{}".format(link))
-        else:
-            link = self.remote_server
-            link = f"{link}/socialj?url={encoded_url}"
-            # print("RemoteServer: calling:{}".format(link))
+            args = f"crawler_data={encoded_crawler_data}"
+        elif name != "":
+            args = f"name={name}"
 
-        real_settings = {}
-        if settings and "settings" in settings:
-            real_settings = settings["settings"]
+        return self.perform_remote_call(link_call = link, url = url, settings = settings, args=args)
 
-        timeout_s = 50
-        if settings and "timeout_s" in real_settings:
-            timeout_s = real_settings["timeout_s"]
-        if settings and "delay_s" in real_settings:
-            timeout_s += real_settings["delay_s"]
+    def get_feedsj(self, url, settings=None):
+        """
+        @returns None in case of error
+        """
 
-        # we make request longer - for the server to be able to respond in time
-        timeout_s += 5
+        link = self.remote_server
+        link = f"{link}/feedsj"
+
+        return self.perform_remote_call(link, url, settings)
+
+    def get_socialj(self, url, settings=None):
+        """
+        @returns None in case of error
+        """
+
+        link = self.remote_server
+        link = f"{link}/socialj"
+
+        return self.perform_remote_call(link, url, settings)
+
+    def perform_remote_call(self, link_call, url, settings=None, args=None):
+        """
+        @param link_call Remote server endpoint
+        @param url Url for which we call Remote server
+        """
+        url = url.strip()
+        encoded_url = urllib.parse.quote(url, safe="")
+
+        link_call = f"{link_call}?url={encoded_url}"
+
+        if args:
+            link_call = f"{link_call}&{args}"
 
         text = None
+
+        timeout_s = 50
+        if settings:
+            if "settings" in settings:
+                real_settings = settings.get("settings", {})
+                timeout_s = real_settings.get("timeout_s", 50)
+                timeout_s += real_settings.get("delay_s", 0)
+                timeout_s += 5
+
+        print(f"Remote server: Calling {link_call}")
+
         try:
-            with requests.get(url=link, timeout=timeout_s, verify=False) as result:
+            with requests.get(url=link_call, timeout=timeout_s, verify=False) as result:
                 text = result.text
         except Exception as E:
             print("Remote error. " + str(E))
@@ -72,98 +110,16 @@ class RemoteServer(object):
         try:
             json_obj = json.loads(text)
         except ValueError as E:
-            print("Url:{} Remote error. Cannot read response".format(link, text))
-            # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
+            print("Url:{} Remote error. Cannot read response".format(link_call, text))
+            # WebLogger.error(info_text="Url:{} Cannot read response".format(link_call), detail_text=text)
             return
         except TypeError as E:
-            print("Url:{} Remote error. Cannot read response".format(link, text))
-            # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
+            print("Url:{} Remote error. Cannot read response".format(link_call, text))
+            # WebLogger.error(info_text="Url:{} Cannot read response".format(link_call), detail_text=text)
             return
 
         if "success" in json_obj and not json_obj["success"]:
-            print("Url:{} Remote error. Not a success".format(link))
-            # WebLogger.error(json_obj["error"])
-            return False
-
-        return json_obj
-
-    def get_getj(self, url, name="", settings=None):
-        """
-        @returns None in case of error
-        """
-        import requests
-
-        url = url.strip()
-
-        encoded_url = urllib.parse.quote(url, safe="")
-
-        if settings:
-            if name != "":
-                settings["name"] = name
-
-            try:
-                crawler_data = json.dumps(settings)
-            except Exception as E:
-                print("Cannot json serialize:{}".format(settings))
-                raise
-
-            encoded_crawler_data = urllib.parse.quote(crawler_data, safe="")
-
-            link = self.remote_server
-            link = f"{link}/getj?url={encoded_url}&crawler_data={encoded_crawler_data}"
-            print("RemoteServer: calling:{}".format(link))
-        elif name != "":
-            link = self.remote_server
-            link = f"{link}/getj?url={encoded_url}&name={name}"
-
-            print("RemoteServer: calling:{}".format(link))
-        else:
-            link = self.remote_server
-            link = f"{link}/getj?url={encoded_url}"
-
-            print("RemoteServer: calling:{}".format(link))
-
-        real_settings = {}
-        if settings and "settings" in settings:
-            real_settings = settings["settings"]
-
-        timeout_s = 50
-        if settings and "timeout_s" in real_settings:
-            timeout_s = real_settings["timeout_s"]
-        if settings and "delay_s" in real_settings:
-            timeout_s += real_settings["delay_s"]
-
-        # we make request longer - for the server to be able to respond in time
-        timeout_s += 5
-
-        # print("Calling:{}".format(link))
-
-        text = None
-        try:
-            with requests.get(url=link, timeout=timeout_s, verify=False) as result:
-                text = result.text
-        except Exception as E:
-            print("Url:{} Remote error. " + str(E))
-            return
-
-        if not text:
-            print("Url:{} Remote error. No text".format(link))
-            return
-
-        json_obj = None
-        try:
-            json_obj = json.loads(text)
-        except ValueError as E:
-            print("Url:{} Remote error. Cannot read response".format(link, text))
-            # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
-            return
-        except TypeError as E:
-            print("Url:{} Remote error. Cannot read response".format(link, text))
-            # WebLogger.error(info_text="Url:{} Cannot read response".format(link), detail_text=text)
-            return
-
-        if "success" in json_obj and not json_obj["success"]:
-            print("Url:{} Remote error. Not a success".format(link))
+            print("Url:{} Remote error. Not a success".format(link_call))
             # WebLogger.error(json_obj["error"])
             return False
 
@@ -236,10 +192,10 @@ class RemoteServer(object):
         url = properties["link"]
 
         o = PageResponseObject(
-            url= url,
+            url=url,
             text=text,
             binary=binary,
             status_code=response_data["status_code"],
-            request_url = url,
+            request_url=url,
         )
         return o
