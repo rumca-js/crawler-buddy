@@ -152,6 +152,12 @@ class HandlerInterface(DefaultContentPage):
 
             return thumbs_up / all
 
+    def get_upvote_diff(self):
+        thumbs_up = self.get_thumbs_up()
+        thumbs_down = self.get_thumbs_down()
+        if thumbs_up and thumbs_down:
+            return thumbs_up - thumbs_down
+
     def get_upvote_view_ratio(self):
         thumbs_up = self.get_thumbs_up()
         views = self.get_view_count()
@@ -185,6 +191,7 @@ class HandlerInterface(DefaultContentPage):
         json_obj["view_count"] = self.get_view_count()
         json_obj["rating"] = self.get_rating()
         json_obj["upvote_ratio"] = self.get_upvote_ratio()
+        json_obj["upvote_diff"] = self.get_upvote_diff()
         json_obj["upvote_view_ratio"] = self.get_upvote_view_ratio()
         json_obj["stars"] = self.get_user_stars()
         json_obj["followers_count"] = self.get_followers_count()

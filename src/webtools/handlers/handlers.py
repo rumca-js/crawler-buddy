@@ -377,13 +377,13 @@ class HackerNewsHandler(DefaultUrlHandler):
         json = self.get_json_object()
 
         if json:
-            self.social_data["upvote_ratio"] = json["score"]
+            self.social_data["upvote_diff"] = json["score"]
 
         return self.social_data
 
-    def get_upvote_ratio(self):
-        if "upvote_ratio" in self.social_data:
-            return self.social_data["upvote_ratio"]
+    def get_upvote_diff(self):
+        if "upvote_diff" in self.social_data:
+            return self.social_data["upvote_diff"]
 
 
 class InternetArchive(DefaultUrlHandler):

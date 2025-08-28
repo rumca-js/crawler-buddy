@@ -166,7 +166,7 @@ class HackerNewsHandlerTest(FakeInternetTestCase):
         data = handler.get_json_data()
         self.assertEqual(handler.get_json_url(), "https://hacker-news.firebaseio.com/v0/item/42728015.json?print=pretty")
 
-        self.assertIn("upvote_ratio", data)
+        self.assertIn("upvote_diff", data)
 
 
 class TwitterUrlHandlerTest(FakeInternetTestCase):
