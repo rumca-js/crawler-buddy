@@ -147,7 +147,7 @@ class HandlerInterface(DefaultContentPage):
         thumbs_up = self.get_thumbs_up()
         thumbs_down = self.get_thumbs_down()
 
-        if thumbs_up and thumbs_down:
+        if thumbs_up is not None and thumbs_down is not None:
             all = thumbs_down + thumbs_up
 
             return thumbs_up / all
@@ -155,14 +155,14 @@ class HandlerInterface(DefaultContentPage):
     def get_upvote_diff(self):
         thumbs_up = self.get_thumbs_up()
         thumbs_down = self.get_thumbs_down()
-        if thumbs_up and thumbs_down:
+        if thumbs_up is not None and thumbs_down is not None:
             return thumbs_up - thumbs_down
 
     def get_upvote_view_ratio(self):
         thumbs_up = self.get_thumbs_up()
         views = self.get_view_count()
 
-        if thumbs_up and views:
+        if thumbs_up is not None and views is not None and views > 0:
             return thumbs_up / views
 
     def get_user_stars(self):
