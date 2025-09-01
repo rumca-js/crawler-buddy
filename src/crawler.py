@@ -34,10 +34,12 @@ class CrawlerInfo(object):
 
 class Crawler(object):
     def __init__(self):
-        self.crawler_info = CrawlerInfo()
         self.entry_rules = EntryRules()
         self.configuration = Configuration()
+
+        self.queue = CrawlerInfo()
         self.url_history = CrawlHistory(200)
+        self.social_history = CrawlHistory(200)
 
     def get_history(self):
         return self.url_history
@@ -245,14 +247,14 @@ class Crawler(object):
             all_properties = [{"name": "Headers", "data": headers}]
         else:
             # TODO what if there is exception
-            crawl_index = self.crawler_info.enter(url, crawler_data)
+            crawl_index = self.queue.enter(url, crawler_data)
 
             try:
                 response = page_url.get_response()
                 all_properties = page_url.get_properties(full=True, include_social=full)
-                self.crawler_info.leave(crawl_index)
+                self.queue.leave(crawl_index)
             except Exception as e:
-                self.crawler_info.leave(crawl_index)
+                self.queue.leave(crawl_index)
                 raise
 
         if webtools.WebConfig.count_chrom_processes() > 30:

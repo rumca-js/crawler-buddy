@@ -58,6 +58,7 @@ URL_TYPE_UNKNOWN = "unknown"
 HTTP_STATUS_UNKNOWN = 0
 HTTP_STATUS_OK = 200
 HTTP_STATUS_USER_AGENT = 403
+HTTP_STATUS_TOO_MANY_REQUESTS = 429
 
 HTTP_STATUS_CODE_EXCEPTION = 600
 HTTP_STATUS_CODE_CONNECTION_ERROR = 603
@@ -119,6 +120,8 @@ def status_code_to_text(status_code):
         return "HTTP_STATUS_GONE(410)"
     elif status_code == 418:
         return "HTTP_STATUS_IM_A_TEAPOT(418)"
+    elif status_code == 429:
+        return "HTTP_STATUS_TOO_MANY_REQUESTS(419)"
     elif status_code == 451:
         return "HTTP_STATUS_UNAVAILABLE_LEGAL_REASONS(451)"
     elif status_code == 500:

@@ -190,6 +190,30 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         self.assertEqual(date, expected_date_published)
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
+    def test_get_social_data__none(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://www.youtube.com/watch?v=123"
+
+        handler = YouTubeJsonHandlerMock(test_link, url_builder=Url)
+        # call tested function
+        social_data = handler.get_social_data()
+
+        self.assertTrue(social_data is None)
+
+    def test_get_social_data__valid(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://www.youtube.com/watch?v=123"
+
+        handler = YouTubeJsonHandlerMock(test_link, url_builder=Url)
+        handler.get_response()
+
+        # call tested function
+        social_data = handler.get_social_data()
+
+        self.assertFalse(social_data is None)
+
 
 class YouTubeChannelHandlerTest(FakeInternetTestCase):
     def setUp(self):

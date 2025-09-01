@@ -291,3 +291,7 @@ class YouTubeChannelHandler(DefaultChannelHandler):
 
     def get_followers_count(self):
         return self.social_data.get("followers_count")
+
+    def get_social_data(self):
+        if len(self.social_data) != 0:
+            return super().get_social_data()

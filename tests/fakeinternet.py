@@ -240,7 +240,8 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
             "view_count" : "2",
             "live_status" : "False"
             }""".replace("${date}", self.get_now())
-        return True
+
+        return self.load_details_youtube()
 
     def get_now(self):
         """

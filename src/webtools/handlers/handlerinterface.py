@@ -184,6 +184,11 @@ class HandlerInterface(DefaultContentPage):
         pass
 
     def get_social_data(self):
+        """
+        This function returns:
+         - social data, if it has them
+         - nothing in case of error
+        """
         json_obj = {}
 
         json_obj["thumbs_up"] = self.get_thumbs_up()

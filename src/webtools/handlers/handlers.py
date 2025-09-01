@@ -139,6 +139,13 @@ class RedditUrlHandler(DefaultUrlHandler):
         if self.social_data:
             return self.social_data.get("followers_count")
 
+    def get_social_data(self):
+        """
+        If we did not receive social data, do not return anything
+        """
+        if len(self.social_data) > 0:
+            return super().get_social_data()
+
     def get_feeds(self):
         """
         even for post, or individual videos we might request feed url

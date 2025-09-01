@@ -33,9 +33,7 @@ from src import CrawlHistory
 app = Flask(__name__)
 
 
-history_length = 200
 # should contain tuples of datetime, URL, properties
-social_history = CrawlHistory(history_length)
 webtools.WebLogger.web_logger = PermanentLogger()
 configuration = Configuration()
 crawler_main = Crawler()
@@ -221,10 +219,10 @@ def history():
 
     text += "<h1>History</h1>\n"
 
-    if crawler_main.get_history().get_history_size() == 0:
+    if crawler_main.url_history.get_history_size() == 0:
         text += "<div>No history yet!</div>"
     else:
-        for datetime, index, things in reversed(crawler_main.get_history().container):
+        for datetime, index, things in reversed(crawler_main.url_history.container):
             url = things[0]
             all_properties = things[1]
 
@@ -243,10 +241,10 @@ def historyj():
 
     json_history = []
 
-    if crawler_main.get_history().get_history_size() == 0:
+    if crawler_main.url_history.get_history_size() == 0:
         return json_history
 
-    for datetime, index, things in reversed(crawler_main.get_history().container):
+    for datetime, index, things in reversed(crawler_main.url_history.container):
         url = things[0]
         all_properties = things[1]
 
@@ -304,7 +302,7 @@ def set_response():
 
     all_properties = u.get_properties(full=True)
 
-    crawler_main.get_history().add((url, all_properties))
+    crawler_main.url_history.add((url, all_properties))
 
     return jsonify({"success": True, "received": contents})
 
@@ -373,7 +371,7 @@ def find():
 
         return get_html(id=id, body=form_html, title="Find")
     else:
-        things = crawler_main.get_history().find(
+        things = crawler_main.url_history.find(
             url=url, crawler_name=name, crawler=crawler
         )
 
@@ -403,7 +401,7 @@ def findj():
     if index:
         index = int(index)
 
-    things = crawler_main.get_history().find(
+    things = crawler_main.url_history.find(
         index=index, url=url, crawler_name=name, crawler=crawler
     )
 
@@ -429,7 +427,7 @@ def removej():
     if index:
         index = int(index)
 
-    if crawler_main.get_history().remove(index=index):
+    if crawler_main.url_history.remove(index=index):
         return jsonify({"success": True})
 
     return jsonify({"success": False, "error": "Could not remove"}), 400
@@ -634,9 +632,9 @@ def headers():
     all_properties = crawler_main.get_crawl_properties(url, crawler_data)
 
     if all_properties:
-        crawler_main.get_history().add((url, all_properties))
+        crawler_main.url_history.add((url, all_properties))
     else:
-        all_properties = crawler_main.get_history().find(url=url)
+        all_properties = crawler_main.url_history.find(url=url)
 
         if not all_properties:
             return jsonify({"success": False, "error": "No properties found"}), 400
@@ -667,9 +665,9 @@ def ping():
     all_properties = crawler_main.get_crawl_properties(url, crawler_data)
 
     if all_properties:
-        crawler_main.get_history().add(url, all_properties)
+        crawler_main.url_history.add(url, all_properties)
     else:
-        things = crawler_main.get_history().find(url=url)
+        things = crawler_main.url_history.find(url=url)
 
         if not things:
             return jsonify({"success": False, "error": "No properties found"}), 400
@@ -697,7 +695,7 @@ def socialj():
     if not url:
         return jsonify({"success": False, "error": "No url provided"}), 400
 
-    things = social_history.find(url=url)
+    things = crawler_main.social_history.find(url=url)
     if things:
         print("Reading from memory")
         index, timestamp, all_properties = things
@@ -707,9 +705,12 @@ def socialj():
     page_url = webtools.Url(url)
     properties = page_url.get_social_properties()
 
-    social_history.add((url, properties))
+    if properties:
+        crawler_main.social_history.add((url, properties))
 
-    return jsonify(properties)
+        return jsonify(properties)
+    else:
+        return jsonify({})
 
 
 @app.route("/linkj", methods=["GET"])
@@ -840,7 +841,7 @@ def queue():
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-    size = crawler_main.crawler_info.get_size()
+    size = crawler_main.queue.get_size()
 
     text = """
     <div>Currently processing:{}</div>
@@ -850,8 +851,8 @@ def queue():
 
     text += "<h1>Queue</h1>\n"
 
-    for index in crawler_main.crawler_info.queue:
-        things = crawler_main.crawler_info.queue[index]
+    for index in crawler_main.queue.queue:
+        things = crawler_main.queue.queue[index]
         timestamp, url, crawler_data = things
 
         timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
@@ -952,8 +953,8 @@ if __name__ == "__main__":
 
     history_length = p.args.history_length
 
-    crawler_main.get_history().set_size(history_length)
-    crawler_main.get_history().set_time_cache(p.args.time_cache_minutes)
+    crawler_main.url_history.set_size(history_length)
+    crawler_main.url_history.set_time_cache(p.args.time_cache_minutes)
 
     port = configuration.get("port")
     host = configuration.get("host")

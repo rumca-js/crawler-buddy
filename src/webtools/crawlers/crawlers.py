@@ -20,6 +20,10 @@ from ..webtools import (
     PageResponseObject,
     WebLogger,
     get_response_from_bytes,
+    HTTP_STATUS_UNKNOWN,
+    HTTP_STATUS_OK,
+    HTTP_STATUS_USER_AGENT,
+    HTTP_STATUS_TOO_MANY_REQUESTS,
     HTTP_STATUS_CODE_EXCEPTION,
     HTTP_STATUS_CODE_CONNECTION_ERROR,
     HTTP_STATUS_CODE_TIMEOUT,
@@ -275,9 +279,6 @@ class RequestsCrawler(CrawlerInterface):
         headers = RequestsCrawler.get_request_headers_default()
         headers["User-Agent"] = user_agent
 
-        # status code 403 means they do not like our user agent.
-        # status code 429 means you are rate limited.
-
         try:
             with requests.get(
                 url=url,
@@ -288,8 +289,8 @@ class RequestsCrawler(CrawlerInterface):
             ) as response:
                 if (
                     (response.status_code >= 200 and response.status_code < 400)
-                    or response.status_code == 403
-                    or response.status_code == 429
+                    or response.status_code == HTTP_STATUS_USER_AGENT
+                    or response.status_code == HTTP_STATUS_TOO_MANY_REQUESTS
                 ):
                     return True
                 else:
