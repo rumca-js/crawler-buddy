@@ -780,7 +780,6 @@ class Url(ContentInterface):
             return i.get_social_data()
 
         json_data = handler.get_json_data()
-        print(f"Received: {json_data}")
         return handler.get_social_data()
 
 

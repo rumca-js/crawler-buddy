@@ -297,7 +297,8 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(properties["link"], test_link)
         self.assertEqual(properties["link_request"], test_link)
 
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        # +1 for yt-flp +1 for return dislike
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_properties__html__basic(self):
         MockRequestCounter.mock_page_requests = 0
@@ -453,7 +454,8 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(properties["link"], test_link)
         self.assertEqual(properties["link_request"], test_link)
 
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        # +1 for yt dlp +1 for return dislike
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_properties__image_advanced(self):
         MockRequestCounter.mock_page_requests = 0
@@ -836,7 +838,7 @@ class UrlTest(FakeInternetTestCase):
 
         main_hash = url.get_contents_hash()
 
-        print(url.get_contents())
+        # print(url.get_contents())
 
         self.assertTrue(hash != main_hash)
 

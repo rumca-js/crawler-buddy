@@ -198,9 +198,8 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
             "view_count" : "2",
             "live_status" : "False"
             }""".replace("${date}", self.get_now())
-            return True
         if self.get_video_code() == "666":
-            return False
+            pass
         if self.get_video_code() == "555555":
             self.yt_text = """{"_filename" : "555555 live video.txt",
             "title" : "555555 live video",
@@ -241,7 +240,10 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
             "live_status" : "False"
             }""".replace("${date}", self.get_now())
 
-        return self.load_details_youtube()
+        if self.get_video_code() == "666":
+            return False
+        else:
+            return self.load_details_youtube()
 
     def get_now(self):
         """
@@ -432,7 +434,7 @@ class TestResponseObject(PageResponseObject):
         if url.startswith("https://api.github.com"):
             return github_json
 
-        if url.startswith("https://https://returnyoutubedislikeapi.com/votes?videoId"):
+        if url.startswith("https://returnyoutubedislikeapi.com/votes?videoId"):
             return return_dislike_json
 
         if url == "https://www.youtube.com/robots.txt":

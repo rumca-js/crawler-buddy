@@ -205,12 +205,15 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             response.url = self.get_link_classic()
 
             status = True
+
             WebLogger.info("YouTube video handler: {} DONE".format(self.url))
         else:
             WebLogger.error("Url:{} Cannot download youtube details".format(self.url))
 
         self.response = response
         self.contents = self.response.get_text()
+
+        self.social_data = self.get_json_data()
 
         if (
             not self.response
@@ -324,16 +327,20 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         if self.return_dislike:
             self.social_data = self.get_json_data_from_rd()
-        else:
-            # TODO we should extend with Return dislike data
-            self.social_data = self.get_json_data_from_yt()
+
+        social_data = self.get_json_data_from_yt()
+        for key, value in social_data.items():
+            self.social_data.setdefault(key, value)
 
         return self.social_data
 
     def get_json_data_from_yt(self):
         json_data = {}
 
-        self.download_details_youtube()
+        if not self.yt_ob:
+            self.download_details_youtube()
+        if self.yt_ob is None:
+            print("Could not download youtube details")
 
         view_count = None
         thumbs_up = None
@@ -343,6 +350,8 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             view_count = int(self.yt_ob.get_view_count())
         except ValueError as E:
             pass
+        except AttributeError as E:
+            pass
 
         json_data["view_count"] = view_count
         return json_data
@@ -350,7 +359,10 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
     def get_json_data_from_rd(self):
         json_data = {}
 
-        self.download_details_return_dislike()
+        if not self.rd_ob:
+            self.download_details_return_dislike()
+        if not self.rd_ob:
+            print("Could not download return dislikes youtube details")
 
         view_count = None
         thumbs_up = None
@@ -413,7 +425,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         return youtube_props
 
     def load_details_youtube(self):
-        if self.yt_ob:
+        if self.yt_ob is not None:
             return True
 
         from utils.serializers import YouTubeJson
@@ -505,7 +517,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
     def get_social_data(self):
         if len(self.social_data) > 0:
-            return super().get_social_data()
+            return self.social_data
 
     def get_feeds(self):
         result = []
