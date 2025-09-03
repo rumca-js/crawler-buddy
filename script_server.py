@@ -48,7 +48,7 @@ def get_crawler_text():
         crawler = item["crawler"]
         settings = item["settings"]
         text += "<div>Name:{} Crawler:{} Settings:{}</div>\n".format(
-            name, crawler.__name__, settings
+            name, crawler, settings
         )
 
     return text
@@ -120,6 +120,7 @@ def index():
     operational_links.append({"link" : "/contentsr", "name":"Contents response", "description":"returns page contents, as if read by a browser"})
     operational_links.append({"link" : "/feeds", "name":"Feeds", "description":"form for finding feeds"})
     operational_links.append({"link" : "/feedsj", "name":"Feeds JSON", "description":"feeds information JSON"})
+    operational_links.append({"link" : "/social", "name":"Social data", "description":"Social data form"})
     operational_links.append({"link" : "/socialj", "name":"Social data JSON", "description":"Social data JSON, likes"})
     operational_links.append({"link" : "/link", "name":"Link", "description":"form for obtaining links, canonical, etc."})
     operational_links.append({"link" : "/linkj", "name":"Link JSON", "description":"link information JSON"})
@@ -181,8 +182,11 @@ def info():
     )
 
     text += "<h2>Default headers</h2>"
-    for key in webtools.crawlers.default_headers:
-        value = webtools.crawlers.default_headers[key]
+    for key, value in webtools.crawlers.default_headers.items():
+        text += "<div>{}:{}</div>".format(key, value)
+
+    text += "<h2>Data</h2>"
+    for key, value in configuration.data.items():
         text += "<div>{}:{}</div>".format(key, value)
 
     return get_html(id=id, body=text, title="Configuration")
@@ -198,15 +202,24 @@ def infoj():
     <h1>Crawlers</h1>
     """
 
-    properties = []
+    all = {}
+    crawlers = []
+    properties = {}
 
     config = configuration.get_crawler_config()
     for item in config:
         item["crawler"] = item["crawler"].__name__
 
-        properties.append(item)
+        crawlers.append(item)
 
-    return jsonify(properties)
+    for aproperty, value in configuration.data.items():
+        properties[str(aproperty)] = str(value)
+
+
+    all["crawlers"] = crawlers
+    all["properties"] = properties
+
+    return jsonify(all)
 
 
 @app.route("/history")
@@ -680,6 +693,28 @@ def ping():
     return jsonify(all_properties)
 
 
+@app.route("/social", methods=["GET"])
+def social():
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    url = request.args.get("url")
+
+    if not url:
+        form_html = get_link_form("Find social information", "socialj", id)
+        return get_html(id=id, body=form_html, title="Social")
+
+    page_url = webtools.Url(url)
+
+    text = "<h1>Social</h1>"
+
+    for social_property, social_value in page_url.get_social_properties().items():
+        text += f'<div>{social_property} {social_value}<div>'.format(feed, feed)
+
+    return get_html(id=id, body=text, title="Social")
+
+
 @app.route("/socialj", methods=["GET"])
 def socialj():
     """
@@ -702,8 +737,16 @@ def socialj():
 
         return jsonify(all_properties)
 
+    crawler_index = crawler_main.social_queue.enter(url)
+    if crawler_index is None:
+        status_code = webtools.HTTP_STATUS_TOO_MANY_REQUESTS
+        content_type = "text/html"
+        return Response("failed", status=status_code, mimetype=content_type)
+
     page_url = webtools.Url(url)
     properties = page_url.get_social_properties()
+
+    crawler_main.social_queue.leave(crawler_index)
 
     if properties:
         crawler_main.social_history.add((url, properties))

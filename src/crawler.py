@@ -11,15 +11,17 @@ from src import CrawlHistory
 
 class CrawlerInfo(object):
 
-    def __init__(self):
+    def __init__(self, max_queue_size = 10):
         self.queue = OrderedDict()
         self.crawl_index = 0
+        self.max_queue_size = max_queue_size
 
     def enter(self, url, crawler_data=None):
-        self.queue[self.crawl_index] = datetime.now(), url, crawler_data
+        if self.get_size() > self.max_queue_size:
+            webtools.WebLogger.error("Crawler info too many requests")
+            return
 
-        if self.get_size() > 100:
-            self.queue = OrderedDict()
+        self.queue[self.crawl_index] = datetime.now(), url, crawler_data
 
         self.crawl_index += 1
         return self.crawl_index - 1
@@ -37,9 +39,16 @@ class Crawler(object):
         self.entry_rules = EntryRules()
         self.configuration = Configuration()
 
-        self.queue = CrawlerInfo()
-        self.url_history = CrawlHistory(200)
-        self.social_history = CrawlHistory(200)
+        """
+        We cannot allow to run 100x of yt-dlp. We need to keep it real.
+        Configurable because people might want more.
+        """
+
+        self.queue = CrawlerInfo(self.configuration.get("max_queue_size"))
+        self.url_history = CrawlHistory(self.configuration.get("history_size"))
+
+        self.social_queue = CrawlerInfo(self.configuration.get("max_queue_size"))
+        self.social_history = CrawlHistory(self.configuration.get("history_size"))
 
     def get_history(self):
         return self.url_history
@@ -102,26 +111,18 @@ class Crawler(object):
 
         return crawler_data
 
-    def fill_crawler_data(self, url, crawler_data):
-        if "ssl_verify" not in crawler_data["settings"] and self.configuration.is_set(
-            "ssl_verify"
-        ):
-            crawler_data["settings"]["ssl_verify"] = True
-        if "respect_robots_txt" not in crawler_data[
-            "settings"
-        ] and self.configuration.is_set("respect_robots_txt"):
-            crawler_data["settings"]["respect_robots_txt"] = True
+    def fill_from_config(self, crawler_data, aproperty):
+        if aproperty not in crawler_data["settings"]:
+            if self.configuration.is_set(aproperty):
+                crawler_data["settings"][aproperty] = self.configuration.get(aproperty)
 
-        if "bytes_limit" not in crawler_data and self.configuration.is_set(
-            "bytes_limit"
-        ):
-            crawler_data["settings"]["bytes_limit"] = self.configuration.get(
-                "bytes_limit"
-            )
-        else:
-            crawler_data["settings"][
-                "bytes_limit"
-            ] = webtools.WebConfig.get_bytes_limit()
+    def fill_crawler_data(self, url, crawler_data):
+        self.fill_from_config(crawler_data, "ssl_verify")
+        self.fill_from_config(crawler_data, "respect_robots_txt")
+        self.fill_from_config(crawler_data, "bytes_limit")
+
+        if crawler_data["settings"].get("bytes_limit") is None:
+            crawler_data["settings"]["bytes_limit"] = webtools.WebConfig.get_bytes_limit()
 
         if "accept_content_types" not in crawler_data["settings"]:
             crawler_data["settings"]["accept_content_types"] = "all"
@@ -248,6 +249,11 @@ class Crawler(object):
         else:
             # TODO what if there is exception
             crawl_index = self.queue.enter(url, crawler_data)
+            if crawl_index is None:
+                webtools.WebLogger.error(
+                    "Too many crawler calls".format(url, crawler_data)
+                )
+                return
 
             try:
                 response = page_url.get_response()

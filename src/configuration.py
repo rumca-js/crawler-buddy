@@ -19,6 +19,8 @@ class Configuration(object):
         self.data["default_crawler"] = None
         self.data["host"] = "127.0.0.1"
         self.data["port"] = "3000"
+        self.data["max_queue_size"] = 10
+        self.data["history_size"] = 200
 
         self.crawler_config = None
 
@@ -28,7 +30,7 @@ class Configuration(object):
         # increment major version digit for releases, or link name changes
         # increment minor version digit for JSON data changes
         # increment last digit for small changes
-        self.__version__ = "4.0.30"
+        self.__version__ = "4.0.31"
 
     def is_set(self, name):
         if name in self.data:
@@ -78,6 +80,8 @@ class Configuration(object):
         self.read_json_config_field(json_config, "bytes_limit")
         self.read_json_config_field(json_config, "host")
         self.read_json_config_field(json_config, "port")
+        self.read_json_config_field(json_config, "max_queue_size")
+        self.read_json_config_field(json_config, "history_size")
 
     def read_json_config_field(self, json_config, field):
         if field in json_config:
