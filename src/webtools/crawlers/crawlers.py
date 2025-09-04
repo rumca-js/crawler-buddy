@@ -279,6 +279,7 @@ class RequestsCrawler(CrawlerInterface):
         headers = RequestsCrawler.get_request_headers_default()
         headers["User-Agent"] = user_agent
 
+        response = None
         try:
             with requests.get(
                 url=url,
@@ -287,18 +288,42 @@ class RequestsCrawler(CrawlerInterface):
                 verify=False,
                 stream=True,
             ) as response:
-                if (
-                    (response.status_code >= 200 and response.status_code < 400)
-                    or response.status_code == HTTP_STATUS_USER_AGENT
-                    or response.status_code == HTTP_STATUS_TOO_MANY_REQUESTS
-                ):
-                    return True
-                else:
-                    return False
+                self.response = PageResponseObject(
+                    url,
+                    text=None,
+                    status_code=response.status_code,
+                    request_url=url,
+                )
+
+        except requests.Timeout:
+            WebLogger.debug("Url:{} timeout".format(url))
+            response = PageResponseObject(
+                url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_TIMEOUT,
+                request_url=url,
+            )
+
+        except requests.exceptions.ConnectionError:
+            WebLogger.debug("Url:{} connection error".format(url))
+            response = PageResponseObject(
+                url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
+                request_url=url,
+            )
 
         except Exception as E:
-            print("Exception: {}".format(str(E)))
-            return False
+            WebLogger.exc(E, "Url:{} General exception".format(url))
+
+            response = PageResponseObject(
+                url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_EXCEPTION,
+                request_url=url,
+            )
+
+        return response
 
 
 class CurlCffiCrawler(CrawlerInterface):

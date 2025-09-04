@@ -138,8 +138,6 @@ class YouTubeJson(object):
         if len(self._json) > 0:
             if "view_count" in self._json:
                 return str(self._json["view_count"])
-            else:
-                print("No view_count in self._json {}".format(self._json))
 
             # return self._json["t_view_count"]
         return 0

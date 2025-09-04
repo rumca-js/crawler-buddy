@@ -515,9 +515,11 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if self.yt_ob:
             return self.yt_ob.get_channel_code()
 
-    def get_social_data(self):
-        if len(self.social_data) > 0:
-            return self.social_data
+    def get_view_count(self):
+        if self.rd_ob:
+            return self.rd_ob.get_view_count()
+        if self.yt_ob:
+            return self.yt_ob.get_view_count()
 
     def get_feeds(self):
         result = []

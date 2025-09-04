@@ -127,6 +127,8 @@ def index():
     operational_links.append({"link" : "/archivesj", "name":"Archive links JSON", "description":"JSON with links to archives, digital libraries"})
     operational_links.append({"link" : "/rssify", "name":"RSSify", "description":"form for RSSfication. RSSfication returns RSS contents for input link"})
     operational_links.append({"link" : "/rssifyr", "name":"RSSifyr", "description":"RSSfication response"})
+    operational_links.append({"link" : "/ping", "name":"Ping", "description":"form for getting ping information"})
+    operational_links.append({"link" : "/pingj", "name":"Ping JSON", "description":"JSON ping response"})
 
     mgmt_links = []
     mgmt_links.append({"link" : "/find", "name":"Find", "description":"form for finding response"})
@@ -463,34 +465,8 @@ def getj():
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-    url = request.args.get("url")
-
-    if not url:
-        return jsonify({"success": False, "error": "No url provided"}), 400
-
-    crawler_data = crawler_main.get_request_data(request)
-
-    if not crawler_data:
-        return jsonify({"success": False, "error": "Cannot obtain crawler data"}), 400
-
-    crawler_data["settings"]["headers"] = False
-    crawler_data["settings"]["ping"] = False
-
-    try:
-        webtools.WebConfig.start_display()
-        all_properties = crawler_main.get_crawl_properties(url, crawler_data)
-    except Exception as E:
-        webtools.WebLogger.exc(
-            E, info_text="Exception when calling getj {} {}".format(url, crawler_data)
-        )
-        all_properties = None
-
+    all_properties = crawler_main.run_all(request)
     if not all_properties:
-        return jsonify({"success": False, "error": "No properties found"}), 400
-
-    try:
-        return jsonify(all_properties)
-    except:
         return (
             jsonify(
                 {
@@ -501,6 +477,7 @@ def getj():
             400,
         )
 
+    return jsonify(all_properties)
 
 @app.route("/rssify", methods=["GET"])
 def rssify_this():
@@ -655,44 +632,6 @@ def headers():
     return jsonify(all_properties)
 
 
-@app.route("/ping", methods=["GET"])
-def ping():
-    # TODO implement
-    id = request.args.get("id")
-    if not configuration.is_allowed(id):
-        return get_html(id=id, body="Cannot access this view", title="Error")
-
-    url = request.args.get("url")
-
-    if not url:
-        return jsonify({"success": False, "error": "No url provided"}), 400
-
-    crawler_data = crawler_main.get_request_data(request)
-
-    if not crawler_data:
-        return jsonify({"success": False, "error": "Cannot obtain crawler data"}), 400
-
-    crawler_data["settings"]["headers"] = False
-    crawler_data["settings"]["ping"] = True
-
-    all_properties = crawler_main.get_crawl_properties(url, crawler_data)
-
-    if all_properties:
-        crawler_main.url_history.add(url, all_properties)
-    else:
-        things = crawler_main.url_history.find(url=url)
-
-        if not things:
-            return jsonify({"success": False, "error": "No properties found"}), 400
-
-        index, timestamp, all_properties = things
-
-        if not all_properties:
-            return jsonify({"success": False, "error": "No properties found"}), 400
-
-    return jsonify(all_properties)
-
-
 @app.route("/social", methods=["GET"])
 def social():
     id = request.args.get("id")
@@ -754,6 +693,59 @@ def socialj():
         return jsonify(properties)
     else:
         return jsonify({})
+
+
+@app.route("/ping", methods=["GET"])
+def ping():
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    url = request.args.get("url")
+
+    if not url:
+        form_html = get_link_form("Find ping information", "pingj", id)
+        return get_html(id=id, body=form_html, title="Social")
+
+    page_url = webtools.Url(url)
+
+    text = "<h1>Ping</h1>"
+
+    text += str(url.ping())
+
+    return get_html(id=id, body=text, title="Social")
+
+
+@app.route("/pingj", methods=["GET"])
+def pingj():
+    """
+    Dynamic, social data.
+    Thumbs up, etc.
+    """
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    url = request.args.get("url")
+    if url:
+        page_url = webtools.Url(url)
+        response = page_url.ping()
+
+        if response.is_valid():
+            return jsonify({"status" : True})
+
+        if response.status_code == webtools.HTTP_STATUS_CODE_CONNECTION_ERROR:
+            return jsonify({"status" : False})
+
+    all_properties = crawler_main.run_all(request, ping=True)
+    response = CrawlHistory.read_properties_section("Response", all_properties)
+
+    if response:
+        status_code = response["status_code"]
+        is_valid = response["is_valid"]
+        return jsonify({"status" : is_valid})
+
+    return jsonify({"status" : False})
 
 
 @app.route("/linkj", methods=["GET"])

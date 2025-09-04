@@ -234,34 +234,21 @@ class Crawler(object):
             )
             return
 
-        request_headers = crawler_data["settings"]["headers"]
-        request_ping = crawler_data["settings"]["ping"]
-        full = crawler_data["settings"]["full"]
+        # TODO what if there is exception
+        crawl_index = self.queue.enter(url, crawler_data)
+        if crawl_index is None:
+            webtools.WebLogger.error(
+                "Too many crawler calls".format(url, crawler_data)
+            )
+            return
 
-        if request_headers:
-            # TODO implement
-            headers = page_url.get_headers()
-            all_properties = [{"name": "Headers", "data": headers}]
-        elif request_ping:
-            # TODO implement
-            headers = page_url.get_headers()
-            all_properties = [{"name": "Headers", "data": headers}]
-        else:
-            # TODO what if there is exception
-            crawl_index = self.queue.enter(url, crawler_data)
-            if crawl_index is None:
-                webtools.WebLogger.error(
-                    "Too many crawler calls".format(url, crawler_data)
-                )
-                return
-
-            try:
-                response = page_url.get_response()
-                all_properties = page_url.get_properties(full=True, include_social=full)
-                self.queue.leave(crawl_index)
-            except Exception as e:
-                self.queue.leave(crawl_index)
-                raise
+        try:
+            response = page_url.get_response()
+            all_properties = page_url.get_properties(full=True, include_social=False)
+            self.queue.leave(crawl_index)
+        except Exception as e:
+            self.queue.leave(crawl_index)
+            raise
 
         if webtools.WebConfig.count_chrom_processes() > 30:
             webtools.WebLogger.error("Too many chrome processes")
@@ -287,3 +274,31 @@ class Crawler(object):
         new_mapping = webtools.WebConfig.get_default_crawler(url)
         if new_mapping:
             return new_mapping
+
+    def run_all(self, request, headers=False, ping=False):
+        url = request.args.get("url")
+
+        if not url:
+            return {"success": False, "error": "No url provided"}
+
+        crawler_data = self.get_request_data(request)
+
+        if not crawler_data:
+            return {"success": False, "error": "Cannot obtain crawler data"}
+
+        crawler_data["settings"]["headers"] = headers
+        crawler_data["settings"]["ping"] = ping
+
+        try:
+            webtools.WebConfig.start_display()
+            all_properties = self.get_crawl_properties(url, crawler_data)
+        except Exception as E:
+            webtools.WebLogger.exc(
+                E, info_text="Exception when calling getj {} {}".format(url, crawler_data)
+            )
+            all_properties = None
+
+        if not all_properties:
+            return {"success": False, "error": "No properties found"}
+
+        return all_properties
