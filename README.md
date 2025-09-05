@@ -37,6 +37,8 @@ Endpoints:
     - Response: Returns JSON with social data.
  - GET /link - form for link information
  - GET /linkj - Provides link information - canonical links, etc.
+ - GET /ping - form for checking page status
+ - GET /pingj - JSON response for ping
  - GET /archivesj - Provides archives links (to web archive etc)
  - GET /rssify - form for RSS contents
  - GET /rssifyr - returns RSS data for link
