@@ -288,7 +288,7 @@ class RequestsCrawler(CrawlerInterface):
                 verify=False,
                 stream=True,
             ) as response:
-                self.response = PageResponseObject(
+                response = PageResponseObject(
                     url,
                     text=None,
                     status_code=response.status_code,
