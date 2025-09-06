@@ -682,8 +682,15 @@ def socialj():
         content_type = "text/html"
         return Response("failed", status=status_code, mimetype=content_type)
 
-    page_url = webtools.Url(url)
-    properties = page_url.get_social_properties()
+    try:
+        page_url = webtools.Url(url)
+        properties = page_url.get_social_properties()
+    except Exception as E:
+        webtools.WebLogger.exc(
+            E, info_text="Exception when calling socialj {} {}".format(url)
+        )
+        all_properties = None
+        return jsonify({})
 
     crawler_main.social_queue.leave(crawler_index)
 
@@ -870,6 +877,21 @@ def archivesj():
     return jsonify(properties)
 
 
+def display_queue(queue):
+    text = ""
+    for index in queue.queue:
+        things = queue.queue[index]
+        timestamp, url, crawler_data = things
+
+        timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+
+        text += '<div style="margin-bottom:1em;">{} {} {} {}</div>\n'.format(
+            index, timestamp_str, url, crawler_data
+        )
+
+    return text
+
+
 @app.route("/queue", methods=["GET"])
 def queue():
     id = request.args.get("id")
@@ -885,16 +907,10 @@ def queue():
     )
 
     text += "<h1>Queue</h1>\n"
+    display_queue(crawler_main.queue)
 
-    for index in crawler_main.queue.queue:
-        things = crawler_main.queue.queue[index]
-        timestamp, url, crawler_data = things
-
-        timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
-
-        text += '<div style="margin-bottom:1em;">{} {} {} {}</div>\n'.format(
-            index, timestamp_str, url, crawler_data
-        )
+    text += "<h1>Social queue</h1>\n"
+    display_queue(crawler_main.social_queue)
 
     return get_html(id=id, body=text, title="Queue")
 
