@@ -679,6 +679,33 @@ class SeleniumDriver(CrawlerInterface):
         """
         raise NotImplementedError("Provide selenium driver implementation!")
 
+    def after_load(self):
+        """
+        To be implemented by subordinate selenium crawlers
+        """
+        from selenium.webdriver.common.by import By
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.support import  expect_conditions as EC
+
+        if "settings" in self.settings and "delay_s" in self.settings["settings"]:
+            delay_s = self.settings["settings"]["delay_s"]
+            time.sleep(delay_s)
+
+        REJECT_TEXTS = ["REJECT ALL", "Reject all", "Odrzuć", "Odrzuć wszystko"]
+
+        if self.request.url.find("youtube.com/@"):
+            # Try each reject button text
+            for text in REJECT_TEXTS:
+                try:
+                    reject_button = WebDriverWait(driver, 5).until(
+                        EC.element_to_be_clickable((By.XPATH, f"//button[contains(text(), '{text}')]"))
+                    )
+                    reject_button.click()
+                    print(f"Clicked reject button with text: '{text}'")
+                    break  # Exit the loop after successful click
+                except Exception:
+                    continue
+
     def run(self):
         """
         To obtain RSS page you have to run real, full blown browser.
@@ -716,9 +743,7 @@ class SeleniumDriver(CrawlerInterface):
 
             self.driver.get(self.request.url)
 
-            if "settings" in self.settings and "delay_s" in self.settings["settings"]:
-                delay_s = self.settings["settings"]["delay_s"]
-                time.sleep(delay_s)
+            self.after_load()
 
             self.process_response()
 

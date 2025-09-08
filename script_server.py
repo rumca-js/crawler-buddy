@@ -682,6 +682,7 @@ def socialj():
         content_type = "text/html"
         return Response("failed", status=status_code, mimetype=content_type)
 
+    properties = None
     try:
         page_url = webtools.Url(url)
         properties = page_url.get_social_properties()
@@ -689,8 +690,7 @@ def socialj():
         webtools.WebLogger.exc(
             E, info_text="Exception when calling socialj {} {}".format(url)
         )
-        all_properties = None
-        return jsonify({})
+        properties = None
 
     crawler_main.social_queue.leave(crawler_index)
 
@@ -907,10 +907,10 @@ def queue():
     )
 
     text += "<h1>Queue</h1>\n"
-    display_queue(crawler_main.queue)
+    text += display_queue(crawler_main.queue)
 
     text += "<h1>Social queue</h1>\n"
-    display_queue(crawler_main.social_queue)
+    text += display_queue(crawler_main.social_queue)
 
     return get_html(id=id, body=text, title="Queue")
 
