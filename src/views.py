@@ -1,5 +1,5 @@
 from utils import PermanentLogger
-from src import CrawlHistory
+from src import CrawlerHistory
 from src import webtools
 
 
@@ -77,8 +77,8 @@ def get_entry_html(id, index, url, timestamp, all_properties):
         find_link, timestamp_str, url, remove_link
     )
 
-    response = CrawlHistory.read_properties_section("Response", all_properties)
-    options = CrawlHistory.read_properties_section("Settings", all_properties)
+    response = CrawlerHistory.read_properties_section("Response", all_properties)
+    options = CrawlerHistory.read_properties_section("Settings", all_properties)
     if response:
         status_code = response["status_code"]
         # TODO maybe create a better API
@@ -119,8 +119,8 @@ def get_entry_html(id, index, url, timestamp, all_properties):
 
 
 def rssify(all_properties):
-    properties = CrawlHistory.read_properties_section("Properties", all_properties)
-    entries = CrawlHistory.read_properties_section("Entries", all_properties)
+    properties = CrawlerHistory.read_properties_section("Properties", all_properties)
+    entries = CrawlerHistory.read_properties_section("Entries", all_properties)
 
     rss_template = """<?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:dc="http://purl.org/dc/elements/1.1/" 

@@ -685,7 +685,7 @@ class SeleniumDriver(CrawlerInterface):
         """
         from selenium.webdriver.common.by import By
         from selenium.webdriver.support.ui import WebDriverWait
-        from selenium.webdriver.support import  expect_conditions as EC
+        from selenium.webdriver.support import expected_conditions as EC
 
         if "settings" in self.settings and "delay_s" in self.settings["settings"]:
             delay_s = self.settings["settings"]["delay_s"]

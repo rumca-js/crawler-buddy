@@ -6,32 +6,8 @@ from collections import OrderedDict
 from src import webtools
 from src.configuration import Configuration
 from src.entryrules import EntryRules
-from src import CrawlHistory
-
-
-class CrawlerInfo(object):
-
-    def __init__(self, max_queue_size = 10):
-        self.queue = OrderedDict()
-        self.crawl_index = 0
-        self.max_queue_size = max_queue_size
-
-    def enter(self, url, crawler_data=None):
-        if self.get_size() > self.max_queue_size:
-            webtools.WebLogger.error("Crawler info too many requests")
-            return
-
-        self.queue[self.crawl_index] = datetime.now(), url, crawler_data
-
-        self.crawl_index += 1
-        return self.crawl_index - 1
-
-    def leave(self, crawl_index):
-        if crawl_index in self.queue:
-            del self.queue[crawl_index]
-
-    def get_size(self):
-        return len(self.queue)
+from src import CrawlerHistory
+from src import CrawlerInfo
 
 
 class Crawler(object):
@@ -45,10 +21,10 @@ class Crawler(object):
         """
 
         self.queue = CrawlerInfo(self.configuration.get("max_queue_size"))
-        self.url_history = CrawlHistory(self.configuration.get("history_size"))
+        self.url_history = CrawlerHistory(self.configuration.get("history_size"))
 
         self.social_queue = CrawlerInfo(self.configuration.get("max_queue_size"))
-        self.social_history = CrawlHistory(self.configuration.get("history_size"))
+        self.social_history = CrawlerHistory(self.configuration.get("history_size"))
 
     def get_history(self):
         return self.url_history
@@ -302,3 +278,32 @@ class Crawler(object):
             return {"success": False, "error": "No properties found"}
 
         return all_properties
+
+    def get_social_properties(self, url):
+        things = self.social_history.find(url=url)
+        if things:
+            index, timestamp, all_properties = things
+
+            return properties
+
+        crawler_index = self.social_queue.enter(url)
+        if crawler_index is None:
+            webtools.WebLogger.exc(
+                E, info_text="Exception when calling socialj {}".format(url)
+            )
+            return None
+
+        properties = None
+        try:
+            page_url = webtools.Url(url)
+            properties = page_url.get_social_properties()
+        except Exception as E:
+            webtools.WebLogger.exc(
+                E, info_text="Exception when calling socialj {}".format(url)
+            )
+            properties = None
+
+        self.social_queue.leave(crawler_index)
+        self.social_history.add((url, properties))
+
+        return properties

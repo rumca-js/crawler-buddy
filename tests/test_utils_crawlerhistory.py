@@ -8,7 +8,7 @@ from src.webtools import (
     PageResponseObject,
     HttpPageHandler,
 )
-from src import CrawlHistory
+from src import CrawlerHistory
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 
@@ -374,14 +374,14 @@ class ScriptServerTest(FakeInternetTestCase):
         all_properties = json.loads(example_requests_properties)
 
         # call tested function
-        data = CrawlHistory.read_properties_section("Text", all_properties)
+        data = CrawlerHistory.read_properties_section("Text", all_properties)
 
         self.assertTrue(data)
 
     def test_find_response__by_url(self):
         all_properties = json.loads(example_requests_properties)
 
-        url_history = CrawlHistory()
+        url_history = CrawlerHistory()
         url_history.add((datetime.now(), "https://www.lemonde.fr/en/rss/une.xml", all_properties))
 
         # call tested function
@@ -392,7 +392,7 @@ class ScriptServerTest(FakeInternetTestCase):
     def test_find_response__by_url(self):
         all_properties = json.loads(example_requests_properties)
 
-        url_history = CrawlHistory()
+        url_history = CrawlerHistory()
         url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_properties))
 
         # call tested function
@@ -404,7 +404,7 @@ class ScriptServerTest(FakeInternetTestCase):
         all_requests_properties = json.loads(example_requests_properties)
         all_selenium_properties = json.loads(example_selenium_properties)
 
-        url_history = CrawlHistory()
+        url_history = CrawlerHistory()
         url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_requests_properties))
         url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_selenium_properties))
 
@@ -423,7 +423,7 @@ class ScriptServerTest(FakeInternetTestCase):
     def test_find_response__by_index_found(self):
         all_properties = json.loads(example_requests_properties)
 
-        url_history = CrawlHistory()
+        url_history = CrawlerHistory()
         url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_properties))
 
         # call tested function
@@ -434,7 +434,7 @@ class ScriptServerTest(FakeInternetTestCase):
     def test_find_response__by_name_not_found(self):
         all_properties = json.loads(example_requests_properties)
 
-        url_history = CrawlHistory()
+        url_history = CrawlerHistory()
         url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_properties))
 
         # call tested function
@@ -445,7 +445,7 @@ class ScriptServerTest(FakeInternetTestCase):
     def test_find_response__not_found__date_old(self):
         all_properties = json.loads(example_requests_properties)
 
-        url_history = CrawlHistory()
+        url_history = CrawlerHistory()
         url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_properties))
 
         url_history.container[0][0] = datetime.now() - timedelta(minutes=11)
@@ -459,7 +459,7 @@ class ScriptServerTest(FakeInternetTestCase):
         all_requests_properties = json.loads(example_requests_properties)
         all_selenium_properties = json.loads(example_selenium_properties)
 
-        url_history = CrawlHistory()
+        url_history = CrawlerHistory()
         url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_requests_properties))
         url_history.add(("https://www.lemonde.fr/en/rss/une.xml", all_selenium_properties))
 

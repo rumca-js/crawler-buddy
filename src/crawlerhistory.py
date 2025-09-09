@@ -6,7 +6,7 @@ TODO:
 from datetime import datetime, timedelta
 
 
-class CrawlHistory(object):
+class CrawlerHistory(object):
     def __init__(self, size=200, time_cache_m=10):
         """
         @param time_cache_m Time Cache in minutes
@@ -35,6 +35,8 @@ class CrawlHistory(object):
 
         self.index += 1
 
+        return self.index - 1
+
     def get_history(self):
         return self.container
 
@@ -57,7 +59,7 @@ class CrawlHistory(object):
             if index is not None and index != inner_index:
                 continue
 
-            settings = CrawlHistory.read_properties_section("Settings", all_properties)
+            settings = CrawlerHistory.read_properties_section("Settings", all_properties)
 
             if (
                 crawler_name is not None

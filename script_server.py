@@ -27,7 +27,7 @@ from src.views import (
 )
 from utils import PermanentLogger
 from utils.systemmonitoring import get_hardware_info, get_process_info
-from src import CrawlHistory
+from src import CrawlerHistory
 
 
 app = Flask(__name__)
@@ -513,8 +513,8 @@ def rssifyr():
         webtools.WebConfig.start_display()
         all_properties = crawler_main.get_crawl_properties(url, crawler_data)
 
-        properties = CrawlHistory.read_properties_section("Properties", all_properties)
-        entries = CrawlHistory.read_properties_section("Entries", all_properties)
+        properties = CrawlerHistory.read_properties_section("Properties", all_properties)
+        entries = CrawlerHistory.read_properties_section("Entries", all_properties)
 
         if not entries or len(entries) == 0:
             if "feeds" in properties:
@@ -537,7 +537,7 @@ def rssifyr():
             400,
         )
 
-    entries = CrawlHistory.read_properties_section("Entries", all_properties)
+    entries = CrawlerHistory.read_properties_section("Entries", all_properties)
     if not entries or len(entries) == 0:
         return (
             jsonify({"success": False, "error": "No entries found - no entries"}),
@@ -582,13 +582,13 @@ def contentsr():
     if not all_properties:
         return jsonify({"success": False, "error": "No properties found"}), 400
 
-    contents_data = CrawlHistory.read_properties_section("Text", all_properties)
+    contents_data = CrawlerHistory.read_properties_section("Text", all_properties)
     if "Contents" in contents_data:
         contents = contents_data["Contents"]
     else:
         contents = ""
 
-    response = CrawlHistory.read_properties_section("Response", all_properties)
+    response = CrawlerHistory.read_properties_section("Response", all_properties)
     if response:
         status_code = response["status_code"]
         content_type = response["Content-Type"]
@@ -669,34 +669,9 @@ def socialj():
     if not url:
         return jsonify({"success": False, "error": "No url provided"}), 400
 
-    things = crawler_main.social_history.find(url=url)
-    if things:
-        print("Reading from memory")
-        index, timestamp, all_properties = things
-
-        return jsonify(all_properties)
-
-    crawler_index = crawler_main.social_queue.enter(url)
-    if crawler_index is None:
-        status_code = webtools.HTTP_STATUS_TOO_MANY_REQUESTS
-        content_type = "text/html"
-        return Response("failed", status=status_code, mimetype=content_type)
-
-    properties = None
-    try:
-        page_url = webtools.Url(url)
-        properties = page_url.get_social_properties()
-    except Exception as E:
-        webtools.WebLogger.exc(
-            E, info_text="Exception when calling socialj {} {}".format(url)
-        )
-        properties = None
-
-    crawler_main.social_queue.leave(crawler_index)
+    properties = crawler_main.get_social_properties(url)
 
     if properties:
-        crawler_main.social_history.add((url, properties))
-
         return jsonify(properties)
     else:
         return jsonify({})
@@ -745,7 +720,7 @@ def pingj():
             return jsonify({"status" : False})
 
     all_properties = crawler_main.run_all(request, ping=True)
-    response = CrawlHistory.read_properties_section("Response", all_properties)
+    response = CrawlerHistory.read_properties_section("Response", all_properties)
 
     if response:
         status_code = response["status_code"]

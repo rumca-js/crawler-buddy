@@ -11,6 +11,7 @@ from src.entryrules import EntryRules
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 
+
 class FlaskArgs(object):
     def __init__(self):
         self._map = {}

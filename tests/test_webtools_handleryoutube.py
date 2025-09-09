@@ -197,7 +197,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
     def test_get_social_data__none(self):
         MockRequestCounter.mock_page_requests = 0
 
-        test_link = "https://www.youtube.com/watch?v=123"
+        test_link = "https://www.youtube.com/watch?v=666"
 
         handler = YouTubeJsonHandlerMock(test_link, url_builder=Url)
         # call tested function
