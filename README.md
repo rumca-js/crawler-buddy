@@ -32,12 +32,11 @@ Endpoints:
  - GET /contentsr - Returns contents of URL, and status code as is
  - GET /feeds - form for finding feeds for the specified URL
  - GET /feedsj - feeds information JSON
- - GET /socialj - Provides social and dynamic information about a specified URL.
-    - Query parameter: url (string).
-    - Response: Returns JSON with social data.
+ - GET /social - form for social information
+ - GET /socialj - Provides social information about a specified URL, thumbs up, view counts.
  - GET /link - form for link information
  - GET /linkj - Provides link information - canonical links, etc.
- - GET /ping - form for checking page status
+ - GET /ping - form for checking page status, if it is up, or not
  - GET /pingj - JSON response for ping
  - GET /archivesj - Provides archives links (to web archive etc)
  - GET /rssify - form for RSS contents
