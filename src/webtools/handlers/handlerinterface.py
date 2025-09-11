@@ -18,6 +18,7 @@ class HandlerInterface(DefaultContentPage):
         )
         self.h = None
         self.response = None
+        self.streams = {}
         self.dead = None
         self.code = None  # social media handle, ID of channel, etc.
         self.settings = settings
@@ -76,6 +77,12 @@ class HandlerInterface(DefaultContentPage):
             binary = self.response.get_binary()
             if binary:
                 return calculate_hash_binary(binary)
+
+    def get_streams(self):
+        if "Text" not in self.streams:
+            if self.response is not None:
+                self.streams["Text"] = self.response.get_text()
+        return self.streams
 
     def get_contents_body_hash(self):
         return self.get_contents_hash()

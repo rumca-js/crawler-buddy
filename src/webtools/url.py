@@ -248,6 +248,23 @@ class Url(ContentInterface):
 
             return self.response
 
+    def get_streams(self):
+        if self.handler is not None:
+            return self.handler.get_streams()
+
+        self.handler = self.get_handler_implementation()
+
+        if self.handler:
+            if (
+                "respect_robots_txt" in self.settings
+                and self.settings["respect_robots_txt"]
+            ):
+                if not self.is_allowed():
+                    return
+
+            streams = self.handler.get_streams()
+            return streams
+
     def get_headers(self):
         # TODO implement
         pass
@@ -626,6 +643,9 @@ class Url(ContentInterface):
                         },
                     }
                 )
+
+        streams = self.get_streams()
+        all_properties.append({"name": "Streams", "data": streams})
 
         request_data = dict(self.settings)
         request_data["crawler"] = type(request_data["crawler"]).__name__

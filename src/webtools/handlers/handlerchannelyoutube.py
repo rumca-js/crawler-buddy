@@ -204,15 +204,27 @@ class YouTubeChannelHandler(DefaultChannelHandler):
         if not feed:
             return
 
-        settings = {}
-        settings["handler_class"] = HttpPageHandler
-
-        self.rss_url = self.url_builder(url=feed, settings=settings)
+        self.rss_url = self.get_page_url(feed)
         self.rss_url.get_response()
         return self.rss_url
 
+    def get_streams(self):
+        if self.rss_url:
+            response = self.rss_url.get_response()
+            if response is not None:
+                self.streams["RSS"] = response.get_text()
+        if self.html_url:
+            response = self.html_url.get_response()
+            if response is not None:
+                self.streams["HTML"] = response.get_text()
+
+        return self.streams
+
     def get_html_url(self):
-        return None
+        crawler_name = self.settings.get("name")
+        self.html_url = self.get_page_url(self.url, crawler_name=crawler_name)
+        self.html_url.get_response()
+        return self.html_url
 
     def get_entries(self):
         rss_url = self.get_rss_url()

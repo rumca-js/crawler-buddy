@@ -284,7 +284,7 @@ class Crawler(object):
         if things:
             index, timestamp, all_properties = things
 
-            return properties
+            return all_properties
 
         crawler_index = self.social_queue.enter(url)
         if crawler_index is None:

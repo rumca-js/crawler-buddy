@@ -444,6 +444,14 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         return True
 
+    def get_streams(self):
+        if self.yt_text:
+            self.streams["yt-dlp JSON"] = self.yt_text # TODO this should be response object
+        if self.rd_text:
+            self.streams["ReturnDislike JSON"] = self.rd_text # TODO this should be response object
+
+        return self.streams
+
     def download_details_youtube(self):
         if self.yt_text is not None:
             return True
