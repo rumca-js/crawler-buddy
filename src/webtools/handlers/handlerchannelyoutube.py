@@ -221,10 +221,12 @@ class YouTubeChannelHandler(DefaultChannelHandler):
         return self.streams
 
     def get_html_url(self):
-        crawler_name = self.settings.get("name")
-        self.html_url = self.get_page_url(self.url, crawler_name=crawler_name)
-        self.html_url.get_response()
-        return self.html_url
+        if False:
+            # TODO disabled
+            crawler_name = self.settings.get("name")
+            self.html_url = self.get_page_url(self.url, crawler_name=crawler_name)
+            self.html_url.get_response()
+            return self.html_url
 
     def get_entries(self):
         rss_url = self.get_rss_url()
