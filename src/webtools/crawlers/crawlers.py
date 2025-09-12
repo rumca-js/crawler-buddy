@@ -698,7 +698,9 @@ class SeleniumDriver(CrawlerInterface):
             for text in REJECT_TEXTS:
                 try:
                     reject_button = WebDriverWait(driver, 5).until(
-                        EC.element_to_be_clickable((By.XPATH, f"//button[contains(text(), '{text}')]"))
+                        EC.element_to_be_clickable(
+                            (By.XPATH, f"//button[contains(text(), '{text}')]")
+                        )
                     )
                     reject_button.click()
                     print(f"Clicked reject button with text: '{text}'")
@@ -775,7 +777,9 @@ class SeleniumDriver(CrawlerInterface):
                     status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
                     request_url=self.request.url,
                 )
-                self.response.add_error("Url:{} Connection error".format(self.request.url))
+                self.response.add_error(
+                    "Url:{} Connection error".format(self.request.url)
+                )
             else:
                 print(E, "Url:{}".format(self.request.url))
                 WebLogger.exc(E, "Url:{}".format(self.request.url))

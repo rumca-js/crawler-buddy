@@ -46,7 +46,9 @@ class RemoteServer(object):
         elif name != "":
             args = f"name={name}"
 
-        return self.perform_remote_call(link_call = link, url = url, settings = settings, args=args)
+        return self.perform_remote_call(
+            link_call=link, url=url, settings=settings, args=args
+        )
 
     def get_feedsj(self, url, settings=None):
         """

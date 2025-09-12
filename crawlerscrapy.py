@@ -22,9 +22,9 @@ class StatusSpider(scrapy.Spider):
         result = {}
         for key, value in headers.items():
             if isinstance(key, bytes):
-                key = key.decode('utf-8', errors='replace')
+                key = key.decode("utf-8", errors="replace")
             if isinstance(value, bytes):
-                value = value.decode('utf-8', errors='replace')
+                value = value.decode("utf-8", errors="replace")
             if isinstance(value, list):
                 str_value = ""
                 for item in value:
@@ -59,12 +59,12 @@ class StatusSpider(scrapy.Spider):
         page_obj = self.save_response(response)
 
         # Optionally yield for debug or live viewing
-        #yield {
+        # yield {
         #    'url': page_obj.url,
         #    'status': page_obj.status_code,
         #    'headers': page_obj.headers,
         #    'text': page_obj.text,
-        #}
+        # }
 
 
 def main():
@@ -85,13 +85,17 @@ def main():
     if parser.args.verbose:
         print(f"Running request: {request} with Scrapy")
 
-    interface = webtools.crawlers.ScriptCrawlerInterface(parser, request, __file__, webtools.webconfig.SCRAPY_SCRIPT)
+    interface = webtools.crawlers.ScriptCrawlerInterface(
+        parser, request, __file__, webtools.webconfig.SCRAPY_SCRIPT
+    )
 
-    configure_logging({'LOG_LEVEL': 'ERROR'})
+    configure_logging({"LOG_LEVEL": "ERROR"})
 
-    process = CrawlerProcess(settings={
-        # No 'FEEDS': disables saving to JSON
-    })
+    process = CrawlerProcess(
+        settings={
+            # No 'FEEDS': disables saving to JSON
+        }
+    )
 
     process.crawl(StatusSpider, request=request, interface=interface)
     process.start()

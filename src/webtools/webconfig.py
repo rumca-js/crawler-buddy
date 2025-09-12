@@ -84,8 +84,12 @@ class WebConfig(object):
 
         mapping.append(WebConfig.get_default_browser_setup(RequestsCrawler))
 
-        mapping.append(WebConfig.get_scriptcralwer(headless_script, CRAWLEE_BEAUTIFUL_SCRIPT))
-        mapping.append(WebConfig.get_scriptcralwer(full_script, CRAWLEE_PLAYWRIGHT_SCRIPT))
+        mapping.append(
+            WebConfig.get_scriptcralwer(headless_script, CRAWLEE_BEAUTIFUL_SCRIPT)
+        )
+        mapping.append(
+            WebConfig.get_scriptcralwer(full_script, CRAWLEE_PLAYWRIGHT_SCRIPT)
+        )
         mapping.append(WebConfig.get_scriptcralwer(scrapy_script, SCRAPY_SCRIPT))
 
         mapping.append(WebConfig.get_seleniumundetected())

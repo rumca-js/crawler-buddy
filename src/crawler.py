@@ -81,7 +81,9 @@ class Crawler(object):
         port = self.configuration.get("port")
 
         if "remote_server" not in crawler_data["settings"]:
-            crawler_data["settings"]["remote_server"] = "http://" + host + ":" + str(port)
+            crawler_data["settings"]["remote_server"] = (
+                "http://" + host + ":" + str(port)
+            )
 
         crawler_data["headers"] = headers
 
@@ -98,7 +100,9 @@ class Crawler(object):
         self.fill_from_config(crawler_data, "bytes_limit")
 
         if crawler_data["settings"].get("bytes_limit") is None:
-            crawler_data["settings"]["bytes_limit"] = webtools.WebConfig.get_bytes_limit()
+            crawler_data["settings"][
+                "bytes_limit"
+            ] = webtools.WebConfig.get_bytes_limit()
 
         if "accept_content_types" not in crawler_data["settings"]:
             crawler_data["settings"]["accept_content_types"] = "all"
@@ -213,9 +217,7 @@ class Crawler(object):
         # TODO what if there is exception
         crawl_index = self.queue.enter(url, crawler_data)
         if crawl_index is None:
-            webtools.WebLogger.error(
-                "Too many crawler calls".format(url, crawler_data)
-            )
+            webtools.WebLogger.error("Too many crawler calls".format(url, crawler_data))
             return
 
         try:
@@ -270,7 +272,8 @@ class Crawler(object):
             all_properties = self.get_crawl_properties(url, crawler_data)
         except Exception as E:
             webtools.WebLogger.exc(
-                E, info_text="Exception when calling getj {} {}".format(url, crawler_data)
+                E,
+                info_text="Exception when calling getj {} {}".format(url, crawler_data),
             )
             all_properties = None
 

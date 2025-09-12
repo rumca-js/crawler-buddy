@@ -59,7 +59,9 @@ class CrawlerHistory(object):
             if index is not None and index != inner_index:
                 continue
 
-            settings = CrawlerHistory.read_properties_section("Settings", all_properties)
+            settings = CrawlerHistory.read_properties_section(
+                "Settings", all_properties
+            )
 
             if (
                 crawler_name is not None

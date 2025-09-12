@@ -9,7 +9,7 @@ def get_template(name, context=None):
         if context:
             for item in context:
                 value = context[item]
-                key = "{"+item+ "}"
+                key = "{" + item + "}"
                 if value is None:
                     value = ""
                 else:

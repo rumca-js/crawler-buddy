@@ -291,17 +291,19 @@ class YouTubeChannelHandler(DefaultChannelHandler):
     def get_json_data(self):
         entries = self.get_entries()
         for entry in entries:
-            u = self.url_builder(url = entry["link"])
+            u = self.url_builder(url=entry["link"])
             u.get_response()
             h = u.get_handler()
             if h:
                 props = h.get_properties()
                 if props:
-                    self.social_data["followers_count"] = props.get("channel_follower_count")
+                    self.social_data["followers_count"] = props.get(
+                        "channel_follower_count"
+                    )
                     if self.social_data["followers_count"]:
                         return
 
-            return # TODO?
+            return  # TODO?
 
     def get_followers_count(self):
         return self.social_data.get("followers_count")

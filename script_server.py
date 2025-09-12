@@ -20,10 +20,10 @@ from src import webtools
 from src.configuration import Configuration
 from src.crawler import Crawler
 from src.views import (
-   get_entry_html,
-   level2color,
-   rssify,
-   get_html,
+    get_entry_html,
+    level2color,
+    rssify,
+    get_html,
 )
 from utils import PermanentLogger
 from utils.systemmonitoring import get_hardware_info, get_process_info
@@ -217,7 +217,6 @@ def infoj():
     for aproperty, value in configuration.data.items():
         properties[str(aproperty)] = str(value)
 
-
     all["crawlers"] = crawlers
     all["properties"] = properties
 
@@ -345,7 +344,13 @@ def set_response_impl(request):
 
     print("Server set_response:{}".format(url))
 
-    response = webtools.PageResponseObject(url = url, headers = headers, binary=content_bytes, status_code = status_code, request_url=url)
+    response = webtools.PageResponseObject(
+        url=url,
+        headers=headers,
+        binary=content_bytes,
+        status_code=status_code,
+        request_url=url,
+    )
 
     u = webtools.Url(url, settings=crawler_data)
     u.settings = crawler_data
@@ -479,6 +484,7 @@ def getj():
 
     return jsonify(all_properties)
 
+
 @app.route("/rssify", methods=["GET"])
 def rssify_this():
     id = request.args.get("id")
@@ -513,7 +519,9 @@ def rssifyr():
         webtools.WebConfig.start_display()
         all_properties = crawler_main.get_crawl_properties(url, crawler_data)
 
-        properties = CrawlerHistory.read_properties_section("Properties", all_properties)
+        properties = CrawlerHistory.read_properties_section(
+            "Properties", all_properties
+        )
         entries = CrawlerHistory.read_properties_section("Entries", all_properties)
 
         if not entries or len(entries) == 0:
@@ -649,7 +657,7 @@ def social():
     text = "<h1>Social</h1>"
 
     for social_property, social_value in page_url.get_social_properties().items():
-        text += f'<div>{social_property} {social_value}<div>'.format(feed, feed)
+        text += f"<div>{social_property} {social_value}<div>".format(feed, feed)
 
     return get_html(id=id, body=text, title="Social")
 
@@ -714,10 +722,10 @@ def pingj():
         response = page_url.ping()
 
         if response.is_valid():
-            return jsonify({"status" : True})
+            return jsonify({"status": True})
 
         if response.status_code == webtools.HTTP_STATUS_CODE_CONNECTION_ERROR:
-            return jsonify({"status" : False})
+            return jsonify({"status": False})
 
     all_properties = crawler_main.run_all(request, ping=True)
     response = CrawlerHistory.read_properties_section("Response", all_properties)
@@ -725,9 +733,9 @@ def pingj():
     if response:
         status_code = response["status_code"]
         is_valid = response["is_valid"]
-        return jsonify({"status" : is_valid})
+        return jsonify({"status": is_valid})
 
-    return jsonify({"status" : False})
+    return jsonify({"status": False})
 
 
 @app.route("/linkj", methods=["GET"])

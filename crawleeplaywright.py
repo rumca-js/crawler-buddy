@@ -73,7 +73,9 @@ async def main() -> None:
     if parser.args.verbose:
         print("Running request:{} with PlaywrightCrawler".format(request))
 
-    interface = webtools.ScriptCrawlerInterface(parser, request, __file__, webtools.webconfig.CRAWLEE_PLAYWRIGHT_SCRIPT)
+    interface = webtools.ScriptCrawlerInterface(
+        parser, request, __file__, webtools.webconfig.CRAWLEE_PLAYWRIGHT_SCRIPT
+    )
     response = webtools.PageResponseObject(request.url)
 
     if parser.args.proxy_address:

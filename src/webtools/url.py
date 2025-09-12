@@ -720,7 +720,8 @@ class Url(ContentInterface):
         respect_robots_txt = False
         is_allowed = True
         if (
-            "respect_robots_txt" in self.settings  # TODO this hsould come from response?
+            "respect_robots_txt"
+            in self.settings  # TODO this hsould come from response?
             and self.settings["respect_robots_txt"]
         ):
             respect_robots_txt = self.settings["respect_robots_txt"]

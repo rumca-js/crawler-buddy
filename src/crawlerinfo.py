@@ -5,7 +5,7 @@ from src import webtools
 
 class CrawlerInfo(object):
 
-    def __init__(self, max_queue_size = 10):
+    def __init__(self, max_queue_size=10):
         self.queue = OrderedDict()
         self.crawl_index = 0
         self.max_queue_size = max_queue_size

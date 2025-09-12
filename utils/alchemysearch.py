@@ -113,9 +113,13 @@ class AlchemySearch(object):
         destination_metadata = MetaData()
 
         if self.args and "table" in self.args:
-            self.destination_table = Table(self.args.table, destination_metadata, autoload_with=self.db)
+            self.destination_table = Table(
+                self.args.table, destination_metadata, autoload_with=self.db
+            )
         else:
-            self.destination_table = Table("linkdatamodel", destination_metadata, autoload_with=self.db)
+            self.destination_table = Table(
+                "linkdatamodel", destination_metadata, autoload_with=self.db
+            )
 
     def get_query_conditions(self):
         ignore_case = False
@@ -123,7 +127,9 @@ class AlchemySearch(object):
             ignore_case = True
 
         symbol_evaluator = AlchemySymbolEvaluator(self.destination_table, ignore_case)
-        equation_evaluator = AlchemyEquationEvaluator(self.search_term, symbol_evaluator)
+        equation_evaluator = AlchemyEquationEvaluator(
+            self.search_term, symbol_evaluator
+        )
 
         search = OmniSearch(self.search_term, equation_evaluator=equation_evaluator)
         combined_query_conditions = search.get_combined_query()
@@ -138,7 +144,9 @@ class AlchemySearch(object):
             if self.args and self.args.order_by:
                 order_by_column_name = self.args.order_by
 
-            order_by_column = getattr(self.destination_table.c, order_by_column_name, None)
+            order_by_column = getattr(
+                self.destination_table.c, order_by_column_name, None
+            )
 
             if order_by_column is None:
                 raise AttributeError(f"Invalid order_by column: {self.args.order_by}")
@@ -146,8 +154,13 @@ class AlchemySearch(object):
             if self.args:
                 # Determine sorting order
                 order_by_clause = (
-                    order_by_column.asc() if self.args.asc else order_by_column.desc()
-                    if self.args.desc else order_by_column.asc()
+                    order_by_column.asc()
+                    if self.args.asc
+                    else (
+                        order_by_column.desc()
+                        if self.args.desc
+                        else order_by_column.asc()
+                    )
                 )
             else:
                 order_by_clause = order_by_column.asc()

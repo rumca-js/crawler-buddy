@@ -53,5 +53,3 @@ class ScriptCrawlerParser(object):
         r.headers = self.args.headers
 
         return r
-
-

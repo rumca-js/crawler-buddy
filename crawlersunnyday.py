@@ -1,4 +1,3 @@
-
 from src import webtools
 
 import sys
@@ -22,7 +21,9 @@ def main():
     if parser.args.verbose:
         print(f"Running request: {request} with Scrapy")
 
-    interface = webtools.crawlers.ScriptCrawlerInterface(parser, request, __file__, "TestScriptCrawlerName")
+    interface = webtools.crawlers.ScriptCrawlerInterface(
+        parser, request, __file__, "TestScriptCrawlerName"
+    )
 
     page_obj = webtools.PageResponseObject(request.url)
     page_obj.set_headers({})

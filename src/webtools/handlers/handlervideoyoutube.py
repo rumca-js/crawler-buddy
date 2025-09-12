@@ -451,9 +451,13 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
     def get_streams(self):
         if self.yt_text:
-            self.streams["yt-dlp JSON"] = self.yt_text # TODO this should be response object
+            self.streams["yt-dlp JSON"] = (
+                self.yt_text
+            )  # TODO this should be response object
         if self.rd_text:
-            self.streams["ReturnDislike JSON"] = self.rd_text # TODO this should be response object
+            self.streams["ReturnDislike JSON"] = (
+                self.rd_text
+            )  # TODO this should be response object
 
         return self.streams
 
@@ -600,16 +604,16 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
                     thumbnail = j.get_thumbnail()
 
                     entry_data = {
-                            "link": url,
-                            "title" : title,
-                            "description" : description,
-                            "date_published" : date_published,
-                            "thumbnail" : thumbnail,
-                            "live" : live_status,
-                            "view_count" : view_count,
-                            "channel_url" : channel_url,
-                            "source_url" : channel_url,
-                            }
+                        "link": url,
+                        "title": title,
+                        "description": description,
+                        "date_published": date_published,
+                        "thumbnail": thumbnail,
+                        "live": live_status,
+                        "view_count": view_count,
+                        "channel_url": channel_url,
+                        "source_url": channel_url,
+                    }
 
                     entries.append(entry_data)
 
