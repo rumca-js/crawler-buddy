@@ -45,7 +45,7 @@ class UrlTest(FakeInternetTestCase):
             "https://www.google.com/url?q=https://forum.ddopl.com/&sa=Udupa"
         )
 
-        self.assertEqual(cleaned_link, "https://forum.ddopl.com/")
+        self.assertEqual(cleaned_link, "https://forum.ddopl.com")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
@@ -56,7 +56,7 @@ class UrlTest(FakeInternetTestCase):
             "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://worldofwarcraft.blizzard.com/&ved=2ahUKEwjtx56Pn5WFAxU2DhAIHYR1CckQFnoECCkQAQ&usg=AOvVaw1pDkx5K7B5loKccvg_079-"
         )
 
-        self.assertEqual(cleaned_link, "https://worldofwarcraft.blizzard.com/")
+        self.assertEqual(cleaned_link, "https://worldofwarcraft.blizzard.com")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 

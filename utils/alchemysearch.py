@@ -154,7 +154,7 @@ class AlchemySearch(object):
 
             # Use select() for SQLAlchemy Core
             stmt = (
-                select(destination_table)
+                select(self.destination_table)
                 .where(combined_query_conditions)
                 .order_by(order_by_clause)
             )

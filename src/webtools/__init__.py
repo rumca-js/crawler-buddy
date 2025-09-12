@@ -46,6 +46,7 @@ from .crawlerscript import (
     ScriptCrawlerParser,
 )
 
+from .feedclient import FeedClient, FeedClientParser
 
 from .contentmoderation import (
     UrlPropertyValidator,
