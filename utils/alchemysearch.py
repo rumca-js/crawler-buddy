@@ -101,29 +101,36 @@ class AlchemySearch(object):
 
         self.args = args
 
+        self.get_destination_table()
+
     def search(self):
+        rows = self.get_filtered_objects()
+
+        for row in rows:
+            self.alchemy_row_handler.handle_row(row)
+
+    def get_destination_table(self):
         destination_metadata = MetaData()
 
         if self.args and "table" in self.args:
-            destination_table = Table(
-                self.args.table, destination_metadata, autoload_with=self.db
-            )
+            self.destination_table = Table(self.args.table, destination_metadata, autoload_with=self.db)
         else:
-            destination_table = Table(
-                "linkdatamodel", destination_metadata, autoload_with=self.db
-            )
+            self.destination_table = Table("linkdatamodel", destination_metadata, autoload_with=self.db)
 
+    def get_query_conditions(self):
         ignore_case = False
         if self.args and self.args.ignore_case:
             ignore_case = True
 
-        symbol_evaluator = AlchemySymbolEvaluator(destination_table, ignore_case)
-        equation_evaluator = AlchemyEquationEvaluator(
-            self.search_term, symbol_evaluator
-        )
+        symbol_evaluator = AlchemySymbolEvaluator(self.destination_table, ignore_case)
+        equation_evaluator = AlchemyEquationEvaluator(self.search_term, symbol_evaluator)
 
         search = OmniSearch(self.search_term, equation_evaluator=equation_evaluator)
         combined_query_conditions = search.get_combined_query()
+        return combined_query_conditions
+
+    def get_filtered_objects(self):
+        combined_query_conditions = self.get_query_conditions()
 
         rows = []
         with self.db.connect() as connection:
@@ -131,7 +138,7 @@ class AlchemySearch(object):
             if self.args and self.args.order_by:
                 order_by_column_name = self.args.order_by
 
-            order_by_column = getattr(destination_table.c, order_by_column_name, None)
+            order_by_column = getattr(self.destination_table.c, order_by_column_name, None)
 
             if order_by_column is None:
                 raise AttributeError(f"Invalid order_by column: {self.args.order_by}")
@@ -139,13 +146,8 @@ class AlchemySearch(object):
             if self.args:
                 # Determine sorting order
                 order_by_clause = (
-                    order_by_column.asc()
-                    if self.args.asc
-                    else (
-                        order_by_column.desc()
-                        if self.args.desc
-                        else order_by_column.asc()
-                    )
+                    order_by_column.asc() if self.args.asc else order_by_column.desc()
+                    if self.args.desc else order_by_column.asc()
                 )
             else:
                 order_by_clause = order_by_column.asc()
@@ -163,5 +165,4 @@ class AlchemySearch(object):
             # Fetch all results
             rows = result.fetchall()
 
-        for row in rows:
-            self.alchemy_row_handler.handle_row(row)
+            return rows
