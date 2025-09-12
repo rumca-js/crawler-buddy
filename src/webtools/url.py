@@ -385,9 +385,11 @@ class Url(ContentInterface):
             query_params = parse_qs(parsed_url.query)
             param_value = query_params.get("url", [None])[0]
             if param_value:
+                param_value = Url.get_cleaned_link(param_value)
                 return param_value
             param_value = query_params.get("q", [None])[0]
             if param_value:
+                param_value = Url.get_cleaned_link(param_value)
                 return param_value
 
         stupid_youtube_string = "https://www.youtube.com/redirect"

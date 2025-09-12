@@ -34,21 +34,26 @@ class YouTubeVideoHandler(DefaultUrlHandler):
         )
 
     def is_handled_by_watch(self, protocol_less):
-        return (protocol_less.startswith("www.youtube.com/watch")
+        return (
+            protocol_less.startswith("www.youtube.com/watch")
             or protocol_less.startswith("youtube.com/watch")
-            or protocol_less.startswith("m.youtube.com/watch"))
+            or protocol_less.startswith("m.youtube.com/watch")
+        )
 
     def get_canonical_url(self):
         return self.code2url(self.code)
 
     def is_handled_by_shorts(self, protocol_less):
-        return (protocol_less.startswith("www.youtube.com/shorts")
+        return (
+            protocol_less.startswith("www.youtube.com/shorts")
             or protocol_less.startswith("youtube.com/shorts")
-            or protocol_less.startswith("m.youtube.com/shorts"))
+            or protocol_less.startswith("m.youtube.com/shorts")
+        )
 
     def is_handled_by_be_domain(self, protocol_less):
-        return (protocol_less.startswith("youtu.be/")
-                and len(protocol_less) > len("youtu.be/"))
+        return protocol_less.startswith("youtu.be/") and len(protocol_less) > len(
+            "youtu.be/"
+        )
 
     def get_video_code(self):
         return self.input2code(self.url)

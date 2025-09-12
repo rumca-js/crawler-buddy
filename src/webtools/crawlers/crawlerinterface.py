@@ -236,8 +236,10 @@ class CrawlerInterface(object):
 
         raw_content = self.response.get_text()
         if raw_content:
-            raw_content_bytes = raw_content.encode(self.response.encoding or 'utf-8', errors='replace')
-            encoded_content = base64.b64encode(raw_content_bytes).decode('ascii')
+            raw_content_bytes = raw_content.encode(
+                self.response.encoding or "utf-8", errors="replace"
+            )
+            encoded_content = base64.b64encode(raw_content_bytes).decode("ascii")
         else:
             encoded_content = ""
 

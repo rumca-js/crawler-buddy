@@ -2,7 +2,7 @@ import json
 import requests
 import urllib.parse
 import base64
-from .webtools import PageResponseObject
+from .webtools import PageResponseObject, HTTP_STATUS_TOO_MANY_REQUESTS
 
 
 class RemoteServer(object):
@@ -68,6 +68,18 @@ class RemoteServer(object):
 
         return self.perform_remote_call(link, url, settings)
 
+    def get_pingj(self, url, settings=None):
+        """
+        @returns None in case of error
+        """
+
+        link = self.remote_server
+        link = f"{link}/pingj"
+
+        json = self.perform_remote_call(link, url, settings)
+        if json:
+            return json.get("status")
+
     def perform_remote_call(self, link_call, url, settings=None, args=None):
         """
         @param link_call Remote server endpoint
@@ -95,6 +107,9 @@ class RemoteServer(object):
 
         try:
             with requests.get(url=link_call, timeout=timeout_s, verify=False) as result:
+                if result.status_code == HTTP_STATUS_TOO_MANY_REQUESTS:
+                    return
+
                 text = result.text
         except Exception as E:
             print("Remote error. " + str(E))

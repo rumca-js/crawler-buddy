@@ -317,6 +317,9 @@ class HttpPageHandler(HandlerInterface):
         return self.p.get_canonical_url()
 
     def get_properties(self):
+        if not self.p:
+            return
+
         props = self.p.get_properties()
         props["status_code"] = self.response.status_code
         return props

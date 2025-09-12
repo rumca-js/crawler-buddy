@@ -363,6 +363,7 @@ class UrlLocation(object):
             dom == "youtube.com"
             or dom == "youtu.be"
             or dom == "www.m.youtube.com"
+            or dom == "m.youtube.com"
             or dom == "www.youtube.com"
         ):
             return True
