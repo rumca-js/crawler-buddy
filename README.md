@@ -79,8 +79,7 @@ settings is a dict, with settings:
 Fields:
 
  - Properties - general properties, like title, description, thumbnail, language, date\_published, feed\_url
- - Text - text contents of page
- - Binary - binary contents of page
+ - Streams - some handlers provide more data streams than "Text" or "Binary". For youtube we collect also yt-dlp JSON output, or return dislike data
  - Response - commonly used response fields Provides Content-Type, Content-Length, status\_code, etc.
  - Headers - all response headers of page. Provides Content-Type, Content-Length, etc.
  - Entries - if the link contains subordinate elements, like RSS, this field is populated with their meta data
