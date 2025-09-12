@@ -112,7 +112,7 @@ class PageResponseObjectTest(FakeInternetTestCase):
 
         self.assertEqual(response.get_encoding(), "UTF-8")
 
-    def test_is_content_html(self):
+    def test_is_content__html(self):
         headers = {"Content-Type": "text/html; charset=UTF-8"}
         response = PageResponseObject(
             "https://test.com", "", status_code=200, headers=headers
@@ -121,7 +121,7 @@ class PageResponseObjectTest(FakeInternetTestCase):
         self.assertTrue(response.is_content_html())
         self.assertFalse(response.is_content_rss())
 
-    def test_is_content_rss(self):
+    def test_is_content__rss(self):
         headers = {"Content-Type": "text/rss; charset=UTF-8"}
         response = PageResponseObject(
             "https://test.com", "", status_code=200, headers=headers
@@ -129,3 +129,20 @@ class PageResponseObjectTest(FakeInternetTestCase):
 
         self.assertTrue(response.is_content_rss())
         self.assertFalse(response.is_content_html())
+
+    def test_get_hash__text(self):
+        headers = {"Content-Type": "text/rss; charset=UTF-8"}
+        response = PageResponseObject(
+            "https://test.com", "", status_code=200, text="test", headers=headers
+        )
+
+        self.assertTrue(response.get_hash())
+
+    def test_get_hash__binary(self):
+        headers = {"Content-Type": "text/rss; charset=UTF-8"}
+        response = PageResponseObject(
+            "https://test.com", status_code=200, binary=b"test", headers=headers
+        )
+
+        self.assertTrue(response.get_hash())
+

@@ -708,6 +708,15 @@ class PageResponseObject(object):
     def get_encoding(self):
         return self.encoding
 
+    def get_hash(self):
+        text = self.get_text()
+        if text:
+            return calculate_hash(text)
+
+        binary = self.get_binary()
+        if binary:
+            return calculate_hash_binary(binary)
+
 
 def get_request_to_bytes(request, script):
     from .ipc import string_to_command

@@ -82,6 +82,9 @@ class HandlerInterface(DefaultContentPage):
         if "Text" not in self.streams:
             if self.response is not None:
                 self.streams["Text"] = self.response.get_text()
+
+                if self.streams["Text"] is None:
+                    self.streams["Binary"] = self.response.get_binary()
         return self.streams
 
     def get_contents_body_hash(self):

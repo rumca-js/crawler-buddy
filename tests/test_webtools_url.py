@@ -324,22 +324,22 @@ class UrlTest(FakeInternetTestCase):
 
         test_link = "https://page-with-two-links.com"
 
-        # call tested function
         url = Url(test_link)
 
         url.get_response()
+
+        # call tested function
         all_properties = url.get_properties(full=True)
-
         self.assertTrue(len(all_properties) > 0)
-        self.assertEqual(all_properties[0]["name"], "Properties")
 
-        properties = all_properties[0]["data"]
+        properties_section = url.get_properties_section("Properties", all_properties)
+        self.assertTrue(properties_section)
 
-        self.assertIn("title", properties)
-        self.assertIn("link", properties)
+        self.assertIn("title", properties_section)
+        self.assertIn("link", properties_section)
 
-        self.assertEqual(properties["link"], test_link)
-        self.assertEqual(properties["link_request"], test_link)
+        self.assertEqual(properties_section["link"], test_link)
+        self.assertEqual(properties_section["link_request"], test_link)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
@@ -348,27 +348,27 @@ class UrlTest(FakeInternetTestCase):
 
         test_link = "https://www.codeproject.com/WebServices/NewsRSS.aspx"
 
-        # call tested function
         url = Url(test_link)
 
         url.get_response()
+
+        # call tested function
         all_properties = url.get_properties(full=True)
-
         self.assertTrue(len(all_properties) > 0)
-        self.assertEqual(all_properties[0]["name"], "Properties")
 
-        properties = all_properties[0]["data"]
+        properties_section = url.get_properties_section("Properties", all_properties)
+        self.assertTrue(properties_section)
 
-        self.assertIn("title", properties)
-        self.assertIn("link", properties)
-        self.assertIn("feeds", properties)
+        self.assertIn("title", properties_section)
+        self.assertIn("link", properties_section)
+        self.assertIn("feeds", properties_section)
 
-        self.assertEqual(properties["link"], test_link)
-        self.assertEqual(properties["link_request"], test_link)
+        self.assertEqual(properties_section["link"], test_link)
+        self.assertEqual(properties_section["link_request"], test_link)
 
-        self.assertEqual(all_properties[5]["name"], "Entries")
-        entries = all_properties[5]["data"]
-        self.assertTrue(len(entries) > 0)
+        entries_section = url.get_properties_section("Entries", all_properties)
+        self.assertTrue(entries_section)
+        self.assertTrue(len(entries_section) > 0)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
@@ -378,27 +378,27 @@ class UrlTest(FakeInternetTestCase):
         test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
         channel_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
 
-        # call tested function
         url = Url(test_link)
 
         url.get_response()
+
+        # call tested function
         all_properties = url.get_properties(full=True)
-
         self.assertTrue(len(all_properties) > 0)
-        self.assertEqual(all_properties[0]["name"], "Properties")
 
-        properties = all_properties[0]["data"]
+        properties_section = url.get_properties_section("Properties", all_properties)
+        self.assertTrue(properties_section)
 
-        self.assertIn("title", properties)
-        self.assertIn("link", properties)
-        self.assertIn("feeds", properties)
+        self.assertIn("title", properties_section)
+        self.assertIn("link", properties_section)
+        self.assertIn("feeds", properties_section)
 
-        self.assertEqual(properties["link"], test_link)
-        self.assertEqual(properties["link_request"], test_link)
+        self.assertEqual(properties_section["link"], test_link)
+        self.assertEqual(properties_section["link_request"], test_link)
 
-        self.assertEqual(all_properties[5]["name"], "Entries")
-        entries = all_properties[5]["data"]
-        self.assertTrue(len(entries) > 0)
+        entries_section = url.get_properties_section("Entries", all_properties)
+        self.assertTrue(entries_section)
+        self.assertTrue(len(entries_section) > 0)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
@@ -416,18 +416,19 @@ class UrlTest(FakeInternetTestCase):
         self.assertTrue(len(all_properties) > 0)
         self.assertEqual(all_properties[0]["name"], "Properties")
 
-        properties = all_properties[0]["data"]
+        properties_section = url.get_properties_section("Properties", all_properties)
+        self.assertTrue(properties_section)
 
-        self.assertIn("title", properties)
-        self.assertIn("link", properties)
-        self.assertIn("feeds", properties)
+        self.assertIn("title", properties_section)
+        self.assertIn("link", properties_section)
+        self.assertIn("feeds", properties_section)
 
         #self.assertEqual(properties["link"], test_link)
-        self.assertEqual(properties["link_request"], test_link)
+        self.assertEqual(properties_section["link_request"], test_link)
 
-        self.assertEqual(all_properties[5]["name"], "Entries")
-        entries = all_properties[5]["data"]
-        self.assertTrue(len(entries) > 0)
+        entries_section = url.get_properties_section("Entries", all_properties)
+        self.assertTrue(entries_section)
+        self.assertTrue(len(entries_section) > 0)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
@@ -436,23 +437,25 @@ class UrlTest(FakeInternetTestCase):
 
         test_link = "https://www.youtube.com/watch?v=1234"
 
-        # call tested function
         url = Url(test_link)
 
         url.get_response()
+
+        # call tested function
         all_properties = url.get_properties(full=True)
 
         self.assertTrue(len(all_properties) > 0)
         self.assertEqual(all_properties[0]["name"], "Properties")
 
-        properties = all_properties[0]["data"]
+        properties_section = url.get_properties_section("Properties", all_properties)
+        self.assertTrue(properties_section)
 
-        self.assertIn("title", properties)
-        self.assertIn("link", properties)
-        self.assertIn("feeds", properties)
+        self.assertIn("title", properties_section)
+        self.assertIn("link", properties_section)
+        self.assertIn("feeds", properties_section)
 
-        self.assertEqual(properties["link"], test_link)
-        self.assertEqual(properties["link_request"], test_link)
+        self.assertEqual(properties_section["link"], test_link)
+        self.assertEqual(properties_section["link_request"], test_link)
 
         # +1 for yt dlp +1 for return dislike
         self.assertEqual(MockRequestCounter.mock_page_requests, 2)
@@ -462,29 +465,32 @@ class UrlTest(FakeInternetTestCase):
 
         test_link = "https://binary.jpg.com"
 
-        # call tested function
         url = Url(test_link)
-
         url.get_response()
+
+        # call tested function
         all_properties = url.get_properties(full=True)
 
         self.assertTrue(len(all_properties) > 0)
         self.assertEqual(all_properties[0]["name"], "Properties")
 
-        properties = all_properties[0]["data"]
+        properties_section = url.get_properties_section("Properties", all_properties)
+        self.assertTrue(properties_section)
 
-        self.assertIn("title", properties)
-        self.assertIn("link", properties)
+        self.assertIn("title", properties_section)
+        self.assertIn("link", properties_section)
 
-        self.assertEqual(properties["link"], test_link)
-        self.assertEqual(properties["link_request"], test_link)
+        self.assertEqual(properties_section["link"], test_link)
+        self.assertEqual(properties_section["link_request"], test_link)
 
-        self.assertTrue(len(all_properties) > 0)
-        self.assertEqual(all_properties[1]["name"], "Binary")
-        self.assertTrue(all_properties[1]["data"]["Contents"])
+        streams_section = url.get_properties_section("Streams", all_properties)
+        self.assertTrue(streams_section)
+        self.assertTrue(len(streams_section) > 0)
+        self.assertIn("Binary", streams_section)
 
-        self.assertEqual(all_properties[3]["name"], "Response")
-        self.assertEqual(all_properties[3]["data"]["Content-Type"], "image/jpg")
+        response_section = url.get_properties_section("Response", all_properties)
+
+        self.assertEqual(response_section["Content-Type"], "image/jpg")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
@@ -493,29 +499,32 @@ class UrlTest(FakeInternetTestCase):
 
         test_link = "https://audio.jpg.com"
 
-        # call tested function
         url = Url(test_link)
 
         url.get_response()
+        # call tested function
         all_properties = url.get_properties(full=True)
 
         self.assertTrue(len(all_properties) > 0)
         self.assertEqual(all_properties[0]["name"], "Properties")
 
-        properties = all_properties[0]["data"]
+        properties_section = url.get_properties_section("Properties", all_properties)
+        self.assertTrue(properties_section)
 
-        self.assertIn("title", properties)
-        self.assertIn("link", properties)
+        self.assertIn("title", properties_section)
+        self.assertIn("link", properties_section)
 
-        self.assertEqual(properties["link"], test_link)
-        self.assertEqual(properties["link_request"], test_link)
+        self.assertEqual(properties_section["link"], test_link)
+        self.assertEqual(properties_section["link_request"], test_link)
 
-        self.assertTrue(len(all_properties) > 0)
-        self.assertEqual(all_properties[1]["name"], "Binary")
-        self.assertTrue(all_properties[1]["data"]["Contents"])
+        streams_section = url.get_properties_section("Streams", all_properties)
+        self.assertTrue(streams_section)
+        self.assertTrue(len(streams_section) > 0)
+        self.assertIn("Binary", streams_section)
 
-        self.assertEqual(all_properties[3]["name"], "Response")
-        self.assertEqual(all_properties[3]["data"]["Content-Type"], "audio/midi")
+        response_section = url.get_properties_section("Response", all_properties)
+
+        self.assertEqual(response_section["Content-Type"], "audio/midi")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
@@ -524,29 +533,31 @@ class UrlTest(FakeInternetTestCase):
 
         test_link = "https://video.jpg.com"
 
-        # call tested function
         url = Url(test_link)
 
         url.get_response()
+
+        # call tested function
         all_properties = url.get_properties(full=True)
-
         self.assertTrue(len(all_properties) > 0)
-        self.assertEqual(all_properties[0]["name"], "Properties")
 
-        properties = all_properties[0]["data"]
+        properties_section = url.get_properties_section("Properties", all_properties)
+        self.assertTrue(properties_section)
 
-        self.assertIn("title", properties)
-        self.assertIn("link", properties)
+        self.assertIn("title", properties_section)
+        self.assertIn("link", properties_section)
 
-        self.assertEqual(properties["link"], test_link)
-        self.assertEqual(properties["link_request"], test_link)
+        self.assertEqual(properties_section["link"], test_link)
+        self.assertEqual(properties_section["link_request"], test_link)
 
-        self.assertTrue(len(all_properties) > 0)
-        self.assertEqual(all_properties[1]["name"], "Binary")
-        self.assertTrue(all_properties[1]["data"]["Contents"])
+        streams_section = url.get_properties_section("Streams", all_properties)
+        self.assertTrue(streams_section)
+        self.assertTrue(len(streams_section) > 0)
+        self.assertIn("Binary", streams_section)
 
-        self.assertEqual(all_properties[3]["name"], "Response")
-        self.assertEqual(all_properties[3]["data"]["Content-Type"], "video/mp4")
+        response_section = url.get_properties_section("Response", all_properties)
+
+        self.assertEqual(response_section["Content-Type"], "video/mp4")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
@@ -1070,3 +1081,18 @@ class UrlTest(FakeInternetTestCase):
         self.assertIn("thumbs_down", properties)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
+    def test_response_to_data(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
+        channel_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
+
+        url = Url(test_link)
+
+        # call tested function
+        response = url.get_response()
+
+        data = url.response_to_data(response)
+        self.assertTrue(data)
+        self.assertIn("is_valid", data)

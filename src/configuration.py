@@ -30,7 +30,7 @@ class Configuration(object):
         # increment major version digit for releases, or link name changes
         # increment minor version digit for JSON data changes
         # increment last digit for small changes
-        self.__version__ = "5.0.4"
+        self.__version__ = "5.0.5"
 
     def is_set(self, name):
         if name in self.data:

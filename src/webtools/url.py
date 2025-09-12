@@ -710,6 +710,53 @@ class Url(ContentInterface):
 
         return properties
 
+    def response_to_data(self, response):
+        response_data = OrderedDict()
+
+        response_data["is_valid"] = response.is_valid()
+
+        respect_robots_txt = False
+        is_allowed = True
+        if (
+            "respect_robots_txt" in self.settings  # TODO this hsould come from response?
+            and self.settings["respect_robots_txt"]
+        ):
+            respect_robots_txt = self.settings["respect_robots_txt"]
+            is_allowed = self.is_allowed()
+
+        response_data["is_allowed"] = is_allowed
+        if respect_robots_txt and not is_allowed:
+            return response_data
+
+        if response:
+            response_data["status_code"] = response.get_status_code()
+            response_data["status_code_str"] = status_code_to_text(
+                response.get_status_code()
+            )
+
+            response_data["crawl_time_s"] = response.crawl_time_s
+
+            response_data["Content-Type"] = response.get_content_type()
+            response_data["Content-Length"] = response.get_content_length()
+            response_data["Last-Modified"] = response.get_last_modified()
+            response_data["Charset"] = response.get_encoding()
+            if not response_data["Charset"]:
+                response_data["Charset"] = response.encoding
+
+            if response.get_hash():
+                response_data["hash"] = self.property_encode(response.get_hash())
+            else:
+                response_data["hash"] = ""
+
+            response_data["body_hash"] = ""  # TODO implement?
+
+            if len(response.errors) > 0:
+                response_data["errors"] = []
+                for error in response.errors:
+                    response_data["errors"].append(error)
+
+        return response_data
+
     def get_response_data(self):
         """
         Easy digestible response data
@@ -802,6 +849,20 @@ class Url(ContentInterface):
 
         json_data = handler.get_json_data()
         return handler.get_social_data()
+
+    def get_properties_section(self, section_name, all_properties):
+        if not all_properties:
+            return
+
+        if "success" in all_properties and not all_properties["success"]:
+            # print("Url:{} Remote error. Not a success".format(link))
+            print("Remote error. Not a success")
+            # WebLogger.error(all_properties["error"])
+            return False
+
+        for properties in all_properties:
+            if section_name == properties["name"]:
+                return properties["data"]
 
 
 class DomainCacheInfo(object):
