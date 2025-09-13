@@ -65,13 +65,13 @@ class YouTubeDownloader(object):
         with open(file_name, "w") as fh:
             fh.write(data)
 
-    def get_thumbs_data(self):
-        code = self.process_link(self._url)
-        url = "https://returnyoutubedislikeapi.com/votes?videoId=" + code
-        from ..pluginurl import UrlHandler
+    #def get_thumbs_data(self):
+    #    code = self.process_link(self._url)
+    #    url = "https://returnyoutubedislikeapi.com/votes?videoId=" + code
+    #    from ..pluginurl import UrlHandler
 
-        handler = UrlHandler(url)
-        return handler.get_contents()
+    #    handler = UrlHandler(url)
+    #    return handler.get_contents()
 
     def _get_json_data(self):
         proc = subprocess.run(

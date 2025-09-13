@@ -61,7 +61,15 @@ class YTDLP(YouTubeDownloader):
         return proc
 
     def download_data(self, path=None):
-        cmds = ["yt-dlp", "--dump-json", "--max-downloads", "1", str(self._url)]
+        # cmds = ["yt-dlp", "--dump-json", "--max-downloads", "1", str(self._url)]
+        cmds = ["yt-dlp",
+                "--dump-json",
+                "--retries", "3",
+                "-t", "sleep",
+                "--sleep-interval 20",
+                "--max-sleep-interval",
+                "25",
+                "--max-downloads", "1", str(self._url)]
 
         proc = subprocess.run(cmds, capture_output=True, timeout=self.timeout_s)
 
