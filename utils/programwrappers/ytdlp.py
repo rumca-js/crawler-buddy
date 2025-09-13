@@ -66,7 +66,7 @@ class YTDLP(YouTubeDownloader):
                 "--dump-json",
                 "--retries", "3",
                 "-t", "sleep",
-                "--sleep-interval 20",
+                "--sleep-interval", "20",
                 "--max-sleep-interval",
                 "25",
                 "--max-downloads", "1", str(self._url)]
