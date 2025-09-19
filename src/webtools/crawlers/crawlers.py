@@ -8,6 +8,7 @@ import json
 import traceback
 import time
 from pathlib import Path
+import shutil
 import os
 import subprocess
 import threading
@@ -651,6 +652,7 @@ class SeleniumDriver(CrawlerInterface):
         )
         self.driver = None
         self.driver_executable = driver_executable
+        self.user_dir = None
 
     def set_settings(self, settings):
         super().set_settings(settings)
@@ -880,6 +882,10 @@ class SeleniumDriver(CrawlerInterface):
             WebLogger.error(str(E))  # TODO
             WebLogger.debug(str(E))
 
+        if self.user_dir:
+            shutil.rmtree(self.user_dir, ignore_errors=True)
+            self.user_dir = None
+
 
 class SeleniumChromeHeadless(SeleniumDriver):
     """
@@ -932,8 +938,9 @@ class SeleniumChromeHeadless(SeleniumDriver):
         options.add_argument("--lang=en-US")
 
         # sometimes two selenium browser clash when accessing user data directory
-        temp_user_data_dir = tempfile.mkdtemp()
-        options.add_argument(f"--user-data-dir={temp_user_data_dir}")
+        self.user_dir = tempfile.mkdtemp()
+        print(f"using data dir {self.user_dir}")
+        options.add_argument(f"--user-data-dir={self.user_dir}")
 
         # options to enable performance log, to read status code
         options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
@@ -1032,8 +1039,9 @@ class SeleniumChromeFull(SeleniumDriver):
         options.add_argument("--disable-gpu")
 
         # sometimes two selenium browser clash when accessing user data directory
-        temp_user_data_dir = tempfile.mkdtemp()
-        options.add_argument(f"--user-data-dir={temp_user_data_dir}")
+        self.user_dir = tempfile.mkdtemp()
+        print(f"Using user data dir {self.user_dir}")
+        options.add_argument(f"--user-data-dir={self.user_dir}")
 
         # options to enable performance log, to read status code
         options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
@@ -1093,8 +1101,8 @@ class SeleniumUndetected(SeleniumDriver):
         options.add_argument("--lang={}".format("en-US"))
 
         # sometimes two selenium browser clash when accessing user data directory
-        temp_user_data_dir = tempfile.mkdtemp()
-        options.add_argument(f"--user-data-dir={temp_user_data_dir}")
+        self.user_dir = tempfile.mkdtemp()
+        options.add_argument(f"--user-data-dir={self.user_dir}")
 
         try:
             return uc.Chrome(options=options)
