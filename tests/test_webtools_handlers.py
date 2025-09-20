@@ -203,3 +203,11 @@ class FourChanChannelHandlerTest(FakeInternetTestCase):
 
         # call tested function
         self.assertEqual("test", handler.code)
+
+    def test_get_feeds(self):
+        test_link = "https://4chan.org/test/"
+
+        handler = FourChanChannelHandler(test_link, url_builder=Url)
+
+        # call tested function
+        self.assertEqual("test", handler.get_feeds())

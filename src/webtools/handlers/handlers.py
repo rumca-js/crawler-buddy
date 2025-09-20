@@ -447,7 +447,7 @@ class FourChanChannelHandler(DefaultChannelHandler):
         """
         feeds = super().get_feeds()
 
-        if self.subreddit:
+        if self.code:
             feeds.append("https://boards.4chan.org/{}/index.rss".format(self.code))
 
         return feeds
