@@ -3,7 +3,7 @@ from collections import OrderedDict
 from src import webtools
 
 
-class CrawlerInfo(object):
+class CrawlerQueue(object):
 
     def __init__(self, max_queue_size=10):
         self.queue = OrderedDict()

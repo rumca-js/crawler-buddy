@@ -1,2 +1,3 @@
 from .crawlerhistory import CrawlerHistory
-from .crawlerinfo import CrawlerInfo
+from .crawlerqueue import CrawlerQueue
+from .crawlerdata import CrawlerData

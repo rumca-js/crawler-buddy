@@ -470,7 +470,7 @@ def getj():
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-    all_properties = crawler_main.run_all(request)
+    all_properties = crawler_main.get_all_properties(request)
     if not all_properties:
         return (
             jsonify(
@@ -507,18 +507,8 @@ def rssifyr():
     if not url:
         return jsonify({"success": False, "error": "No url provided"}), 400
 
-    crawler_data = crawler_main.get_request_data(request)
-
-    if not crawler_data:
-        return jsonify({"success": False, "error": "Cannot obtain crawler data"}), 400
-
-    crawler_data["settings"]["headers"] = False
-    crawler_data["settings"]["ping"] = False
-
-    try:
-        webtools.WebConfig.start_display()
-        all_properties = crawler_main.get_crawl_properties(url, crawler_data)
-
+    all_properties = crawler_main.get_all_properties(request)
+    if all_properties:
         properties = CrawlerHistory.read_properties_section(
             "Properties", all_properties
         )
@@ -532,25 +522,6 @@ def rssifyr():
                     )
                     if all_properties:
                         break
-
-    except Exception as E:
-        webtools.WebLogger.exc(
-            E, info_text="Exception when calling getj {} {}".format(url, crawler_data)
-        )
-        all_properties = None
-
-    if not all_properties:
-        return (
-            jsonify({"success": False, "error": "No properties found - no properties"}),
-            400,
-        )
-
-    entries = CrawlerHistory.read_properties_section("Entries", all_properties)
-    if not entries or len(entries) == 0:
-        return (
-            jsonify({"success": False, "error": "No entries found - no entries"}),
-            400,
-        )
 
     return Response(rssify(all_properties), mimetype="application/rss+xml")
 
@@ -577,19 +548,15 @@ def contentsr():
     if not url:
         return jsonify({"success": False, "error": "No url provided"}), 400
 
-    crawler_data = crawler_main.get_request_data(request)
-
-    if not crawler_data:
-        return jsonify({"success": False, "error": "Cannot obtain crawler data"}), 400
-
     crawler_data["settings"]["headers"] = False
     crawler_data["settings"]["ping"] = False
 
-    all_properties = crawler_main.get_crawl_properties(url, crawler_data)
+    all_properties = crawler_main.get_all_properties(request)
 
     if not all_properties:
         return jsonify({"success": False, "error": "No properties found"}), 400
 
+    # TODO use streams
     contents_data = CrawlerHistory.read_properties_section("Text", all_properties)
     if "Contents" in contents_data:
         contents = contents_data["Contents"]
@@ -619,23 +586,7 @@ def headers():
     if not url:
         return jsonify({"success": False, "error": "No url provided"}), 400
 
-    crawler_data = crawler_main.get_request_data(request)
-
-    if not crawler_data:
-        return jsonify({"success": False, "error": "Cannot obtain crawler data"}), 400
-
-    crawler_data["settings"]["headers"] = True
-    crawler_data["settings"]["ping"] = False
-
-    all_properties = crawler_main.get_crawl_properties(url, crawler_data)
-
-    if all_properties:
-        crawler_main.url_history.add((url, all_properties))
-    else:
-        all_properties = crawler_main.url_history.find(url=url)
-
-        if not all_properties:
-            return jsonify({"success": False, "error": "No properties found"}), 400
+    all_properties = crawler_main.get_all_properties(request, headers=True)
 
     return jsonify(all_properties)
 
@@ -727,7 +678,7 @@ def pingj():
         if response.status_code == webtools.HTTP_STATUS_CODE_CONNECTION_ERROR:
             return jsonify({"status": False})
 
-    all_properties = crawler_main.run_all(request, ping=True)
+    all_properties = crawler_main.get_all_properties(request, ping=True)
     response = CrawlerHistory.read_properties_section("Response", all_properties)
 
     if response:
