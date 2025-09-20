@@ -69,6 +69,7 @@ HTTP_STATUS_CODE_TIMEOUT = 604
 HTTP_STATUS_CODE_FILE_TOO_BIG = 612
 HTTP_STATUS_CODE_PAGE_UNSUPPORTED = 613
 HTTP_STATUS_CODE_SERVER_ERROR = 614
+HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS = 615 # this server too many requests
 
 
 class WebLogger(object):
@@ -149,6 +150,8 @@ def status_code_to_text(status_code):
         return "HTTP_STATUS_CODE_PAGE_UNSUPPORTED(613)"
     elif status_code == 614:
         return "HTTP_STATUS_CODE_SERVER_ERROR(614)"
+    elif status_code == 615:
+        return "HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS(615)"
     else:
         return str(status_code)
 
@@ -897,3 +900,58 @@ class InputContent(object):
         self.text = result
 
         return result
+
+
+def json_encode(byte_property):
+    return base64.b64encode(byte_property).decode("utf-8")
+
+
+def json_decode_field(data):
+    return base64.b64decode(data)
+
+
+def response_to_json(response):
+    """
+    TODO implement json to response
+     - implement is_allowed
+     - implement get_contents_hash
+     - implement get_contents_body_hash
+    """
+    response_data = OrderedDict()
+
+    response_data["is_valid"] = response.is_valid()
+    response_data["is_allowed"] = response.is_allowed()
+
+    if response:
+        response_data["status_code"] = response.get_status_code()
+        response_data["status_code_str"] = status_code_to_text(
+            response.get_status_code()
+        )
+
+        response_data["crawl_time_s"] = response.crawl_time_s
+
+        response_data["Content-Type"] = response.get_content_type()
+
+        response_data["Content-Length"] = response.get_content_length()
+        response_data["Last-Modified"] = response.get_last_modified()
+        response_data["Charset"] = response.get_encoding()
+        if not response_data["Charset"]:
+            response_data["Charset"] = response.encoding
+
+        if response.get_contents_hash():
+            response_data["hash"] = json_encode(response.get_contents_hash())
+        else:
+            response_data["hash"] = ""
+        if response.get_contents_body_hash():
+            response_data["body_hash"] = json_encode(
+                response.get_contents_body_hash()
+            )
+        else:
+            response_data["body_hash"] = ""
+
+        if len(response.errors) > 0:
+            response_data["errors"] = []
+            for error in response.errors:
+                response_data["errors"].append(error)
+
+    return response_data
