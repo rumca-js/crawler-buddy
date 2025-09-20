@@ -78,7 +78,7 @@ class Crawler(object):
             return {"success": False, "error": "No url provided"}
 
         self.data.set_request(request)
-        crawler_data = self.data.get_request_data(request)
+        crawler_data = self.data.get_request_data()
 
         if not crawler_data:
             return {"success": False, "error": "Cannot obtain crawler data"}
@@ -118,6 +118,8 @@ class Crawler(object):
             )
             all_properties = None
 
+        self.queue.leave(crawl_index)
+
         if not all_properties:
             return {"success": False, "error": "No properties found"}
 
@@ -141,9 +143,7 @@ class Crawler(object):
         try:
             response = page_url.get_response()
             all_properties = page_url.get_properties(full=True, include_social=False)
-            self.queue.leave(crawl_index)
         except Exception as e:
-            self.queue.leave(crawl_index)
             raise
 
         if webtools.WebConfig.count_chrom_processes() > 30:
