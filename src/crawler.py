@@ -66,8 +66,6 @@ class Crawler(object):
     def get_page_url(self, url, crawler_data):
         """ """
 
-        print("Running:{}, with:{}".format(url, crawler_data))
-
         page_url = webtools.Url(url, settings=crawler_data)
         return page_url
 
@@ -119,6 +117,7 @@ class Crawler(object):
             all_properties = None
 
         self.queue.leave(crawl_index)
+        self.url_history.add((url, all_properties))
 
         if not all_properties:
             return {"success": False, "error": "No properties found"}
@@ -141,6 +140,8 @@ class Crawler(object):
             return
 
         try:
+            print("Running:{}, with:{}".format(url, crawler_data))
+
             response = page_url.get_response()
             all_properties = page_url.get_properties(full=True, include_social=False)
         except Exception as e:

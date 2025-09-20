@@ -22,7 +22,7 @@ class CrawlerHistory(object):
     def set_size(self, size):
         self.size = size
 
-    def get_history_size(self):
+    def get_size(self):
         return len(self.container)
 
     def add(self, things):

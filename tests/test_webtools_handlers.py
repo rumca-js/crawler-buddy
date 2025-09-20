@@ -210,4 +210,4 @@ class FourChanChannelHandlerTest(FakeInternetTestCase):
         handler = FourChanChannelHandler(test_link, url_builder=Url)
 
         # call tested function
-        self.assertEqual("https://boards.4chan.org/test/index.rss", handler.get_feeds())
+        self.assertEqual(["https://boards.4chan.org/test/index.rss"], handler.get_feeds())

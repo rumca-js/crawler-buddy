@@ -467,13 +467,13 @@ class ScriptServerTest(FakeInternetTestCase):
         status = url_history.remove(index = 0)
 
         self.assertTrue(status)
-        self.assertEqual(url_history.get_history_size(), 1)
+        self.assertEqual(url_history.get_size(), 1)
 
         # call tested function
         status = url_history.remove(index = 1)
 
         self.assertTrue(status)
-        self.assertEqual(url_history.get_history_size(), 0)
+        self.assertEqual(url_history.get_size(), 0)
 
         # call tested function
         status = url_history.remove(index = 2)

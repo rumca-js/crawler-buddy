@@ -233,7 +233,7 @@ def history():
 
     text += "<h1>History</h1>\n"
 
-    if crawler_main.url_history.get_history_size() == 0:
+    if crawler_main.url_history.get_size() == 0:
         text += "<div>No history yet!</div>"
     else:
         for datetime, index, things in reversed(crawler_main.url_history.container):
@@ -255,7 +255,7 @@ def historyj():
 
     json_history = []
 
-    if crawler_main.url_history.get_history_size() == 0:
+    if crawler_main.url_history.get_size() == 0:
         return json_history
 
     for datetime, index, things in reversed(crawler_main.url_history.container):
