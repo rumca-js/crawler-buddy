@@ -634,6 +634,7 @@ class SeleniumDriver(CrawlerInterface):
      - how can we make for the driver to be persistent? we do not want to start driver again and again
      - we could not be running in parallel new drivers
     """
+    counter = 0
 
     def __init__(
         self,
@@ -739,6 +740,8 @@ class SeleniumDriver(CrawlerInterface):
         if not self.driver:
             return
 
+        SeleniumDriver.counter += 1
+
         try:
             # add 10 seconds for start of browser, etc.
             selenium_timeout = self.timeout_s
@@ -792,6 +795,8 @@ class SeleniumDriver(CrawlerInterface):
                     request_url=self.request.url,
                 )
                 self.response.add_error("Url:{} exception".format(self.request.url))
+
+        SeleniumDriver.counter -= 1
 
         return self.response
 
@@ -875,12 +880,15 @@ class SeleniumDriver(CrawlerInterface):
             WebLogger.error(str(E))  # TODO
             WebLogger.debug(str(E))
 
-        try:
-            if self.driver:
-                self.driver.quit()
-        except Exception as E:
-            WebLogger.error(str(E))  # TODO
-            WebLogger.debug(str(E))
+        print(SeleniumDriver.counter)
+
+        if SeleniumDriver.counter == 0:
+            try:
+                if self.driver:
+                    self.driver.quit()
+            except Exception as E:
+                WebLogger.error(str(E))  # TODO
+                WebLogger.debug(str(E))
 
         if self.user_dir:
             shutil.rmtree(self.user_dir, ignore_errors=True)
