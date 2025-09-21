@@ -357,3 +357,38 @@ class CrawlerTest(FakeInternetTestCase):
 
         self.assertEqual(crawler.url_history.get_size(), 1)
         self.assertEqual(crawler.queue.get_size(), 0)
+
+    def test_get_all_properties__from_history(self):
+        crawler = Crawler()
+
+        test_url = "https://linkedin.com"
+
+        crawler_data = {
+                "name" : "RequestsCrawler",
+                "crawler" : "RequestsCrawler",
+                "settings" : {
+                    "timeout_s" : 20,
+                    "remote_server": "https://",
+                }
+        }
+
+        request = FlaskRequest("http://192.168.0.0")
+        request.set("url", test_url)
+        request.set("name", "RequestsCrawler")
+
+        self.assertEqual(crawler.url_history.get_size(), 0)
+        self.assertEqual(crawler.queue.get_size(), 0)
+
+        # call tested function
+        props = crawler.get_all_properties(request)
+        self.assertTrue(props)
+
+        self.assertEqual(crawler.url_history.get_size(), 1)
+        self.assertEqual(crawler.queue.get_size(), 0)
+
+        # call tested function
+        props = crawler.get_all_properties(request)
+        self.assertTrue(props)
+
+        self.assertEqual(crawler.url_history.get_size(), 1) # no new history was created
+        self.assertEqual(crawler.queue.get_size(), 0)

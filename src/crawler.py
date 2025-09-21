@@ -86,7 +86,7 @@ class Crawler(object):
             name = crawler_data["name"]
         crawler = None
         if "crawler" in crawler_data:
-            crawler = crawler_data["crawler"]
+            crawler = crawler_data["crawler"].__class__.__name__
 
         things = self.get_history().find(url=url, crawler_name=name, crawler=crawler)
 
