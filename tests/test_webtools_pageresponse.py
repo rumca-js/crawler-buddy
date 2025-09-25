@@ -3,6 +3,7 @@ from src.webtools import (
     response_to_json,
     json_to_response,
 )
+from utils.dateutils import DateUtils
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 
@@ -147,6 +148,18 @@ class PageResponseObjectTest(FakeInternetTestCase):
         )
 
         self.assertTrue(response.get_hash())
+
+    def test_get_last_modified(self):
+        date_str = DateUtils.get_datetime_now_iso()
+
+        headers = {"Content-Type": "text/rss; charset=UTF-8",
+                   "Last-Modified" : date_str}
+
+        response = PageResponseObject(
+            "https://test.com", status_code=200, binary=b"test", headers=headers
+        )
+
+        self.assertTrue(response.get_last_modified())
 
 
 class PageResponseToJsonTest(FakeInternetTestCase):

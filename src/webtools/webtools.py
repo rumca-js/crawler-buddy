@@ -367,7 +367,7 @@ class ResponseHeaders(object):
             date = self.headers["last-modified"]
 
         if date:
-            return date_str_to_date(date)
+            return date_str_to_date(str(date))
 
     def get_clean_headers(self):
         self.headers["Content-Type"] = self.get_content_type()
