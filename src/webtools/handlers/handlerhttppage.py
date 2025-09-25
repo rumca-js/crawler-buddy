@@ -226,6 +226,16 @@ class HttpPageHandler(HandlerInterface):
 
         self.p = self.get_page_handler()
 
+        if self.p and type(self.p) == RssPage:
+            if self.response:
+                self.response.set_recognized_content_type("application/rss+xml")
+        elif self.p and type(self.p) == HtmlPage:
+            if self.response:
+                self.response.set_recognized_content_type("text/html")
+
+        if self.p and self.response:
+            self.response.set_body_hash(self.get_contents_body_hash())
+
         if self.response:
             return self.response
 

@@ -39,6 +39,8 @@ import html
 import traceback
 import re
 import json
+import base64
+from collections import OrderedDict
 from dateutil import parser
 import urllib.request, urllib.error, urllib.parse
 from bs4 import BeautifulSoup
@@ -335,6 +337,9 @@ class ResponseHeaders(object):
     def __init__(self, headers):
         self.headers = dict(headers)
 
+    def get(self, field):
+        return self.headers.get(field)
+
     def is_headers_empty(self):
         return len(self.headers) == 0
 
@@ -474,6 +479,9 @@ class PageResponseObject(object):
         self.status_code = status_code
         self.crawler_data = None
         self.crawl_time_s = None
+        self.recognized_content_type = None
+        self.body_hash = None
+        self.is_allowed_internal = True
 
         if self.status_code is None:
             self.status_code = 0
@@ -528,13 +536,37 @@ class PageResponseObject(object):
 
     def set_headers(self, headers):
         self.headers = ResponseHeaders(headers=headers)
+        self.recognized_content_type = self.get_content_type()
+
+    def set_recognized_content_type(self, recognized_type):
+        self.recognized_content_type = recognized_type
+
+    def get_recognized_content_type(self):
+        if not self.recognized_content_type:
+            self.recognized_content_type = self.headers.get_content_type()
+            if self.recognized_content_type:
+                wh = self.recognized_content_type.find(";")
+                if wh >= 0:
+                    self.recognized_content_type = self.recognized_content_type[:wh]
+
+        return self.recognized_content_type
+
+    def set_body_hash(self, body_hash):
+        self.body_hash = body_hash
+
+    def get_body_hash(self):
+        return self.body_hash
 
     def set_crawler(self, crawler_data):
         self.crawler_data = dict(crawler_data)
         self.crawler_data["crawler"] = type(self.crawler_data["crawler"]).__name__
 
     def get_content_type(self):
-        return self.headers.get_content_type()
+        content_type = self.headers.get_content_type()
+        if content_type is None:
+            return self.recognized_content_type
+
+        return content_type
 
     def get_content_type_keys(self):
         return self.headers.get_content_type_keys()
@@ -642,6 +674,9 @@ class PageResponseObject(object):
 
         return True
 
+    def is_allowed(self):
+        return self.is_allowed_internal
+
     def get_status_code(self):
         return self.status_code
 
@@ -651,8 +686,22 @@ class PageResponseObject(object):
     def get_binary(self):
         return self.binary
 
+    def get_streams(self):
+        if self.text is not None:
+            return [self.text]
+        elif self.binary:
+            return [self.binary]
+
+        return []
+
     def get_headers(self):
-        return self.headers.get_clean_headers()
+        clean_headers = self.headers.get_clean_headers()
+        content_type = self.headers.get_content_type()
+        if content_type is None:
+            if self.recognized_content_type:
+                clean_headers["Content-Type"] = self.recognized_content_type
+
+        return clean_headers
 
     def set_text(self, text, encoding=None):
         if encoding:
@@ -722,6 +771,76 @@ class PageResponseObject(object):
         binary = self.get_binary()
         if binary:
             return calculate_hash_binary(binary)
+
+
+class InputContent(object):
+    def __init__(self, text):
+        self.text = text
+
+    def htmlify(self):
+        """
+        Use iterative approach. There is one thing to keep in mind:
+         - text can contain <a href=" links already
+
+        So some links needs to be translated. Some do not.
+
+        @return text with https links changed into real links
+        """
+        self.text = self.strip_html_attributes()
+        self.text = self.linkify("https://")
+        self.text = self.linkify("http://")
+        return self.text
+
+    def strip_html_attributes(self):
+        soup = BeautifulSoup(self.text, "html.parser")
+
+        for tag in soup.find_all(True):
+            if tag.name == "a":
+                # Preserve "href" attribute for anchor tags
+                tag.attrs = {"href": tag.get("href")}
+            elif tag.name == "img":
+                # Preserve "src" attribute for image tags
+                tag.attrs = {"src": tag.get("src")}
+            else:
+                # Remove all other attributes
+                tag.attrs = {}
+
+        self.text = str(soup)
+        return self.text
+
+    def linkify(self, protocol="https://"):
+        """
+        @return text with https links changed into real links
+        """
+        if self.text.find(protocol) == -1:
+            return self.text
+
+        import re
+
+        result = ""
+        i = 0
+
+        while i < len(self.text):
+            pattern = r"{}\S+(?![\w.])".format(protocol)
+            match = re.match(pattern, self.text[i:])
+            if match:
+                url = match.group()
+                # Check the previous 10 characters
+                preceding_chars = self.text[max(0, i - 10) : i]
+
+                # We do not care who write links using different char order
+                if '<a href="' not in preceding_chars and "<img" not in preceding_chars:
+                    result += f'<a href="{url}">{url}</a>'
+                else:
+                    result += url
+                i += len(url)
+            else:
+                result += self.text[i]
+                i += 1
+
+        self.text = result
+
+        return result
 
 
 def get_request_to_bytes(request, script):
@@ -832,77 +951,7 @@ def get_response_from_bytes(all_bytes):
     return response
 
 
-class InputContent(object):
-    def __init__(self, text):
-        self.text = text
-
-    def htmlify(self):
-        """
-        Use iterative approach. There is one thing to keep in mind:
-         - text can contain <a href=" links already
-
-        So some links needs to be translated. Some do not.
-
-        @return text with https links changed into real links
-        """
-        self.text = self.strip_html_attributes()
-        self.text = self.linkify("https://")
-        self.text = self.linkify("http://")
-        return self.text
-
-    def strip_html_attributes(self):
-        soup = BeautifulSoup(self.text, "html.parser")
-
-        for tag in soup.find_all(True):
-            if tag.name == "a":
-                # Preserve "href" attribute for anchor tags
-                tag.attrs = {"href": tag.get("href")}
-            elif tag.name == "img":
-                # Preserve "src" attribute for image tags
-                tag.attrs = {"src": tag.get("src")}
-            else:
-                # Remove all other attributes
-                tag.attrs = {}
-
-        self.text = str(soup)
-        return self.text
-
-    def linkify(self, protocol="https://"):
-        """
-        @return text with https links changed into real links
-        """
-        if self.text.find(protocol) == -1:
-            return self.text
-
-        import re
-
-        result = ""
-        i = 0
-
-        while i < len(self.text):
-            pattern = r"{}\S+(?![\w.])".format(protocol)
-            match = re.match(pattern, self.text[i:])
-            if match:
-                url = match.group()
-                # Check the previous 10 characters
-                preceding_chars = self.text[max(0, i - 10) : i]
-
-                # We do not care who write links using different char order
-                if '<a href="' not in preceding_chars and "<img" not in preceding_chars:
-                    result += f'<a href="{url}">{url}</a>'
-                else:
-                    result += url
-                i += len(url)
-            else:
-                result += self.text[i]
-                i += 1
-
-        self.text = result
-
-        return result
-
-
-def json_encode(byte_property):
+def json_encode_field(byte_property):
     return base64.b64encode(byte_property).decode("utf-8")
 
 
@@ -910,48 +959,84 @@ def json_decode_field(data):
     return base64.b64decode(data)
 
 
-def response_to_json(response):
+def response_to_json(response, with_streams=False):
     """
-    TODO implement json to response
-     - implement is_allowed
-     - implement get_contents_hash
-     - implement get_contents_body_hash
     """
     response_data = OrderedDict()
 
-    response_data["is_valid"] = response.is_valid()
-    response_data["is_allowed"] = response.is_allowed()
-
     if response:
+        response_data["url"] = response.url
+        response_data["request_url"] = response.request_url
+        response_data["headers"] = response.get_headers()
+
+        response_data["is_valid"] = response.is_valid()
+        response_data["is_allowed"] = response.is_allowed()
+
         response_data["status_code"] = response.get_status_code()
         response_data["status_code_str"] = status_code_to_text(
             response.get_status_code()
         )
 
         response_data["crawl_time_s"] = response.crawl_time_s
-
         response_data["Content-Type"] = response.get_content_type()
-
+        response_data["Recognized-Content-Type"] = response.get_recognized_content_type()
         response_data["Content-Length"] = response.get_content_length()
         response_data["Last-Modified"] = response.get_last_modified()
         response_data["Charset"] = response.get_encoding()
-        if not response_data["Charset"]:
-            response_data["Charset"] = response.encoding
-
-        if response.get_contents_hash():
-            response_data["hash"] = json_encode(response.get_contents_hash())
+        contents_hash = response.get_hash()
+        if contents_hash:
+            response_data["hash"] = json_encode_field(contents_hash)
         else:
-            response_data["hash"] = ""
-        if response.get_contents_body_hash():
-            response_data["body_hash"] = json_encode(
-                response.get_contents_body_hash()
-            )
+            response_data["hash"] = None
+        body_hash = response.get_body_hash()
+        if body_hash:
+            response_data["body_hash"] = json_encode_field(body_hash)
         else:
-            response_data["body_hash"] = ""
+            response_data["body_hash"] = None
 
         if len(response.errors) > 0:
             response_data["errors"] = []
             for error in response.errors:
                 response_data["errors"].append(error)
 
+        if with_streams:
+            response_data["streams"] = response.get_streams()
+            response_data["text"] = response.get_text()
+            response_data["binary"] = json_encode_field(response.get_binary())
+    else:
+        response_data["is_valid"] = False
+        response_data["status_code"] = HTTP_STATUS_CODE_EXCEPTION
+        response_data["status_code_str"] = status_code_to_text(HTTP_STATUS_CODE_EXCEPTION)
+
     return response_data
+
+
+def json_to_response(json_data, with_streams=False):
+    url = json_data.get("url")
+    request_url = json_data.get("request_url")
+    streams = json_data.get("streams")
+    text = json_data.get("text")
+    binary = json_data.get("binary")
+    status_code = json_data.get("status_code")
+    encoding = json_data.get("Charset")
+    headers = json_data.get("headers")
+    body_hash = json_data.get("body_hash")
+
+    if binary:
+        binary = base64.b64decode(binary)
+    if body_hash:
+        body_hash = base64.b64decode(body_hash)
+
+    response = PageResponseObject(
+        url=url,  # received url
+        binary=binary,
+        text=text,
+        status_code=status_code,
+        encoding=encoding,
+        headers=headers,
+        request_url=request_url,
+    )
+
+    response.body_hash = body_hash
+
+    return response

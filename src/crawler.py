@@ -2,7 +2,6 @@ import subprocess
 import psutil
 import json
 from datetime import datetime
-from collections import OrderedDict
 from src import webtools
 from src.configuration import Configuration
 from src import CrawlerHistory

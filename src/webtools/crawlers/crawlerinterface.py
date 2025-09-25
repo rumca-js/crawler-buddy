@@ -33,10 +33,8 @@ class CrawlerInterface(object):
         @param response_file If set, response is stored in a file
         @param settings passed settings
         """
-        if not request and url:
+        if not request:
             request = PageRequestObject(url)
-        elif not request and not url:
-            raise TypeError("Incorrect crawler use")
 
         self.request = request
         self.response = None

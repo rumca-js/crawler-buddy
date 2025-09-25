@@ -1,5 +1,7 @@
 from src.webtools import (
     PageResponseObject,
+    response_to_json,
+    json_to_response,
 )
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
@@ -146,3 +148,182 @@ class PageResponseObjectTest(FakeInternetTestCase):
 
         self.assertTrue(response.get_hash())
 
+
+class PageResponseToJsonTest(FakeInternetTestCase):
+    def setUp(self):
+        self.disable_web_pages()
+
+    def test_response_to_json__403_no_text(self):
+        headers = {"Content-Type": "text/rss; charset=UTF-8"}
+        response = PageResponseObject(
+            "https://test.com", "", status_code=403, headers=headers
+        )
+
+        # call tested function
+        json_map = response_to_json(response)
+
+        self.assertTrue(json_map)
+        self.assertIn("is_valid", json_map)
+        self.assertIn("status_code", json_map)
+        self.assertIn("status_code_str", json_map)
+        self.assertIn("crawl_time_s", json_map)
+        self.assertIn("Content-Type", json_map)
+        self.assertIn("Recognized-Content-Type", json_map)
+        self.assertIn("Content-Length", json_map)
+        self.assertIn("Charset", json_map)
+        self.assertIn("hash", json_map)
+        self.assertIn("body_hash", json_map)
+        self.assertNotIn("streams", json_map)
+
+        self.assertEqual(json_map["is_valid"], True)
+        self.assertEqual(json_map["status_code"], 403)
+        self.assertEqual(json_map["Content-Type"], "text/rss; charset=UTF-8")
+        self.assertEqual(json_map["Recognized-Content-Type"], "text/rss")
+        self.assertEqual(json_map["Charset"], "UTF-8")
+        self.assertEqual(json_map["hash"], None)
+        self.assertEqual(json_map["body_hash"], None)
+
+    def test_response_to_json__404_no_text(self):
+        headers = {"Content-Type": "text/rss; charset=UTF-8"}
+        response = PageResponseObject(
+            "https://test.com", "", status_code=404, headers=headers
+        )
+
+        # call tested function
+        json_map = response_to_json(response)
+
+        self.assertTrue(json_map)
+        self.assertIn("is_valid", json_map)
+        self.assertIn("status_code", json_map)
+        self.assertIn("status_code_str", json_map)
+        self.assertIn("crawl_time_s", json_map)
+        self.assertIn("Content-Type", json_map)
+        self.assertIn("Recognized-Content-Type", json_map)
+        self.assertIn("Content-Length", json_map)
+        self.assertIn("Charset", json_map)
+        self.assertIn("hash", json_map)
+        self.assertIn("body_hash", json_map)
+        self.assertNotIn("streams", json_map)
+
+        self.assertEqual(json_map["is_valid"], False)
+        self.assertEqual(json_map["status_code"], 404)
+        self.assertEqual(json_map["Content-Type"], "text/rss; charset=UTF-8")
+        self.assertEqual(json_map["Recognized-Content-Type"], "text/rss")
+        self.assertEqual(json_map["Charset"], "UTF-8")
+        self.assertEqual(json_map["hash"], None)
+        self.assertEqual(json_map["body_hash"], None)
+
+    def test_response_to_json__valid_text_no_streams(self):
+        headers = {"Content-Type": "text/rss; charset=UTF-8"}
+        response = PageResponseObject(
+            "https://test.com", "", status_code=200, text="test", headers=headers
+        )
+
+        # call tested function
+        json_map = response_to_json(response)
+
+        self.assertTrue(json_map)
+        self.assertIn("is_valid", json_map)
+        self.assertIn("status_code", json_map)
+        self.assertIn("status_code_str", json_map)
+        self.assertIn("crawl_time_s", json_map)
+        self.assertIn("Content-Type", json_map)
+        self.assertIn("Recognized-Content-Type", json_map)
+        self.assertIn("Content-Length", json_map)
+        self.assertIn("Charset", json_map)
+        self.assertIn("hash", json_map)
+        self.assertIn("body_hash", json_map)
+        self.assertNotIn("streams", json_map)
+
+        self.assertEqual(json_map["is_valid"], True)
+        self.assertEqual(json_map["status_code"], 200)
+        self.assertEqual(json_map["Content-Type"], "text/rss; charset=UTF-8")
+        self.assertEqual(json_map["Recognized-Content-Type"], "text/rss")
+        self.assertEqual(json_map["Charset"], "UTF-8")
+        self.assertNotEqual(json_map["hash"], None)
+        self.assertEqual(json_map["body_hash"], None)
+
+    def test_response_to_json__valid_text_streams(self):
+        headers = {"Content-Type": "text/rss; charset=UTF-8"}
+        response = PageResponseObject(
+            "https://test.com", "", status_code=200, text="test", headers=headers
+        )
+
+        # call tested function
+        json_map = response_to_json(response, with_streams=True)
+
+        self.assertTrue(json_map)
+        self.assertIn("is_valid", json_map)
+        self.assertIn("status_code", json_map)
+        self.assertIn("status_code_str", json_map)
+        self.assertIn("crawl_time_s", json_map)
+        self.assertIn("Content-Type", json_map)
+        self.assertIn("Recognized-Content-Type", json_map)
+        self.assertIn("Content-Length", json_map)
+        self.assertIn("Charset", json_map)
+        self.assertIn("hash", json_map)
+        self.assertIn("body_hash", json_map)
+        self.assertIn("streams", json_map)
+
+        self.assertEqual(json_map["is_valid"], True)
+        self.assertEqual(json_map["status_code"], 200)
+        self.assertEqual(json_map["Content-Type"], "text/rss; charset=UTF-8")
+        self.assertEqual(json_map["Recognized-Content-Type"], "text/rss")
+        self.assertEqual(json_map["Charset"], "UTF-8")
+        self.assertNotEqual(json_map["hash"], None)
+        self.assertEqual(json_map["body_hash"], None)
+
+
+class JsonToPageResponseTest(FakeInternetTestCase):
+    def setUp(self):
+        self.disable_web_pages()
+
+    def test__valid(self):
+        json_data = {
+            "status_code" : 200,
+        }
+
+        response = json_to_response(json_data)
+        self.assertTrue(response.is_valid())
+
+    def test__not_valid(self):
+        json_data = {
+            "status_code" : 404,
+        }
+
+        response = json_to_response(json_data)
+        self.assertFalse(response.is_valid())
+
+    def test__url(self):
+        json_data = {
+            "url" : "https://test.com",
+        }
+
+        response = json_to_response(json_data)
+        self.assertEqual(response.url, "https://test.com")
+
+    def test__request_url(self):
+        json_data = {
+            "request_url" : "https://test.com",
+        }
+
+        response = json_to_response(json_data)
+        self.assertEqual(response.request_url, "https://test.com")
+
+    def test__text(self):
+        json_data = {
+            "text" : "<html></html>",
+        }
+
+        response = json_to_response(json_data)
+        self.assertEqual(response.text, "<html></html>")
+
+    def test__headers(self):
+        json_data = {
+            "headers" : {
+                "Content-Type" : "test/content/type",
+            }
+        }
+
+        response = json_to_response(json_data)
+        self.assertEqual(response.get_content_type(), "test/content/type")

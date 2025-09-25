@@ -2,7 +2,11 @@ import json
 import requests
 import urllib.parse
 import base64
-from .webtools import PageResponseObject, HTTP_STATUS_TOO_MANY_REQUESTS
+from .webtools import (
+    PageResponseObject,
+    HTTP_STATUS_TOO_MANY_REQUESTS,
+    json_to_response,
+)
 
 
 class RemoteServer(object):
@@ -200,19 +204,16 @@ class RemoteServer(object):
         binary = None
         if binary_data:
             if binary_data["Contents"]:
-                binary = base64.b64decode(binary_data["Contents"])
+                binary = binary_data["Contents"]
 
         if not response_data:
             o = PageResponseObject(url=properties["link"], text=text, binary=binary)
             return o
 
+        response = json_to_response(response_data)
+        response.text = text
+        response.binary = binary
+
         url = properties["link"]
 
-        o = PageResponseObject(
-            url=url,
-            text=text,
-            binary=binary,
-            status_code=response_data["status_code"],
-            request_url=url,
-        )
-        return o
+        return response

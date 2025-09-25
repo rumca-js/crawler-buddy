@@ -275,6 +275,8 @@ class TestResponseObject(PageResponseObject):
     """
 
     def __init__(self, url, headers, timeout):
+        super().__init__(url=url, headers=headers)
+
         self.status_code = 200
         self.errors = []
         self.crawl_time_s = 10

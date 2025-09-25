@@ -26,6 +26,7 @@ from .webtools import (
     URL_TYPE_FONT,
     URL_TYPE_UNKNOWN,
     status_code_to_text,
+    response_to_json,
 )
 from .webconfig import WebConfig
 from .urllocation import UrlLocation
@@ -196,13 +197,9 @@ class Url(ContentInterface):
         if self.response:
             return self.response.get_text()
 
-        if not self.handler:
-            self.handler = self.get_handler_implementation()
-
-        if self.handler:
-            self.response = self.handler.get_response()
-            if self.response:
-                return self.response.get_text()
+        response = self.get_response()
+        if self.response:
+            return self.response.get_text()
 
     def get_binary(self):
         """
@@ -211,14 +208,9 @@ class Url(ContentInterface):
         if self.response:
             return self.response.get_binary()
 
-        if not self.handler:
-            self.handler = self.get_handler_implementation()
-
-        if self.handler:
-            self.response = self.handler.get_response()
-
-            if self.response:
-                return self.response.get_binary()
+        response = self.get_response()
+        if response:
+            return self.response.get_binary()
 
     def get_response(self):
         """
@@ -713,9 +705,7 @@ class Url(ContentInterface):
         return properties
 
     def response_to_data(self, response):
-        response_data = OrderedDict()
-
-        response_data["is_valid"] = response.is_valid()
+        response_data = response_to_json(response)
 
         respect_robots_txt = False
         is_allowed = True
@@ -728,35 +718,17 @@ class Url(ContentInterface):
             is_allowed = self.is_allowed()
 
         response_data["is_allowed"] = is_allowed
-        if respect_robots_txt and not is_allowed:
-            return response_data
 
-        if response:
-            response_data["status_code"] = response.get_status_code()
-            response_data["status_code_str"] = status_code_to_text(
-                response.get_status_code()
+        if self.get_contents_hash():
+            response_data["hash"] = self.property_encode(self.get_contents_hash())
+        else:
+            response_data["hash"] = ""
+        if self.get_contents_body_hash():
+            response_data["body_hash"] = self.property_encode(
+                self.get_contents_body_hash()
             )
-
-            response_data["crawl_time_s"] = response.crawl_time_s
-
-            response_data["Content-Type"] = response.get_content_type()
-            response_data["Content-Length"] = response.get_content_length()
-            response_data["Last-Modified"] = response.get_last_modified()
-            response_data["Charset"] = response.get_encoding()
-            if not response_data["Charset"]:
-                response_data["Charset"] = response.encoding
-
-            if response.get_hash():
-                response_data["hash"] = self.property_encode(response.get_hash())
-            else:
-                response_data["hash"] = ""
-
-            response_data["body_hash"] = ""  # TODO implement?
-
-            if len(response.errors) > 0:
-                response_data["errors"] = []
-                for error in response.errors:
-                    response_data["errors"].append(error)
+        else:
+            response_data["body_hash"] = ""
 
         return response_data
 
@@ -764,63 +736,8 @@ class Url(ContentInterface):
         """
         Easy digestible response data
         """
-        response_data = OrderedDict()
         response = self.get_response()
-        page_handler = self.get_handler()
-
-        response_data["is_valid"] = response.is_valid()
-
-        respect_robots_txt = False
-        is_allowed = True
-        if (
-            "respect_robots_txt" in self.settings
-            and self.settings["respect_robots_txt"]
-        ):
-            respect_robots_txt = self.settings["respect_robots_txt"]
-            is_allowed = self.is_allowed()
-
-        response_data["is_allowed"] = is_allowed
-        if respect_robots_txt and not is_allowed:
-            return response_data
-
-        if response:
-            response_data["status_code"] = response.get_status_code()
-            response_data["status_code_str"] = status_code_to_text(
-                response.get_status_code()
-            )
-
-            response_data["crawl_time_s"] = response.crawl_time_s
-
-            response_data["Content-Type"] = response.get_content_type()
-            if page_handler == HttpPageHandler:
-                if page_handler.p:
-                    if type(page_handler.p) == RssPage:
-                        response_data["Content-Type"] = "application/rss+xml"
-                    if type(page_handler.p) == HtmlPage:
-                        response_data["Content-Type"] = "text/html"
-
-            response_data["Content-Length"] = response.get_content_length()
-            response_data["Last-Modified"] = response.get_last_modified()
-            response_data["Charset"] = response.get_encoding()
-            if not response_data["Charset"]:
-                response_data["Charset"] = response.encoding
-
-            if self.get_contents_hash():
-                response_data["hash"] = self.property_encode(self.get_contents_hash())
-            else:
-                response_data["hash"] = ""
-            if self.get_contents_body_hash():
-                response_data["body_hash"] = self.property_encode(
-                    self.get_contents_body_hash()
-                )
-            else:
-                response_data["body_hash"] = ""
-
-            if len(response.errors) > 0:
-                response_data["errors"] = []
-                for error in response.errors:
-                    response_data["errors"].append(error)
-
+        response_data = self.response_to_data(response)
         return response_data
 
     def get_entry_data(self):
