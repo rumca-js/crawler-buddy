@@ -61,6 +61,7 @@ HTTP_STATUS_UNKNOWN = 0
 HTTP_STATUS_OK = 200
 HTTP_STATUS_USER_AGENT = 403
 HTTP_STATUS_TOO_MANY_REQUESTS = 429
+HTTP_STATUS_SSL_CERTIFICATE_ERROR = 495
 
 # standard HTTP status codes are up to 600
 # we define our own internal error types

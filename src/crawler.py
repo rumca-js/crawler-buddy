@@ -69,16 +69,25 @@ class Crawler(object):
         return page_url
 
     def get_all_properties(self, request, headers=False, ping=False):
+
         url = request.args.get("url")
 
         if not url:
-            return {"success": False, "error": "No url provided"}
+            all_properties = [{"name": "Response", "data": {
+                "status_code" : webtools.HTTP_STATUS_CODE_EXCEPTION,
+                "errors" :  ["No url provided"],
+            }}]
+            return all_properties
 
         self.data.set_request(request)
         crawler_data = self.data.get_request_data()
 
         if not crawler_data:
-            return {"success": False, "error": "Cannot obtain crawler data"}
+            all_properties = [{"name": "Response", "data": {
+                "status_code" : webtools.HTTP_STATUS_CODE_EXCEPTION,
+                "errors" :  ["Cannot obtain crowler data"],
+            }}]
+            return all_properties
 
         name = None
         if "name" in crawler_data:
@@ -96,11 +105,23 @@ class Crawler(object):
             if all_properties:
                 return all_properties
 
+        if webtools.WebConfig.count_chrom_processes() > 30:
+            webtools.WebLogger.error("Too many chrome processes")
+            all_properties = [{"name": "Response", "data": {
+                "status_code" : webtools.HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+                "errors" :  ["Too many chrome processes"],
+            }}]
+            return all_properties
+
         # TODO what if there is exception
         crawl_index = self.queue.enter(url, crawler_data)
         if crawl_index is None:
             webtools.WebLogger.error("Too many crawler calls".format(url, crawler_data))
-            return
+            all_properties = [{"name": "Response", "data": {
+                "status_code" : webtools.HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+                "errors" :  ["Too many crawler calls"],
+            }}]
+            return all_properties
 
         crawler_data["settings"]["headers"] = headers
         crawler_data["settings"]["ping"] = ping
@@ -119,7 +140,11 @@ class Crawler(object):
         self.url_history.add((url, all_properties))
 
         if not all_properties:
-            return {"success": False, "error": "No properties found"}
+            all_properties = [{"name": "Response", "data": {
+                "status_code" : webtools.HTTP_STATUS_CODE_EXCEPTION,
+                "errors" :  ["No properties found"],
+            }}]
+            return all_properties
 
         return all_properties
 
@@ -148,7 +173,7 @@ class Crawler(object):
 
         if webtools.WebConfig.count_chrom_processes() > 30:
             webtools.WebLogger.error("Too many chrome processes")
-            webtools.WebConfig.kill_chrom_processes()
+            # webtools.WebConfig.kill_chrom_processes()
 
         return all_properties
 

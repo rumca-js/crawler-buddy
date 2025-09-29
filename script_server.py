@@ -191,6 +191,11 @@ def info():
     for key, value in configuration.data.items():
         text += "<div>{}:{}</div>".format(key, value)
 
+    text += "<h2>System</h2>"
+    process_count = webtools.WebConfig.count_chrom_processes()
+    text += "<div>{}:{}</div>".format("Chrome processes", process_count)
+    text += "<div>{}:{}</div>".format("Selenium count", webtools.SeleniumDriver.counter)
+
     return get_html(id=id, body=text, title="Configuration")
 
 
@@ -946,6 +951,7 @@ if __name__ == "__main__":
 
     socket.setdefaulttimeout(40)
 
+    webtools.WebConfig.disable_ssl_warnings()
     webtools.WebConfig.start_display()
 
     context = None

@@ -754,9 +754,6 @@ class SeleniumDriver(CrawlerInterface):
 
             self.process_response()
 
-            if not self.is_response_valid():
-                return self.response
-
         except TimeoutException:
             error_text = traceback.format_exc()
             print("Page timeout:{}\n{}".format(self.request.url, error_text))
@@ -785,6 +782,16 @@ class SeleniumDriver(CrawlerInterface):
                 self.response.add_error(
                     "Url:{} Connection error".format(self.request.url)
                 )
+            elif str_exc.find("net::ERR_SSL_VERSION_OR_CIPHER_MISMATCH") >= 0:
+                print(E, "Url:{}".format(self.request.url))
+                WebLogger.exc(E, "Url:{}".format(self.request.url))
+                self.response = PageResponseObject(
+                    self.request.url,
+                    text=None,
+                    status_code=HTTP_STATUS_SSL_CERTIFICATE_ERROR,
+                    request_url=self.request.url,
+                )
+                self.response.add_error("Url:{} ssl certificate error".format(self.request.url))
             else:
                 print(E, "Url:{}".format(self.request.url))
                 WebLogger.exc(E, "Url:{}".format(self.request.url))
@@ -795,8 +802,6 @@ class SeleniumDriver(CrawlerInterface):
                     request_url=self.request.url,
                 )
                 self.response.add_error("Url:{} exception".format(self.request.url))
-
-        SeleniumDriver.counter -= 1
 
         return self.response
 
@@ -880,7 +885,8 @@ class SeleniumDriver(CrawlerInterface):
             WebLogger.error(str(E))  # TODO
             WebLogger.debug(str(E))
 
-        print(SeleniumDriver.counter)
+        SeleniumDriver.counter -= 1
+        WebLogger.debug("Selenium drivers count:{} ".format(SeleniumDriver.counter))
 
         if SeleniumDriver.counter == 0:
             try:
@@ -891,7 +897,12 @@ class SeleniumDriver(CrawlerInterface):
                 WebLogger.debug(str(E))
 
         if self.user_dir:
-            shutil.rmtree(self.user_dir, ignore_errors=True)
+            try:
+                shutil.rmtree(self.user_dir, ignore_errors=True)
+            except Exception as E:
+                WebLogger.error(str(E))  # TODO
+                WebLogger.debug(str(E))
+
             self.user_dir = None
 
 
