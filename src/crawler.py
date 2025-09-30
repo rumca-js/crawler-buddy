@@ -171,9 +171,5 @@ class Crawler(object):
         except Exception as e:
             raise
 
-        if webtools.WebConfig.count_chrom_processes() > 30:
-            webtools.WebLogger.error("Too many chrome processes")
-            # webtools.WebConfig.kill_chrom_processes()
-
         return all_properties
 
