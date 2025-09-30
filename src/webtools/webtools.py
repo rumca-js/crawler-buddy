@@ -640,13 +640,48 @@ class PageResponseObject(object):
         return self.headers.get_redirect_url()
 
     def is_this_status_ok(self):
-        if self.status_code == 0:
+        if self.status_code is None:
             return False
 
-        if self.status_code == None:
+        if self.status_code == HTTP_STATUS_UNKNOWN:
             return False
 
-        return self.status_code >= 200 and self.status_code < 300
+        # 300 are redirects - we don't know if these are valid
+
+        return self.status_code >= 200 and self.status_code < 400
+
+    def is_this_status_nok(self):
+        """
+        This function informs that status code is so bad, that further communication does not make any sense
+        """
+        if self.status_code is None:
+            return True
+
+        if self.status_code == HTTP_STATUS_UNKNOWN:
+            # we do not know status of page yet
+            return False
+
+        if self.status_code == HTTP_STATUS_USER_AGENT:
+            # if current agent is rejected, does not mean page (source) is invalid
+            return False
+
+        if self.status_code == HTTP_STATUS_TOO_MANY_REQUESTS:
+            # too many requests - we don't know what the page is
+            return False
+
+        if self.status_code == HTTP_STATUS_CODE_SERVER_ERROR:
+            # server error - we don't know what the page is
+            return False
+
+        if self.status_code == HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS:
+            # too many requests - we don't know what the page is
+            return False
+
+        if self.status_code < 200:
+            return True
+
+        if self.status_code >= 400:
+            return True
 
     def is_this_status_redirect(self):
         """
@@ -657,23 +692,18 @@ class PageResponseObject(object):
             self.status_code > 300 and self.status_code < 400
         ) or self.status_code == 403
 
-    def is_this_status_nok(self):
-        """
-        This function informs that status code is so bad, that further communication does not make any sense
-        """
-        if self.status_code is None:
+    def is_valid(self):
+        # TODO this needs to check if it is 200 and 400
+        if self.is_this_status_ok():
             return True
 
-        if self.is_this_status_redirect():
-            return False
+        return False
 
-        return self.status_code < 200 or self.status_code >= 400
-
-    def is_valid(self):
+    def is_invalid(self):
         if self.is_this_status_nok():
-            return False
+            return True
 
-        return True
+        return False
 
     def is_allowed(self):
         return self.is_allowed_internal
@@ -971,6 +1001,7 @@ def response_to_json(response, with_streams=False):
         response_data["headers"] = response.get_headers()
 
         response_data["is_valid"] = response.is_valid()
+        response_data["is_invalid"] = response.is_invalid()
         response_data["is_allowed"] = response.is_allowed()
 
         response_data["status_code"] = response.get_status_code()

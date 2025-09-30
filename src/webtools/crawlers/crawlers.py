@@ -72,7 +72,7 @@ class RequestsCrawler(CrawlerInterface):
         self.response = PageResponseObject(
             self.request.url,
             text=None,
-            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
             request_url=self.request.url,
         )
 
@@ -339,7 +339,7 @@ class CurlCffiCrawler(CrawlerInterface):
         self.response = PageResponseObject(
             self.request.url,
             text=None,
-            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
             request_url=self.request.url,
         )
 
@@ -446,7 +446,7 @@ class HttpxCrawler(CrawlerInterface):
         self.response = PageResponseObject(
             self.request.url,
             text=None,
-            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
             request_url=self.request.url,
         )
 
@@ -545,7 +545,7 @@ class StealthRequestsCrawler(CrawlerInterface):
         self.response = PageResponseObject(
             self.request.url,
             text=None,
-            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
             request_url=self.request.url,
         )
 
@@ -725,7 +725,7 @@ class SeleniumDriver(CrawlerInterface):
         self.response = PageResponseObject(
             self.request.url,
             text=None,
-            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
             request_url=self.request.url,
         )
 
@@ -1315,7 +1315,7 @@ class ScriptCrawler(CrawlerInterface):
         self.response = PageResponseObject(
             self.request.url,
             text=None,
-            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
             request_url=self.request.url,
         )
 
@@ -1405,7 +1405,7 @@ class ScriptCrawler(CrawlerInterface):
         self.response = PageResponseObject(
             self.request.url,
             text=None,
-            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
             request_url=self.request.url,
         )
 
@@ -1602,7 +1602,7 @@ class SeleniumBase(CrawlerInterface):
         self.response = PageResponseObject(
             self.request.url,
             text=None,
-            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
             request_url=self.request.url,
         )
 
@@ -1641,7 +1641,7 @@ class BotasaurusCrawler(CrawlerInterface):
         self.response = PageResponseObject(
             self.request.url,
             text=None,
-            status_code=HTTP_STATUS_CODE_EXCEPTION,
+            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
             request_url=self.request.url,
         )
 

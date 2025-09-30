@@ -951,6 +951,12 @@ if __name__ == "__main__":
 
     socket.setdefaulttimeout(40)
 
+    if webtools.WebConfig.count_chrom_processes() > 0:
+        print("Killing chrome processes")
+        webtools.WebConfig.kill_chrom_processes()
+        webtools.WebConfig.kill_xvfb_processes()
+        print("Killing chrome processes DONE")
+
     webtools.WebConfig.disable_ssl_warnings()
     webtools.WebConfig.start_display()
 

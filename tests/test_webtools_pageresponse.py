@@ -2,6 +2,9 @@ from src.webtools import (
     PageResponseObject,
     response_to_json,
     json_to_response,
+    HTTP_STATUS_CODE_SERVER_ERROR,
+    HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+    HTTP_STATUS_CODE_EXCEPTION,
 )
 from utils.dateutils import DateUtils
 
@@ -21,7 +24,21 @@ class PageResponseObjectTest(FakeInternetTestCase):
         # call tested function
         self.assertEqual(response.get_content_type(), "text/html")
 
-    def test_is_valid__true(self):
+    def test_is_valid(self):
+        headers = {"Content-Type": "text/html"}
+        response = PageResponseObject(
+            "https://test.com", "", status_code=100, headers=headers
+        )
+        # call tested function
+        self.assertFalse(response.is_valid())
+
+        headers = {"Content-Type": "text/html"}
+        response = PageResponseObject(
+            "https://test.com", "", status_code=199, headers=headers
+        )
+        # call tested function
+        self.assertFalse(response.is_valid())
+
         headers = {"Content-Type": "text/html"}
 
         response = PageResponseObject(
@@ -32,13 +49,13 @@ class PageResponseObjectTest(FakeInternetTestCase):
         self.assertTrue(response.is_valid())
 
         response = PageResponseObject(
-            "https://test.com", "", status_code=300, headers=headers
+            "https://test.com", "", status_code=299, headers=headers
         )
         # call tested function - redirect status is OK
         self.assertTrue(response.is_valid())
 
         response = PageResponseObject(
-            "https://test.com", "", status_code=301, headers=headers
+            "https://test.com", "", status_code=300, headers=headers
         )
         # call tested function - redirect status is OK
         self.assertTrue(response.is_valid())
@@ -50,18 +67,10 @@ class PageResponseObjectTest(FakeInternetTestCase):
         self.assertTrue(response.is_valid())
 
         response = PageResponseObject(
-            "https://test.com", "", status_code=403, headers=headers
+            "https://test.com", "", status_code=399, headers=headers
         )
-        # call tested function
+        # call tested function - redirect status is OK
         self.assertTrue(response.is_valid())
-
-    def test_is_valid__status(self):
-        headers = {"Content-Type": "text/html"}
-        response = PageResponseObject(
-            "https://test.com", "", status_code=100, headers=headers
-        )
-        # call tested function
-        self.assertFalse(response.is_valid())
 
         response = PageResponseObject(
             "https://test.com", "", status_code=400, headers=headers
@@ -77,6 +86,12 @@ class PageResponseObjectTest(FakeInternetTestCase):
 
         response = PageResponseObject(
             "https://test.com", "", status_code=402, headers=headers
+        )
+        # call tested function
+        self.assertFalse(response.is_valid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=403, headers=headers
         )
         # call tested function
         self.assertFalse(response.is_valid())
@@ -98,6 +113,126 @@ class PageResponseObjectTest(FakeInternetTestCase):
         )
         # call tested function
         self.assertFalse(response.is_valid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=HTTP_STATUS_CODE_SERVER_ERROR, headers=headers
+        )
+        # call tested function
+        self.assertFalse(response.is_valid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS, headers=headers
+        )
+        # call tested function
+        self.assertFalse(response.is_valid())
+
+    def test_is_invalid(self):
+        headers = {"Content-Type": "text/html"}
+        response = PageResponseObject(
+            "https://test.com", "", status_code=100, headers=headers
+        )
+        # call tested function
+        self.assertTrue(response.is_invalid())
+
+        headers = {"Content-Type": "text/html"}
+        response = PageResponseObject(
+            "https://test.com", "", status_code=199, headers=headers
+        )
+        # call tested function
+        self.assertTrue(response.is_invalid())
+
+        headers = {"Content-Type": "text/html"}
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=200, headers=headers
+        )
+
+        # call tested function - ok status is OK
+        self.assertFalse(response.is_invalid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=300, headers=headers
+        )
+        # call tested function - redirect status is OK
+        self.assertFalse(response.is_invalid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=301, headers=headers
+        )
+        # call tested function - redirect status is OK
+        self.assertFalse(response.is_invalid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=304, headers=headers
+        )
+        # call tested function - redirect status is OK
+        self.assertFalse(response.is_invalid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=399, headers=headers
+        )
+        # call tested function - redirect status is OK
+        self.assertFalse(response.is_invalid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=400, headers=headers
+        )
+        # call tested function
+        self.assertTrue(response.is_invalid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=401, headers=headers
+        )
+        # call tested function
+        self.assertTrue(response.is_invalid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=402, headers=headers
+        )
+        # call tested function
+        self.assertTrue(response.is_invalid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=403, headers=headers
+        )
+        # call tested function
+        self.assertFalse(response.is_invalid()) # sometimes 403 indicates browser problem
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=404, headers=headers
+        )
+        # call tested function
+        self.assertTrue(response.is_invalid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=405, headers=headers
+        )
+        # call tested function
+        self.assertTrue(response.is_invalid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=500, headers=headers
+        )
+        # call tested function
+        self.assertTrue(response.is_invalid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=HTTP_STATUS_CODE_EXCEPTION, headers=headers
+        )
+        # call tested function
+        self.assertTrue(response.is_invalid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=HTTP_STATUS_CODE_SERVER_ERROR, headers=headers
+        )
+        # call tested function
+        self.assertFalse(response.is_invalid())
+
+        response = PageResponseObject(
+            "https://test.com", "", status_code=HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS, headers=headers
+        )
+        # call tested function
+        self.assertFalse(response.is_invalid())
 
     def test_get_encoding__quotes(self):
         headers = {"Content-Type": 'text/html; charset="UTF-8"'}
@@ -188,7 +323,7 @@ class PageResponseToJsonTest(FakeInternetTestCase):
         self.assertIn("body_hash", json_map)
         self.assertNotIn("streams", json_map)
 
-        self.assertEqual(json_map["is_valid"], True)
+        self.assertEqual(json_map["is_valid"], False)
         self.assertEqual(json_map["status_code"], 403)
         self.assertEqual(json_map["Content-Type"], "text/rss; charset=UTF-8")
         self.assertEqual(json_map["Recognized-Content-Type"], "text/rss")

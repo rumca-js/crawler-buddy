@@ -288,6 +288,24 @@ class WebConfig(object):
                     f"Could not kill process {proc.info.get('name', 'unknown')}: {e}"
                 )
 
+    def kill_xvfb_processes():
+        """Kill all processes whose names start with 'chrom'."""
+        for proc in psutil.process_iter(["pid", "name"]):
+            try:
+                if proc.info["name"] and proc.info["name"].lower().startswith("xvfb"):
+                    proc.kill()  # Kill the process
+                    WebLogger.error(
+                        f"Killed process: {proc.info['name']} (PID: {proc.info['pid']})"
+                    )
+            except (
+                psutil.NoSuchProcess,
+                psutil.AccessDenied,
+                psutil.ZombieProcess,
+            ) as e:
+                WebLogger.error(
+                    f"Could not kill process {proc.info.get('name', 'unknown')}: {e}"
+                )
+
     def count_chrom_processes():
         """Count the number of running processes whose names start with 'chrom'."""
         count = 0
