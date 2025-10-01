@@ -1,5 +1,5 @@
 from url_cleaner import UrlCleaner
-import cleanurl
+#import cleanurl
 
 from urllib.parse import unquote, urlparse, parse_qs
 from .webtools import (
