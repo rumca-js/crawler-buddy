@@ -21,6 +21,8 @@ brutefeedparser="^0.10.5"
 pytz = "^2024.2"
 psutil="*"
 flask="*"
+url-cleaner="*"
+#cleanurl="*"  TODO may change url structure
 
 # Enable and crawlers as needed
 

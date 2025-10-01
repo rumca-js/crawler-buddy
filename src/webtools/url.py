@@ -361,40 +361,7 @@ class Url(ContentInterface):
             url = url[:-1]
 
         # domain is lowercase
-        p = UrlLocation(url)
-        domain = p.get_domain()
-        if not domain:
-            WebLogger.error("Could not obtain domain for:{}".format(url))
-            return
-
-        domain_lower = domain.lower()
-
-        url = domain_lower + url[len(domain) :]
-
-        stupid_google_string = "https://www.google.com/url"
-        if url.find(stupid_google_string) >= 0:
-            parsed_url = urlparse(url)
-            query_params = parse_qs(parsed_url.query)
-            param_value = query_params.get("url", [None])[0]
-            if param_value:
-                param_value = Url.get_cleaned_link(param_value)
-                return param_value
-            param_value = query_params.get("q", [None])[0]
-            if param_value:
-                param_value = Url.get_cleaned_link(param_value)
-                return param_value
-
-        stupid_youtube_string = "https://www.youtube.com/redirect"
-        if url.find(stupid_youtube_string) >= 0:
-            parsed_url = urlparse(url)
-            query_params = parse_qs(parsed_url.query)
-            param_value = query_params.get("q", [None])[0]
-
-            param_value = unquote(param_value)
-            param_value = Url.get_cleaned_link(param_value)
-            return param_value
-
-        return url
+        return UrlLocation.get_cleaned_link(url)
 
     def get_clean_url(self):
         self.get_handler()

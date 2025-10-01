@@ -982,7 +982,7 @@ class ContentLinkParser(ContentInterface):
 
     def __init__(self, url, contents):
         super().__init__(url=url, contents=contents)
-        self.url = UrlLocation(url).get_clean_url()
+        self.url = UrlLocation(url).get_no_arg_link()
 
     def get_links(self):
         links = set()

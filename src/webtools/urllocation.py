@@ -1,4 +1,7 @@
-from urllib.parse import urlparse, parse_qs
+from url_cleaner import UrlCleaner
+import cleanurl
+
+from urllib.parse import unquote, urlparse, parse_qs
 from .webtools import (
     URL_TYPE_RSS,
     URL_TYPE_CSS,
@@ -228,6 +231,9 @@ class UrlLocation(object):
             return parts[2].lower()
 
     def get_scheme(self):
+        """
+        Returns scheme. For example "https"
+        """
         parts = self.parse_url()
         if parts:
             return parts[0]
@@ -246,7 +252,7 @@ class UrlLocation(object):
         """
         @return extension, or none
         """
-        url = self.get_clean_url()
+        url = self.get_no_arg_link()
 
         # domain level does not say anything if it is HTML page, or not
         if url == self.get_domain():
@@ -263,13 +269,91 @@ class UrlLocation(object):
 
         return
 
-    def get_clean_url(self):
+    def get_no_arg_link(self):
         url = self.url
         if url.find("?") >= 0:
             wh = url.find("?")
             return url[:wh]
         else:
             return url
+
+    def get_cleaned_link(url):
+        if not url:
+            return
+
+        url = url.strip()
+
+        if url.endswith("/"):
+            url = url[:-1]
+        if url.endswith("."):
+            url = url[:-1]
+
+        p = UrlLocation(url)
+        domain = p.get_domain()
+        if not domain:
+            WebLogger.error("Could not obtain domain for:{}".format(url))
+            return
+
+        domain_lower = domain.lower()
+
+        url = domain_lower + url[len(domain) :]
+
+        url = UrlLocation.get_google_redirect_fix(url)
+        url = UrlLocation.get_google_redirect_fix2(url)
+        url = UrlLocation.get_youtube_redirect_fix(url)
+        url = UrlLocation.get_trackless_url(url)
+
+        return url
+
+    def get_google_redirect_fix(url):
+        stupid_google_string = "https://www.google.com/url"
+        if url.find(stupid_google_string) >= 0:
+            parsed_url = urlparse(url)
+            query_params = parse_qs(parsed_url.query)
+            param_value = query_params.get("url", [None])[0]
+            if param_value:
+                param_value = UrlLocation.get_cleaned_link(param_value)
+                return param_value
+            param_value = query_params.get("q", [None])[0]
+            if param_value:
+                param_value = UrlLocation.get_cleaned_link(param_value)
+                return param_value
+
+        return url
+
+    def get_google_redirect_fix2(url):
+        stupid_google_string = "https://www.google.com/amp/s"
+        if url.find(stupid_google_string) >= 0:
+            url = url[len(stupid_google_string) + 1:]
+            return UrlLocation.get_cleaned_link(url)
+
+        return url
+
+    def get_youtube_redirect_fix(url):
+        stupid_youtube_string = "https://www.youtube.com/redirect"
+        if url.find(stupid_youtube_string) >= 0:
+            parsed_url = urlparse(url)
+            query_params = parse_qs(parsed_url.query)
+            param_value = query_params.get("q", [None])[0]
+
+            param_value = unquote(param_value)
+            param_value = UrlLocation.get_cleaned_link(param_value)
+            return param_value
+
+        return url
+
+    def get_trackless_url(url):
+        scheme = UrlLocation(url).get_scheme()
+        if scheme == "http" or scheme == "https":
+            c = UrlCleaner()
+            cleaned = c.clean(url)
+
+            #cleaned = cleanurl.cleanurl(cleaned)
+            #cleaned = cleaned.url
+            # changes structure of link
+
+            return cleaned
+        return url
 
     def get_url_full(domain, url):
         """
