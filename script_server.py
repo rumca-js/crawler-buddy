@@ -11,7 +11,6 @@ import socket
 import json
 import html
 import subprocess
-import argparse
 import base64
 import traceback
 from datetime import datetime
@@ -28,6 +27,7 @@ from src.views import (
 from utils import PermanentLogger
 from utils.systemmonitoring import get_hardware_info, get_process_info
 from src import CrawlerHistory
+from commandlineparser import CommandLineParser
 
 
 app = Flask(__name__)
@@ -910,33 +910,6 @@ def system():
     return get_html(id=id, body=text, title="Processes")
 
 
-class CommandLineParser(object):
-    """
-    Headers can only be passed by input binary file
-    """
-
-    def parse(self):
-        self.parser = argparse.ArgumentParser(description="Remote server options")
-        self.parser.add_argument(
-            "-l",
-            "--history-length",
-            default=200,
-            type=int,
-            help="Length of history",
-        )
-        self.parser.add_argument(
-            "-t",
-            "--time-cache-minutes",
-            default=10,
-            type=int,
-            help="Time cache in minutes",
-        )
-        self.parser.add_argument("--cert-file", help="Host")
-        self.parser.add_argument("--cert-key", help="Host")
-
-        self.args = self.parser.parse_args()
-
-
 if __name__ == "__main__":
     p = CommandLineParser()
     p.parse()
@@ -951,7 +924,7 @@ if __name__ == "__main__":
 
     socket.setdefaulttimeout(40)
 
-    if webtools.WebConfig.count_chrom_processes() > 0:
+    if p.args.kill_processes and webtools.WebConfig.count_chrom_processes() > 0:
         print("Killing chrome processes")
         webtools.WebConfig.kill_chrom_processes()
         webtools.WebConfig.kill_xvfb_processes()

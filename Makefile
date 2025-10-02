@@ -29,7 +29,7 @@ installsysdeps:
 
 server:
 	rm -rf storage
-	poetry run python script_server.py
+	poetry run python script_server.py -k
 
 # Assumptions:
 #  - python black is in your path

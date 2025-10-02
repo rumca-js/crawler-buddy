@@ -69,6 +69,13 @@ class Crawler(object):
         return page_url
 
     def get_all_properties(self, request, headers=False, ping=False):
+        if webtools.WebConfig.count_chrom_processes() > 50:
+            webtools.WebLogger.error("Too many chrome processes")
+            all_properties = [{"name": "Response", "data": {
+                "status_code" : webtools.HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+                "errors" :  ["Too many chrome processes"],
+            }}]
+            return all_properties
 
         url = request.args.get("url")
 
