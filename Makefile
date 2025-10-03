@@ -43,4 +43,4 @@ backfiles:
 	find . -type f -name "*.bak" -exec rm -f {} +
 
 test:
-	poetry run python -m unittest discover -v
+	poetry run python -m unittest discover -v  2>&1 | tee test_output.txt

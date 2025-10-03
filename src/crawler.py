@@ -69,14 +69,6 @@ class Crawler(object):
         return page_url
 
     def get_all_properties(self, request, headers=False, ping=False):
-        if webtools.WebConfig.count_chrom_processes() > 50:
-            webtools.WebLogger.error("Too many chrome processes")
-            all_properties = [{"name": "Response", "data": {
-                "status_code" : webtools.HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
-                "errors" :  ["Too many chrome processes"],
-            }}]
-            return all_properties
-
         url = request.args.get("url")
 
         if not url:
@@ -112,14 +104,6 @@ class Crawler(object):
             if all_properties:
                 return all_properties
 
-        if webtools.WebConfig.count_chrom_processes() > 30:
-            webtools.WebLogger.error("Too many chrome processes")
-            all_properties = [{"name": "Response", "data": {
-                "status_code" : webtools.HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
-                "errors" :  ["Too many chrome processes"],
-            }}]
-            return all_properties
-
         # TODO what if there is exception
         crawl_index = self.queue.enter(url, crawler_data)
         if crawl_index is None:
@@ -145,6 +129,10 @@ class Crawler(object):
 
         self.queue.leave(crawl_index)
         self.url_history.add((url, all_properties))
+
+        if webtools.SeleniumDriver.counter == 0 and webtools.WebConfig.count_chrom_processes() > 10:
+            webtools.WebConfig.kill_chrom_processes()
+            webtools.WebConfig.kill_xvfb_processes()
 
         if not all_properties:
             all_properties = [{"name": "Response", "data": {

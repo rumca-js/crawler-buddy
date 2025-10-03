@@ -95,6 +95,9 @@ class CrawlerHistory(object):
         return last_found
 
     def read_properties_section(section_name, all_properties):
+        if not all_properties:
+            return
+
         for properties in all_properties:
             if "name" in properties:
                 if section_name == properties["name"]:

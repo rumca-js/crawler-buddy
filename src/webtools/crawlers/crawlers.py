@@ -875,6 +875,8 @@ class SeleniumDriver(CrawlerInterface):
             return response["headers"]
 
     def close(self):
+        from ..webconfig import WebConfig
+
         """
         https://stackoverflow.com/questions/15067107/difference-between-webdriver-dispose-close-and-quit
         """
@@ -889,12 +891,18 @@ class SeleniumDriver(CrawlerInterface):
         WebLogger.debug("Selenium drivers count:{} ".format(SeleniumDriver.counter))
 
         if SeleniumDriver.counter == 0:
+            if WebConfig.count_chrom_processes() == 0:
+                return
+
             try:
                 if self.driver:
                     self.driver.quit()
             except Exception as E:
                 WebLogger.error(str(E))  # TODO
                 WebLogger.debug(str(E))
+
+            WebConfig.kill_chrom_processes()
+            WebConfig.kill_xvfb_processes()
 
         if self.user_dir:
             try:
@@ -1520,6 +1528,8 @@ class ScriptCrawler(CrawlerInterface):
         return response_file
 
     def get_operating_dir(self):
+        from ..webconfig import WebConfig
+
         file_path = os.path.realpath(__file__)
         full_path = Path(file_path)
 
