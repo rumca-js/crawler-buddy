@@ -1088,6 +1088,15 @@ class SeleniumChromeFull(SeleniumDriver):
             driver = webdriver.Chrome(service=service, options=options)
             return driver
         except Exception as e:
+            e_str = str(e)
+            if e_str.find("session not created: probably user data directory is already in use, please specify a unique value for") == -1:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    text=None,
+                    status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
+                    request_url=self.request.url,
+                )
+
             WebLogger.error(f"Failed to initialize WebDriver: {e}")
             return None
 
