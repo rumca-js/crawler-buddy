@@ -880,15 +880,24 @@ class SeleniumDriver(CrawlerInterface):
         """
         https://stackoverflow.com/questions/15067107/difference-between-webdriver-dispose-close-and-quit
         """
+        closed = False
+
         try:
             if self.driver:
+                closed = True
                 self.driver.close()
         except Exception as E:
             WebLogger.error(str(E))  # TODO
             WebLogger.debug(str(E))
 
-        SeleniumDriver.counter -= 1
+        if not closed:
+            return
+
+        if SeleniumDriver.counter > 0:
+            SeleniumDriver.counter -= 1
+
         WebLogger.debug("Selenium drivers count:{} ".format(SeleniumDriver.counter))
+        time.sleep(1)
 
         if SeleniumDriver.counter == 0:
             if WebConfig.count_chrom_processes() == 0:
@@ -901,6 +910,7 @@ class SeleniumDriver(CrawlerInterface):
                 WebLogger.error(str(E))  # TODO
                 WebLogger.debug(str(E))
 
+            time.sleep(1)
             WebConfig.kill_chrom_processes()
             WebConfig.kill_xvfb_processes()
 
