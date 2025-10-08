@@ -24,8 +24,8 @@ from ..webtools import (
     HTTP_STATUS_CODE_PAGE_UNSUPPORTED,
     HTTP_STATUS_CODE_SERVER_ERROR,
 )
-from ..urllocation import UrlLocation
-from ..pages import (
+from webtoolkit import UrlLocation
+from webtoolkit import (
     HtmlPage,
     RssPage,
     PageFactory,
@@ -243,6 +243,14 @@ class HttpPageHandler(HandlerInterface):
         url = self.url
 
         dap = UrlLocation(url)
+        if dap.is_onion():
+            self.response = PageResponseObject(
+                self.url,
+                text=None,
+                status_code=HTTP_STATUS_UNKNOWN,
+                request_url=self.url,
+            )
+            return
 
         if url.startswith("https") or url.startswith("http"):
             if not dap.is_media():

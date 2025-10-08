@@ -495,12 +495,6 @@ class PageResponseObject(object):
         if text:
             self.text = text
 
-        # I read selenium always assume utf8 encoding
-
-        # encoding = chardet.detect(contents)['encoding']
-        # self.apparent_encoding = encoding
-        # self.encoding = encoding
-
         if not headers:
             self.headers = ResponseHeaders(headers={})
         else:

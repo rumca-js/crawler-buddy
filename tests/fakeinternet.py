@@ -284,7 +284,6 @@ class TestResponseObject(PageResponseObject):
         self.url = url
         self.request_url = url
 
-        # encoding = chardet.detect(contents)['encoding']
         encoding = "utf-8"
         self.apparent_encoding = encoding
         self.encoding = encoding
