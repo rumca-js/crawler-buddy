@@ -196,6 +196,12 @@ def info():
     text += "<div>{}:{}</div>".format("Chrome processes", process_count)
     text += "<div>{}:{}</div>".format("Selenium count", webtools.SeleniumDriver.counter)
 
+    chromedriver_path = Path("/usr/bin/chromedriver")
+    if chromedriver_path.exists():
+        text += "<div>Chromedriver at {} exists".format(chromedriver_path)
+    else:
+        text += "<div>Chromedriver at {} does not exist".format(chromedriver_path)
+
     return get_html(id=id, body=text, title="Configuration")
 
 
