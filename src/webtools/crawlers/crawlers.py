@@ -394,7 +394,7 @@ class CurlCffiCrawler(CrawlerInterface):
 
     def build_requests(self):
         from curl_cffi import requests
-        from curl_cffi.requests.errors import ConnectionError
+        from curl_cffi.requests.exceptions import ConnectionError
 
         headers = self.get_request_headers()
 
@@ -1089,7 +1089,21 @@ class SeleniumChromeFull(SeleniumDriver):
             return driver
         except Exception as e:
             e_str = str(e)
-            if e_str.find("session not created: probably user data directory is already in use, please specify a unique value for") == -1:
+            if e_str.find("session not created: probably user data directory is already in use, please specify a unique value for") >= 0:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    text=None,
+                    status_code=HTTP_STATUS_CODE_SERVER_ERROR,
+                    request_url=self.request.url,
+                )
+            elif e_str.find("Unable to obtain driver for chrome") >= 0:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    text=None,
+                    status_code=HTTP_STATUS_CODE_SERVER_ERROR,
+                    request_url=self.request.url,
+                )
+            else:
                 self.response = PageResponseObject(
                     self.request.url,
                     text=None,
