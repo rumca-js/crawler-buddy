@@ -49,29 +49,27 @@ COPY . /app
 RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg id3v2 wget xvfb gnupg ca-certificates
 
 
-# Set up the Chrome PPA
-# Add Google's GPG key
-RUN mkdir -p /etc/apt/keyrings \
-  && curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/keyrings/google.gpg
-
-# Add the repo
-RUN echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
-  > /etc/apt/sources.list.d/google-chrome.list
-
-# Update the package list and install chrome
-RUN apt-get update -y
-RUN apt-get install -y google-chrome-stable
-
-
-# Set up Chromedriver Environment variables
-ENV CHROMEDRIVER_VERSION=2.19
 ENV CHROMEDRIVER_DIR=/usr/bin
 
-RUN mkdir /app/chrome
 
-# Download and install Chromedriver
-RUN wget -q --continue -P /app/chrome "http://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
-RUN unzip /app/chrome/chromedriver* -d $CHROMEDRIVER_DIR
+# Install Chrome 114 from a mirror (e.g. mirror.cs.uchicago.edu)
+# Chrome & Chromedriver should match, if possible
+ENV CHROME_VERSION=114.0.5735.90
+
+RUN wget -q https://mirror.cs.uchicago.edu/google-chrome/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}-1_amd64.deb && \
+    apt-get install -y ./google-chrome-stable_${CHROME_VERSION}-1_amd64.deb && \
+    rm google-chrome-stable_${CHROME_VERSION}-1_amd64.deb
+
+
+# chromedriver https://chromedriver.storage.googleapis.com/LATEST_RELEASE
+ENV CHROMEDRIVER_VERSION=114.0.5735.90
+
+# Step 2: Download and install
+RUN wget -q -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip" || (echo "Failed to download Chromedriver version $CHROMEDRIVER_VERSION" && exit 1) && \
+    unzip /tmp/chromedriver.zip -d ${CHROMEDRIVER_DIR} && \
+    chmod +x ${CHROMEDRIVER_DIR}/chromedriver && \
+    rm /tmp/chromedriver.zip
+
 
 # Put Chromedriver into the PATH
 ENV PATH=$CHROMEDRIVER_DIR:$PATH
