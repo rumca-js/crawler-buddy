@@ -48,6 +48,7 @@ COPY . /app
 
 RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg id3v2 wget xvfb gnupg ca-certificates
 
+
 # Set up the Chrome PPA
 # Add Google's GPG key
 RUN mkdir -p /etc/apt/keyrings \
@@ -61,19 +62,19 @@ RUN echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google.gpg] http://dl.goog
 RUN apt-get update -y
 RUN apt-get install -y google-chrome-stable
 
+
 # Set up Chromedriver Environment variables
 ENV CHROMEDRIVER_VERSION=2.19
-ENV CHROMEDRIVER_DIR=/usr/bin/chromedriver
-RUN mkdir $CHROMEDRIVER_DIR
+ENV CHROMEDRIVER_DIR=/usr/bin
+
+RUN mkdir /app/chrome
 
 # Download and install Chromedriver
-RUN wget -q --continue -P $CHROMEDRIVER_DIR "http://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
-RUN unzip $CHROMEDRIVER_DIR/chromedriver* -d $CHROMEDRIVER_DIR
+RUN wget -q --continue -P /app/chrome "http://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
+RUN unzip /app/chrome/chromedriver* -d $CHROMEDRIVER_DIR
 
 # Put Chromedriver into the PATH
 ENV PATH=$CHROMEDRIVER_DIR:$PATH
-
-
 
 
 # Expose the port that Django will run on
