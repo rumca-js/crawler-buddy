@@ -1,4 +1,4 @@
-from ..urllocation import UrlLocation
+from webtoolkit import UrlLocation
 
 from .defaulturlhandler import DefaultUrlHandler
 

@@ -3,9 +3,9 @@ from urllib.parse import parse_qs
 
 from utils.dateutils import DateUtils
 
-from ..webtools import PageResponseObject, WebLogger
-from ..urllocation import UrlLocation
-from ..pages import HtmlPage, ContentInterface
+from webtoolkit import PageResponseObject, UrlLocation, HtmlPage, ContentInterface
+
+from ..webtools import WebLogger
 
 from .defaulturlhandler import DefaultUrlHandler
 

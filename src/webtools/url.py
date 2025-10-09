@@ -16,12 +16,12 @@ import urllib.robotparser
 import asyncio
 import base64
 
-from webtoolkit import UrlLocation
 from webtoolkit import (
     ContentInterface,
     DefaultContentPage,
     RssPage,
     HtmlPage,
+    UrlLocation,
 )
 from .webtools import (
     PageOptions,

@@ -67,7 +67,7 @@ class WebConfig(object):
         mapping = []
 
         # one of the methods should be available
-        from .ipc import DEFAULT_PORT, SocketConnection
+        from webtoolkit.ipc import DEFAULT_PORT, SocketConnection
 
         if not port:
             port = DEFAULT_PORT

@@ -10,13 +10,16 @@ import unittest
 import traceback
 
 from utils.dateutils import DateUtils
+from webtoolkit import (
+    PageResponseObject,
+)
+
 from src.webtools import (
     YouTubeVideoHandler,
     YouTubeJsonHandler,
     YouTubeChannelHandler,
     HttpPageHandler,
     Url,
-    PageResponseObject,
     WebLogger,
     WebConfig,
     CrawlerInterface,

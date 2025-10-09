@@ -1,4 +1,4 @@
-from ..pages import DefaultContentPage
+from webtoolkit import DefaultContentPage
 from ..webtools import calculate_hash_binary, calculate_hash
 
 

@@ -17,10 +17,9 @@ import tempfile
 
 from utils.basictypes import fix_path_for_os
 
-from ..webtools import (
-    PageResponseObject,
-    WebLogger,
-    get_response_from_bytes,
+from webtoolkit import (
+    RssPage,
+    HtmlPage,
     HTTP_STATUS_UNKNOWN,
     HTTP_STATUS_OK,
     HTTP_STATUS_USER_AGENT,
@@ -32,9 +31,11 @@ from ..webtools import (
     HTTP_STATUS_CODE_PAGE_UNSUPPORTED,
     HTTP_STATUS_CODE_SERVER_ERROR,
 )
-from ..pages import (
-    RssPage,
-    HtmlPage,
+
+from ..webtools import (
+    PageResponseObject,
+    WebLogger,
+    get_response_from_bytes,
 )
 from .crawlerinterface import CrawlerInterface
 

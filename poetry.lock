@@ -3153,20 +3153,19 @@ files = [
 
 [[package]]
 name = "webtoolkit"
-version = "0.0.4"
-description = "Web Toolkit"
+version = "0.0.5"
+description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "webtoolkit-0.0.4-py3-none-any.whl", hash = "sha256:0a4bd7d59b687f19383fd7db2061a80e084dc2f89bfe45da9132633b91c2cff2"},
-    {file = "webtoolkit-0.0.4.tar.gz", hash = "sha256:cfbcd626eadb97d4d78f4eb31a8d27510687e5a04909f4088ba53c64eb89316d"},
+    {file = "webtoolkit-0.0.5-py3-none-any.whl", hash = "sha256:1d1a20e9abedf84d35d49a67901c31f865bd8bd29c45cb7427e0ec349c089550"},
+    {file = "webtoolkit-0.0.5.tar.gz", hash = "sha256:5117188c772cdc5a3248033bfa8272dc6cc9ebc4b9064be7e236d1b6beef835c"},
 ]
 
 [package.dependencies]
 beautifulsoup4 = ">=4.13.5,<5.0.0"
 brutefeedparser = ">=0.10.5,<0.11.0"
-flask = "*"
 lxml = ">=5.4.0,<6.0.0"
 psutil = "*"
 python-dateutil = ">=2.8.2,<3.0.0"
@@ -3424,4 +3423,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9"
-content-hash = "f6203abcc12d1b7e19e4a9d8f1ca96a761fdd81cb4a48c03cf22d5051c617a7c"
+content-hash = "d59d50a508e57e075856dd89bb0736ac15158ac455b8be50212f823bf378f550"
