@@ -100,17 +100,11 @@ Notes:
  - Some things might be just fixed by project. No Content-Type, but we detected it is text/html, then software provides it in response
  - To sum up: the strategy is to fix what can be fixed, to make consistent things that are not
 
-# How to use the response?
+# Automated access
 
-Sure that is quite simple.
+To use output programmatically RemoteServer and Url classes was provided.
 
-For Python RemoteServer has been provided in remoteserver.py file. To obtain all properties it is enough to use the following code:
-
-```
-link = "https://google.com"
-server = RemoteServer(server_address)
-all_properties = server.get_getj(url=link)
-```
+Please refer to [webtoolkit](https://github.com/rumca-js/webtoolkit)
 
 ## Additional features
 

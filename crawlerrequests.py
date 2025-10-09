@@ -24,7 +24,7 @@ def main():
 
     request = parser.get_request()
 
-    driver = webtools.RequestsCrawler(request, parser.args.output_file)
+    driver = webtools.RequestsCrawler(request=request, response_file=parser.args.output_file)
 
     if parser.args.verbose:
         print("Running request:{} with RequestsCrawler".format(request))

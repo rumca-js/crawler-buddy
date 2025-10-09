@@ -991,7 +991,7 @@ class SeleniumChromeHeadless(SeleniumDriver):
             driver = webdriver.Chrome(service=service, options=options)
             return driver
         except Exception as E:
-            WebLogger.error(f"Failed to initialize WebDriver: {E}")
+            WebLogger.error(f"Failed to initialize WebDriver: {E} Driver location:{self.driver_executable}")
             self.response.add_error(str(E))
             return None
 
@@ -1111,7 +1111,7 @@ class SeleniumChromeFull(SeleniumDriver):
                     request_url=self.request.url,
                 )
 
-            WebLogger.error(f"Failed to initialize WebDriver: {e}")
+            WebLogger.error(f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}")
             return None
 
     def is_valid(self):
@@ -1253,7 +1253,7 @@ class SeleniumWireFull(SeleniumDriver):
             return driver
         except Exception as e:
             WebLogger.error(f"Failed to initialize WebDriver: {e}")
-            print(f"Failed to initialize WebDriver: {e}")
+            print(f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}")
             return None
 
     def process_response(self):

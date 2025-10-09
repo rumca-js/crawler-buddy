@@ -17,6 +17,7 @@ from ..webtools import (
     PageResponseObject,
     PageOptions,
     lazy_load_content,
+    HTTP_STATUS_UNKNOWN,
     HTTP_STATUS_CODE_EXCEPTION,
     HTTP_STATUS_CODE_CONNECTION_ERROR,
     HTTP_STATUS_CODE_TIMEOUT,

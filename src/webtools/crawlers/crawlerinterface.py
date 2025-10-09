@@ -46,7 +46,18 @@ class CrawlerInterface(object):
                 settings["settings"] = {}
             self.set_settings(settings)
         else:
-            self.settings = {"settings": {}}
+            if self.request:
+                self.timeout_s = self.request.timeout_s
+
+                self.settings = {"settings": {
+                    "timeout_s" : self.request.timeout_s,
+                    "ping" : self.request.ping,
+                    "request_headers" : self.request.request_headers,
+                    "ssl_verify" : self.request.ssl_verify,
+                    "user_agent" : self.request.user_agent,
+                    }}
+            else:
+                self.settings = {"settings": {}}
 
     def set_settings(self, settings):
         self.settings = settings
