@@ -1,6 +1,7 @@
+from webtoolkit import RemoteServer
+
 from src.webtools import (
     Url,
-    RemoteServer,
 )
 from script_server import set_response_impl
 

@@ -1,7 +1,9 @@
-from src.webtools import (
-   HttpPageHandler,
+from webtoolkit import (
    HtmlPage,
    RssPage,
+)
+from src.webtools import (
+   HttpPageHandler,
    Url,
 )
 

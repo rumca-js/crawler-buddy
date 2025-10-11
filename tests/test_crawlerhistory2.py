@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta
 import json
 
+from webtoolkit import (
+    HtmlPage,
+    PageOptions,
+    PageResponseObject,
+)
+
 from src.webtools import (
     Url,
-    PageOptions,
-    HtmlPage,
-    PageResponseObject,
     HttpPageHandler,
 )
 from src import CrawlerHistory

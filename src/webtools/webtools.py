@@ -44,6 +44,7 @@ from collections import OrderedDict
 from dateutil import parser
 import urllib.request, urllib.error, urllib.parse
 from bs4 import BeautifulSoup
+from webtoolkit.ipc import string_to_command, commands_from_bytes
 
 from utils.dateutils import DateUtils
 
@@ -869,8 +870,6 @@ class InputContent(object):
 
 
 def get_request_to_bytes(request, script):
-    from .ipc import string_to_command
-
     total_bytes = bytearray()
 
     bytes1 = string_to_command("PageRequestObject.__init__", "OK")
@@ -946,8 +945,6 @@ def get_response_to_bytes(response):
 
 
 def get_response_from_bytes(all_bytes):
-    from .ipc import commands_from_bytes
-
     response = PageResponseObject("")
 
     commands_data = commands_from_bytes(all_bytes)
