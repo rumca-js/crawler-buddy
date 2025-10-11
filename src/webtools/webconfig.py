@@ -40,6 +40,7 @@ class WebConfig(object):
     script_responses_directory = Path("storage")
     display = None
     browser_mapping = {}
+    default_chromedriver_path = Path("/usr/bin/chromedriver")
 
     def init():
         pass

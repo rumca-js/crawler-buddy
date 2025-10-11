@@ -646,18 +646,22 @@ class SeleniumDriver(CrawlerInterface):
         settings=None,
     ):
 
+        self.driver_executable = driver_executable
+        self.driver = None
+        self.user_dir = None
+
         super().__init__(
             request=request,
             url=url,
             response_file=response_file,
             settings=settings,
         )
-        self.driver = None
-        self.driver_executable = driver_executable
-        self.user_dir = None
 
     def set_settings(self, settings):
+        from ..webconfig import WebConfig
+
         super().set_settings(settings)
+        self.driver_executable = None
 
         if (
             settings
@@ -666,6 +670,9 @@ class SeleniumDriver(CrawlerInterface):
             and settings["settings"]["driver_executable"]
         ):
             self.driver_executable = settings["settings"]["driver_executable"]
+
+        if self.driver_executable is None:
+            self.driver_executable = WebConfig.default_chromedriver_path
 
     def get_driver(self):
         """
@@ -1186,7 +1193,6 @@ class SeleniumUndetected(SeleniumDriver):
 class SeleniumWireFull(SeleniumDriver):
 
     def get_driver(self):
-        print("00000")
         selenium_feature_enabled = True
         try:
             from selenium.webdriver.chrome.service import Service
