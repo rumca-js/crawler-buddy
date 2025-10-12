@@ -2,7 +2,6 @@
 Similar project: https://pypi.org/project/abstract-webtools/
 """
 
-from .webtools import *
 from .webconfig import WebConfig
 
 from .url import (

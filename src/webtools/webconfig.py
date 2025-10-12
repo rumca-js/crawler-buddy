@@ -10,7 +10,7 @@ from pathlib import Path
 from urllib3.exceptions import InsecureRequestWarning
 from urllib3 import disable_warnings
 
-from .webtools import WebLogger
+from webtoolkit import WebLogger
 
 from .crawlers import (
     RequestsCrawler,

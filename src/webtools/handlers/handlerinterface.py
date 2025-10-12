@@ -1,5 +1,4 @@
-from webtoolkit import DefaultContentPage
-from ..webtools import calculate_hash_binary, calculate_hash
+from webtoolkit import DefaultContentPage, calculate_hash_binary, calculate_hash
 
 
 class HandlerInterface(DefaultContentPage):

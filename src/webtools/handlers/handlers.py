@@ -1,9 +1,6 @@
 import json
 
-from webtoolkit import UrlLocation, RssPage
-from ..webtools import (
-    WebLogger,
-)
+from webtoolkit import UrlLocation, RssPage, WebLogger
 
 from .handlerhttppage import HttpPageHandler
 from .defaulturlhandler import DefaultUrlHandler, DefaultChannelHandler

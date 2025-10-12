@@ -22,8 +22,6 @@ from webtoolkit import (
     RssPage,
     HtmlPage,
     UrlLocation,
-)
-from .webtools import (
     PageOptions,
     WebLogger,
     URL_TYPE_RSS,

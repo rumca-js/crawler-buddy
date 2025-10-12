@@ -3,7 +3,7 @@
 
 [tool.poetry]
 name = "crawler-buddy"
-version = "5.0.31"
+version = "5.0.32"
 description = "Internet Crawler"
 authors = ["Iwan Grozny <renegat@renegat0x0.ddns.net>"]
 license = "GPL3"
@@ -21,7 +21,7 @@ psutil="*"
 flask="*"
 url-cleaner="*"
 #cleanurl="*"  TODO may change url structure
-webtoolkit="0.0.7"
+webtoolkit="0.0.10"
 
 # Enable and crawlers as needed
 
@@ -29,7 +29,7 @@ webtoolkit="0.0.7"
 requests = "^2.32.3"
 
 # [Selenium]
-selenium="4.29.0"
+selenium="4.36.0"
 selenium-wire="*"
 # chardet = "^5.2.0" # does not work with some RSS sources
 # psycopg2 = "*"

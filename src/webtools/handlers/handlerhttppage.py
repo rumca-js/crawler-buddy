@@ -11,7 +11,11 @@ from datetime import timedelta
 
 from utils.dateutils import DateUtils
 
-from ..webtools import (
+from webtoolkit import (
+    UrlLocation,
+    HtmlPage,
+    RssPage,
+    PageFactory,
     WebLogger,
     PageRequestObject,
     PageResponseObject,
@@ -24,12 +28,6 @@ from ..webtools import (
     HTTP_STATUS_CODE_FILE_TOO_BIG,
     HTTP_STATUS_CODE_PAGE_UNSUPPORTED,
     HTTP_STATUS_CODE_SERVER_ERROR,
-)
-from webtoolkit import UrlLocation
-from webtoolkit import (
-    HtmlPage,
-    RssPage,
-    PageFactory,
 )
 from ..webconfig import WebConfig
 

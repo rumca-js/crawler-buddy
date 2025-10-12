@@ -7,7 +7,7 @@ from webtoolkit.ipc import (
     string_to_command,
 )
 
-from ..webtools import (
+from webtoolkit import (
     PageRequestObject,
     PageResponseObject,
     WebLogger,

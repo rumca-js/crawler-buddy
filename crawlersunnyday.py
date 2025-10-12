@@ -1,3 +1,4 @@
+from webtoolkit import PageResponseObject
 from src import webtools
 
 import sys
@@ -25,7 +26,7 @@ def main():
         parser, request, __file__, "TestScriptCrawlerName"
     )
 
-    page_obj = webtools.PageResponseObject(request.url)
+    page_obj = PageResponseObject(request.url)
     page_obj.set_headers({})
     page_obj.status_code = 200
     page_obj.set_text("<html></html>")

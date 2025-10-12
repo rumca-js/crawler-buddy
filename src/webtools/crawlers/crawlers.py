@@ -20,6 +20,9 @@ from utils.basictypes import fix_path_for_os
 from webtoolkit import (
     RssPage,
     HtmlPage,
+    PageResponseObject,
+    WebLogger,
+    get_response_from_bytes,
     HTTP_STATUS_UNKNOWN,
     HTTP_STATUS_OK,
     HTTP_STATUS_USER_AGENT,
@@ -32,11 +35,6 @@ from webtoolkit import (
     HTTP_STATUS_CODE_SERVER_ERROR,
 )
 
-from ..webtools import (
-    PageResponseObject,
-    WebLogger,
-    get_response_from_bytes,
-)
 from .crawlerinterface import CrawlerInterface
 
 
