@@ -68,7 +68,7 @@ def main():
     #time_crawleebeautiful = call_crawleebeautiful()
     #time_crawleeplaywright = call_crawleeplaywright()
     time_seleniumchromeheadless = call_seleniumchromeheadless()
-    #time_seleniumchromefull = call_seleniumchromefull()
+    time_seleniumchromefull = call_seleniumchromefull()
     #time_seleniumchromeundetected = call_seleniumchromeundetected()
     #time_seleniumbase = call_seleniumbase()
 
@@ -76,7 +76,7 @@ def main():
     #print(f"crawleebeautifulsoup:{time_crawleebeautiful} [s]")
     #print(f"crawleeplaywright:{time_crawleeplaywright} [s]")
     print(f"seleniumchromeheadless:{time_seleniumchromeheadless} [s]")
-    #print(f"seleniumchromefull:{time_seleniumchromefull} [s]")
+    print(f"seleniumchromefull:{time_seleniumchromefull} [s]")
     #print(f"seleniumchromeundetected:{time_seleniumchromeundetected} [s]")
     #print(f"seleniumbase:{time_seleniumbase} [s]")
 

@@ -15,6 +15,16 @@ import base64
 import traceback
 from datetime import datetime
 
+from webtoolkit import (
+   WebLogger,
+   PageResponseObject,
+   HTTP_STATUS_CODE_CONNECTION_ERROR,
+   HTTP_STATUS_CODE_EXCEPTION,
+   HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+)
+from utils import PermanentLogger
+from utils.systemmonitoring import get_hardware_info, get_process_info
+
 from src import webtools
 from src.configuration import Configuration
 from src.crawler import Crawler
@@ -24,8 +34,6 @@ from src.views import (
     rssify,
     get_html,
 )
-from utils import PermanentLogger
-from utils.systemmonitoring import get_hardware_info, get_process_info
 from src import CrawlerHistory
 from commandlineparser import CommandLineParser
 
@@ -34,7 +42,7 @@ app = Flask(__name__)
 
 
 # should contain tuples of datetime, URL, properties
-webtools.WebLogger.web_logger = PermanentLogger()
+WebLogger.web_logger = PermanentLogger()
 configuration = Configuration()
 crawler_main = Crawler()
 
@@ -293,7 +301,7 @@ def debug():
     <h1>Debug</h1>
     """
 
-    for items in reversed(webtools.WebLogger.web_logger.permanent_data):
+    for items in reversed(WebLogger.web_logger.permanent_data):
         level = items[0]
         timestamp = items[1]
         info_text = items[2]
@@ -355,7 +363,7 @@ def set_response_impl(request):
 
     print("Server set_response:{}".format(url))
 
-    response = webtools.PageResponseObject(
+    response = PageResponseObject(
         url=url,
         headers=headers,
         binary=content_bytes,
