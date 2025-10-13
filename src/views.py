@@ -1,6 +1,6 @@
 from utils import PermanentLogger
 from src import CrawlerHistory
-from src import webtools
+from webtoolkit import status_code_to_text
 
 
 def get_template(name, context=None):
@@ -82,7 +82,7 @@ def get_entry_html(id, index, url, timestamp, all_properties):
     if response:
         status_code = response["status_code"]
         # TODO maybe create a better API
-        status_code_text = webtools.status_code_to_text(status_code)
+        status_code_text = status_code_to_text(status_code)
 
         charset = response["Charset"]
         content_length = response["Content-Length"]

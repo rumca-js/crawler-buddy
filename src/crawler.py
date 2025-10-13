@@ -2,6 +2,8 @@ import subprocess
 import psutil
 import json
 from datetime import datetime
+from webtoolkit import WebLogger
+
 from src import webtools
 from src.configuration import Configuration
 from src import CrawlerHistory
@@ -42,7 +44,7 @@ class Crawler(object):
 
         crawler_index = self.social_queue.enter(url)
         if crawler_index is None:
-            webtools.WebLogger.exc(
+            WebLogger.exc(
                 E, info_text="Exception when calling socialj {}".format(url)
             )
             return None
@@ -52,7 +54,7 @@ class Crawler(object):
             page_url = webtools.Url(url)
             properties = page_url.get_social_properties()
         except Exception as E:
-            webtools.WebLogger.exc(
+            WebLogger.exc(
                 E, info_text="Exception when calling socialj {}".format(url)
             )
             properties = None
@@ -107,7 +109,7 @@ class Crawler(object):
         # TODO what if there is exception
         crawl_index = self.queue.enter(url, crawler_data)
         if crawl_index is None:
-            webtools.WebLogger.error("Too many crawler calls".format(url, crawler_data))
+            WebLogger.error("Too many crawler calls".format(url, crawler_data))
             all_properties = [{"name": "Response", "data": {
                 "status_code" : webtools.HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
                 "errors" :  ["Too many crawler calls"],
@@ -121,7 +123,7 @@ class Crawler(object):
             webtools.WebConfig.start_display()
             all_properties = self.run(url, crawler_data)
         except Exception as E:
-            webtools.WebLogger.exc(
+            WebLogger.exc(
                 E,
                 info_text="Exception when calling getj {} {}".format(url, crawler_data),
             )
@@ -145,7 +147,7 @@ class Crawler(object):
 
     def run(self, url, crawler_data=None):
         if not crawler_data:
-            webtools.WebLogger.error(
+            WebLogger.error(
                 "Url:{} Cannot run request without crawler_data".format(url)
             )
             return
@@ -153,7 +155,7 @@ class Crawler(object):
         page_url = self.get_page_url(url, crawler_data)
 
         if not page_url:
-            webtools.WebLogger.error(
+            WebLogger.error(
                 "Could not create page url for {} {}".format(url, crawler_data)
             )
             return

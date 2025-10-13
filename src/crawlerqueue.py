@@ -1,6 +1,6 @@
 from datetime import datetime
 from collections import OrderedDict
-from src import webtools
+from webtoolkit import WebLogger
 
 
 class CrawlerQueue(object):
@@ -15,7 +15,7 @@ class CrawlerQueue(object):
 
     def enter(self, url, crawler_data=None):
         if self.get_size() > self.max_queue_size:
-            webtools.WebLogger.error("Crawler info too many requests")
+            WebLogger.error("Crawler info too many requests")
             return
 
         if self.find(url, crawler_data):
