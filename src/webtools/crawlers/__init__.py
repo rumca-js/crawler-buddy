@@ -2,5 +2,21 @@
 Provides various crawling mechanisms, libraries that can crawl.
 """
 
-from .crawlerinterface import CrawlerInterface, default_user_agent, default_headers
-from .crawlers import *
+from .crawlers import (
+   RequestsCrawler,
+   CurlCffiCrawler,
+   HttpxCrawler,
+   StealthRequestsCrawler,
+   ScriptCrawler,
+   ScriptCrawlerInterface,
+   BotasaurusCrawler,
+)
+
+from .seleniumbased import (
+   SeleniumDriver,
+   SeleniumChromeHeadless,
+   SeleniumChromeFull,
+   SeleniumUndetected,
+   SeleniumWireFull,
+   SeleniumBase,
+)

@@ -1,6 +1,5 @@
 from webtoolkit import UrlLocation
-
-from .defaulturlhandler import DefaultUrlHandler
+from webtoolkit import DefaultUrlHandler
 
 
 class OdyseeVideoHandler(DefaultUrlHandler):

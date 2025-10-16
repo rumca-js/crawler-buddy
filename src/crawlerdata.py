@@ -1,5 +1,7 @@
 import json
-from src import webtools
+from webtoolkit import WebLogger
+from src.webtools import WebConfig
+
 from src.entryrules import EntryRules
 
 
@@ -23,7 +25,7 @@ class CrawlerData(object):
         crawler_data = self.get_crawler(url, crawler_data)
 
         if not crawler_data:
-            webtools.WebLogger.error(
+            WebLogger.error(
                 "Url:{} Cannot run request without crawler".format(url)
             )
             return
@@ -87,7 +89,7 @@ class CrawlerData(object):
         if crawler_data["settings"].get("bytes_limit") is None:
             crawler_data["settings"][
                 "bytes_limit"
-            ] = webtools.WebConfig.get_bytes_limit()
+            ] = WebConfig.get_bytes_limit()
 
         if "accept_content_types" not in crawler_data["settings"]:
             crawler_data["settings"]["accept_content_types"] = "all"
@@ -120,7 +122,7 @@ class CrawlerData(object):
             else:
                 new_mapping = self.configuration.get_crawler(name=crawler_name)
                 if not new_mapping:
-                    webtools.WebLogger.error(
+                    WebLogger.error(
                         "Cannot find specified crawler in config: {}".format(
                             crawler_name
                         )
@@ -133,7 +135,7 @@ class CrawlerData(object):
             new_mapping["crawler"] = new_mapping["crawler"](url=url)
 
         if not new_mapping:
-            webtools.WebLogger.error("Could not find crawler")
+            WebLogger.error("Could not find crawler")
             return
 
         # use what is not default by crawler buddy
@@ -181,7 +183,7 @@ class CrawlerData(object):
             else:
                 new_mapping = self.configuration.get_crawler(name=crawler_name)
                 if not new_mapping:
-                    webtools.WebLogger.error(
+                    WebLogger.error(
                         "Cannot find specified crawler in config: {}".format(
                             crawler_name
                         )
@@ -194,7 +196,7 @@ class CrawlerData(object):
             new_mapping["crawler"] = new_mapping["crawler"](url=url)
 
         if not new_mapping:
-            webtools.WebLogger.error("Could not find crawler")
+            WebLogger.error("Could not find crawler")
             return
 
         # use what is not default by crawler buddy
@@ -223,6 +225,6 @@ class CrawlerData(object):
             if new_mapping:
                 return new_mapping
 
-        new_mapping = webtools.WebConfig.get_default_crawler(url)
+        new_mapping = WebConfig.get_default_crawler(url)
         if new_mapping:
             return new_mapping

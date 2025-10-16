@@ -9,6 +9,7 @@ import time
 import argparse
 import sys
 
+from webtoolkit import response_to_file
 from src import webtools
 from src.webtools import WebConfig
 
@@ -43,7 +44,7 @@ def main():
         print(response.get_text())
 
     print(response)
-    driver.save_response()
+    response_to_file(response, parser.args.output_file)
     driver.close()
 
 

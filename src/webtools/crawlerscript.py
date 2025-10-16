@@ -1,9 +1,7 @@
 import argparse
 import json
 
-from webtoolkit import PageRequestObject
-
-from .crawlers import CrawlerInterface
+from webtoolkit import PageRequestObject, CrawlerInterface
 
 
 class ScriptCrawlerParser(object):

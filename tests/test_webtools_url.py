@@ -1,11 +1,11 @@
 from webtoolkit import (
     HtmlPage,
     RssPage,
+    PageOptions,
+    PageResponseObject,
 )
 from src.webtools import (
     Url,
-    PageOptions,
-    PageResponseObject,
     HttpPageHandler,
     RedditUrlHandler,
 )

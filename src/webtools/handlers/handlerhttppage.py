@@ -20,6 +20,7 @@ from webtoolkit import (
     PageRequestObject,
     PageResponseObject,
     PageOptions,
+    HandlerInterface,
     lazy_load_content,
     HTTP_STATUS_UNKNOWN,
     HTTP_STATUS_CODE_EXCEPTION,
@@ -31,7 +32,6 @@ from webtoolkit import (
 )
 from ..webconfig import WebConfig
 
-from .handlerinterface import HandlerInterface
 
 
 class HttpRequestBuilder(object):

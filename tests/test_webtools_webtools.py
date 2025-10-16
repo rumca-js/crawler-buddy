@@ -1,5 +1,5 @@
 import hashlib
-from src.webtools import (
+from webtoolkit import (
    InputContent,
    PageOptions,
    calculate_hash,

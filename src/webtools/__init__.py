@@ -30,7 +30,6 @@ from .handlers import (
 )
 
 from .crawlers import (
-    CrawlerInterface,
     RequestsCrawler,
     SeleniumDriver,
     SeleniumChromeHeadless,

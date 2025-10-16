@@ -14,6 +14,7 @@ from webtoolkit import (
     PageResponseObject,
     WebLogger,
     ResponseHeaders,
+    CrawlerInterface,
 )
 
 from src.webtools import (
@@ -23,7 +24,6 @@ from src.webtools import (
     HttpPageHandler,
     Url,
     WebConfig,
-    CrawlerInterface,
 )
 
 from tests.fakeinternetdata import (

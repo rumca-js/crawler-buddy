@@ -24,8 +24,11 @@ test_webpage = "https://google.com"
 
 def call_process(input_script):
     start_time = time.time()
+
+    print(f"Running script {input_script}")
+
     subprocess.check_call(
-        "poetry run python {} --url {} --output-file {} --timeout 20".format(
+        "poetry run python {} --url {} --output-file {} --timeout 55".format(
             input_script, test_webpage, "out.txt"
         ),
         shell=True,
@@ -65,7 +68,7 @@ def call_seleniumbase():
 
 def main():
     time_requests = call_requests()
-    #time_crawleebeautiful = call_crawleebeautiful()
+    time_crawleebeautiful = call_crawleebeautiful()
     #time_crawleeplaywright = call_crawleeplaywright()
     time_seleniumchromeheadless = call_seleniumchromeheadless()
     time_seleniumchromefull = call_seleniumchromefull()

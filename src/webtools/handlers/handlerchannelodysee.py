@@ -1,8 +1,8 @@
 from webtoolkit import UrlLocation
 from webtoolkit import WebLogger
+from webtoolkit import DefaultChannelHandler
 
 from .handlerhttppage import HttpPageHandler
-from .defaulturlhandler import DefaultChannelHandler
 
 
 class OdyseeChannelHandler(DefaultChannelHandler):

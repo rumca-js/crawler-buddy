@@ -2,11 +2,10 @@ import traceback
 
 from webtoolkit import PageResponseObject
 from webtoolkit import UrlLocation, RssPage
-from webtoolkit import WebLogger
+from webtoolkit import WebLogger, DefaultChannelHandler
 
 
 from .handlerhttppage import HttpPageHandler
-from .defaulturlhandler import DefaultChannelHandler
 
 
 class YouTubeChannelHandler(DefaultChannelHandler):

@@ -22,6 +22,11 @@ from src import webtools
 import traceback
 import shutil
 
+from webtoolkit import (
+   PageResponseObject, response_to_file,
+   HTTP_STATUS_CODE_EXCEPTION,
+)
+
 os.environ["CRAWLEE_STORAGE_DIR"] = "./storage/{}".format(os.getpid())
 
 
@@ -37,12 +42,7 @@ try:
 
     # https://github.com/apify/crawlee-python
     # https://crawlee.dev/python/api
-    from crawlee.beautifulsoup_crawler import (
-        BeautifulSoupCrawler,
-        BeautifulSoupCrawlingContext,
-    )
-    from crawlee.basic_crawler import BasicCrawler
-    from crawlee.playwright_crawler import PlaywrightCrawler, PlaywrightCrawlingContext
+    from crawlee.crawlers import PlaywrightCrawler, PlaywrightCrawlingContext
 except Exception as E:
     print(str(E))
     crawlee_feataure_enabled = False
@@ -50,7 +50,10 @@ except Exception as E:
 
 def on_close(interface, response):
     interface.response = response
-    interface.save_response()
+
+    file = "response.txt"
+    response_to_file(response, file)
+
     cleanup_storage()
     # crawlee complains if we kill it like this sys.exit(0)
 
@@ -76,7 +79,7 @@ async def main() -> None:
     interface = webtools.ScriptCrawlerInterface(
         parser, request, __file__, webtools.webconfig.CRAWLEE_PLAYWRIGHT_SCRIPT
     )
-    response = webtools.PageResponseObject(request.url)
+    response = PageResponseObject(request.url)
 
     if parser.args.proxy_address:
         proxy_config = ProxyConfiguration(

@@ -64,23 +64,21 @@ class ScriptServerTest(FakeInternetTestCase):
 
         self.assertTrue(all_properties)
 
-        remote = RemoteServer("")
-
-        properties = remote.read_properties_section("Properties", all_properties)
+        properties = RemoteServer.read_properties_section("Properties", all_properties)
         self.assertIn("link", properties)
         self.assertEqual(properties["link"], "https://google.com")
 
-        text = remote.read_properties_section("Text", all_properties)
+        text = RemoteServer.read_properties_section("Text", all_properties)
         self.assertIn("Contents", text)
 
-        headers = remote.read_properties_section("Headers", all_properties)
+        headers = RemoteServer.read_properties_section("Headers", all_properties)
         self.assertIn("Content-Type", headers)
         self.assertEqual(headers["Content-Type"], "text/html")
 
-        settings = remote.read_properties_section("Settings", all_properties)
+        settings = RemoteServer.read_properties_section("Settings", all_properties)
         self.assertIn("crawler", settings)
         self.assertIn("name", settings)
 
-        response = remote.read_properties_section("Response", all_properties)
+        response = RemoteServer.read_properties_section("Response", all_properties)
         self.assertIn("status_code", response)
         self.assertEqual(response["status_code"], 200)

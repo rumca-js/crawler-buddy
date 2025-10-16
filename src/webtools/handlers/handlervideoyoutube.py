@@ -6,7 +6,7 @@ from utils.dateutils import DateUtils
 from webtoolkit import PageResponseObject, UrlLocation, HtmlPage, ContentInterface
 from webtoolkit import WebLogger
 
-from .defaulturlhandler import DefaultUrlHandler
+from webtoolkit import DefaultUrlHandler
 
 
 class YouTubeVideoHandler(DefaultUrlHandler):

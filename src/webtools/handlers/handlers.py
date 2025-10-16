@@ -1,9 +1,9 @@
 import json
 
 from webtoolkit import UrlLocation, RssPage, WebLogger
+from webtoolkit import DefaultUrlHandler, DefaultChannelHandler
 
 from .handlerhttppage import HttpPageHandler
-from .defaulturlhandler import DefaultUrlHandler, DefaultChannelHandler
 
 
 class RedditUrlHandler(DefaultUrlHandler):
