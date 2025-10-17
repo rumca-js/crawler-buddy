@@ -16,6 +16,11 @@ In my setup it was around:
 
 import time
 import subprocess
+import importlib
+from pathlib import Path
+
+from webtoolkit import file_to_response
+import src.webtools.crawlers
 
 
 # change test webpage to see if other pages can be scraped using different scrapers
@@ -26,6 +31,9 @@ def call_process(input_script):
     start_time = time.time()
 
     print(f"Running script {input_script}")
+    path = Path("out.txt")
+    if path.exists():
+        path.unlink()
 
     subprocess.check_call(
         "poetry run python {} --url {} --output-file {} --timeout 55".format(
@@ -34,6 +42,28 @@ def call_process(input_script):
         shell=True,
         timeout=20,
     )
+
+    response = file_to_response("out.txt")
+    print(response)
+
+    return time.time() - start_time
+
+
+def call_crawler(name):
+    print(f"Running crawler {name}")
+
+    start_time = time.time()
+
+    crawler_class = getattr(src.webtools.crawlers, name)
+    crawler = crawler_class(url=test_webpage)
+    if not crawler.is_valid():
+        print(f"Crawler is {name} disabled")
+        return
+
+    response = crawler.run()
+    crawler.close()
+
+    print(response)
 
     return time.time() - start_time
 
@@ -67,21 +97,17 @@ def call_seleniumbase():
 
 
 def main():
-    time_requests = call_requests()
+    call_crawler("RequestsCrawler")
+    call_crawler("CurlCffiCrawler")
+    call_crawler("HttpxCrawler")
+    call_crawler("StealthRequestsCrawler")
+    call_crawler("SeleniumChromeHeadless")
+    call_crawler("SeleniumChromeFull")
+    call_crawler("SeleniumUndetected")
+    call_crawler("SeleniumWireFull")
+
     time_crawleebeautiful = call_crawleebeautiful()
     #time_crawleeplaywright = call_crawleeplaywright()
-    time_seleniumchromeheadless = call_seleniumchromeheadless()
-    time_seleniumchromefull = call_seleniumchromefull()
-    #time_seleniumchromeundetected = call_seleniumchromeundetected()
-    #time_seleniumbase = call_seleniumbase()
-
-    print(f"Requests:{time_requests} [s]")
-    #print(f"crawleebeautifulsoup:{time_crawleebeautiful} [s]")
-    #print(f"crawleeplaywright:{time_crawleeplaywright} [s]")
-    print(f"seleniumchromeheadless:{time_seleniumchromeheadless} [s]")
-    print(f"seleniumchromefull:{time_seleniumchromefull} [s]")
-    #print(f"seleniumchromeundetected:{time_seleniumchromeundetected} [s]")
-    #print(f"seleniumbase:{time_seleniumbase} [s]")
 
 
 main()

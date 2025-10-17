@@ -242,10 +242,8 @@ class SeleniumDriver(CrawlerInterface):
 
         if "status_code" in info:
             status_code = info["status_code"]
-            print(status_code)
         if "headers" in info:
             headers = info["headers"]
-            print(headers)
 
         self.response = PageResponseObject(
             self.driver.current_url,
@@ -697,6 +695,13 @@ class SeleniumWireFull(SeleniumDriver):
         )
 
     def is_valid(self):
+        try:
+            from seleniumwire import webdriver as wire_webdriver
+            from selenium.webdriver.common.proxy import Proxy, ProxyType
+            from seleniumwire import webdriver as wire_webdriver
+        except Exception as E:
+            return False
+
         return True
 
 

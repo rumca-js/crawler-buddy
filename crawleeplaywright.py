@@ -38,13 +38,13 @@ def cleanup_storage():
 
 crawlee_feataure_enabled = True
 try:
-    import asyncio
-
     # https://github.com/apify/crawlee-python
     # https://crawlee.dev/python/api
+    import asyncio
     from crawlee.crawlers import PlaywrightCrawler, PlaywrightCrawlingContext
 except Exception as E:
     print(str(E))
+    print("Make sure you have crawlee with playwright extra")
     crawlee_feataure_enabled = False
 
 

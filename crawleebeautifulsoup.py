@@ -55,7 +55,7 @@ def on_close(interface, response, status_code=0):
     interface.response = response
 
     file = "response.txt"
-    response_to_file(response, file)
+    response_to_file(response, interface.parser.args.output_file)
 
     cleanup_storage()
     # crawlee complains if we kill it like this sys.exit(0)
