@@ -262,9 +262,7 @@ class Url(ContentInterface):
 
     def ping(self, timeout_s=20, user_agent=None):
         # TODO if that fails we would have to find suitable agent, and then ping
-        return RequestsCrawler.ping(
-            self.url, timeout_s=timeout_s, user_agent=user_agent
-        )
+        return RequestsCrawler(self.url).ping()
 
     def get_handler_implementation(self):
         url = self.url

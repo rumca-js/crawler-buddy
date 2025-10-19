@@ -694,7 +694,7 @@ def pingj():
         if response.is_valid():
             return jsonify({"status": True})
 
-        if response.status_code == webtools.HTTP_STATUS_CODE_CONNECTION_ERROR:
+        if response.status_code == HTTP_STATUS_CODE_CONNECTION_ERROR:
             return jsonify({"status": False})
 
     all_properties = crawler_main.get_all_properties(request, ping=True)

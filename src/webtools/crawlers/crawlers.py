@@ -267,9 +267,9 @@ class RequestsCrawler(CrawlerInterface):
         import requests
 
         if not user_agent:
-            user_agent = RequestsCrawler.get_user_agent()
+            user_agent = RequestsCrawler(url).get_user_agent()
 
-        headers = RequestsCrawler.get_request_headers_default()
+        headers = RequestsCrawler(url).get_default_headers()
         headers["User-Agent"] = user_agent
 
         response = None
