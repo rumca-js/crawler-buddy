@@ -263,14 +263,13 @@ class RequestsCrawler(CrawlerInterface):
             print(str(E))
             return False
 
-    def ping(url, timeout_s=20, user_agent=None):
+    def ping(self):
         import requests
 
-        if not user_agent:
-            user_agent = RequestsCrawler(url).get_user_agent()
-
-        headers = RequestsCrawler(url).get_default_headers()
+        user_agent = self.get_user_agent()
+        headers = self.get_default_headers()
         headers["User-Agent"] = user_agent
+        url = self.request.url
 
         response = None
         try:
