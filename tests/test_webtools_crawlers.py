@@ -16,9 +16,9 @@ class CrawlerInterfaceTest(FakeInternetTestCase):
         settings = {}
         settings["name"] = "Test"
         settings["crawler"] = "Crawler"
-        settings["headers"] = {}
-        settings["headers"]["User-Agent"] = "Test-User-Agent"
-        settings["settings"] = {}
+        settings["settings"] = {
+                "User-Agent" : "Test-User-Agent",
+                }
 
         # call tested function
         crawler = CrawlerInterface(request=None, url=url, settings=settings)

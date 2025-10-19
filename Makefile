@@ -10,7 +10,7 @@
 .PHONY: install installsysdeps
 .PHONY: run
 .PHONY: reformat
-.PHONY: backfiles test min-test manual-test
+.PHONY: backfiles test test-min test-man
 
 CP = cp
 PROJECT_NAME = crawler-buddy
@@ -44,7 +44,7 @@ backfiles:
 
 test: min-test manual-test
 
-min-test:
+test-min:
 	poetry run python -m unittest discover -v  2>&1 | tee test_output.txt
-manual-test:
+test-man:
 	poetry run python manual_test_crawlers.py 2>&1 | tee test_output.txt
