@@ -2,8 +2,7 @@ import json
 
 from webtoolkit import UrlLocation, RssPage, WebLogger
 from webtoolkit import DefaultUrlHandler, DefaultChannelHandler
-
-from .handlerhttppage import HttpPageHandler
+from webtoolkit import HttpPageHandler
 
 
 class RedditUrlHandler(DefaultUrlHandler):
@@ -22,7 +21,7 @@ class RedditUrlHandler(DefaultUrlHandler):
         self.social_data = {}
 
         super().__init__(
-            url, contents=contents, settings=settings, url_builder=url_builder
+            url=url, contents=contents, settings=settings, url_builder=url_builder
         )
 
     def is_handled_by(self):
@@ -160,7 +159,7 @@ class GitHubUrlHandler(DefaultUrlHandler):
         self.social_data = {}
 
         super().__init__(
-            url, contents=contents, settings=settings, url_builder=url_builder
+            url=url, contents=contents, settings=settings, url_builder=url_builder
         )
 
     def is_handled_by(self):
@@ -264,6 +263,7 @@ class ReturnDislike(DefaultUrlHandler):
 
         if video_code:
             url = self.code2url(video_code)
+            self.video_code = video_code
 
         super().__init__(
             url=url, contents=contents, settings=settings, url_builder=url_builder
@@ -273,11 +273,15 @@ class ReturnDislike(DefaultUrlHandler):
         return "https://returnyoutubedislikeapi.com/votes?videoId=" + input_code
 
     def is_handled_by(self):
-        return False
+        return self.url and self.url.find("https://returnyoutubedislikeapi.com/votes?videoId") >= 0
 
     def load_response(self):
-        self.get_response()
-        contents = self.get_contents()
+        response = self.get_response()
+        if response is None or not response.is_valid():
+            return
+
+        contents = response.get_text()
+
         self._json = self.loads(contents)
         return self._json
 
@@ -316,7 +320,7 @@ class HackerNewsHandler(DefaultUrlHandler):
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         self.social_data = {}
         super().__init__(
-            url, contents=contents, settings=settings, url_builder=url_builder
+            url=url, contents=contents, settings=settings, url_builder=url_builder
         )
 
     def is_handled_by(self):
@@ -391,7 +395,7 @@ class HackerNewsHandler(DefaultUrlHandler):
 
 class InternetArchive(DefaultUrlHandler):
     def __init__(self, url, settings=None, url_builder=None):
-        super().__init__(url, settings=settings, url_builder=url_builder)
+        super().__init__(url=url, settings=settings, url_builder=url_builder)
 
     def is_handled_by(self):
         p = UrlLocation(self.url)
@@ -410,7 +414,7 @@ class InternetArchive(DefaultUrlHandler):
 class FourChanChannelHandler(DefaultChannelHandler):
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         super().__init__(
-            url, contents=contents, settings=settings, url_builder=url_builder
+            url=url, contents=contents, settings=settings, url_builder=url_builder
         )
 
         if url:
@@ -453,7 +457,7 @@ class TwitterUrlHandler(DefaultUrlHandler):
 
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         super().__init__(
-            url, contents=contents, settings=settings, url_builder=url_builder
+            url=url, contents=contents, settings=settings, url_builder=url_builder
         )
         wh = self.url.find("?ref_src=")
         if wh >= 0:

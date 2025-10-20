@@ -1,5 +1,6 @@
 from webtoolkit import UrlLocation
 from webtoolkit import DefaultUrlHandler
+from webtoolkit import HttpPageHandler
 
 
 class OdyseeVideoHandler(DefaultUrlHandler):
@@ -87,7 +88,6 @@ class OdyseeVideoHandler(DefaultUrlHandler):
         return "https://odysee.com/$/embed/{0}".format(self.get_video_code())
 
     def get_response(self):
-        from .handlerhttppage import HttpPageHandler
 
         if self.response:
             return self.response

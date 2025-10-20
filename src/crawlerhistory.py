@@ -64,6 +64,8 @@ class CrawlerHistory(object):
                 settings = CrawlerHistory.read_properties_section(
                     "Settings", all_properties
                 )
+                if not settings:
+                    continue
 
             settings_crawler_name = settings.get("name")
             settings_crawler = settings.get("crawler")

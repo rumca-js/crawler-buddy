@@ -3,9 +3,7 @@ import traceback
 from webtoolkit import PageResponseObject
 from webtoolkit import UrlLocation, RssPage
 from webtoolkit import WebLogger, DefaultChannelHandler
-
-
-from .handlerhttppage import HttpPageHandler
+from webtoolkit import HttpPageHandler
 
 
 class YouTubeChannelHandler(DefaultChannelHandler):
@@ -289,7 +287,7 @@ class YouTubeChannelHandler(DefaultChannelHandler):
     def get_json_data(self):
         entries = self.get_entries()
         for entry in entries:
-            u = self.url_builder(url=entry["link"])
+            u = self.url_builder(url=entry["link"], settings=self.settings)
             u.get_response()
             h = u.get_handler()
             if h:

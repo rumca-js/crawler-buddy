@@ -308,7 +308,8 @@ def debug():
         detail_text = items[3]
         user = items[4]
 
-        info_text = html.escape(info_text)
+        if info_text:
+            info_text = html.escape(info_text)
 
         color = level2color(level)
 

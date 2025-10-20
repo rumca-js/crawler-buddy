@@ -32,6 +32,7 @@ from webtoolkit import (
     URL_TYPE_UNKNOWN,
     status_code_to_text,
     response_to_json,
+    HandlerInterface,
 )
 from .webconfig import WebConfig
 
@@ -52,7 +53,6 @@ from .handlers import (
     FourChanChannelHandler,
     TwitterUrlHandler,
     HttpPageHandler,
-    HandlerInterface,
 )
 
 from utils.dateutils import DateUtils

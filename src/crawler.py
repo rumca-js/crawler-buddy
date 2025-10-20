@@ -2,7 +2,7 @@ import subprocess
 import psutil
 import json
 from datetime import datetime
-from webtoolkit import WebLogger
+from webtoolkit import WebLogger, RemoteServer
 
 from src import webtools
 from src.configuration import Configuration
@@ -44,8 +44,8 @@ class Crawler(object):
 
         crawler_index = self.social_queue.enter(url)
         if crawler_index is None:
-            WebLogger.exc(
-                E, info_text="Exception when calling socialj {}".format(url)
+            WebLogger.error(
+                info_text=f"{url} Cannot call socialj".format(url)
             )
             return None
 
@@ -141,7 +141,15 @@ class Crawler(object):
                 "status_code" : webtools.HTTP_STATUS_CODE_EXCEPTION,
                 "errors" :  ["No properties found"],
             }}]
-            return all_properties
+
+        response = RemoteServer.read_properties_section("Response", all_properties)
+        if "text" in response:
+            del response["text"]
+        if "binary" in response:
+            del response["binary"]
+        if "streams" in response:
+            del response["streams"]
+        WebLogger.debug(info_text = "Crawling response: ", detail_text = str(response))
 
         return all_properties
 

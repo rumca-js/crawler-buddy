@@ -12,7 +12,7 @@ from webtoolkit import DefaultUrlHandler
 class YouTubeVideoHandler(DefaultUrlHandler):
     def __init__(self, url=None, contents=None, settings=None, url_builder=None):
         super().__init__(
-            url, contents=contents, settings=settings, url_builder=url_builder
+            url=url, contents=contents, settings=settings, url_builder=url_builder
         )
 
         if not self.is_handled_by():
@@ -331,10 +331,13 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         if self.return_dislike:
             self.social_data = self.get_json_data_from_rd()
+            if not self.social_data:
+                self.social_data = {}
 
         social_data = self.get_json_data_from_yt()
-        for key, value in social_data.items():
-            self.social_data.setdefault(key, value)
+        if social_data:
+            for key, value in social_data.items():
+                self.social_data.setdefault(key, value)
 
         return self.social_data
 
@@ -344,7 +347,8 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if not self.yt_ob:
             self.download_details_youtube()
         if self.yt_ob is None:
-            print("Could not download youtube details")
+            WebLogger.error("Url:{}:Could not download youtube details".format(self.url))
+            return
 
         view_count = None
         thumbs_up = None
@@ -366,7 +370,8 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if not self.rd_ob:
             self.download_details_return_dislike()
         if not self.rd_ob:
-            print("Could not download return dislikes youtube details")
+            WebLogger.error("Url:{}:Could not download return dislike details".format(self.url))
+            return
 
         view_count = None
         thumbs_up = None
@@ -479,9 +484,12 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         from .handlers import ReturnDislike
 
-        dislike = ReturnDislike(video_code=self.get_video_code())
-        dislike.get_response()
-        self.rd_text = dislike.get_contents()
+        dislike = ReturnDislike(video_code=self.get_video_code(), url_builder=self.url_builder, settings=self.settings)
+        response = dislike.get_response()
+        if response is None or not response.is_valid():
+            return False
+
+        self.rd_text = response.get_text()
         if not self.rd_text:
             return False
 

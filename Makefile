@@ -42,7 +42,7 @@ reformat:
 backfiles:
 	find . -type f -name "*.bak" -exec rm -f {} +
 
-test: min-test manual-test
+test: test-min test-man
 
 test-min:
 	poetry run python -m unittest discover -v  2>&1 | tee test_output.txt

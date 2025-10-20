@@ -1,8 +1,7 @@
 from webtoolkit import UrlLocation
 from webtoolkit import WebLogger
 from webtoolkit import DefaultChannelHandler
-
-from .handlerhttppage import HttpPageHandler
+from webtoolkit import HttpPageHandler
 
 
 class OdyseeChannelHandler(DefaultChannelHandler):
@@ -135,9 +134,6 @@ class OdyseeChannelHandler(DefaultChannelHandler):
         if not feed:
             return
 
-        settings = {}
-        settings["handler_class"] = HttpPageHandler
-
-        self.rss_url = self.url_builder(feed, settings=settings)
+        self.rss_url = self.get_page_url(feeds)
         self.rss_url.get_response()
         return self.rss_url
