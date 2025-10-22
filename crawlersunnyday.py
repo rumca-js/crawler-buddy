@@ -1,4 +1,4 @@
-from webtoolkit import PageResponseObject
+from webtoolkit import PageResponseObject, response_to_file
 from src import webtools
 
 import sys
@@ -34,6 +34,7 @@ def main():
 
     # Use interface to pass data out
     interface.response = page_obj
+    response_to_file(interface.response, parser.args.output_file)
     print(interface.response)
 
 

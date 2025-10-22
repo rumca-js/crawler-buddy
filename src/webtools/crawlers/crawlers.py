@@ -24,7 +24,7 @@ from webtoolkit import (
     CrawlerInterface,
     WebToolsTimeoutException,
     WebLogger,
-    get_response_from_bytes,
+    file_to_response,
     HTTP_STATUS_UNKNOWN,
     HTTP_STATUS_OK,
     HTTP_STATUS_USER_AGENT,
@@ -848,11 +848,7 @@ class ScriptCrawler(CrawlerInterface):
             )
 
         if file_abs.exists():
-            response = None
-
-            with open(str(file_abs), "rb") as fh:
-                all_bytes = fh.read()
-                self.response = get_response_from_bytes(all_bytes)
+            self.response = file_to_response(str(file_abs))
 
             file_abs.unlink()
 

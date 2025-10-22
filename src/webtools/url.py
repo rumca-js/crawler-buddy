@@ -377,8 +377,6 @@ class Url(ContentInterface):
             if handler.is_handled_by():
                 return handler.get_canonical_url()
 
-        return self.url
-
     def get_urls(self):
         properties = {}
         properties["link"] = self.url

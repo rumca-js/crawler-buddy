@@ -5,7 +5,6 @@ from utils.dateutils import DateUtils
 
 from webtoolkit import PageResponseObject, UrlLocation, HtmlPage, ContentInterface
 from webtoolkit import WebLogger
-
 from webtoolkit import DefaultUrlHandler
 
 
@@ -478,23 +477,25 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         return self.load_details_youtube()
 
+    def get_return_dislike_url(self):
+        return "https://returnyoutubedislikeapi.com/votes?videoId=" + self.get_video_code()
+
     def download_details_return_dislike(self):
         if self.rd_text is not None:
             return True
 
-        from .handlers import ReturnDislike
-
-        dislike = ReturnDislike(video_code=self.get_video_code(), url_builder=self.url_builder, settings=self.settings)
-        response = dislike.get_response()
+        url = self.url_builder(url = self.get_return_dislike_url(), settings=self.settings)
+        response = url.get_response()
         if response is None or not response.is_valid():
             return False
 
         self.rd_text = response.get_text()
         if not self.rd_text:
             return False
+        handler = url.get_handler()
 
-        dislike.load_response()
-        self.rd_ob = dislike
+        handler.load_response()
+        self.rd_ob = handler
 
         if not self.rd_ob:
             return False
