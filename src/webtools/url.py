@@ -22,7 +22,6 @@ from webtoolkit import (
     RssPage,
     HtmlPage,
     UrlLocation,
-    PageOptions,
     WebLogger,
     URL_TYPE_RSS,
     URL_TYPE_CSS,

@@ -1,6 +1,5 @@
 from datetime import datetime
 from webtoolkit import  (
-    PageOptions,
     HtmlPage,
     PageResponseObject,
 )

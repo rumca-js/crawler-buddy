@@ -2,7 +2,13 @@ import subprocess
 import psutil
 import json
 from datetime import datetime
-from webtoolkit import WebLogger, RemoteServer
+
+from webtoolkit import (
+  WebLogger,
+  RemoteServer,
+  HTTP_STATUS_CODE_EXCEPTION,
+  HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+)
 
 from src import webtools
 from src.configuration import Configuration
@@ -80,12 +86,11 @@ class Crawler(object):
             }}]
             return all_properties
 
-        self.data.set_request(request)
-        crawler_data = self.data.get_request_data()
+        crawler_data = self.get_request_data(request)
 
         if not crawler_data:
             all_properties = [{"name": "Response", "data": {
-                "status_code" : webtools.HTTP_STATUS_CODE_EXCEPTION,
+                "status_code" : HTTP_STATUS_CODE_EXCEPTION,
                 "errors" :  ["Cannot obtain crowler data"],
             }}]
             return all_properties
@@ -111,7 +116,7 @@ class Crawler(object):
         if crawl_index is None:
             WebLogger.error("Too many crawler calls".format(url, crawler_data))
             all_properties = [{"name": "Response", "data": {
-                "status_code" : webtools.HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+                "status_code" : HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
                 "errors" :  ["Too many crawler calls"],
             }}]
             return all_properties
@@ -138,7 +143,7 @@ class Crawler(object):
 
         if not all_properties:
             all_properties = [{"name": "Response", "data": {
-                "status_code" : webtools.HTTP_STATUS_CODE_EXCEPTION,
+                "status_code" : HTTP_STATUS_CODE_EXCEPTION,
                 "errors" :  ["No properties found"],
             }}]
 

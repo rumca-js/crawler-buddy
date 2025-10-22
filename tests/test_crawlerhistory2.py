@@ -3,7 +3,6 @@ import json
 
 from webtoolkit import (
     HtmlPage,
-    PageOptions,
     PageResponseObject,
 )
 

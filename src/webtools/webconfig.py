@@ -67,18 +67,6 @@ class WebConfig(object):
         """
         mapping = []
 
-        # one of the methods should be available
-        from webtoolkit.ipc import DEFAULT_PORT, SocketConnection
-
-        if not port:
-            port = DEFAULT_PORT
-
-            c = SocketConnection()
-            if not c.connect(host=SocketConnection.gethostname(), port=port):
-                port = None
-
-            c.close()
-
         headless_script = WebConfig.get_script_path("crawleebeautifulsoup.py")
         full_script = WebConfig.get_script_path("crawleeplaywright.py")
         scrapy_script = WebConfig.get_script_path("cralwerscrapy.py")

@@ -1,6 +1,5 @@
 from datetime import datetime
 from webtoolkit import  (
-    PageOptions,
     HtmlPage,
     PageResponseObject,
 )
@@ -11,28 +10,7 @@ from src.webtools import (
 from src.crawler import Crawler
 from src.entryrules import EntryRules
 
-from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
-
-
-class FlaskArgs(object):
-    def __init__(self):
-        self._map = {}
-
-    def get(self, key):
-        if key in self._map:
-            return self._map[key]
-
-    def set(self, key, value):
-        self._map[key] = value
-
-
-class FlaskRequest(object):
-    def __init__(self, host):
-        self.host = host
-        self.args = FlaskArgs()
-
-    def set(self, key, value):
-        self.args.set(key, value)
+from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter, FlaskRequest
 
 
 class CrawlerTest(FakeInternetTestCase):
@@ -44,7 +22,7 @@ class CrawlerTest(FakeInternetTestCase):
 
         request = FlaskRequest("http://192.168.0.0")
         request.set("url", "https://test.com")
-        request.set("name", "RequestsCrawler")
+        request.set("crawler_name", "RequestsCrawler")
 
         # call tested function
         data = crawler.get_request_data(request)
@@ -56,7 +34,7 @@ class CrawlerTest(FakeInternetTestCase):
 
         request = FlaskRequest("http://192.168.0.0")
         request.set("url", "https://test.com")
-        request.set("crawler", "RequestsCrawler")
+        request.set("crawler_type", "RequestsCrawler")
 
         # call tested function
         data = crawler.get_request_data(request)
@@ -67,8 +45,8 @@ class CrawlerTest(FakeInternetTestCase):
         crawler = Crawler()
 
         crawler_data = """{
-                "name": "RequestsCrawler",
-                "crawler": "RequestsCrawler"
+                "crawler_name": "RequestsCrawler",
+                "crawler_type": "RequestsCrawler"
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
@@ -88,12 +66,10 @@ class CrawlerTest(FakeInternetTestCase):
         test_url = "https://linkedin.com"
 
         crawler_data = """{
-                "name" : "RequestsCrawlerDupa",
-                "crawler" : "RequestsCrawlerDupa",
-                "settings" : {
-                    "timeout_s" : 20,
-                    "remote_server": "https://"
-                }
+           "crawler_name" : "RequestsCrawlerDupa",
+           "crawler_type" : "RequestsCrawlerDupa",
+           "timeout_s" : 20,
+           "remote_server": "https://"
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
@@ -110,10 +86,7 @@ class CrawlerTest(FakeInternetTestCase):
         test_url = "https://linkedin.com"
 
         crawler_data = """{
-                "settings" : {
-                    "timeout_s" : 20,
-                    "remote_server": "http://8.8.8.8:3000"
-                }
+           "timeout_s" : 20
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
@@ -132,9 +105,6 @@ class CrawlerTest(FakeInternetTestCase):
 
         self.assertIn("settings", data)
         self.assertIn("timeout_s", data["settings"])
-        self.assertIn("remote_server", data["settings"])
-
-        self.assertEqual(data["settings"]["remote_server"], "http://8.8.8.8:3000")
 
         self.assertNotIn("timeout_s", data)
 
@@ -173,12 +143,10 @@ class CrawlerTest(FakeInternetTestCase):
         crawler = Crawler()
 
         crawler_data = """{
-                "name": "RequestsCrawler",
-                "crawler": "RequestsCrawler",
-                "settings": {
-                   "ssl_verify": true,
-                   "respect_robots_txt": true
-                }
+           "crawler_name": "RequestsCrawler",
+           "crawler_type": "RequestsCrawler",
+           "ssl_verify": true,
+           "respect_robots": true
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
@@ -203,14 +171,12 @@ class CrawlerTest(FakeInternetTestCase):
         crawler = Crawler()
 
         crawler_data = """{
-                "name": "RequestsCrawler",
-                "crawler": "RequestsCrawler",
-                "settings" : {
-                   "ssl_verify" : false,
-                   "respect_robots_txt" : false,
-                   "timeout_s" : 60,
-                   "delay_s" : 10
-                }
+           "crawler_name": "RequestsCrawler",
+           "crawler_type": "RequestsCrawler",
+           "ssl_verify" : false,
+           "respect_robots" : false,
+           "timeout_s" : 60,
+           "delay_s" : 10
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
@@ -234,12 +200,10 @@ class CrawlerTest(FakeInternetTestCase):
         crawler = Crawler()
 
         crawler_data = """{
-                "name": "RequestsCrawler",
-                "crawler": "RequestsCrawler",
-                "settings": {
-                   "ssl_verify": true,
-                   "respect_robots_txt": true
-                }
+            "crawler_name": "RequestsCrawler",
+            "crawler_type": "RequestsCrawler",
+            "ssl_verify": true,
+            "respect_robots": true
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
@@ -256,12 +220,10 @@ class CrawlerTest(FakeInternetTestCase):
         crawler = Crawler()
 
         crawler_data = """{
-                "name": "RequestsCrawler",
-                "crawler": "RequestsCrawler",
-                "settings": {
-                   "ssl_verify": true,
-                   "respect_robots_txt": true
-                }
+                "crawler_name": "RequestsCrawler",
+                "crawler_type": "RequestsCrawler",
+                "ssl_verify": true,
+                "respect_robots_txt": true
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
@@ -284,9 +246,7 @@ class CrawlerTest(FakeInternetTestCase):
         test_url = "https://linkedin.com"
 
         crawler_data = """{
-                "settings" : {
-                    "timeout_s" : 20
-                }
+            "timeout_s" : 20
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
@@ -319,9 +279,8 @@ class CrawlerTest(FakeInternetTestCase):
         crawler_data = {
                 "name" : "RequestsCrawler",
                 "crawler" : "RequestsCrawler",
-                "settings" : {
+                "settings": {
                     "timeout_s" : 20,
-                    "remote_server": "https://",
                 }
         }
 
@@ -337,18 +296,9 @@ class CrawlerTest(FakeInternetTestCase):
 
         test_url = "https://linkedin.com"
 
-        crawler_data = {
-                "name" : "RequestsCrawler",
-                "crawler" : "RequestsCrawler",
-                "settings" : {
-                    "timeout_s" : 20,
-                    "remote_server": "https://",
-                }
-        }
-
         request = FlaskRequest("http://192.168.0.0")
         request.set("url", test_url)
-        request.set("name", "RequestsCrawler")
+        request.set("crawler_name", "RequestsCrawler")
 
         self.assertEqual(crawler.url_history.get_size(), 0)
         self.assertEqual(crawler.queue.get_size(), 0)
@@ -365,18 +315,9 @@ class CrawlerTest(FakeInternetTestCase):
 
         test_url = "https://linkedin.com"
 
-        crawler_data = {
-                "name" : "RequestsCrawler",
-                "crawler" : "RequestsCrawler",
-                "settings" : {
-                    "timeout_s" : 20,
-                    "remote_server": "https://",
-                }
-        }
-
         request = FlaskRequest("http://192.168.0.0")
         request.set("url", test_url)
-        request.set("name", "RequestsCrawler")
+        request.set("crawler_name", "RequestsCrawler")
 
         self.assertEqual(crawler.url_history.get_size(), 0)
         self.assertEqual(crawler.queue.get_size(), 0)

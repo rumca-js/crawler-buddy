@@ -5,28 +5,7 @@ from src.webtools import (
 )
 from script_server import set_response_impl
 
-from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
-
-class FlaskArgs(object):
-    def __init__(self):
-        self._map = {}
-
-    def get(self, key):
-        if key in self._map:
-            return self._map[key]
-
-    def set(self, key, value):
-        self._map[key] = value
-
-
-class FlaskRequest(object):
-    def __init__(self, host):
-        self.host = host
-        self.args = FlaskArgs()
-        self.json = None
-
-    def set(self, key, value):
-        self.args.set(key, value)
+from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter, FlaskRequest
 
 
 class ScriptServerTest(FakeInternetTestCase):

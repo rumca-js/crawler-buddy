@@ -761,12 +761,39 @@ class DefaultCrawler(CrawlerInterface):
 
         MockRequestCounter.requested(request.url, crawler_data=self.settings)
 
-        self.response = TestResponseObject(request.url, request.headers, request.timeout_s)
+        self.response = TestResponseObject(request.url, request.request_headers, request.timeout_s)
 
         return self.response
 
     def is_valid(self):
         return True
+
+
+class FlaskArgs(object):
+    def __init__(self):
+        self._map = {}
+
+    def get(self, key):
+        if key in self._map:
+            return self._map[key]
+
+    def set(self, key, value):
+        self._map[key] = value
+
+    def __contains__(self, key):
+        return key in self._map
+
+    def __getitem__(self, key):
+        return self._map[key]
+
+
+class FlaskRequest(object):
+    def __init__(self, host):
+        self.host = host
+        self.args = FlaskArgs()
+
+    def set(self, key, value):
+        self.args.set(key, value)
 
 
 class FakeInternetTestCase(unittest.TestCase):

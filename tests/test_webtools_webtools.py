@@ -1,7 +1,6 @@
 import hashlib
 from webtoolkit import (
    InputContent,
-   PageOptions,
    calculate_hash,
    status_code_to_text,
 )
@@ -71,61 +70,6 @@ webpage_links = """<html>
    </a>
 </html>
 """
-
-
-class PageOptionsTest(FakeInternetTestCase):
-    def setUp(self):
-        self.disable_web_pages()
-
-    def test_get_crawler(self):
-        o = PageOptions()
-        o.mode_mapping = [
-                {
-                    "name" : "test",
-                    "crawler" : "test",
-                    "settings" : {},
-                },
-                {
-                    "name" : "test2",
-                    "crawler" : "test2",
-                    "settings" : {},
-                },
-        ]
-
-        # call tested function
-        self.assertTrue(o.get_crawler("test"))
-
-        # call tested function
-        self.assertFalse(o.get_crawler("notest"))
-
-    def test_bring_to_frong(self):
-        o = PageOptions()
-        o.mode_mapping = [
-                {
-                    "name" : "test1",
-                    "crawler" : "test1",
-                    "settings" : {},
-                },
-                {
-                    "name" : "test2",
-                    "crawler" : "test2",
-                    "settings" : {},
-                },
-                {
-                    "name" : "test3",
-                    "crawler" : "test3",
-                    "settings" : {},
-                },
-        ]
-
-        crawler = o.get_crawler("test2")
-        self.assertTrue(crawler)
-
-        # call tested function
-        o.bring_to_front(crawler)
-
-        self.assertEqual(o.mode_mapping[0]["crawler"], "test2")
-        self.assertEqual(o.mode_mapping[1]["crawler"], "test1")
 
 
 class InputContentTest(FakeInternetTestCase):

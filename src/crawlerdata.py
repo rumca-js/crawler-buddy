@@ -1,5 +1,5 @@
 import json
-from webtoolkit import WebLogger
+from webtoolkit import WebLogger, json_to_request
 from src.webtools import WebConfig
 
 from src.entryrules import EntryRules
@@ -21,45 +21,11 @@ class CrawlerData(object):
         url = self.request.args.get("url")
 
         crawler_data = self.get_request_data_from_request()
-        crawler_data = self.fill_crawler_data(url, crawler_data)
-        crawler_data = self.get_crawler(url, crawler_data)
-
         if not crawler_data:
             WebLogger.error(
-                "Url:{} Cannot run request without crawler".format(url)
+                "Url:{} Cannot obtain crawler data".format(url)
             )
             return
-
-        return crawler_data
-
-    def get_request_data_from_request(self):
-        request = self.request
-
-        crawler_data = request.args.get("crawler_data")
-        crawler = request.args.get("crawler")
-        name = request.args.get("name")
-        headers = request.args.get("headers")
-
-        if crawler_data:
-            try:
-                crawler_data = json.loads(crawler_data)
-            except json.JSONDecodeError as E:
-                print(str(E))
-
-        if crawler_data is None:
-            crawler_data = {}
-
-        if crawler:
-            crawler_data["crawler"] = crawler
-        if name:
-            crawler_data["name"] = name
-
-        if "settings" not in crawler_data:
-            crawler_data["settings"] = {}
-
-        crawler_data["settings"]["full"] = request.args.get("full")
-        crawler_data["settings"]["headers"] = request.args.get("headers")
-        crawler_data["settings"]["ping"] = request.args.get("ping")
 
         # TODO host is 0.0.0.0 because we want to listen to "any".
         # host = self.configuration.get("host")
@@ -72,7 +38,41 @@ class CrawlerData(object):
                 "http://" + host + ":" + str(port)
             )
 
-        crawler_data["headers"] = headers
+        crawler_data = self.fill_crawler_data(url, crawler_data)
+        crawler_data = self.get_crawler(url, crawler_data)
+
+        if not crawler_data:
+            WebLogger.error(
+                "Url:{} Cannot run request without crawler".format(url)
+            )
+            return
+
+        return crawler_data
+
+    def get_request_data_from_request(self):
+        if "crawler_data" in self.request.args:
+            data_str = self.request.args.get("crawler_data")
+            data_json = json.loads(data_str)
+            data_json["url"] = self.request.args.get("url")
+            page_request = json_to_request(data_json)
+        else:
+            page_request = json_to_request(self.request.args)
+            print(page_request)
+
+        if not page_request:
+            return
+
+        crawler_data = {}
+
+        if page_request.crawler_name:
+            crawler_data["name"] = page_request.crawler_name
+        if page_request.crawler_type:
+            crawler_data["crawler"] = page_request.crawler_type
+        crawler_data["settings"] = {}
+        crawler_data["settings"]["timeout_s"] = page_request.timeout_s
+        crawler_data["settings"]["delay_s"] = page_request.delay_s
+        crawler_data["settings"]["ssl_verify"] = page_request.ssl_verify
+        crawler_data["settings"]["respect_robots_txt"] = page_request.respect_robots
 
         return crawler_data
 

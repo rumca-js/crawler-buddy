@@ -87,7 +87,7 @@ class RequestsCrawler(CrawlerInterface):
 
                 return self.response
 
-            if self.request.ping:
+            if self.request.request_type == "ping":
                 request_result.close()
                 return self.response
 

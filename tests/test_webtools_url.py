@@ -1,7 +1,6 @@
 from webtoolkit import (
     HtmlPage,
     RssPage,
-    PageOptions,
     PageResponseObject,
 )
 from src.webtools import (
@@ -941,7 +940,7 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(len(urls), 3)
         self.assertEqual(urls["link"], "https://corridordigital.com")
         self.assertEqual(urls["link_request"], "https://www.youtube.com/redirect?event=lorum&redir_token=ipsum&q=https%3A%2F%2Fcorridordigital.com%2F&v=LeB9DcFT810")
-        self.assertNotInEqual("link_canonical", urls)
+        self.assertNotIn("link_canonical", urls)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 

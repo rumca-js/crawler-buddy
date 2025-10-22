@@ -1,28 +1,7 @@
 
-
-from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
+from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter, FlaskRequest
 from script_server import info
 
-
-class FlaskArgs(object):
-    def __init__(self):
-        self._map = {}
-
-    def get(self, key):
-        if key in self._map:
-            return self._map[key]
-
-    def set(self, key, value):
-        self._map[key] = value
-
-
-class FlaskRequest(object):
-    def __init__(self, host):
-        self.host = host
-        self.args = FlaskArgs()
-
-    def set(self, key, value):
-        self.args.set(key, value)
 
 
 class ViewsInfoTest(FakeInternetTestCase):
