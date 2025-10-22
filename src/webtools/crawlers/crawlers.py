@@ -948,9 +948,6 @@ class ScriptCrawlerInterface(CrawlerInterface):
             request, settings=settings
         )
 
-    def save_response(self):
-        super().save_response()
-
 
 class BotasaurusCrawler(CrawlerInterface):
     """

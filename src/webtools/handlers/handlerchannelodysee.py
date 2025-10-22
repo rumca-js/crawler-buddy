@@ -134,6 +134,23 @@ class OdyseeChannelHandler(DefaultChannelHandler):
         if not feed:
             return
 
-        self.rss_url = self.get_page_url(feeds)
+        self.rss_url = self.get_page_url(feed)
         self.rss_url.get_response()
         return self.rss_url
+
+    def get_response(self):
+        if self.response:
+            return self.response
+
+        if self.dead:
+            return
+
+        self.rss_url = self.get_rss_url()
+
+        self.response = self.rss_url.get_response()
+        return self.response
+
+    def get_contents(self):
+        response = self.get_response()
+        if response:
+            return response.get_text()

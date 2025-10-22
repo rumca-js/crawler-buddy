@@ -33,6 +33,7 @@ from webtoolkit import (
     status_code_to_text,
     response_to_json,
     HandlerInterface,
+    HttpPageHandler,
 )
 from .webconfig import WebConfig
 
@@ -52,7 +53,6 @@ from .handlers import (
     InternetArchive,
     FourChanChannelHandler,
     TwitterUrlHandler,
-    HttpPageHandler,
 )
 
 from utils.dateutils import DateUtils
@@ -168,7 +168,7 @@ class Url(ContentInterface):
 
         handlers = Url.get_handlers()
         for handler in handlers:
-            if handler(url).is_handled_by():
+            if handler(url=url).is_handled_by():
                 if handler == HttpPageHandler:
                     page_type = UrlLocation(url).get_type()
 

@@ -34,7 +34,7 @@ def main():
 
     # Use interface to pass data out
     interface.response = page_obj
-    interface.save_response()
+    print(interface.response)
 
 
 if __name__ == "__main__":
