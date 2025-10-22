@@ -72,10 +72,10 @@ def get_crawling_form(title, action_url, id=""):
             <input type="url" id="url" name="url" required autofocus><br><br>
 
             <label for="name">Name (optional):</label><br>
-            <input type="text" id="name" name="name"><br><br>
+            <input type="text" id="crawler_name" name="crawler_name"><br><br>
 
             <label for="crawler">Crawler (optional):</label><br>
-            <input type="text" id="crawler" name="crawler"><br><br>
+            <input type="text" id="crawler_type" name="crawler_type"><br><br>
 
             <button type="submit">Submit</button>
         </form>
@@ -387,8 +387,8 @@ def find():
         return get_html(id=id, body="Cannot access this view", title="Error")
 
     url = request.args.get("url")
-    name = request.args.get("name")
-    crawler = request.args.get("crawler")
+    name = request.args.get("crawler_name")
+    crawler = request.args.get("crawler_type")
 
     if not url and not name and not crawler:
         form_html = """
@@ -434,8 +434,8 @@ def findj():
         return get_html(id=id, body="Cannot access this view", title="Error")
 
     url = request.args.get("url")
-    name = request.args.get("name")
-    crawler = request.args.get("crawler")
+    name = request.args.get("crawler_name")
+    crawler = request.args.get("crawler_type")
     index = request.args.get("index")
 
     if index:
