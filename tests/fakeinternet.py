@@ -808,7 +808,7 @@ class FakeInternetTestCase(unittest.TestCase):
         Url.handlers[0] = YouTubeJsonHandlerMock
 
         WebConfig.use_print_logging()
-        #WebConfig.get_crawler_from_mapping = FakeInternetTestCase.get_crawler_from_mapping
+        WebConfig.get_crawler_from_string = FakeInternetTestCase.get_crawler_from_string
 
     def get_default_crawler(url):
         data = {}
@@ -818,14 +818,8 @@ class FakeInternetTestCase(unittest.TestCase):
 
         return data
 
-    #def get_crawler_from_mapping(request, crawler_data):
-    #    if "settings" in crawler_data:
-    #        crawler = DefaultCrawler(request = request, settings = crawler_data["settings"])
-    #    else:
-    #        crawler = DefaultCrawler(request = request)
-    #    crawler.crawler_data = crawler_data
-
-    #    return crawler
+    def get_crawler_from_string(string):
+        return DefaultCrawler
 
     def setup_configuration(self):
         # each suite should start with a default configuration entry
