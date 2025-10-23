@@ -104,12 +104,18 @@ class Url(ContentInterface):
         if not self.settings:
             self.settings = WebConfig.get_default_crawler(self.url)
 
-        if "crawler" not in self.settings:
+        if "name" not in self.settings:
             settings = WebConfig.get_default_crawler(self.url)
 
             self.settings["name"] = settings["name"]
-            self.settings["crawler"] = settings["crawler"]
             self.settings["settings"] = settings["settings"]
+
+            crawler = WebConfig.get_crawler_from_string(settings["crawler"])
+            if not crawler:
+                WebLogger.error("Could not find crawler")
+                return
+
+            self.settings["crawler"] = crawler(url=self.url)
 
         if self.settings and "handler_class" in self.settings:
             handler_class = self.settings["handler_class"]

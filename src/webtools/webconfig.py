@@ -251,12 +251,10 @@ class WebConfig(object):
         return result
 
     def get_default_crawler(url):
-        config = WebConfig.get_init_crawler_config()
-        if config:
-            crawler_data = dict(config[0])
-            if "crawler" in crawler_data:
-                crawler_data["crawler"] = crawler_data["crawler"](url=url)
-                return crawler_data
+        configured_crawlers = WebConfig.get_init_crawler_config()
+        if configured_crawlers:
+            crawler_data = dict(configured_crawlers[0])
+            return crawler_data
 
     def use_logger(Logger):
         WebLogger.web_logger = Logger
