@@ -186,6 +186,10 @@ class CrawlerData(object):
             return
 
         crawler = WebConfig.get_crawler_from_string(new_mapping["name"])
+        if not crawler:
+            WebLogger.error("Could not find crawler")
+            return
+
         new_mapping["crawler"] = crawler(url=url)
 
         # use what is not default by crawler buddy

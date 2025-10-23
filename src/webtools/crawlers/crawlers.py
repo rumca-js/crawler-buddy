@@ -384,17 +384,19 @@ class CurlCffiCrawler(CrawlerInterface):
             return self.response
 
     def build_requests(self):
+        import curl_cffi
         from curl_cffi import requests
         from curl_cffi.requests.exceptions import ConnectionError
 
         headers = self.get_request_headers()
 
         try:
-            answer = requests.get(
+            answer = curl_cffi.get(
                 self.request.url,
                 timeout=self.get_timeout_s(),
                 verify=self.request.ssl_verify,
-                headers=headers,
+                impersonate="chrome",
+                #headers=headers,
                 # stream=True, # TODO
             )
             return answer

@@ -77,7 +77,7 @@ async def main() -> None:
         print("Running request:{} with PlaywrightCrawler".format(request))
 
     interface = webtools.ScriptCrawlerInterface(
-        parser, request, __file__, webtools.webconfig.CRAWLEE_PLAYWRIGHT_SCRIPT
+        parser, request, __file__, webtools.webconfig.CrawleePlaywrightScript.script
     )
     response = PageResponseObject(request.url)
 

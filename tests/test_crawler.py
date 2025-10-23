@@ -29,24 +29,11 @@ class CrawlerTest(FakeInternetTestCase):
 
         self.assertEqual(data["name"], "RequestsCrawler")
 
-    def test_get_request_data__crawler(self):
-        crawler = Crawler()
-
-        request = FlaskRequest("http://192.168.0.0")
-        request.set("url", "https://test.com")
-        request.set("crawler_type", "RequestsCrawler")
-
-        # call tested function
-        data = crawler.get_request_data(request)
-
-        self.assertEqual(type(data["crawler"]).__name__, "RequestsCrawler")
-
     def test_get_request_data__crawler_data(self):
         crawler = Crawler()
 
         crawler_data = """{
-                "crawler_name": "RequestsCrawler",
-                "crawler_type": "RequestsCrawler"
+           "crawler_name": "RequestsCrawler"
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
