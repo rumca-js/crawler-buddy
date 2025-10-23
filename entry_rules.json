@@ -16,7 +16,7 @@
             "rule_name": "Crawlee",
             "block": false,
             "auto_tag": "",
-            "browser": "CrawleeScript"
+            "browser": "CrawleeBeautifulScript"
         }
     ]
 }

@@ -1,6 +1,5 @@
 [
   {
-    "crawler": "RequestsCrawler",
     "enabled": true,
     "name": "RequestsCrawler",
     "settings": {
@@ -8,7 +7,27 @@
     }
   },
   {
-    "crawler": "SeleniumUndetected",
+    "enabled": true,
+    "name": "StealthRequestsCrawler",
+    "settings": {
+      "timeout_s": 40
+    }
+  },
+  {
+    "enabled": true,
+    "name": "CurlCffiCrawler",
+    "settings": {
+      "timeout_s": 40
+    }
+  },
+  {
+    "enabled": true,
+    "name": "HttpxCrawler",
+    "settings": {
+      "timeout_s": 40
+    }
+  },
+  {
     "enabled": true,
     "name": "SeleniumUndetected",
     "settings": {
@@ -17,7 +36,6 @@
     }
   },
   {
-    "crawler": "SeleniumChromeHeadless",
     "enabled": true,
     "name": "SeleniumChromeHeadless",
     "settings": {
@@ -26,7 +44,6 @@
     }
   },
   {
-    "crawler": "SeleniumChromeFull",
     "enabled": true,
     "name": "SeleniumChromeFull",
     "settings": {
@@ -36,49 +53,22 @@
     }
   },
   {
-    "crawler": "StealthRequestsCrawler",
     "enabled": true,
-    "name": "StealthRequestsCrawler",
-    "settings": {
-      "timeout_s": 40
-    }
-  },
-  {
-    "crawler": "CurlCffiCrawler",
-    "enabled": true,
-    "name": "CurlCffiCrawler",
-    "settings": {
-      "timeout_s": 40
-    }
-  },
-  {
-    "crawler": "HttpxCrawler",
-    "enabled": true,
-    "name": "HttpxCrawler",
-    "settings": {
-      "timeout_s": 40
-    }
-  },
-  {
-    "crawler": "ScriptCrawler",
-    "enabled": true,
-    "name": "CrawleeScript",
+    "name": "CrawleeBeautifulScript",
     "settings": {
       "script": "poetry run python crawleebeautifulsoup.py",
       "timeout_s": 50
     }
   },
   {
-    "crawler": "ScriptCrawler",
     "enabled": true,
-    "name": "PlaywrightScript",
+    "name": "CrawleePlaywrightScript",
     "settings": {
       "script": "poetry run python crawleeplaywright.py",
       "timeout_s": 50
     }
   },
   {
-    "crawler": "ScriptCrawler",
     "enabled": true,
     "name": "ScrapyCrawler",
     "settings": {
@@ -87,7 +77,6 @@
     }
   },
   {
-    "crawler": "SeleniumWireFull",
     "enabled": true,
     "name": "SeleniumWireFull",
     "settings": {
@@ -97,7 +86,6 @@
     }
   },
   {
-    "crawler": "SeleniumBase",
     "enabled": false,
     "name": "SeleniumBase",
     "settings": {

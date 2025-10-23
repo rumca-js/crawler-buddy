@@ -162,19 +162,11 @@ class CrawlerData(object):
 
         new_mapping = None
 
-        if "crawler" not in crawler_data and "name" in crawler_data:
+        if "name" in crawler_data:
             new_mapping = self.configuration.get_crawler(name=crawler_data["name"])
             if not new_mapping:
                 return
-            new_mapping["crawler"] = new_mapping["crawler"](url=url)
-        elif "name" not in crawler_data and "crawler" in crawler_data:
-            new_mapping = self.configuration.get_crawler(
-                crawler_name=crawler_data["crawler"]
-            )
-            if not new_mapping:
-                return
-            new_mapping["crawler"] = new_mapping["crawler"](url=url)
-        elif "name" not in crawler_data and "crawler" not in crawler_data:
+        else:
             crawler_name = self.entry_rules.get_browser(url)
             if not crawler_name:
                 new_mapping = self.get_default_crawler(url)
@@ -188,16 +180,13 @@ class CrawlerData(object):
                             crawler_name
                         )
                     )
-                new_mapping["crawler"] = new_mapping["crawler"](url=url)
-        else:
-            new_mapping = self.configuration.get_crawler(name=crawler_data["name"])
-            if not new_mapping:
-                return
-            new_mapping["crawler"] = new_mapping["crawler"](url=url)
 
         if not new_mapping:
             WebLogger.error("Could not find crawler")
             return
+
+        crawler = WebConfig.get_crawler_from_string(new_mapping["name"])
+        new_mapping["crawler"] = crawler(url=url)
 
         # use what is not default by crawler buddy
         for key in crawler_data:

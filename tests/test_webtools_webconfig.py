@@ -9,11 +9,14 @@ class WebConfigTest(FakeInternetTestCase):
     def setUp(self):
         self.disable_web_pages()
 
-    def test_get_browsers(self):
-        browsers = WebConfig.get_browsers()
-        self.assertTrue(len(browsers) > 0)
+    def test_get_crawler_names(self):
+        crawlers = WebConfig.get_crawler_names()
+        self.assertTrue(len(crawlers) > 0)
+        self.assertIn("RequestsCrawler", crawlers)
 
-        self.assertIn("RequestsCrawler", browsers)
+    def test_get_crawlers(self):
+        crawlers = WebConfig.get_crawlers()
+        self.assertTrue(len(crawlers) > 0)
 
     def test_get_init_crawler_config__standard(self):
         config = WebConfig.get_init_crawler_config()
@@ -33,7 +36,6 @@ class WebConfigTest(FakeInternetTestCase):
         config = WebConfig.get_default_crawler("https://test.com")
 
         self.assertIn("name", config)
-        self.assertIn("crawler", config)
         self.assertIn("settings", config)
 
     def test_get_bytes_limits(self):

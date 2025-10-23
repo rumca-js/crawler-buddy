@@ -48,11 +48,6 @@ class Configuration(object):
             print("Reading crawler config from file")
             with path.open("r") as file:
                 config = json.load(file)
-                for index, item in enumerate(config):
-                    config[index]["crawler"] = (
-                        webtools.WebConfig.get_crawler_from_string(item["crawler"])
-                    )
-
                 self.crawler_config = config
 
                 return self.crawler_config
@@ -90,14 +85,11 @@ class Configuration(object):
     def get_crawler_config(self):
         return self.crawler_config
 
-    def get_crawler(self, name=None, crawler_name=None):
+    def get_crawler(self, name=None):
         config = self.crawler_config
         for item in config:
             if name:
                 if name == item["name"]:
-                    return dict(item)
-            if crawler_name:
-                if crawler_name == item["crawler"].__name__:
                     return dict(item)
 
     def is_allowed(self, id):

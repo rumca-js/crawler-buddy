@@ -15,6 +15,7 @@ import base64
 import traceback
 from datetime import datetime
 
+import webtoolkit
 from webtoolkit import (
    WebLogger,
    PageResponseObject,
@@ -53,10 +54,9 @@ def get_crawler_text():
     config = configuration.get_crawler_config()
     for item in config:
         name = item["name"]
-        crawler = item["crawler"]
         settings = item["settings"]
-        text += "<div>Name:{} Crawler:{} Settings:{}</div>\n".format(
-            name, crawler, settings
+        text += "<div>Name:{} Settings:{}</div>\n".format(
+            name, settings
         )
 
     return text
@@ -188,11 +188,11 @@ def info():
 
     text += "<h2>Default user agent</h2>"
     text += "<div>Default user agent:{}</div>".format(
-        webtools.crawlers.default_user_agent
+        webtoolkit.crawlers.crawlerinterface.default_user_agent
     )
 
     text += "<h2>Default headers</h2>"
-    for key, value in webtools.crawlers.default_headers.items():
+    for key, value in webtoolkit.crawlers.crawlerinterface.default_headers.items():
         text += "<div>{}:{}</div>".format(key, value)
 
     text += "<h2>Data</h2>"

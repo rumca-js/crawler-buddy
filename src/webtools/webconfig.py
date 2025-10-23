@@ -26,9 +26,25 @@ from .crawlers import (
 )
 
 
-CRAWLEE_BEAUTIFUL_SCRIPT = "CrawleeScript"
-CRAWLEE_PLAYWRIGHT_SCRIPT = "PlaywrightScript"
-SCRAPY_SCRIPT = "ScrapyScript"
+class CrawleeBeautifulScript(ScriptCrawler):
+    def __init__(self, request=None, settings=None):
+        super().__init__(request=request,
+                         settings=settings,
+                         script=WebConfig.get_script_path("crawleebeautifulsoup.py"))
+
+
+class CrawleePlaywrightScript(ScriptCrawler):
+    def __init__(self, request=None, settings=None):
+        super().__init__(request=request,
+                         settings=settings,
+                         script=WebConfig.get_script_path("crawleeplaywright.py"))
+
+
+class ScrapyScript(ScriptCrawler):
+    def __init__(self, request=None, settings=None):
+        super().__init__(request=request,
+                         settings=settings,
+                         script=WebConfig.get_script_path("cralwerscrapy.py"))
 
 
 class WebConfig(object):
@@ -45,21 +61,23 @@ class WebConfig(object):
     def init():
         pass
 
-    def get_browsers_raw():
-        browsers = [
+    def get_crawlers_raw():
+        crawlers = [
             RequestsCrawler,
             SeleniumChromeHeadless,  # requires driver location
             SeleniumChromeFull,  # requires driver location
             SeleniumUndetected,  # requires driver location
-            ScriptCrawler,  # requires script
             SeleniumBase,
             SeleniumWireFull,
             StealthRequestsCrawler,
             CurlCffiCrawler,
             HttpxCrawler,
+            CrawleeBeautifulScript,
+            CrawleePlaywrightScript,
+            ScrapyScript,
         ]
 
-        return browsers
+        return crawlers
 
     def get_init_crawler_config(headless_script=None, full_script=None, port=None):
         """
@@ -67,31 +85,102 @@ class WebConfig(object):
         """
         mapping = []
 
-        headless_script = WebConfig.get_script_path("crawleebeautifulsoup.py")
-        full_script = WebConfig.get_script_path("crawleeplaywright.py")
-        scrapy_script = WebConfig.get_script_path("cralwerscrapy.py")
-
         mapping.append(WebConfig.get_default_browser_setup(RequestsCrawler))
 
-        mapping.append(
-            WebConfig.get_scriptcralwer(headless_script, CRAWLEE_BEAUTIFUL_SCRIPT)
-        )
-        mapping.append(
-            WebConfig.get_scriptcralwer(full_script, CRAWLEE_PLAYWRIGHT_SCRIPT)
-        )
-        mapping.append(WebConfig.get_scriptcralwer(scrapy_script, SCRAPY_SCRIPT))
-
-        mapping.append(WebConfig.get_seleniumundetected())
-        mapping.append(WebConfig.get_seleniumbase())
-        mapping.append(WebConfig.get_seleniumheadless())
-        mapping.append(WebConfig.get_seleniumfull())
-
-        mapping.append(WebConfig.get_default_browser_setup(SeleniumWireFull))
         mapping.append(WebConfig.get_default_browser_setup(StealthRequestsCrawler))
         mapping.append(WebConfig.get_default_browser_setup(CurlCffiCrawler))
         mapping.append(WebConfig.get_default_browser_setup(HttpxCrawler))
 
+        mapping.append(WebConfig.get_seleniumundetected())
+        mapping.append(WebConfig.get_seleniumheadless())
+        mapping.append(WebConfig.get_seleniumfull())
+        mapping.append(WebConfig.get_seleniumbase())
+
+        mapping.append(WebConfig.get_default_browser_setup(CrawleeBeautifulScript))
+        mapping.append(WebConfig.get_default_browser_setup(CrawleePlaywrightScript))
+        mapping.append(WebConfig.get_default_browser_setup(ScrapyScript))
+
+        mapping.append(WebConfig.get_default_browser_setup(SeleniumWireFull, timeout_s=50))
+
         return mapping
+
+    def get_default_browser_setup(browser, enabled=True, timeout_s=30):
+        return {
+            "enabled": enabled,
+            "name": browser.__name__,
+            "settings": {"timeout_s": timeout_s},
+        }
+
+    def get_requests():
+        return {
+            "enabled": True,
+            "name": "RequestsCrawler",
+            "settings": {"timeout_s": 40},
+        }
+
+    def get_seleniumheadless():
+        chromedriver_path = Path("/usr/bin/chromedriver")
+
+        if chromedriver_path.exists():
+            return {
+                "enabled": False,
+                "name": "SeleniumChromeHeadless",
+                "settings": {
+                    "driver_executable": str(chromedriver_path),
+                    "timeout_s": 60,
+                },
+            }
+        else:
+            return {
+                "enabled": True,
+                "name": "SeleniumChromeHeadless",
+                "settings": {"driver_executable": None, "timeout_s": 60},
+            }
+
+    def get_seleniumfull():
+        chromedriver_path = Path("/usr/bin/chromedriver")
+
+        if chromedriver_path.exists():
+            return {
+                "enabled": False,
+                "name": "SeleniumChromeFull",
+                "settings": {
+                    "driver_executable": str(chromedriver_path),
+                    "timeout_s": 40,
+                },
+            }
+        else:
+            return {
+                "enabled": False,
+                "name": "SeleniumChromeFull",
+                "settings": {"driver_executable": None, "timeout_s": 60},
+            }
+
+    def get_seleniumundetected():
+        chromedriver_path = Path("/usr/bin/chromedriver")
+
+        if chromedriver_path.exists():
+            return {
+                "enabled": False,
+                "name": "SeleniumUndetected",
+                "settings": {
+                    "driver_executable": str(chromedriver_path),
+                    "timeout_s": 60,
+                },
+            }
+        else:
+            return {
+                "enabled": False,
+                "name": "SeleniumUndetected",
+                "settings": {"driver_executable": None, "timeout_s": 60},
+            }
+
+    def get_seleniumbase():
+        return {
+            "enabled": False,
+            "name": "SeleniumBase",
+            "settings": {},
+        }
 
     def get_script_path(script_relative):
         """
@@ -107,25 +196,41 @@ class WebConfig(object):
 
         return script_relative
 
-    def get_browsers():
-        str_browsers = []
-        for browser in WebConfig.get_browsers_raw():
-            str_browsers.append(browser.__name__)
-
-        return str_browsers
-
-    def get_crawler_from_string(input_string):
+    def get_crawler_names():
         """
-        TODO - apply generic approach
+        Returns string representation
         """
-        browsers = WebConfig.get_browsers_raw()
-        for browser in browsers:
-            if browser.__name__ == input_string:
-                return browser
+        str_crawlers = []
+        for crawler in WebConfig.get_crawlers_raw():
+            str_crawlers.append(crawler.__name__)
+
+        return str_crawlers
+
+    def get_crawler_from_string(crawler_string):
+        """
+        Returns crawler for input string
+        """
+        if not crawler_string:
+            return
+
+        crawlers = WebConfig.get_crawlers_raw()
+        for crawler in crawlers:
+            if crawler.__name__ == crawler_string:
+                return crawler
 
     def get_crawler_from_mapping(request, mapping_data):
-        crawler = mapping_data["crawler"]
-        if not crawler:
+        crawler_class = None
+
+        if "crawler" in mapping_data and mapping_data["crawler"]:
+            crawler_class = mapping_data["crawler"]
+
+        if "name" in mapping_data and mapping_data["name"]:
+            crawler_class = WebConfig.get_crawler_from_string(mapping_data["name"])
+
+        if crawler_class is None and request:
+            crawler_class = WebConfig.get_crawler_from_string(request.crawler_type)
+
+        if not crawler_class:
             return
 
         settings = mapping_data["settings"]
@@ -152,101 +257,6 @@ class WebConfig(object):
             if "crawler" in crawler_data:
                 crawler_data["crawler"] = crawler_data["crawler"](url=url)
                 return crawler_data
-
-    def get_default_browser_setup(browser, enabled=True):
-        return {
-            "enabled": enabled,
-            "name": browser.__name__,
-            "crawler": browser,
-            "settings": {"timeout_s": 30},
-        }
-
-    def get_requests():
-        return {
-            "enabled": True,
-            "name": "RequestsCrawler",
-            "crawler": RequestsCrawler,
-            "settings": {"timeout_s": 40},
-        }
-
-    def get_scriptcralwer(script, name=""):
-        return {
-            "enabled": True,
-            "name": name,
-            "crawler": ScriptCrawler,
-            "settings": {"script": script, "timeout_s": 50},
-        }
-
-    def get_seleniumheadless():
-        chromedriver_path = Path("/usr/bin/chromedriver")
-
-        if chromedriver_path.exists():
-            return {
-                "enabled": False,
-                "name": "SeleniumChromeHeadless",
-                "crawler": SeleniumChromeHeadless,
-                "settings": {
-                    "driver_executable": str(chromedriver_path),
-                    "timeout_s": 60,
-                },
-            }
-        else:
-            return {
-                "enabled": True,
-                "name": "SeleniumChromeHeadless",
-                "crawler": SeleniumChromeHeadless,
-                "settings": {"driver_executable": None, "timeout_s": 60},
-            }
-
-    def get_seleniumfull():
-        chromedriver_path = Path("/usr/bin/chromedriver")
-
-        if chromedriver_path.exists():
-            return {
-                "enabled": False,
-                "name": "SeleniumChromeFull",
-                "crawler": SeleniumChromeFull,
-                "settings": {
-                    "driver_executable": str(chromedriver_path),
-                    "timeout_s": 40,
-                },
-            }
-        else:
-            return {
-                "enabled": False,
-                "name": "SeleniumChromeFull",
-                "crawler": SeleniumChromeFull,
-                "settings": {"driver_executable": None, "timeout_s": 60},
-            }
-
-    def get_seleniumundetected():
-        chromedriver_path = Path("/usr/bin/chromedriver")
-
-        if chromedriver_path.exists():
-            return {
-                "enabled": False,
-                "name": "SeleniumUndetected",
-                "crawler": SeleniumUndetected,
-                "settings": {
-                    "driver_executable": str(chromedriver_path),
-                    "timeout_s": 60,
-                },
-            }
-        else:
-            return {
-                "enabled": False,
-                "name": "SeleniumUndetected",
-                "crawler": SeleniumUndetected,
-                "settings": {"driver_executable": None, "timeout_s": 60},
-            }
-
-    def get_seleniumbase():
-        return {
-            "enabled": False,
-            "name": "SeleniumBase",
-            "crawler": SeleniumBase,
-            "settings": {},
-        }
 
     def use_logger(Logger):
         WebLogger.web_logger = Logger
