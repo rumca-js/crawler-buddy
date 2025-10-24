@@ -1,5 +1,5 @@
 {
-    "respect_robots_txt" : true,
+    "respect_robots_txt" : false,
     "logging_level" : 10,
     "ssl_verify" : true,
     "use_canonical_links" : true,

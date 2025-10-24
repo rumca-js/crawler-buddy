@@ -54,6 +54,7 @@ def level2color(level):
 
 
 def status2color(status_code):
+    print(status_code)
     if status_code >= 200 and status_code < 300:
         return "green"
     elif status_code == 403:

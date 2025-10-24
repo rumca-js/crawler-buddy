@@ -619,8 +619,11 @@ class Url(ContentInterface):
 
         response_data = self.get_response_data()
         all_properties.append({"name": "Response", "data": response_data})
-        raw_headers_data = response.get_headers()
-        all_properties.append({"name": "Headers", "data": raw_headers_data})
+        if response:
+            raw_headers_data = response.get_headers()
+            all_properties.append({"name": "Headers", "data": raw_headers_data})
+        else:
+            all_properties.append({"name": "Headers", "data": None})
 
         if include_social:
             social_data = self.get_social_properties(self.url)
