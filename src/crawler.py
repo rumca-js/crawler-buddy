@@ -70,10 +70,10 @@ class Crawler(object):
 
         return properties
 
-    def get_page_url(self, url, crawler_data):
+    def get_page_url(self, url, request):
         """ """
 
-        page_url = webtools.Url(url, settings=crawler_data)
+        page_url = webtools.Url(url, request=request)
         return page_url
 
     def get_all_properties(self, request, headers=False, ping=False):
@@ -86,21 +86,19 @@ class Crawler(object):
             }}]
             return all_properties
 
-        crawler_data = self.get_request_data(request)
+        request = self.get_request_data(request)
 
-        if not crawler_data:
+        if not request:
             all_properties = [{"name": "Response", "data": {
                 "status_code" : HTTP_STATUS_CODE_EXCEPTION,
-                "errors" :  ["Cannot obtain crowler data"],
+                "errors" :  ["Cannot obtain request"],
             }}]
             return all_properties
 
-        name = None
-        if "name" in crawler_data:
-            name = crawler_data["name"]
+        name = request.crawler_name
         crawler = None
-        if "crawler" in crawler_data:
-            crawler = crawler_data["crawler"].__class__.__name__
+        if request.crawler_type:
+            crawler = request.crawler_type.__class__.__name__
 
         things = self.get_history().find(url=url, crawler_name=name, crawler=crawler)
 
@@ -112,25 +110,27 @@ class Crawler(object):
                 return all_properties
 
         # TODO what if there is exception
-        crawl_index = self.queue.enter(url, crawler_data)
+        crawl_index = self.queue.enter(url, request)
         if crawl_index is None:
-            WebLogger.error("Too many crawler calls".format(url, crawler_data))
+            WebLogger.error("Too many crawler calls".format(url, request))
             all_properties = [{"name": "Response", "data": {
                 "status_code" : HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
                 "errors" :  ["Too many crawler calls"],
             }}]
             return all_properties
 
-        crawler_data["settings"]["headers"] = headers
-        crawler_data["settings"]["ping"] = ping
+        if headers:
+            request.request_type = "head"
+        elif ping:
+            request.request_type = "ping"
 
         try:
             webtools.WebConfig.start_display()
-            all_properties = self.run(url, crawler_data)
+            all_properties = self.run(url, request)
         except Exception as E:
             WebLogger.exc(
                 E,
-                info_text="Exception when calling getj {} {}".format(url, crawler_data),
+                info_text="Exception when calling getj {} {}".format(url, request),
             )
             all_properties = None
 
@@ -158,23 +158,23 @@ class Crawler(object):
 
         return all_properties
 
-    def run(self, url, crawler_data=None):
-        if not crawler_data:
+    def run(self, url, request=None):
+        if not request:
             WebLogger.error(
-                "Url:{} Cannot run request without crawler_data".format(url)
+                "Url:{} Cannot run request without request".format(url)
             )
             return
 
-        page_url = self.get_page_url(url, crawler_data)
+        page_url = self.get_page_url(url, request)
 
         if not page_url:
             WebLogger.error(
-                "Could not create page url for {} {}".format(url, crawler_data)
+                "Could not create page url for {} {}".format(url, request)
             )
             return
 
         try:
-            print("Running:{}, with:{}".format(url, crawler_data))
+            print("Running:{}, with:{}".format(url, request))
 
             response = page_url.get_response()
             all_properties = page_url.get_properties(full=True, include_social=False)

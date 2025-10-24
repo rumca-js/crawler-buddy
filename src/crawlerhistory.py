@@ -67,8 +67,8 @@ class CrawlerHistory(object):
                 if not settings:
                     continue
 
-            settings_crawler_name = settings.get("name")
-            settings_crawler = settings.get("crawler")
+            settings_crawler_name = settings.get("crawler_name")
+            settings_crawler = settings.get("crawler_type")
 
             if crawler_name and crawler_name != settings_crawler_name:
                 continue

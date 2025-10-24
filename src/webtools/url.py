@@ -31,6 +31,7 @@ from webtoolkit import (
     URL_TYPE_UNKNOWN,
     status_code_to_text,
     response_to_json,
+    request_to_json,
     HandlerInterface,
     HttpPageHandler,
 )
@@ -82,57 +83,54 @@ class Url(ContentInterface):
         HttpPageHandler,  # default
     ]
 
-    def __init__(self, url=None, settings=None, url_builder=None):
+    def __init__(self, url=None, settings=None, request=None, url_builder=None):
         """
         @param handler_class Allows to enforce desired handler to be used to process link
 
         There are various ways url can be specified. For simplicity we cleanup it.
         I do not like trailing slashes, no google stupid links, etc.
         """
+        self.request_url = url
 
         if url:
-            self.request_url = url
             url = Url.get_cleaned_link(url)
-            self.url = url
-        else:
+        elif request:
+            url = Url.get_cleaned_link(request.url)
+
+        if not url:
             self.url = None
             self.request_url = None
+            WebLogger.error("Url needs to be specified")
+            return
 
-        self.settings = settings
-        self.handler = None
+        self.url = url
 
-        if not self.settings:
-            self.settings = WebConfig.get_default_crawler(self.url)
+        if not request:
+            self.request = WebConfig.get_default_request(self.url)
+        else:
+            self.request = request
 
-        if "name" not in self.settings:
-            settings = WebConfig.get_default_crawler(self.url)
-            if not settings:
+        if not self.request.crawler_name:
+            default = WebConfig.get_default_request(self.url)
+            if not default:
                 WebLogger.error("Could not find default crawler")
                 return
+            
+            self.request.crawler_name = default.crawler_name
 
-            self.settings["name"] = settings["name"]
-            self.settings["settings"] = settings["settings"]
-
-            crawler = WebConfig.get_crawler_from_string(settings["name"])
-            if not crawler:
-                WebLogger.error("Could not find crawler with name {}".format(settings["name"]))
-                return
-
-            self.settings["crawler"] = crawler(url=self.url)
-
-        if self.settings and "handler_class" in self.settings:
-            handler_class = self.settings["handler_class"]
-            self.handler = handler_class(
-                url=self.url, settings=self.settings, url_builder=url_builder
-            )
-
+        self.handler = None
         self.response = None
+
         self.url_builder = url_builder
+
         if not self.url_builder:
             self.url_builder = Url
 
     def get_init_settings(self):
         return WebConfig.get_default_crawler(self.url)
+
+    def get_init_request(self):
+        return WebConfig.get_default_request(self.url)
 
     def get_handlers():
         return Url.handlers
@@ -230,10 +228,7 @@ class Url(ContentInterface):
             self.handler = self.get_handler_implementation()
 
         if self.handler:
-            if (
-                "respect_robots_txt" in self.settings
-                and self.settings["respect_robots_txt"]
-            ):
+            if (self.request.respect_robots):
                 if not self.is_allowed():
                     return
 
@@ -254,10 +249,7 @@ class Url(ContentInterface):
         self.handler = self.get_handler_implementation()
 
         if self.handler:
-            if (
-                "respect_robots_txt" in self.settings
-                and self.settings["respect_robots_txt"]
-            ):
+            if (self.request.respect_robots):
                 if not self.is_allowed():
                     return
 
@@ -285,8 +277,11 @@ class Url(ContentInterface):
 
         handlers = Url.get_handlers()
         for handler in handlers:
+            if self.request.handler_type and self.request.handler_type != handler:
+                continue
+
             h = handler(
-                url=self.url, settings=self.settings, url_builder=self.url_builder
+                url=self.url, request=self.request, url_builder=self.url_builder
             )
             if h.is_handled_by():
                 self.url = h.url
@@ -294,7 +289,7 @@ class Url(ContentInterface):
 
         if url.startswith("https") or url.startswith("http"):
             return HttpPageHandler(
-                url=url, settings=self.settings, url_builder=self.url_builder
+                url=url, request=request, url_builder=self.url_builder
             )
         elif url.startswith("smb") or url.startswith("ftp"):
             raise NotImplementedError("Protocol has not been implemented")
@@ -311,8 +306,7 @@ class Url(ContentInterface):
             return self
         else:
             p = UrlLocation(self.url)
-            u = self.url_builder(p.get_domain())
-            u.set_config(self.settings)
+            u = self.url_builder(p.get_domain(), request=self.request)
             return u
 
     def get_robots_txt_url(self):
@@ -341,8 +335,7 @@ class Url(ContentInterface):
 
         domain = p.get_domain()
 
-        url = self.url_builder(domain)
-        url.set_config(self.settings)
+        url = self.url_builder(domain, request=self.request)
 
         return url.get_favicon()
 
@@ -409,7 +402,7 @@ class Url(ContentInterface):
         return DomainCache.get_object(self.url)
 
     def __str__(self):
-        return "{}".format(self.settings)
+        return "{}".format(self.request)
 
     def is_valid(self):
         if not self.handler:
@@ -611,8 +604,8 @@ class Url(ContentInterface):
         streams = self.get_streams()
         all_properties.append({"name": "Streams", "data": streams})
 
-        request_data = dict(self.settings)
-        request_data["crawler"] = type(request_data["crawler"]).__name__
+        request_data = request_to_json(self.request)
+        request_data["crawler_type"] = type(request_data["crawler_type"]).__name__
 
         all_properties.append({"name": "Settings", "data": request_data})
 
@@ -679,12 +672,7 @@ class Url(ContentInterface):
 
         respect_robots_txt = False
         is_allowed = True
-        if (
-            "respect_robots_txt"
-            in self.settings  # TODO this hsould come from response?
-            and self.settings["respect_robots_txt"]
-        ):
-            respect_robots_txt = self.settings["respect_robots_txt"]
+        if (self.request.respect_robots):
             is_allowed = self.is_allowed()
 
         response_data["is_allowed"] = is_allowed
@@ -760,14 +748,14 @@ class DomainCacheInfo(object):
     is_access_valid
     """
 
-    def __init__(self, url, respect_robots_txt=True, settings=None, url_builder=None):
+    def __init__(self, url, respect_robots_txt=True, request=None, url_builder=None):
         p = UrlLocation(url)
 
         self.respect_robots_txt = respect_robots_txt
 
         self.url = p.get_domain()
         self.robots_contents = None
-        self.settings = settings
+        self.request = request
         self.url_builder = url_builder
 
         if not self.url_builder:
@@ -810,7 +798,7 @@ class DomainCacheInfo(object):
             return self.robots_contents
 
         robots_url = self.get_robots_txt_url()
-        u = self.url_builder(robots_url, settings=self.settings)
+        u = self.url_builder(robots_url, request=self.request)
 
         response = u.get_response()
         if response:
@@ -852,8 +840,7 @@ class DomainCacheInfo(object):
 
         urls = self.get_site_maps_urls()
         for url in urls:
-            u = slef.url_builder(url=url)
-            u.set_config(self.settings)
+            u = slef.url_builder(url=url, request=self.request)
             response = u.get_response()
             contents = response.get_text()
             if contents:
@@ -885,8 +872,7 @@ class DomainCacheInfo(object):
     def get_subordinate_sites(self, site):
         all_subordinates = set()
 
-        u = self.url_builder(site)
-        u.set_config(self.settings)
+        u = self.url_builder(site, request=self.request)
         response = u.get_response
         if not response:
             return all_subordinates
@@ -918,11 +904,11 @@ class DomainCache(object):
     default_cache_size = 400
     respect_robots_txt = True
 
-    def get_object(domain_url, settings=None, url_builder=None):
+    def get_object(domain_url, request=None, url_builder=None):
         if DomainCache.object is None:
             DomainCache.object = DomainCache(
                 DomainCache.default_cache_size,
-                settings=settings,
+                request=request,
                 url_builder=url_builder,
             )
 
@@ -932,7 +918,7 @@ class DomainCache(object):
         self,
         cache_size=400,
         respect_robots_txt=True,
-        settings=None,
+        request=None,
         url_builder=None,
     ):
         """
@@ -941,7 +927,7 @@ class DomainCache(object):
         self.cache_size = cache_size
         self.cache = {}
         self.respect_robots_txt = respect_robots_txt
-        self.settings = settings
+        self.request = request
         self.url_builder = url_builder
 
     def get_domain_info(self, input_url):
@@ -960,7 +946,7 @@ class DomainCache(object):
         return DomainCacheInfo(
             domain_url,
             self.respect_robots_txt,
-            settings=self.settings,
+            request=self.request,
             url_builder=self.url_builder,
         )
 
@@ -982,13 +968,13 @@ class DomainCache(object):
             self.cache[item[0]] = {"date": item[1], "domain": item[2]}
 
 
-def fetch_url(link, settings=None):
-    u = url_builder(url=link, settings=settings)
+def fetch_url(link, request=None):
+    u = url_builder(url=link, request=request)
     u.get_response()
     return u
 
 
-async def fetch_all_urls(links, settings=None, url_builder=None, max_concurrency=10):
+async def fetch_all_urls(links, request=None, url_builder=None, max_concurrency=10):
     num_pages = int(len(links) / max_concurrency)
     num_pages_mod = len(links) % max_concurrency
 
@@ -1002,7 +988,7 @@ async def fetch_all_urls(links, settings=None, url_builder=None, max_concurrency
         tasks = []
 
         for link in links[page_start:page_stop]:
-            tasks.append(asyncio.to_thread(fetch_url, link, settings, url_builder))
+            tasks.append(asyncio.to_thread(fetch_url, link, request, url_builder))
 
         result = await asyncio.gather(*tasks)
         return result

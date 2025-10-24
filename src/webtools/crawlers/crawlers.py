@@ -637,7 +637,6 @@ class ScriptCrawler(CrawlerInterface):
         super().__init__(
             request=request,
             url=url,
-            settings=settings,
         )
 
     def get_response_file(self):
@@ -659,31 +658,14 @@ class ScriptCrawler(CrawlerInterface):
         full_path = Path(file_path)
         return full_path.parents[3]
 
-    def set_settings(self, settings):
-        super().set_settings(settings)
-
-        inner = self.settings["settings"]
-
-        if inner and "script" in inner and inner["script"]:
-            self.script = inner["script"]
-
-        if inner and "cwd" in inner:
-            self.cwd = inner["cwd"]
-
-        if not self.cwd:
-            self.cwd = self.get_main_path()
-
-        if inner and "remote_server" in inner:
-            return
-
     def run(self):
         if not self.is_valid():
             return
 
-        inner = self.settings["settings"]
+        remote_server = self.request.settings.get("remote_server")
 
-        if inner and "remote_server" in inner:
-            return self.run_via_server(inner["remote_server"])
+        if remote_server:
+            return self.run_via_server(remote_server)
         else:
             return self.run_via_file()
 

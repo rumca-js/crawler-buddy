@@ -67,7 +67,6 @@ class SeleniumDriver(CrawlerInterface):
         super().__init__(
             request=request,
             url=url,
-            settings=settings,
         )
 
     def set_settings(self, settings):
@@ -111,8 +110,8 @@ class SeleniumDriver(CrawlerInterface):
         from selenium.webdriver.support.ui import WebDriverWait
         from selenium.webdriver.support import expected_conditions as EC
 
-        if "settings" in self.settings and "delay_s" in self.settings["settings"]:
-            delay_s = self.settings["settings"]["delay_s"]
+        delay_s = self.request.delay_s
+        if delay_s is not None:
             time.sleep(delay_s)
 
         REJECT_TEXTS = ["REJECT ALL", "Reject all", "Odrzuć", "Odrzuć wszystko"]
@@ -367,13 +366,13 @@ class SeleniumChromeHeadless(SeleniumDriver):
 
         # Proxy Configuration
         if any(
-            key in self.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]
+            key in self.request.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]
         ):
             prox = Proxy()
             prox.proxy_type = ProxyType.MANUAL
-            prox.http_proxy = self.settings.get("http_proxy")
-            prox.socks_proxy = self.settings.get("socks_proxy")
-            prox.ssl_proxy = self.settings.get("ssl_proxy")
+            prox.http_proxy = self.request.settings.get("http_proxy")
+            prox.socks_proxy = self.request.settings.get("socks_proxy")
+            prox.ssl_proxy = self.request.settings.get("ssl_proxy")
             prox.add_to_capabilities(capabilities)
 
         # Validate Chromedriver Executable
@@ -452,14 +451,14 @@ class SeleniumChromeFull(SeleniumDriver):
         # capabilities = webdriver.DesiredCapabilities.CHROME.copy()
 
         # Proxy Configuration
-        if self.settings and any(
-            key in self.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]
+        if any(
+            key in self.request.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]
         ):
             prox = Proxy()
             prox.proxy_type = ProxyType.MANUAL
-            prox.http_proxy = self.settings.get("http_proxy")
-            prox.socks_proxy = self.settings.get("socks_proxy")
-            prox.ssl_proxy = self.settings.get("ssl_proxy")
+            prox.http_proxy = self.request.settings.get("http_proxy")
+            prox.socks_proxy = self.request.settings.get("socks_proxy")
+            prox.ssl_proxy = self.request.settings.get("ssl_proxy")
             # prox.add_to_capabilities(capabilities)
 
         # capabilities["goog:loggingPrefs"] = {"performance": "ALL"}
@@ -567,13 +566,13 @@ class SeleniumUndetected(SeleniumDriver):
 
         # Proxy Configuration
         if any(
-            key in self.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]
+            key in self.request.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]
         ):
             prox = Proxy()
             prox.proxy_type = ProxyType.MANUAL
-            prox.http_proxy = self.settings.get("http_proxy")
-            prox.socks_proxy = self.settings.get("socks_proxy")
-            prox.ssl_proxy = self.settings.get("ssl_proxy")
+            prox.http_proxy = self.request.settings.get("http_proxy")
+            prox.socks_proxy = self.request.settings.get("socks_proxy")
+            prox.ssl_proxy = self.request.settings.get("ssl_proxy")
             prox.add_to_capabilities(options.experimental_options)
 
         options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
@@ -618,15 +617,15 @@ class SeleniumWireFull(SeleniumDriver):
         from selenium.webdriver.common.proxy import Proxy, ProxyType
 
         seleniumwire_options = {}
-        proxy_enabled = self.settings and any(
-            key in self.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]
+        proxy_enabled = any(
+            key in self.request.settings for key in ["http_proxy", "socks_proxy", "ssl_proxy"]
         )
 
         if proxy_enabled:
             proxy_str = (
-                self.settings.get("http_proxy")
-                or self.settings.get("socks_proxy")
-                or self.settings.get("ssl_proxy")
+                self.request.settings.get("http_proxy")
+                or self.request.settings.get("socks_proxy")
+                or self.request.settings.get("ssl_proxy")
             )
             seleniumwire_options["proxy"] = {
                 "http": proxy_str,
@@ -717,7 +716,6 @@ class SeleniumBase(CrawlerInterface):
     ):
         super().__init__(
             request=request,
-            settings=settings,
         )
 
     def run(self):

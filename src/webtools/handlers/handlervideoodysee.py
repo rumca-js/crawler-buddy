@@ -1,12 +1,18 @@
+import copy
+
 from webtoolkit import UrlLocation
 from webtoolkit import DefaultUrlHandler
 from webtoolkit import HttpPageHandler
 
 
 class OdyseeVideoHandler(DefaultUrlHandler):
-    def __init__(self, url=None, contents=None, settings=None, url_builder=None):
+    def __init__(self, url=None, contents=None, settings=None, request=None, url_builder=None):
         super().__init__(
-            url, contents=contents, settings=settings, url_builder=url_builder
+            url,
+            contents=contents,
+            settings=settings,
+            request=request,
+            url_builder=url_builder
         )
         self.channel = None
         self.video = None
@@ -95,10 +101,14 @@ class OdyseeVideoHandler(DefaultUrlHandler):
         if self.dead:
             return
 
-        settings = {}
-        settings["handler_class"] = HttpPageHandler
+        if self.request:
+            request = copy.copy(self.request)
+            request.url = self.url
+            request.handler_type = HttpPageHandler
+        else:
+            request = None
 
-        self.handler = self.url_builder(self.url, settings=settings)
+        self.handler = self.url_builder(self.url, request=request)
         self.response = self.handler.get_response()
 
         if self.response:

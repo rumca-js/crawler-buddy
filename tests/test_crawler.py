@@ -25,9 +25,9 @@ class CrawlerTest(FakeInternetTestCase):
         request.set("crawler_name", "RequestsCrawler")
 
         # call tested function
-        data = crawler.get_request_data(request)
+        page_request = crawler.get_request_data(request)
 
-        self.assertEqual(data["name"], "RequestsCrawler")
+        self.assertEqual(page_request.crawler_name, "RequestsCrawler")
 
     def test_get_request_data__crawler_data(self):
         crawler = Crawler()
@@ -41,11 +41,11 @@ class CrawlerTest(FakeInternetTestCase):
         request.set("crawler_data", crawler_data)
 
         # call tested function
-        data = crawler.get_request_data(request)
+        page_request = crawler.get_request_data(request)
 
-        self.assertTrue(data)
-        self.assertEqual(data["name"], "RequestsCrawler")
-        self.assertEqual(type(data["crawler"]).__name__, "RequestsCrawler")
+        self.assertTrue(page_request)
+        self.assertEqual(page_request.crawler_name, "RequestsCrawler")
+        self.assertEqual(type(page_request.crawler_type).__name__, "RequestsCrawler")
 
     def test_get_request_data__invalid(self):
         crawler = Crawler()
@@ -64,8 +64,8 @@ class CrawlerTest(FakeInternetTestCase):
         request.set("crawler_data", crawler_data)
 
         # call tested function
-        data = crawler.get_request_data(request)
-        self.assertFalse(data)
+        page_request = crawler.get_request_data(request)
+        self.assertFalse(page_request)
 
     def test_get_request_data__by_none(self):
         crawler = Crawler()
@@ -81,19 +81,13 @@ class CrawlerTest(FakeInternetTestCase):
         request.set("crawler_data", crawler_data)
 
         # call tested function
-        data = crawler.get_request_data(request)
+        page_request = crawler.get_request_data(request)
 
-        self.assertTrue(data)
-        self.assertIn("name", data)
-        self.assertEqual(data["name"], "DefaultCrawler")
+        self.assertTrue(page_request)
+        self.assertEqual(page_request.crawler_name, "DefaultCrawler")
 
-        self.assertIn("crawler", data)
-        self.assertEqual(type(data["crawler"]).__name__, "DefaultCrawler")
-
-        self.assertIn("settings", data)
-        self.assertIn("timeout_s", data["settings"])
-
-        self.assertNotIn("timeout_s", data)
+        self.assertEqual(type(page_request.crawler_type).__name__, "DefaultCrawler")
+        self.assertEqual(request.timeout_s, 20)
 
     def test_get_request_data__by_entry_rule(self):
         crawler = Crawler()
@@ -117,14 +111,12 @@ class CrawlerTest(FakeInternetTestCase):
         request.set("crawler_data", crawler_data)
 
         # call tested function
-        data = crawler.get_request_data(request)
+        page_request = crawler.get_request_data(request)
 
-        self.assertTrue(data)
-        self.assertIn("name", data)
-        self.assertEqual(data["name"], "SeleniumChromeFull")
+        self.assertTrue(page_request)
+        self.assertEqual(page_request.crawler_name, "SeleniumChromeFull")
 
-        self.assertIn("crawler", data)
-        self.assertEqual(type(data["crawler"]).__name__, "SeleniumChromeFull")
+        self.assertEqual(type(page_request.crawler_type).__name__, "SeleniumChromeFull")
 
     def test_get_request_data__crawler_data__ssl_verify_True(self):
         crawler = Crawler()
@@ -141,18 +133,14 @@ class CrawlerTest(FakeInternetTestCase):
         request.set("crawler_data", crawler_data)
 
         # call tested function
-        data = crawler.get_request_data(request)
+        page_request = crawler.get_request_data(request)
 
-        self.assertTrue(data)
-        self.assertEqual(data["name"], "RequestsCrawler")
-        self.assertEqual(type(data["crawler"]).__name__, "RequestsCrawler")
-        self.assertEqual(data["settings"]["ssl_verify"], True)
-        self.assertEqual(data["settings"]["respect_robots_txt"], True)
-
-        self.assertIn("settings", data)
-        self.assertIn("remote_server", data["settings"])
-
-        self.assertNotIn("timeout_s", data)
+        self.assertTrue(page_request)
+        self.assertEqual(page_request.crawler_name, "RequestsCrawler")
+        self.assertEqual(type(page_request.crawler_type).__name__, "RequestsCrawler")
+        self.assertEqual(page_request.ssl_verify, True)
+        self.assertEqual(page_request.respect_robots, True)
+        self.assertEqual(page_request.timeout_s, None)
 
     def test_get_request_data__crawler_data__ssl_verify_False(self):
         crawler = Crawler()
@@ -171,19 +159,19 @@ class CrawlerTest(FakeInternetTestCase):
         request.set("crawler_data", crawler_data)
 
         # call tested function
-        data = crawler.get_request_data(request)
+        page_request = crawler.get_request_data(request)
 
-        self.assertTrue(data)
-        self.assertEqual(data["name"], "RequestsCrawler")
-        self.assertEqual(type(data["crawler"]).__name__, "RequestsCrawler")
-        self.assertEqual(data["settings"]["ssl_verify"], False)
-        self.assertEqual(data["settings"]["respect_robots_txt"], False)
-        self.assertEqual(data["settings"]["timeout_s"], 60)
-        self.assertEqual(data["settings"]["delay_s"], 10)
+        self.assertTrue(page_request)
+        self.assertEqual(page_request.crawler_name, "RequestsCrawler")
+        self.assertEqual(type(page_request.crawler_type).__name__, "RequestsCrawler")
+        self.assertEqual(page_request.ssl_verify, False)
+        self.assertEqual(page_request.respect_robots, False)
+        self.assertEqual(page_request.timeout_s, 60)
+        self.assertEqual(page_request.delay_s, 10)
 
         self.assertNotIn("timeout_s", data)
 
-    def test_get_request_data__bytes_limit(self):
+    def test_get_request_data__default_bytes_limit(self):
         crawler = Crawler()
 
         crawler_data = """{
@@ -198,10 +186,10 @@ class CrawlerTest(FakeInternetTestCase):
         request.set("crawler_data", crawler_data)
 
         # call tested function
-        data = crawler.get_request_data(request)
+        page_request = crawler.get_request_data(request)
 
-        self.assertTrue(data)
-        self.assertTrue(data["settings"]["bytes_limit"])
+        self.assertTrue(page_request)
+        self.assertTrue(page_request.bytes_limit)
 
     def test_get_request_data__accept_types(self):
         crawler = Crawler()
@@ -218,45 +206,10 @@ class CrawlerTest(FakeInternetTestCase):
         request.set("crawler_data", crawler_data)
 
         # call tested function
-        data = crawler.get_request_data(request)
+        page_request = crawler.get_request_data(request)
 
-        self.assertTrue(data)
-        self.assertIn("settings", data)
-        self.assertNotIn("Accept", data["settings"])
-        self.assertIn("accept_content_types", data["settings"])
-
-        self.assertNotIn("timeout_s", data)
-
-    def test_get_request_data__remote_server__default(self):
-        crawler = Crawler()
-
-        test_url = "https://linkedin.com"
-
-        crawler_data = """{
-            "timeout_s" : 20
-        }"""
-
-        request = FlaskRequest("http://192.168.0.0")
-        request.set("url", "https://test.com")
-        request.set("crawler_data", crawler_data)
-
-        # call tested function
-        data = crawler.get_request_data(request)
-
-        self.assertTrue(data)
-        self.assertIn("name", data)
-        self.assertEqual(data["name"], "DefaultCrawler")
-
-        self.assertIn("crawler", data)
-        self.assertEqual(type(data["crawler"]).__name__, "DefaultCrawler")
-
-        self.assertIn("settings", data)
-        self.assertIn("timeout_s", data["settings"])
-        self.assertIn("remote_server", data["settings"])
-
-        self.assertEqual(data["settings"]["remote_server"], "http://127.0.0.1:3000")
-
-        self.assertNotIn("timeout_s", data)
+        self.assertTrue(page_request)
+        self.assertTrue(page_request.accept_types)
 
     def test_get_page_url__by_name(self):
         crawler = Crawler()
@@ -264,19 +217,18 @@ class CrawlerTest(FakeInternetTestCase):
         test_url = "https://linkedin.com"
 
         crawler_data = {
-                "name" : "RequestsCrawler",
-                "crawler" : "RequestsCrawler",
-                "settings": {
-                    "timeout_s" : 20,
-                }
+          "crawler_name" : "RequestsCrawler",
+          "crawler_type" : "RequestsCrawler",
+          "timeout_s" : 20,
         }
 
         # call tested function
         page_url = crawler.get_page_url(test_url, crawler_data)
         self.assertTrue(page_url)
 
-        self.assertIn("name", page_url.settings)
-        self.assertEqual(page_url.settings["name"], "RequestsCrawler")
+        self.assertTrue(page_url.request)
+        self.assertTrue(page_url.request.crawler_name)
+        self.assertEqual(page_url.request.crawler_name, "RequestsCrawler")
 
     def test_get_all_properties(self):
         crawler = Crawler()

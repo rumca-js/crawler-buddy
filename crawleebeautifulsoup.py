@@ -80,7 +80,7 @@ async def main() -> None:
         print("Running request:{} with BeautifulSoupCrawler".format(request))
 
     interface = webtools.crawlers.ScriptCrawlerInterface(
-        parser, request, __file__, webtools.webconfig.CrawleeBeautifulScript.script
+        parser, request, __file__, webtools.webconfig.CrawleeBeautifulScript(request.url).script
     )
     response = PageResponseObject(request.url)
 

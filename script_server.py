@@ -229,8 +229,6 @@ def infoj():
 
     config = configuration.get_crawler_config()
     for item in config:
-        item["crawler"] = item["crawler"].__name__
-
         crawlers.append(item)
 
     for aproperty, value in configuration.data.items():

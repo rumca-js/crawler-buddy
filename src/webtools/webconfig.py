@@ -10,7 +10,7 @@ from pathlib import Path
 from urllib3.exceptions import InsecureRequestWarning
 from urllib3 import disable_warnings
 
-from webtoolkit import WebLogger
+from webtoolkit import WebLogger, PageRequestObject
 
 from .crawlers import (
     RequestsCrawler,
@@ -255,6 +255,13 @@ class WebConfig(object):
         if configured_crawlers:
             crawler_data = dict(configured_crawlers[0])
             return crawler_data
+
+    def get_default_request(url):
+        crawler_data = WebConfig.get_default_crawler(url)
+        if crawler_data:
+            request = PageRequestObject(url)
+            request.crawler_name = crawler_data["name"]
+            return request
 
     def use_logger(Logger):
         WebLogger.web_logger = Logger

@@ -767,7 +767,6 @@ class UrlTest(FakeInternetTestCase):
         settings = Url("https://yahoo.com/test_link").get_init_settings()
 
         self.assertIn("name", settings)
-        self.assertIn("crawler", settings)
         self.assertIn("settings", settings)
 
         self.assertEqual(settings["name"], "DefaultCrawler")
@@ -780,7 +779,6 @@ class UrlTest(FakeInternetTestCase):
         settings = Url("https://techcrunch.com/test_link").get_init_settings()
 
         self.assertIn("name", settings)
-        self.assertIn("crawler", settings)
         self.assertIn("settings", settings)
 
         self.assertEqual(settings["name"], "DefaultCrawler")

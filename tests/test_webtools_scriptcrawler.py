@@ -13,7 +13,6 @@ class ScriptCrawlerTest(FakeInternetTestCase):
 
     def test_read_properties_section(self):
         crawler = ScriptCrawler(url = "https://google.com", script = "poetry run python crawlersunnyday.py")
-        crawler.set_settings({"settings" : {}})
 
         # call tested function
         response = crawler.run()

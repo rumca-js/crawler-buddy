@@ -3,7 +3,7 @@
 
 [tool.poetry]
 name = "crawler-buddy"
-version = "6.0.2"
+version = "6.0.3"
 description = "Internet Crawler"
 authors = ["Iwan Grozny <renegat@renegat0x0.ddns.net>"]
 license = "GPL3"
@@ -12,7 +12,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 python-dateutil = "^2.8.2"
-yt-dlp = "^2025.10.14"
+yt-dlp = "^2025.10.22"
 beautifulsoup4 = "^4.13.5"
 lxml = "^5.3.0"
 brutefeedparser="^0.10.5"
@@ -21,7 +21,7 @@ psutil="*"
 flask="*"
 url-cleaner="*"
 #cleanurl="*"  TODO may change url structure
-webtoolkit="^0.0.47"
+webtoolkit="^0.0.55"
 
 # Enable and crawlers as needed
 
