@@ -118,6 +118,14 @@ class Url(ContentInterface):
             
             self.request.crawler_name = default.crawler_name
 
+        if not self.request.crawler_type:
+            crawler = WebConfig.get_crawler_from_string(self.request.crawler_name)
+            if not crawler:
+                WebLogger.error(f"Could not find crawler {name}")
+                return
+
+            self.request.crawler_type = crawler(url=url)
+
         self.handler = None
         self.response = None
 
