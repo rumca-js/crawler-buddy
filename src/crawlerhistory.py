@@ -40,7 +40,7 @@ class CrawlerHistory(object):
     def get_history(self):
         return self.container
 
-    def find(self, index=None, url=None, crawler_name=None, crawler=None):
+    def find(self, index=None, url=None, crawler_name=None):
         """
         return index
         """
@@ -68,12 +68,8 @@ class CrawlerHistory(object):
                     continue
 
             settings_crawler_name = settings.get("crawler_name")
-            settings_crawler = settings.get("crawler_type")
 
             if crawler_name and crawler_name != settings_crawler_name:
-                continue
-
-            if crawler and crawler != settings_crawler:
                 continue
 
             return inner_index, timestamp, all_properties

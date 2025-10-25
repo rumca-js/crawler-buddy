@@ -74,9 +74,6 @@ def get_crawling_form(title, action_url, id=""):
             <label for="name">Name (optional):</label><br>
             <input type="text" id="crawler_name" name="crawler_name"><br><br>
 
-            <label for="crawler">Crawler (optional):</label><br>
-            <input type="text" id="crawler_type" name="crawler_type"><br><br>
-
             <button type="submit">Submit</button>
         </form>
 
@@ -377,7 +374,6 @@ def find():
 
     url = request.args.get("url")
     name = request.args.get("crawler_name")
-    crawler = request.args.get("crawler_type")
 
     if not url and not name and not crawler:
         form_html = """
@@ -388,9 +384,6 @@ def find():
 
                 <label for="name">Name (optional):</label><br>
                 <input type="text" id="name" name="name"><br><br>
-
-                <label for="crawler">Crawler (optional):</label><br>
-                <input type="text" id="crawler" name="crawler"><br><br>
 
                 <button type="submit">Submit</button>
             </form>
@@ -424,14 +417,13 @@ def findj():
 
     url = request.args.get("url")
     name = request.args.get("crawler_name")
-    crawler = request.args.get("crawler_type")
     index = request.args.get("index")
 
     if index:
         index = int(index)
 
     things = crawler_main.url_history.find(
-        index=index, url=url, crawler_name=name, crawler=crawler
+        index=index, url=url, crawler_name=name,
     )
 
     if not things:
