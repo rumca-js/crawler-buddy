@@ -2558,6 +2558,17 @@ files = [
 typing-extensions = ">=4.12.0"
 
 [[package]]
+name = "ua-generator"
+version = "2.0.17"
+description = "A random user-agent generator"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "ua_generator-2.0.17-py3-none-any.whl", hash = "sha256:5d4b4e244d8b8d64b5b88a5d67fe93a26ef92fd868110a186757bb3d80ebce8b"},
+    {file = "ua_generator-2.0.17.tar.gz", hash = "sha256:a65463235cbe13bb043c14eb525b22b301b81a9c0a48b892c4201b7da1339362"},
+]
+
+[[package]]
 name = "undetected-chromedriver"
 version = "3.5.5"
 description = "('Selenium.webdriver.Chrome replacement with compatiblity for Brave, and other Chromium based browsers.', 'Not triggered by CloudFlare/Imperva/hCaptcha and such.', 'NOTE: results may vary due to many factors. No guarantees are given, except for ongoing efforts in understanding detection algorithms.')"
@@ -2710,13 +2721,13 @@ files = [
 
 [[package]]
 name = "webtoolkit"
-version = "0.0.55"
+version = "0.0.58"
 description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "webtoolkit-0.0.55-py3-none-any.whl", hash = "sha256:41e93e633543fffd8bd893bf0b78ebf318ee0e3d3aa5aa4f20653ff00f4c980d"},
-    {file = "webtoolkit-0.0.55.tar.gz", hash = "sha256:a716e921300bdeaa04d89fd36ed600345a25d384b12fa6cb5f040928774c2fdf"},
+    {file = "webtoolkit-0.0.58-py3-none-any.whl", hash = "sha256:32296c82d37dfc6fef8c45a8746d59ab2d22b9b7739214337c9bca631865c80c"},
+    {file = "webtoolkit-0.0.58.tar.gz", hash = "sha256:bd3273daf452023276cf1309df6e30dadf2181764eef6fb0b8891a95801074ce"},
 ]
 
 [package.dependencies]
@@ -2728,6 +2739,7 @@ python-dateutil = ">=2.8.2,<3.0.0"
 pytz = ">=2024.2,<2025.0"
 requests = ">=2.32.3,<3.0.0"
 tldextract = ">=5.1.2,<6.0.0"
+ua-generator = ">=2.0.17,<3.0.0"
 url-cleaner = "*"
 
 [[package]]
@@ -3085,4 +3097,4 @@ cffi = ["cffi (>=1.17,<2.0)", "cffi (>=2.0.0b)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "888a4dfde785cd820168ce1cb59b4b03e6011989a7bb96b80f3fffb416768360"
+content-hash = "5d4c13ead9bb788e8db1dc2594701ee4989770f3a9d996bcffa8ebfdb006e999"
