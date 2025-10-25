@@ -1,6 +1,7 @@
 from datetime import datetime
 from webtoolkit import  (
     HtmlPage,
+    PageRequestObject,
     PageResponseObject,
 )
 from src.webtools import (
@@ -216,14 +217,13 @@ class CrawlerTest(FakeInternetTestCase):
 
         test_url = "https://linkedin.com"
 
-        crawler_data = {
-          "crawler_name" : "RequestsCrawler",
-          "crawler_type" : "RequestsCrawler",
-          "timeout_s" : 20,
-        }
+        request = PageRequestObject(test_url)
+        request.crawler_name = "RequestsCrawler"
+        request.crawler_type = "RequestsCrawler"
+        request.timeout_s = 20
 
         # call tested function
-        page_url = crawler.get_page_url(test_url, crawler_data)
+        page_url = crawler.get_page_url(test_url, request=request)
         self.assertTrue(page_url)
 
         self.assertTrue(page_url.request)

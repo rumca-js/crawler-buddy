@@ -754,12 +754,12 @@ class DefaultCrawler(CrawlerInterface):
     def run(self):
         request = self.request
 
-        if self.settings:
-            print("FakeInternet:Url:{} Crawler:{}".format(self.request.url, self.settings["name"]))
+        if self.request:
+            print("FakeInternet:Url:{} Request:{}".format(self.request.url, self.request))
         else:
             print("FakeInternet:Url:{}".format(self.request.url))
 
-        MockRequestCounter.requested(request.url, crawler_data=self.settings)
+        MockRequestCounter.requested(request.url, crawler_data=self.request)
 
         self.response = TestResponseObject(request.url, request.request_headers, request.timeout_s)
 
