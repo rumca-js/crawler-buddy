@@ -96,11 +96,8 @@ class Crawler(object):
             return all_properties
 
         name = request.crawler_name
-        crawler = None
-        if request.crawler_type:
-            crawler = request.crawler_type.__class__.__name__
 
-        things = self.get_history().find(url=url, crawler_name=name, crawler=crawler)
+        things = self.get_history().find(url=url, crawler_name=name)
 
         if things:
             print("Returning from saved properties")
