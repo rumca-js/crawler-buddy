@@ -186,15 +186,6 @@ def info():
 
     text += get_crawler_text()
 
-    text += "<h2>Default user agent</h2>"
-    text += "<div>Default user agent:{}</div>".format(
-        webtoolkit.crawlers.crawlerinterface.default_user_agent
-    )
-
-    text += "<h2>Default headers</h2>"
-    for key, value in webtoolkit.crawlers.crawlerinterface.default_headers.items():
-        text += "<div>{}:{}</div>".format(key, value)
-
     text += "<h2>Data</h2>"
     for key, value in configuration.data.items():
         text += "<div>{}:{}</div>".format(key, value)
