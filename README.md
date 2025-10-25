@@ -56,13 +56,11 @@ Operation Endpoints:
 The getj Entpoint request arguments
 
 - url (string): The URL to crawl
-- name (optional, string): The name of the crawler
-- crawler (optional, string): The crawler type
+- crawler_name (optional, string): The name of the crawler
 - crawler_data (optional, dict): Additional data for the crawler
 
 crawler_data is a dict, with settings:
- - name (optional, string)
- - crawler (optional, string)
+ - crawler_name (optional, string)
  - settings (dict)
 
 settings is a dict, with settings:
