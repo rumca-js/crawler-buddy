@@ -3,7 +3,7 @@
         {
             "id": 1,
             "enabled": true,
-            "rule_url": "politico.com, barrons.com, reuters.com, techcrunch.com, .yahoo.com, engadget.com, phys.org, youtube.com/channel, wsj.com, open.spotify.com/show, washingtontimes.com, feedpress.me, axios.com, nytimes.com, reutersagency.com, geekwire.com, https://x.com, https://twitter.com, 4chan.org, facebook.com, meta.com, geekwire.com, securityweek.com",
+            "rule_url": "politico.com, barrons.com, reuters.com, techcrunch.com, .yahoo.com, engadget.com, phys.org, wsj.com, open.spotify.com/show, washingtontimes.com, feedpress.me, axios.com, nytimes.com, reutersagency.com, geekwire.com, https://x.com, https://twitter.com, 4chan.org, facebook.com, meta.com, geekwire.com, securityweek.com",
             "rule_name": "Selenium full",
             "block": false,
             "auto_tag": "",
