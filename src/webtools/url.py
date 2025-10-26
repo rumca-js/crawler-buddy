@@ -297,7 +297,7 @@ class Url(ContentInterface):
 
         if url.startswith("https") or url.startswith("http"):
             return HttpPageHandler(
-                url=url, request=request, url_builder=self.url_builder
+                url=url, request=self.request, url_builder=self.url_builder
             )
         elif url.startswith("smb") or url.startswith("ftp"):
             raise NotImplementedError("Protocol has not been implemented")

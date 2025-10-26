@@ -61,6 +61,13 @@ class CrawlerData(object):
             # TODo copy from crawler
             new_mapping = new_mapping
 
+            settings = new_mapping.get("settings")
+            if settings:
+                if page_request.timeout_s is None:
+                    timeout_s = settings.get("timeout_s")
+                    if timeout_s is not None:
+                        page_request.timeout_s = timeout_s
+
         if page_request.ssl_verify is None:
             page_request.ssl_verify = self.configuration.get("ssl_verify")
         if page_request.respect_robots is None:
