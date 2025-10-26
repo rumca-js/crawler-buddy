@@ -2121,13 +2121,13 @@ six = ">=1.5"
 
 [[package]]
 name = "python-dotenv"
-version = "1.1.1"
+version = "1.2.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "python_dotenv-1.1.1-py3-none-any.whl", hash = "sha256:31f23644fe2602f88ff55e1f5c79ba497e01224ee7737937930c448e4d0e24dc"},
-    {file = "python_dotenv-1.1.1.tar.gz", hash = "sha256:a8a6399716257f45be6a007360200409fce5cda2661e3dec71d23dc15f6189ab"},
+    {file = "python_dotenv-1.2.1-py3-none-any.whl", hash = "sha256:b81ee9561e9ca4004139c6cbba3a238c32b03e4894671e181b671e8cb8425d61"},
+    {file = "python_dotenv-1.2.1.tar.gz", hash = "sha256:42667e897e16ab0d66954af0e60a9caa94f0fd4ecf3aaf6d2d260eec1aa36ad6"},
 ]
 
 [package.extras]
@@ -2721,13 +2721,13 @@ files = [
 
 [[package]]
 name = "webtoolkit"
-version = "0.0.59"
+version = "0.0.61"
 description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "webtoolkit-0.0.59-py3-none-any.whl", hash = "sha256:b55c005b8f3eff13c84e3c6da418cd0c6103580db1b9aeadb9825a91c65d1486"},
-    {file = "webtoolkit-0.0.59.tar.gz", hash = "sha256:ce200c2ef5e33a0a5d45d2fcbed27a054461d5b02f4c80b41dea407452e697f8"},
+    {file = "webtoolkit-0.0.61-py3-none-any.whl", hash = "sha256:7bc0df6e1173ab9fd72683ad93dde0283ce8913a371da5799cfc7c9b634f841f"},
+    {file = "webtoolkit-0.0.61.tar.gz", hash = "sha256:25c22b56bd739dc5fc153ee063462fdb76ffdac139f9182c53d2cf022d365e29"},
 ]
 
 [package.dependencies]
@@ -3097,4 +3097,4 @@ cffi = ["cffi (>=1.17,<2.0)", "cffi (>=2.0.0b)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "47896872b4a1f1b79604d514d8c36683cf0f4552214e81340de2f44c7e78111b"
+content-hash = "49b9d9df540d1c1efaeb351c26ae4d500c2d4500130cf461330e334598e0ece2"

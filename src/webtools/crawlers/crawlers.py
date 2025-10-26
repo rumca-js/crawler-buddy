@@ -908,24 +908,12 @@ class ScriptCrawlerInterface(CrawlerInterface):
     """
 
     def __init__(self, parser, request, file_name, scraper_name):
-        settings = None
         self.parser = parser
-
-        if parser.args.remote_server:
-            settings = {"remote_server": parser.args.remote_server}
-        elif not settings:
-            settings = {}
 
         file_name = os.path.relpath(file_name, os.getcwd())
 
-        settings["name"] = scraper_name
-        settings["crawler"] = ScriptCrawler.__name__
-        settings["settings"] = {}
-        settings["settings"]["script"] = file_name
-        settings["settings"]["response_file"] = parser.args.output_file
-
         super().__init__(
-            request, settings=settings
+            request=request
         )
 
 
