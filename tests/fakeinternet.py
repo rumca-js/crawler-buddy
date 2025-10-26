@@ -26,7 +26,7 @@ from src.webtools import (
     WebConfig,
 )
 
-from tests.fakeinternetdata import (
+from webtoolkit.tests.fakeinternetcontents import (
     webpage_with_real_rss_links,
     webpage_simple_rss_page,
     webpage_old_pubdate_rss,
@@ -36,10 +36,10 @@ from tests.fakeinternetdata import (
     webpage_html_casinos,
     webpage_html_canonical_1,
 )
-from tests.fake.geekwirecom import (
+from webtoolkit.tests.fake.geekwirecom import (
     geekwire_feed,
 )
-from tests.fake.youtube import (
+from webtoolkit.tests.fake.youtube import (
     youtube_robots_txt,
     youtube_sitemap_sitemaps,
     youtube_sitemap_product,
@@ -49,43 +49,43 @@ from tests.fake.youtube import (
     youtube_channel_html_linus_tech_tips,
     youtube_channel_rss_linus_tech_tips,
 )
-from tests.fake.robotstxtcom import (
+from webtoolkit.tests.fake.robotstxtcom import (
     robots_txt_example_com_robots,
 )
-from tests.fake.codeproject import (
+from webtoolkit.tests.fake.codeproject import (
     webpage_code_project_rss,
 )
-from tests.fake.opmlfile import (
+from webtoolkit.tests.fake.opmlfile import (
     opml_file,
 )
-from tests.fake.hackernews import (
+from webtoolkit.tests.fake.hackernews import (
     webpage_hackernews_rss,
     hacker_news_item,
 )
-from tests.fake.warhammercommunity import (
+from webtoolkit.tests.fake.warhammercommunity import (
     warhammer_community_rss,
 )
-from tests.fake.thehill import (
+from webtoolkit.tests.fake.thehill import (
     thehill_rss,
 )
-from tests.fake.reddit import (
+from webtoolkit.tests.fake.reddit import (
     reddit_rss_text,
     reddit_entry_json,
     reddit_subreddit_json,
 )
-from tests.fake.githubcom import (
+from webtoolkit.tests.fake.githubcom import (
     github_json,
 )
-from tests.fake.returndislike import (
+from webtoolkit.tests.fake.returndislike import (
     return_dislike_json,
 )
-from tests.fake.firebog import (
+from webtoolkit.tests.fake.firebog import (
     firebog_adguard_list,
     firebog_w3kbl_list,
     firebog_tick_lists,
     firebog_malware,
 )
-from tests.fake.instance import (
+from webtoolkit.tests.fake.instance import (
     instance_entries_json,
     instance_sources_json_empty,
     instance_entries_json_empty,
