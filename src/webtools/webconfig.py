@@ -27,23 +27,23 @@ from .crawlers import (
 
 
 class CrawleeBeautifulScript(ScriptCrawler):
-    def __init__(self, request=None, settings=None):
-        super().__init__(request=request,
-                         settings=settings,
+    def __init__(self, url=None,request=None):
+        super().__init__(url=url,
+                         request=request,
                          script=WebConfig.get_script_path("crawleebeautifulsoup.py"))
 
 
 class CrawleePlaywrightScript(ScriptCrawler):
-    def __init__(self, request=None, settings=None):
-        super().__init__(request=request,
-                         settings=settings,
+    def __init__(self, url=None, request=None):
+        super().__init__(url=url,
+                         request=request,
                          script=WebConfig.get_script_path("crawleeplaywright.py"))
 
 
 class ScrapyScript(ScriptCrawler):
-    def __init__(self, request=None, settings=None):
-        super().__init__(request=request,
-                         settings=settings,
+    def __init__(self, url=None, request=None):
+        super().__init__(url=url,
+                         request=request,
                          script=WebConfig.get_script_path("cralwerscrapy.py"))
 
 
