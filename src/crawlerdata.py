@@ -58,15 +58,10 @@ class CrawlerData(object):
         """
         new_mapping = self.configuration.get_crawler(name=page_request.crawler_name)
         if new_mapping:
-            # TODo copy from crawler
             new_mapping = new_mapping
 
-            settings = new_mapping.get("settings")
-            if settings:
-                if page_request.timeout_s is None:
-                    timeout_s = settings.get("timeout_s")
-                    if timeout_s is not None:
-                        page_request.timeout_s = timeout_s
+            if new_mapping:
+                page_request = self.settings_to_request(page_request, new_mapping)
 
         if page_request.ssl_verify is None:
             page_request.ssl_verify = self.configuration.get("ssl_verify")
@@ -79,6 +74,25 @@ class CrawlerData(object):
             page_request.bytes_limit = WebConfig.get_bytes_limit()
         if page_request.accept_types is None:
             page_request.accept_types = "all"
+
+        return page_request
+
+    def settings_to_request(self, page_request, crawler_settings):
+        def set_property_if_none(page_request, setting_name, crawler_settings, key_in_settings):
+            if getattr(page_request, setting_name) is None:
+                setting_value = crawler_settings.get("settings", {}).get(key_in_settings)
+                if setting_value is not None:
+                    setattr(page_request, setting_name, setting_value)
+
+        settings = crawler_settings.get("settings", {})
+        set_property_if_none(page_request, 'user_agent', settings, 'User-Agent')
+        set_property_if_none(page_request, 'request_headers', settings, 'request_headers')
+        set_property_if_none(page_request, 'timeout_s', settings, 'timeout_s')
+        set_property_if_none(page_request, 'delay_s', settings, 'delay_s')
+        set_property_if_none(page_request, 'ssl_verify', settings, 'ssl_verify')
+        set_property_if_none(page_request, 'respect_robots', settings, 'respect_robots_txt')
+        set_property_if_none(page_request, 'bytes_limit', settings, 'bytes_limit')
+        set_property_if_none(page_request, 'accept_types', settings, 'accepte_types')
 
         return page_request
 

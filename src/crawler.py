@@ -41,12 +41,15 @@ class Crawler(object):
         self.data.set_request(request)
         return self.data.get_request_data()
 
-    def get_social_properties(self, url):
-        things = self.social_history.find(url=url)
-        if things:
-            index, timestamp, all_properties = things
+    def get_social_properties(self, request, url):
+        force = request.args.get("force")
 
-            return all_properties
+        if not foce:
+            things = self.social_history.find(url=url)
+            if things:
+                index, timestamp, all_properties = things
+
+                return all_properties
 
         crawler_index = self.social_queue.enter(url)
         if crawler_index is None:
@@ -78,6 +81,7 @@ class Crawler(object):
 
     def get_all_properties(self, request, headers=False, ping=False):
         url = request.args.get("url")
+        force = request.args.get("force")
 
         if not url:
             all_properties = [{"name": "Response", "data": {
@@ -97,14 +101,15 @@ class Crawler(object):
 
         name = request.crawler_name
 
-        things = self.get_history().find(url=url, crawler_name=name)
+        if not force:
+            things = self.get_history().find(url=url, crawler_name=name)
 
-        if things:
-            print("Returning from saved properties")
-            index, timestamp, all_properties = things
+            if things:
+                print("Returning from saved properties")
+                index, timestamp, all_properties = things
 
-            if all_properties:
-                return all_properties
+                if all_properties:
+                    return all_properties
 
         # TODO what if there is exception
         crawl_index = self.queue.enter(url, request)

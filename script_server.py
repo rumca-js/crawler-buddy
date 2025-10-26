@@ -629,7 +629,7 @@ def socialj():
     if not url:
         return jsonify({"success": False, "error": "No url provided"}), 400
 
-    properties = crawler_main.get_social_properties(url)
+    properties = crawler_main.get_social_properties(request, url)
 
     if properties:
         return jsonify(properties)
