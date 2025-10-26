@@ -21,7 +21,7 @@ psutil="*"
 flask="*"
 url-cleaner="*"
 #cleanurl="*"  TODO may change url structure
-webtoolkit="^0.0.61"
+webtoolkit="^0.0.62"
 
 # Enable and crawlers as needed
 

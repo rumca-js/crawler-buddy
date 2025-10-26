@@ -44,7 +44,7 @@ class Crawler(object):
     def get_social_properties(self, request, url):
         force = request.args.get("force")
 
-        if not foce:
+        if not force:
             things = self.social_history.find(url=url)
             if things:
                 index, timestamp, all_properties = things
