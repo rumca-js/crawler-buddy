@@ -88,7 +88,7 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertEqual(page_request.crawler_name, "MockCrawler")
 
         self.assertEqual(type(page_request.crawler_type).__name__, "MockCrawler")
-        self.assertEqual(request.timeout_s, 20)
+        self.assertEqual(page_request.timeout_s, 20)
 
     def test_get_request_data__by_entry_rule(self):
         crawler = Crawler()

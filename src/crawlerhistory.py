@@ -61,13 +61,13 @@ class CrawlerHistory(object):
 
             settings = {}
             if all_properties:
-                settings = CrawlerHistory.read_properties_section(
-                    "Settings", all_properties
+                request = CrawlerHistory.read_properties_section(
+                    "Request", all_properties
                 )
-                if not settings:
+                if not request:
                     continue
 
-            settings_crawler_name = settings.get("crawler_name")
+            settings_crawler_name = request.get("crawler_name")
 
             if crawler_name and crawler_name != settings_crawler_name:
                 continue

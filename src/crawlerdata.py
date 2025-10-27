@@ -130,6 +130,8 @@ class CrawlerData(object):
             WebLogger.error(f"Could not find crawler {name}")
             return
 
+        if page_request.crawler_name != name:
+            page_request.crawler_name = name
         page_request.crawler_type = crawler(url=url)
 
         return page_request

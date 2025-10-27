@@ -27,10 +27,25 @@ class CrawlerQueue(object):
         return self.crawl_index - 1
 
     def find(self, input_url=None, input_crawler_data=None):
+        found_crawler = False
+        found_url = False
+
         for index, stored_data in self.queue.items():
             datetime, url, crawler_data = stored_data
-            if input_url == url and input_crawler_data == crawler_data:
+
+            if input_url == url:
+                found_url = True
+
+            if input_crawler_data and crawler_data and input_crawler_data.crawler_name == crawler_data.crawler_name:
+                found_crawler = True
+
+            if input_url and input_crawler_data:
+                if found_url and found_crawler:
+                    return True
+            elif input_url and found_url:
                 return True
+            elif input_crawler_data and found_crawler:
+                return True;
 
         return False
 
