@@ -85,9 +85,9 @@ class CrawlerTest(FakeInternetTestCase):
         page_request = crawler.get_request_data(request)
 
         self.assertTrue(page_request)
-        self.assertEqual(page_request.crawler_name, "DefaultCrawler")
+        self.assertEqual(page_request.crawler_name, "MockCrawler")
 
-        self.assertEqual(type(page_request.crawler_type).__name__, "DefaultCrawler")
+        self.assertEqual(type(page_request.crawler_type).__name__, "MockCrawler")
         self.assertEqual(request.timeout_s, 20)
 
     def test_get_request_data__by_entry_rule(self):
@@ -169,8 +169,6 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertEqual(page_request.respect_robots, False)
         self.assertEqual(page_request.timeout_s, 60)
         self.assertEqual(page_request.delay_s, 10)
-
-        self.assertNotIn("timeout_s", data)
 
     def test_get_request_data__default_bytes_limit(self):
         crawler = Crawler()

@@ -121,7 +121,7 @@ class Url(ContentInterface):
         if not self.request.crawler_type:
             crawler = WebConfig.get_crawler_from_string(self.request.crawler_name)
             if not crawler:
-                WebLogger.error(f"Could not find crawler {name}")
+                WebLogger.error(f"Could not find crawler {crawler}")
                 return
 
             self.request.crawler_type = crawler(url=url)
@@ -390,7 +390,9 @@ class Url(ContentInterface):
         properties = {}
         properties["link"] = self.url
         properties["link_request"] = self.request_url
-        properties["link_canonical"] = self.get_canonical_url()
+        canonical = self.get_canonical_url()
+        if canonical:
+            properties["link_canonical"] = canonical
         return properties
 
     def get_urls_archive(self):
@@ -612,10 +614,10 @@ class Url(ContentInterface):
         streams = self.get_streams()
         all_properties.append({"name": "Streams", "data": streams})
 
+        # TODO request is part of response now. Should we include it?
         request_data = request_to_json(self.request)
         request_data["crawler_type"] = type(request_data["crawler_type"]).__name__
-
-        all_properties.append({"name": "Settings", "data": request_data})
+        all_properties.append({"name": "Request", "data": request_data})
 
         response_data = self.get_response_data()
         all_properties.append({"name": "Response", "data": response_data})

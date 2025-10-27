@@ -27,6 +27,7 @@ class CrawlerData(object):
             )
             return
 
+        page_request = self.check_rules(url, page_request)
         page_request = self.fill_crawler_data(url, page_request)
         page_request = self.get_crawler(url, page_request)
 
@@ -49,6 +50,13 @@ class CrawlerData(object):
 
         return page_request
 
+    def check_rules(self, url, page_request):
+        """
+        Use rule - if not specified by args
+        """
+
+        return page_request
+
     def fill_crawler_data(self, url, page_request):
         """
         order: 
@@ -56,6 +64,13 @@ class CrawlerData(object):
          - second what is specified by browser config (json file)
          - third what is specified in configuration
         """
+        crawler_name = self.entry_rules.get_browser(url)
+        new_mapping = self.configuration.get_crawler(name=crawler_name)
+        if new_mapping:
+            crawler_name = new_mapping.get("name")
+            if not page_request.crawler_name and crawler_name and page_request.crawler_name != crawler_name:
+                page_request.crawler_name = crawler_name
+
         new_mapping = self.configuration.get_crawler(name=page_request.crawler_name)
         if new_mapping:
             new_mapping = new_mapping

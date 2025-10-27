@@ -460,12 +460,12 @@ class FourChanChannelHandler(DefaultChannelHandler):
 
     def get_feeds(self):
         """
-        even for post, or individual videos we might request feed url
+        4chan RSS support does not seem to work any more
         """
         feeds = super().get_feeds()
 
-        if self.code:
-            feeds.append("https://boards.4chan.org/{}/index.rss".format(self.code))
+        #if self.code:
+        #    feeds.append("https://boards.4chan.org/{}/index.rss".format(self.code))
 
         return feeds
 
