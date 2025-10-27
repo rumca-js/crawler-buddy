@@ -1,6 +1,10 @@
 from utils import PermanentLogger
 from src import CrawlerHistory
-from webtoolkit import status_code_to_text
+from webtoolkit import (
+   status_code_to_text,
+   is_status_code_valid,
+   is_status_code_invalid,
+)
 
 
 def get_template(name, context=None):
@@ -54,14 +58,17 @@ def level2color(level):
 
 
 def status2color(status_code):
-    print(status_code)
-    if status_code >= 200 and status_code < 300:
+    valid = is_status_code_valid(status_code)
+    invalid = is_status_code_invalid(status_code)
+
+    if valid:
         return "green"
-    elif status_code == 403:
-        return "yellow"
+    if invalid:
+        return "red"
     elif status_code == 0:
         return ""
-    return "red"
+    else:
+        return "yellow"
 
 
 def get_entry_html(id, index, url, timestamp, all_properties):
