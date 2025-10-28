@@ -246,6 +246,7 @@ class Url(ContentInterface):
                 if not self.response.is_valid():
                     WebLogger.error(
                         "Url:{} Response is invalid:{}".format(self.url, self.response)
+                        detail_text = str(response_to_json(self.response))
                     )
 
             return self.response

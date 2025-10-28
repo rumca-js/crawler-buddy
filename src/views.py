@@ -115,7 +115,12 @@ def get_entry_html(id, index, url, timestamp, all_properties):
         crawler_name = ""
         crawler_crawler = ""
 
-    color = status2color(status_code)
+    color = ""
+    try:
+        color = status2color(status_code)
+    except Exception as E:
+        color = "Status is string"
+        print(str(E))
 
     text += "<div>"
     text += f'<span style="color:{color}">Status code:{status_code_text}</span> '
