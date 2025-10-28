@@ -21,10 +21,9 @@ data = [
    },
    {
        "data" : {
-           "crawler" : "RequestsCrawler",
-           "name" : "RequestsCrawler",
+           "crawler_name" : "RequestsCrawler",
            },
-       "name" : "Settings",
+       "name" : "Request",
    },
 ]
 

@@ -41,15 +41,14 @@ example_requests_properties = """
   {
     "data": {
       "bytes_limit": 5000000,
-      "crawler": "RequestsCrawler",
       "enabled": true,
-      "name": "RequestsCrawler",
+      "crawler_name": "RequestsCrawler",
       "settings": {
         "remote_server": "http://127.0.0.1:3000",
         "timeout_s": 20
       }
     },
-    "name": "Settings"
+    "name": "Request"
   },
   {
     "data": {
