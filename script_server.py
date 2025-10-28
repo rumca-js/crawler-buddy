@@ -18,7 +18,10 @@ from datetime import datetime
 import webtoolkit
 from webtoolkit import (
    WebLogger,
+   RemoteUrl,
+   RemoteServer,
    PageResponseObject,
+   ContentLinkParser,
    HTTP_STATUS_CODE_CONNECTION_ERROR,
    HTTP_STATUS_CODE_EXCEPTION,
    HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
@@ -134,6 +137,7 @@ def index():
     operational_links.append({"link" : "/rssifyr", "name":"RSSifyr", "description":"RSSfication response"})
     operational_links.append({"link" : "/ping", "name":"Ping", "description":"form for getting ping information"})
     operational_links.append({"link" : "/pingj", "name":"Ping JSON", "description":"JSON ping response"})
+    operational_links.append({"link" : "/scanlinksj", "name":"Scan links", "description":"JSON for scannign links"})
 
     mgmt_links = []
     mgmt_links.append({"link" : "/find", "name":"Find", "description":"form for finding response"})
@@ -549,30 +553,82 @@ def contentsr():
     if not url:
         return jsonify({"success": False, "error": "No url provided"}), 400
 
-    crawler_data["settings"]["headers"] = False
-    crawler_data["settings"]["ping"] = False
+    all_properties = crawler_main.get_all_properties(request)
+
+    if not all_properties:
+        return jsonify({"success": False, "error": "No properties found"}), 400
+
+    page_url = RemoteUrl(url)
+    page_url.all_properties = all_properties
+    page_url.responses = {"Default" : RemoteServer.get_response(page_url.all_properties)}
+
+    response = page_url.get_response()
+    if response:
+        status_code = response.get_status_code()
+        content_type = response.get_contents_type()
+    else:
+        status_code = 600
+        content_type = "text/html"
+
+    return Response(contents, status=status_code, mimetype=content_type)
+
+
+@app.route("/scanlinksj", methods=["GET"])
+def scanlinksj():
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    url = request.args.get("url")
+
+    if not url:
+        return jsonify({"success": False, "error": "No url provided"}), 400
 
     all_properties = crawler_main.get_all_properties(request)
 
     if not all_properties:
         return jsonify({"success": False, "error": "No properties found"}), 400
 
-    # TODO use streams
-    contents_data = CrawlerHistory.read_properties_section("Text", all_properties)
-    if "Contents" in contents_data:
-        contents = contents_data["Contents"]
-    else:
-        contents = ""
+    page_url = RemoteUrl(url)
+    page_url.all_properties = all_properties
+    page_url.responses = {"Default" : RemoteServer.get_response(page_url.all_properties)}
 
-    response = CrawlerHistory.read_properties_section("Response", all_properties)
+    response = page_url.get_response()
+
     if response:
-        status_code = response["status_code"]
-        content_type = response["Content-Type"]
-    else:
-        status_code = 600
-        content_type = "text/html"
+        parser = ContentLinkParser(url, response.get_text())
 
-    return Response(contents, status=status_code, mimetype=content_type)
+        return jsonify({"success": True, "links": list(parser.get_links())})
+    return jsonify({"success": False, "error": "No response for link"}), 400
+
+
+@app.route("/scandomainsj", methods=["GET"])
+def scandomainsj():
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    url = request.args.get("url")
+
+    if not url:
+        return jsonify({"success": False, "error": "No url provided"}), 400
+
+    all_properties = crawler_main.get_all_properties(request)
+
+    if not all_properties:
+        return jsonify({"success": False, "error": "No properties found"}), 400
+
+    page_url = RemoteUrl(url)
+    page_url.all_properties = all_properties
+    page_url.responses = {"Default" : RemoteServer.get_response(page_url.all_properties)}
+
+    response = page_url.get_response()
+
+    if response:
+        parser = ContentLinkParser(url, response.get_text())
+
+        return jsonify({"success": True, "links": list(parser.get_domains())})
+    return jsonify({"success": False, "error": "No response for link"}), 400
 
 
 @app.route("/headers", methods=["GET"])

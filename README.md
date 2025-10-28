@@ -41,6 +41,8 @@ Endpoints:
  - GET /archivesj - Provides archives links (to web archive etc)
  - GET /rssify - form for RSS contents
  - GET /rssifyr - returns RSS data for link
+ - GET /scanlinksj - Provides JSON data with links present in the page
+ - GET /scandomainsj - Provides JSON data with domains present in the page
 
 Operation Endpoints:
 
