@@ -20,3 +20,4 @@ from .seleniumbased import (
    SeleniumWireFull,
    SeleniumBase,
 )
+from .scriptcrawler import *

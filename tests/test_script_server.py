@@ -17,9 +17,8 @@ class ScriptServerTest(FakeInternetTestCase):
 
         crawler_data = {
           "name" : "test name",
-          "crawler" : "ScriptCrawler",
+          "timeout_s" : 400,
           "settings" : {
-              "timeout_s" : 400,
               "script": "test/path",
           }
         }
@@ -54,9 +53,11 @@ class ScriptServerTest(FakeInternetTestCase):
         self.assertIn("Content-Type", headers)
         self.assertEqual(headers["Content-Type"], "text/html")
 
-        settings = RemoteServer.read_properties_section("Settings", all_properties)
-        self.assertIn("crawler_name", settings)
-        self.assertIn("request", settings)
+        request_data = RemoteServer.read_properties_section("Request", all_properties)
+        self.assertIn("url", request_data)
+        self.assertIn("crawler_name", request_data)
+        self.assertEqual(request_data["url"], "htps://google.com")
+        self.assertEqual(request_data["crawler_name"], "test name")
 
         response = RemoteServer.read_properties_section("Response", all_properties)
         self.assertIn("status_code", response)

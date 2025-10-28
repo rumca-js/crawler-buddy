@@ -852,6 +852,8 @@ class ScriptCrawler(CrawlerInterface):
                 request_url=self.request.url,
             )
 
+        return self.response
+
     def process_input(self):
         """
         TODO these three functions below, could be used

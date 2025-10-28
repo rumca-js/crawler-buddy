@@ -37,6 +37,6 @@ from .crawlers import (
     ScriptCrawler,
     StealthRequestsCrawler,
 )
-from .crawlerscript import (
+from .scriptcrawlerparser import (
     ScriptCrawlerParser,
 )
