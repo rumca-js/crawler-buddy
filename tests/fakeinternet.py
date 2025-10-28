@@ -134,8 +134,8 @@ class FlaskRequest(object):
 
 
 class YouTubeJsonHandlerMock(YouTubeJsonHandler):
-    def __init__(self, url, settings=None, request=None, url_builder=None):
-        super().__init__(url, settings=settings, request=request, url_builder=url_builder)
+    def __init__(self, url, request=None, url_builder=None):
+        super().__init__(url, request=request, url_builder=url_builder)
 
     def download_details_youtube(self):
         MockRequestCounter.requested(self.url)

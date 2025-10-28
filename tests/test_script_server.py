@@ -56,7 +56,7 @@ class ScriptServerTest(FakeInternetTestCase):
         request_data = RemoteServer.read_properties_section("Request", all_properties)
         self.assertIn("url", request_data)
         self.assertIn("crawler_name", request_data)
-        self.assertEqual(request_data["url"], "htps://google.com")
+        self.assertEqual(request_data["url"], "https://google.com")
         self.assertEqual(request_data["crawler_name"], "test name")
 
         response = RemoteServer.read_properties_section("Response", all_properties)
