@@ -4,6 +4,8 @@ from webtoolkit import (
    status_code_to_text,
    is_status_code_valid,
    is_status_code_invalid,
+   json_to_request,
+   json_to_response,
 )
 
 
@@ -68,7 +70,7 @@ def status2color(status_code):
     elif status_code == 0:
         return ""
     else:
-        return "yellow"
+        return "orange"
 
 
 def get_entry_html(id, index, url, timestamp, all_properties):
@@ -85,24 +87,25 @@ def get_entry_html(id, index, url, timestamp, all_properties):
         find_link, timestamp_str, url, remove_link
     )
 
-    response = CrawlerHistory.read_properties_section("Response", all_properties)
-    options = CrawlerHistory.read_properties_section("Settings", all_properties)
+    response_json = CrawlerHistory.read_properties_section("Response", all_properties)
+    request_json = CrawlerHistory.read_properties_section("Request", all_properties)
+    response = json_to_response(response_json)
+    request = json_to_request(request_json)
+
     if response:
-        status_code = response["status_code"]
+        status_code = response.get_status_code()
         # TODO maybe create a better API
         status_code_text = status_code_to_text(status_code)
 
-        charset = response["Charset"]
-        content_length = response["Content-Length"]
-        content_type = response["Content-Type"]
+        charset = response.get_encoding()
+        content_length = response.get_content_length()
+        content_type = response.get_content_type()
 
-        if options and "name" in options:
-            crawler_name = options["name"]
+        if request:
+            crawler_name = request.crawler_name
+            crawler_crawler = request.crawler_type
         else:
             crawler_name = ""
-        if options and "crawler" in options:
-            crawler_crawler = options["crawler"]
-        else:
             crawler_crawler = ""
     else:
         status_code = ""
