@@ -889,7 +889,7 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(urls["link_request"], test_link)
         self.assertNotIn("link_canonical", urls)
 
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_urls__html__canonical(self):
         MockRequestCounter.mock_page_requests = 0

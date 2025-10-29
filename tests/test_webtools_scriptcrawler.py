@@ -16,6 +16,9 @@ class ScriptCrawlerTest(FakeInternetTestCase):
 
         # call tested function
         response = crawler.run()
+        if response.errors:
+            for error in response.errors:
+                print(error)
 
         self.assertTrue(response)
         self.assertEqual(response.url, "https://google.com")

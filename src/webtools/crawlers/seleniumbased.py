@@ -176,7 +176,6 @@ class SeleniumDriver(CrawlerInterface):
 
         except TimeoutException:
             error_text = traceback.format_exc()
-            print("Page timeout:{}\n{}".format(self.request.url, error_text))
             WebLogger.debug(
                 info_text="Page timeout:{}".format(self.request.url),
                 detail_text=error_text,
@@ -203,7 +202,6 @@ class SeleniumDriver(CrawlerInterface):
                     "Url:{} Connection error".format(self.request.url)
                 )
             elif str_exc.find("net::ERR_SSL_VERSION_OR_CIPHER_MISMATCH") >= 0:
-                print(E, "Url:{}".format(self.request.url))
                 WebLogger.exc(E, "Url:{}".format(self.request.url))
                 self.response = PageResponseObject(
                     self.request.url,
@@ -213,7 +211,6 @@ class SeleniumDriver(CrawlerInterface):
                 )
                 self.response.add_error("Url:{} ssl certificate error".format(self.request.url))
             else:
-                print(E, "Url:{}".format(self.request.url))
                 WebLogger.exc(E, "Url:{}".format(self.request.url))
                 self.response = PageResponseObject(
                     self.request.url,
@@ -382,6 +379,8 @@ class SeleniumChromeHeadless(SeleniumDriver):
                 WebLogger.error(
                     f"Chromedriver executable not found at: {self.driver_executable}"
                 )
+                self.response.add_error(f"Chromedriver executable not found at: {self.driver_executable}")
+
                 return None
             service = Service(executable_path=self.driver_executable)
         else:
@@ -471,6 +470,7 @@ class SeleniumChromeFull(SeleniumDriver):
                 WebLogger.error(
                     f"Chromedriver executable not found at: {self.driver_executable}"
                 )
+                self.response.add_error(f"Chromedriver executable not found at: {self.driver_executable}")
                 return None
             service = Service(executable_path=self.driver_executable)
         else:

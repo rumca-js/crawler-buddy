@@ -110,7 +110,7 @@ class ScriptCrawler(CrawlerInterface):
         # WebLogger.error("maintl:{}".format(self.get_main_path()))
         # WebLogger.error("script:{}".format(script))
 
-        print("Running CWD:{} script:{}".format(self.cwd, script))
+        WebLogger.debug("Running CWD:{} via server with script:{}".format(self.cwd, script))
 
         try:
             p = subprocess.run(
@@ -132,6 +132,7 @@ class ScriptCrawler(CrawlerInterface):
             return self.response
         except ValueError as E:
             WebLogger.exc(E, "Incorrect script call {}".format(script))
+            self.response.add_error("Incorrect script call: {}".format(str(E)))
             return self.response
 
         if p.returncode != 0:
@@ -153,6 +154,7 @@ class ScriptCrawler(CrawlerInterface):
                     self.cwd,
                 )
             )
+            self.response.add_error("Return code invalid: {}".format(p.returncode))
 
         import requests
         from ..remoteserver import RemoteServer
@@ -172,16 +174,17 @@ class ScriptCrawler(CrawlerInterface):
             except ValueError as E:
                 print("Response content is not valid JSON. {}".format(E))
         else:
-            WebLogger.error(
-                f"Url:{self.request.url}: Failed to fetch data. Status code: {response.status_code}"
-            )
-
             self.response = PageResponseObject(
                 self.request.url,
                 text=None,
                 status_code=HTTP_STATUS_CODE_SERVER_ERROR,
                 request_url=self.request.url,
             )
+
+            WebLogger.error(
+                f"Url:{self.request.url}: Failed to fetch data. Status code: {response.status_code}"
+            )
+            self.response.add_error("Failed to fetch data")
 
     def run_via_file(self):
         self.response = PageResponseObject(
@@ -192,16 +195,16 @@ class ScriptCrawler(CrawlerInterface):
         )
 
         response_file_location = Path(self.get_response_file())
-        print("Running via file {}".format(response_file_location))
+        WebLogger.debug("Running via file {}".format(response_file_location))
 
         if len(response_file_location.parents) > 1:
-            response_dir = response_file_location.parents[1]
+            response_dir = response_file_location.parents[0]
+            WebLogger.debug(str(response_dir))
             if not response_dir.exists():
                 response_dir.mkdir(parents=True, exist_ok=True)
 
-        file_abs = response_file_location
-        if file_abs.exists():
-            file_abs.unlink()
+        if response_file_location.exists():
+            response_file_location.unlink()
 
         script = self.script + ' --url "{}" --output-file="{}" --timeout={}'.format(
             self.request.url, self.get_response_file(), self.get_timeout_s()
@@ -236,6 +239,16 @@ class ScriptCrawler(CrawlerInterface):
             return self.response
 
         if p.returncode != 0:
+            WebLogger.error(
+                "Url:{}. Script:'{}'. Return code invalid:{}. Path:{}".format(
+                    self.request.url,
+                    script,
+                    p.returncode,
+                    self.cwd,
+                )
+            )
+            self.response.add_error("Return code invalid: {}".format(p.returncode))
+
             if p.stdout:
                 stdout_str = p.stdout.decode()
                 if stdout_str != "":
@@ -246,19 +259,10 @@ class ScriptCrawler(CrawlerInterface):
                 if stderr_str and stderr_str != "":
                     WebLogger.error("Url:{}. {}".format(self.request.url, stderr_str))
 
-            WebLogger.error(
-                "Url:{}. Script:'{}'. Return code invalid:{}. Path:{}".format(
-                    self.request.url,
-                    script,
-                    p.returncode,
-                    self.cwd,
-                )
-            )
+        if response_file_location.exists():
+            self.response = file_to_response(str(response_file_location))
 
-        if file_abs.exists():
-            self.response = file_to_response(str(file_abs))
-
-            file_abs.unlink()
+            response_file_location.unlink()
 
             return self.response
 
@@ -310,6 +314,7 @@ class ScriptCrawler(CrawlerInterface):
 
         if not operating_path.exists():
             WebLogger.error("Operating path does not exist: {}".format(operating_path))
+            self.response.add_error("Operating path does not exist: {}".format(operating_path))
             return
 
         return operating_path

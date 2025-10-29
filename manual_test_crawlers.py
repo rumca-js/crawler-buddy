@@ -44,9 +44,8 @@ def call_process(input_script):
     )
 
     response = file_to_response("out.txt")
-    print(response)
 
-    return time.time() - start_time
+    return [input_script, time.time() - start_time, response]
 
 
 def call_crawler(name):
@@ -58,14 +57,12 @@ def call_crawler(name):
     crawler = crawler_class(url=test_webpage)
     if not crawler.is_valid():
         print(f"Crawler is {name} disabled")
-        return
+        return [name, None, None]
 
     response = crawler.run()
     crawler.close()
 
-    print(response)
-
-    return time.time() - start_time
+    return [name, time.time() - start_time, response]
 
 
 def call_requests():
@@ -97,17 +94,44 @@ def call_seleniumbase():
 
 
 def main():
-    call_crawler("RequestsCrawler")
-    call_crawler("CurlCffiCrawler")
-    call_crawler("HttpxCrawler")
-    call_crawler("StealthRequestsCrawler")
-    call_crawler("SeleniumChromeHeadless")
-    call_crawler("SeleniumChromeFull")
-    call_crawler("SeleniumUndetected")
-    call_crawler("SeleniumWireFull")
+    times = []
+    times.append(call_crawler("RequestsCrawler"))
+    times.append(call_crawler("CurlCffiCrawler"))
+    times.append(call_crawler("HttpxCrawler"))
+    times.append(call_crawler("StealthRequestsCrawler"))
+    times.append(call_crawler("SeleniumChromeHeadless"))
+    times.append(call_crawler("SeleniumChromeFull"))
+    times.append(call_crawler("SeleniumUndetected"))
+    times.append(call_crawler("SeleniumWireFull"))
 
-    time_crawleebeautiful = call_crawleebeautiful()
-    #time_crawleeplaywright = call_crawleeplaywright()
+    times.append(call_crawleebeautiful())
+    # times.append(call_crawleeplaywright())
 
+    print("---------------------")
+
+    for time_data in times:
+        if not time_data:
+            return
+
+        name = time_data[0]
+        time = time_data[1]
+        response = time_data[2]
+
+        if response and response.is_valid():
+            print("{}:\t{}".format(name, time))
+
+    print("--------ALL----------")
+
+    for time_data in times:
+        if not time_data:
+            return
+
+        name = time_data[0]
+        time = time_data[1]
+        response = time_data[2]
+
+        print("{}:{}".format(name, time))
+        if response:
+            print(response)
 
 main()

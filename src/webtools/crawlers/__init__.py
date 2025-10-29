@@ -7,8 +7,6 @@ from .crawlers import (
    CurlCffiCrawler,
    HttpxCrawler,
    StealthRequestsCrawler,
-   ScriptCrawler,
-   ScriptCrawlerInterface,
    BotasaurusCrawler,
 )
 

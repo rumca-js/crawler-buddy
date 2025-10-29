@@ -100,6 +100,18 @@ Notes:
  - Some things might be just fixed by project. No Content-Type, but we detected it is text/html, then software provides it in response
  - To sum up: the strategy is to fix what can be fixed, to make consistent things that are not
 
+# Speed results
+
+Manual test iterates over available crawlers and checks what is their speed
+
+```
+RequestsCrawler:            1.2801945209503174
+CurlCffiCrawler:            0.8332247734069824
+HttpxCrawler:               5.192519187927246
+StealthRequestsCrawler:     0.7852857112884521
+crawleebeautifulsoup.py:    14.384637832641602
+```
+
 # Automated access
 
 To use output programmatically RemoteServer and Url classes was provided.

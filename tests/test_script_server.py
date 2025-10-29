@@ -16,7 +16,7 @@ class ScriptServerTest(FakeInternetTestCase):
         request = FlaskRequest("http://192.168.0.0")
 
         crawler_data = {
-          "name" : "test name",
+          "name" : "MockCrawler",
           "timeout_s" : 400,
           "settings" : {
               "script": "test/path",
@@ -57,7 +57,7 @@ class ScriptServerTest(FakeInternetTestCase):
         self.assertIn("url", request_data)
         self.assertIn("crawler_name", request_data)
         self.assertEqual(request_data["url"], "https://google.com")
-        self.assertEqual(request_data["crawler_name"], "test name")
+        self.assertEqual(request_data["crawler_name"], "MockCrawler")
 
         response = RemoteServer.read_properties_section("Response", all_properties)
         self.assertIn("status_code", response)
