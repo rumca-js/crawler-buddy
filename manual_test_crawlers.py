@@ -49,7 +49,7 @@ def call_process(input_script, url = None):
 
     response = file_to_response("out.txt")
 
-    return [input_script, time.time() - start_time, response]
+    return [input_script + " " + url, time.time() - start_time, response]
 
 
 def call_crawler(name):
@@ -97,7 +97,7 @@ def call_seleniumbase():
     return call_process("crawlerseleniumbase.py")
 
 
-def main():
+def test_crawlers():
     times = []
     times.append(call_crawler("RequestsCrawler"))
     times.append(call_crawler("CurlCffiCrawler"))
@@ -123,8 +123,16 @@ def main():
 
         if response and response.is_valid():
             print("{}:\t{}".format(name, time))
+        else:
+            print("{} Failed".format(name))
 
-    print("--------ALL----------")
+
+def test_youtube():
+    times = []
+    times.append(call_process("crawl.py", "https://www.youtube.com/watch?v=9yanqmc01ck"))
+    times.append(call_process("crawl.py", "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"))
+    times.append(call_process("crawl.py", "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"))
+    times.append(call_process("crawl.py", "https://www.youtube.com/@LinusTechTips"))
 
     for time_data in times:
         if not time_data:
@@ -134,15 +142,13 @@ def main():
         time = time_data[1]
         response = time_data[2]
 
-        print("{}:{}".format(name, time))
-        if response:
-            print(response)
+        if response and response.is_valid():
+            print("{}:\t{}".format(name, time))
+        else:
+            print("{} Failed".format(name))
 
-
-def test_youtube():
-    times = []
-    times.append(call_process("crawlersunnyday.py", "https://www.youtube.com/watch?v=9yanqmc01ck"))
-    times.append(call_process("crawlersunnyday.py", "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"))
+def main():
+    test_crawlers()
+    test_youtube()
 
 main()
-test_youtube()

@@ -17,6 +17,7 @@ from datetime import datetime
 
 import webtoolkit
 from webtoolkit import (
+   HttpPageHandler,
    WebLogger,
    RemoteUrl,
    RemoteServer,
@@ -364,7 +365,7 @@ def set_response_impl(request):
 
     u = webtools.Url(url, settings=crawler_data)
     u.settings = crawler_data
-    u.handler = webtools.HttpPageHandler(url)
+    u.handler = HttpPageHandler(url)
     u.handler.response = response
 
     return u

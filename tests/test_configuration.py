@@ -5,7 +5,6 @@ from webtoolkit import  (
 )
 from src.webtools import (
     Url,
-    HttpPageHandler,
 )
 from src.configuration import Configuration
 

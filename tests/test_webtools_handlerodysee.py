@@ -1,6 +1,9 @@
-from src.webtools import (
+from webtoolkit import (
    OdyseeVideoHandler,
    OdyseeChannelHandler,
+)
+
+from src.webtools import (
    Url,
 )
 
@@ -76,8 +79,9 @@ class OdyseeVideoHandlerTest(FakeInternetTestCase):
 
     def test_get_contents_hash(self):
         test_link = "https://odysee.com/ridiculous-zendesk-vulnerability-causes:01c863c36e86789070adf02eaa5c0778975507d5"
+        request = Url(test_link).get_init_request()
 
-        handler = OdyseeVideoHandler(test_link, url_builder=Url)
+        handler = OdyseeVideoHandler(test_link, request=request, url_builder=Url)
 
         handler.get_response()
 
@@ -88,8 +92,9 @@ class OdyseeVideoHandlerTest(FakeInternetTestCase):
 
     def test_get_contents_body_hash(self):
         test_link = "https://odysee.com/ridiculous-zendesk-vulnerability-causes:01c863c36e86789070adf02eaa5c0778975507d5"
+        request = Url(test_link).get_init_request()
 
-        handler = OdyseeVideoHandler(test_link, url_builder=Url)
+        handler = OdyseeVideoHandler(test_link, request=request, url_builder=Url)
 
         handler.get_response()
 
@@ -100,8 +105,9 @@ class OdyseeVideoHandlerTest(FakeInternetTestCase):
 
     def test_get_response(self):
         test_link = "https://odysee.com/ridiculous-zendesk-vulnerability-causes:01c863c36e86789070adf02eaa5c0778975507d5"
+        request = Url(test_link).get_init_request()
 
-        handler = OdyseeVideoHandler(test_link, url_builder=Url)
+        handler = OdyseeVideoHandler(test_link, request=request, url_builder=Url)
 
         # call tested function
         response = handler.get_response()

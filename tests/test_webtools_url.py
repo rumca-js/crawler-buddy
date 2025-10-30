@@ -1,12 +1,12 @@
 from webtoolkit import (
+    HttpPageHandler,
     HtmlPage,
     RssPage,
     PageResponseObject,
+    RedditUrlHandler,
 )
 from src.webtools import (
     Url,
-    HttpPageHandler,
-    RedditUrlHandler,
 )
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
@@ -833,7 +833,7 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertTrue(hash)
 
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_contents_body_hash__html(self):
         MockRequestCounter.mock_page_requests = 0

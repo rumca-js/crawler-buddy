@@ -41,10 +41,8 @@ from .crawlers import (
     RequestsCrawler,
 )
 
-from .handlers import (
-    YouTubeJsonHandler,
+from webtoolkit import (
     OdyseeVideoHandler,
-    YouTubeChannelHandler,
     OdyseeChannelHandler,
     RedditUrlHandler,
     ReturnDislike,
@@ -53,6 +51,12 @@ from .handlers import (
     InternetArchive,
     FourChanChannelHandler,
     TwitterUrlHandler,
+    YouTubeVideoHandler,
+    YouTubeChannelHandler,
+)
+from .handlers import (
+    YouTubeJsonHandler,
+    YouTubeChannelHandlerYdlp,
 )
 
 from utils.dateutils import DateUtils
@@ -64,13 +68,15 @@ class Url(ContentInterface):
     """
 
     youtube_video_handler = YouTubeJsonHandler
-    youtube_channel_handler = YouTubeChannelHandler
+    youtube_channel_handler = YouTubeChannelHandlerYdlp
     odysee_video_handler = OdyseeVideoHandler
     odysee_channel_handler = OdyseeChannelHandler
 
+    #fmt off
+
     handlers = [
         YouTubeJsonHandler,
-        YouTubeChannelHandler,
+        YouTubeChannelHandlerYdlp,
         OdyseeVideoHandler,
         OdyseeChannelHandler,
         RedditUrlHandler,
@@ -80,8 +86,11 @@ class Url(ContentInterface):
         InternetArchive,
         FourChanChannelHandler,
         TwitterUrlHandler,
-        HttpPageHandler,  # default
+        YouTubeVideoHandler,        # present here, if somebody wants to call it by name
+        YouTubeChannelHandler,      # present here, if somebody wants to call it by name
+        HttpPageHandler,            # default
     ]
+    #fmt on
 
     def __init__(self, url=None, settings=None, request=None, url_builder=None):
         """

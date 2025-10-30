@@ -1,9 +1,12 @@
-from src.webtools import (
+from webtoolkit import (
    RedditUrlHandler,
    GitHubUrlHandler,
    HackerNewsHandler,
    TwitterUrlHandler,
    FourChanChannelHandler,
+)
+
+from src.webtools import (
    Url,
 )
 from tests.fakeinternet import (

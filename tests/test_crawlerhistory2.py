@@ -4,11 +4,11 @@ import json
 from webtoolkit import (
     HtmlPage,
     PageResponseObject,
+    HttpPageHandler,
 )
 
 from src.webtools import (
     Url,
-    HttpPageHandler,
 )
 from src import CrawlerHistory
 

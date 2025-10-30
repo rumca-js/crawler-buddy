@@ -11,10 +11,8 @@ import traceback
 
 from utils.dateutils import DateUtils
 from src.webtools import (
-    YouTubeVideoHandler,
     YouTubeJsonHandler,
-    YouTubeChannelHandler,
-    HttpPageHandler,
+    YouTubeChannelHandlerYdlp,
     Url,
     WebConfig,
 )
@@ -210,7 +208,7 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
         return str(tuple[0]) + str(tuple[1]) + str(tuple[2])
 
 
-class YouTubeChannelHandlerMock(YouTubeChannelHandler):
+class YouTubeChannelHandlerMock(YouTubeChannelHandlerYdlp):
     def __init__(self, url=None):
         super().__init__(url)
 

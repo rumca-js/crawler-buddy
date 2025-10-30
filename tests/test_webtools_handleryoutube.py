@@ -1,7 +1,11 @@
-from utils.dateutils import DateUtils
-from src.webtools import (
+from webtoolkit import (
    YouTubeVideoHandler,
    YouTubeChannelHandler,
+)
+
+from utils.dateutils import DateUtils
+
+from src.webtools import (
    YouTubeJsonHandler,
    Url,
 )
@@ -372,7 +376,7 @@ class YouTubeChannelHandlerTest(FakeInternetTestCase):
         hash = handler.get_contents_hash()
 
         self.assertTrue(hash)
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_contents_body_hash(self):
         MockRequestCounter.mock_page_requests = 0
@@ -385,7 +389,7 @@ class YouTubeChannelHandlerTest(FakeInternetTestCase):
         hash = handler.get_contents_body_hash()
 
         self.assertTrue(hash)
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_contents(self):
         MockRequestCounter.mock_page_requests = 0
@@ -400,7 +404,7 @@ class YouTubeChannelHandlerTest(FakeInternetTestCase):
         contents = handler.get_contents()
 
         self.assertTrue(contents)
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_response(self):
         MockRequestCounter.mock_page_requests = 0
@@ -415,7 +419,7 @@ class YouTubeChannelHandlerTest(FakeInternetTestCase):
         response = handler.get_response()
 
         self.assertTrue(response)
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_feeds__from_rss(self):
         MockRequestCounter.mock_page_requests = 0
@@ -458,4 +462,4 @@ class YouTubeChannelHandlerTest(FakeInternetTestCase):
         thumbnail = handler.get_thumbnail()
 
         # +1 for RSS response +1 for channel HTML response
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)

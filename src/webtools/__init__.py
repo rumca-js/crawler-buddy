@@ -13,19 +13,8 @@ from .url import (
 )
 
 from .handlers import (
-    HttpPageHandler,
-    YouTubeChannelHandler,
-    YouTubeVideoHandler,
+    YouTubeChannelHandlerYdlp,
     YouTubeJsonHandler,
-    OdyseeChannelHandler,
-    OdyseeVideoHandler,
-    RedditUrlHandler,
-    GitHubUrlHandler,
-    ReturnDislike,
-    HackerNewsHandler,
-    InternetArchive,
-    FourChanChannelHandler,
-    TwitterUrlHandler,
 )
 
 from .crawlers import (

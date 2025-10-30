@@ -3,10 +3,10 @@ from webtoolkit import  (
     HtmlPage,
     PageRequestObject,
     PageResponseObject,
+    HttpPageHandler,
 )
 from src.webtools import (
     Url,
-    HttpPageHandler,
 )
 from src.crawler import Crawler
 from src.entryrules import EntryRules
