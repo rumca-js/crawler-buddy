@@ -286,6 +286,8 @@ class Url(ContentInterface):
 
         handlers = Url.get_handlers()
         for handler in handlers:
+            if self.request.handler_name and self.request.handler_name != "" and self.request.handler_name != handler.__name__:
+                continue
             if self.request.handler_type and self.request.handler_type != handler:
                 continue
 

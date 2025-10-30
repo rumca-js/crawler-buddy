@@ -27,17 +27,21 @@ import src.webtools.crawlers
 test_webpage = "https://google.com"
 
 
-def call_process(input_script):
+def call_process(input_script, url = None):
     start_time = time.time()
 
     print(f"Running script {input_script}")
+
     path = Path("out.txt")
     if path.exists():
         path.unlink()
 
+    if url == None:
+        url = test_webpage
+
     subprocess.check_call(
         "poetry run python {} --url {} --output-file {} --timeout 55".format(
-            input_script, test_webpage, "out.txt"
+            input_script, url, "out.txt"
         ),
         shell=True,
         timeout=20,
@@ -134,4 +138,11 @@ def main():
         if response:
             print(response)
 
+
+def test_youtube():
+    times = []
+    times.append(call_process("crawlersunnyday.py", "https://www.youtube.com/watch?v=9yanqmc01ck"))
+    times.append(call_process("crawlersunnyday.py", "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"))
+
 main()
+test_youtube()
