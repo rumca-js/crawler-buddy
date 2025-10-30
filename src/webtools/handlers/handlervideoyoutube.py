@@ -19,6 +19,10 @@ class YouTubeVideoHandler(DefaultUrlHandler):
         if not self.is_handled_by():
             return
 
+        if request:
+            request.cookies = {}
+            request.cookies["CONSENT"] = "YES+cb.20210328-17-p0.en+F+678"
+
         self.code = self.input2code(url)
 
     def is_handled_by(self):

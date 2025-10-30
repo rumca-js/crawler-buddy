@@ -109,6 +109,7 @@ def get_entry_html(id, index, url, timestamp, all_properties):
             crawler_crawler = ""
     else:
         status_code = ""
+        status_code_text = ""
         charset = ""
         content_length = ""
         content_type = ""

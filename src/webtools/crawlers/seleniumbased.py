@@ -168,6 +168,19 @@ class SeleniumDriver(CrawlerInterface):
 
             self.driver.set_page_load_timeout(selenium_timeout)
 
+            if self.request.url.find("youtube.com") >= 0:
+                self.drvier.execute_cdp_cmd("Network.enable", {})
+
+                self.drvier.execute_cdp_cmd("Network.setCookie", {
+                    "name": "CONSENT",
+                    "value": "YES+1",
+                    "domain": ".youtube.com",
+                    "path": "/",
+                    "secure": True,
+                    "httpOnly": False,
+                    "sameSite": "Lax",
+                })
+
             self.driver.get(self.request.url)
 
             self.after_load()

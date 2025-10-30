@@ -16,6 +16,10 @@ class YouTubeChannelHandler(DefaultChannelHandler):
         self.rss_url = None
         self.social_data = {}
 
+        if request:
+            request.cookies = {}
+            request.cookies["CONSENT"] = "YES+cb.20210328-17-p0.en+F+678"
+
         super().__init__(
             url,
             contents=contents,

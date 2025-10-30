@@ -196,17 +196,18 @@ class RequestsCrawler(CrawlerInterface):
             elif text.count("charset") == 1 and text.find('charset="utf-8"') >= 0:
                 return "utf-8"
 
-    def make_requests_call(self, url, headers, timeout, verify, stream):
+    def make_requests_call(self, request, stream):
         """
         This method can be overridden in subclasses to change the request behavior.
         """
         import requests
 
         return requests.get(
-            url,
-            headers=headers,
-            timeout=timeout,
-            verify=verify,
+            request.url,
+            headers=request.request_headers,
+            timeout=request.timeout_s,
+            verify=request.ssl_verify,
+            cookies=request.cookies,
             stream=stream,
         )
 
@@ -219,23 +220,23 @@ class RequestsCrawler(CrawlerInterface):
         - Overcomes the limitation of requests.get's timeout (which doesn't cover total duration).
         """
 
-        def request_with_timeout(url, headers, timeout, verify, stream, result):
+        def request_with_timeout(request, stream, result):
             try:
                 result["response"] = self.make_requests_call(
-                    url, headers, timeout, verify, stream
+                    request, stream
                 )
             except Exception as e:
                 result["exception"] = e
 
-        def make_request_with_threading(url, headers, timeout_s, ssl_verify, stream):
+        def make_request_with_threading(request, stream):
             result = {"response": None, "exception": None}
 
             thread = threading.Thread(
                 target=request_with_timeout,
-                args=(url, headers, timeout_s, ssl_verify, stream, result),
+                args=(request, stream, result),
             )
             thread.start()
-            thread.join(timeout_s)
+            thread.join(request.timeout_s)
 
             if thread.is_alive():
                 raise WebToolsTimeoutException("Request timed out")
@@ -243,13 +244,11 @@ class RequestsCrawler(CrawlerInterface):
                 raise result["exception"]
             return result["response"]
 
-        headers = self.get_request_headers()
+        self.request.headers = self.get_request_headers()
+        self.request.timeout_s = self.get_timeout_s()
 
         response = make_request_with_threading(
-            url=self.request.url,
-            headers=headers,
-            timeout_s=self.get_timeout_s(),
-            ssl_verify=self.request.ssl_verify,
+            request=self.request,
             stream=True,
         )
         return response
@@ -395,6 +394,7 @@ class CurlCffiCrawler(CrawlerInterface):
                 self.request.url,
                 timeout=self.get_timeout_s(),
                 verify=self.request.ssl_verify,
+                cookies=self.request.cookies,
                 impersonate="chrome",
                 #headers=headers,
                 # stream=True, # TODO
@@ -495,14 +495,13 @@ class HttpxCrawler(CrawlerInterface):
     def build_requests(self):
         import httpx
 
-        headers = self.get_request_headers()
-
         try:
             answer = httpx.get(
                 self.request.url,
                 timeout=self.get_timeout_s(),
                 verify=self.request.ssl_verify,
-                headers=headers,
+                headers=self.get_request_headers(),
+                cookies=self.request.cookies,
                 follow_redirects=True,
                 # stream=True, # TODO
             )
@@ -544,8 +543,12 @@ class StealthRequestsCrawler(CrawlerInterface):
 
         answer = self.build_requests()
 
-        content = answer.content
-        text = answer.text
+        content = None
+        text = None
+
+        if answer:
+            content = answer.content
+            text = answer.text
 
         if answer and content:
             self.response = PageResponseObject(
