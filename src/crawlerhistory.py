@@ -45,6 +45,7 @@ class CrawlerHistory(object):
         return index
         """
         last_found = None
+        request = None
 
         for timestamp, inner_index, things in reversed(self.container):
             container_url = things[0]
@@ -67,7 +68,9 @@ class CrawlerHistory(object):
                 if not request:
                     continue
 
-            settings_crawler_name = request.get("crawler_name")
+            settings_crawler_name = None
+            if request:
+                settings_crawler_name = request.get("crawler_name")
 
             if crawler_name and crawler_name != settings_crawler_name:
                 continue
