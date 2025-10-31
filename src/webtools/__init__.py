@@ -13,7 +13,6 @@ from .url import (
 )
 
 from .handlers import (
-    YouTubeChannelHandlerYdlp,
     YouTubeJsonHandler,
 )
 

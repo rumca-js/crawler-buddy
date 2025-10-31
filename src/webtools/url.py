@@ -56,7 +56,6 @@ from webtoolkit import (
 )
 from .handlers import (
     YouTubeJsonHandler,
-    YouTubeChannelHandlerYdlp,
 )
 
 from utils.dateutils import DateUtils
@@ -68,7 +67,7 @@ class Url(ContentInterface):
     """
 
     youtube_video_handler = YouTubeJsonHandler
-    youtube_channel_handler = YouTubeChannelHandlerYdlp
+    youtube_channel_handler = YouTubeChannelHandler
     odysee_video_handler = OdyseeVideoHandler
     odysee_channel_handler = OdyseeChannelHandler
 
@@ -76,7 +75,6 @@ class Url(ContentInterface):
 
     handlers = [
         YouTubeJsonHandler,
-        YouTubeChannelHandlerYdlp,
         OdyseeVideoHandler,
         OdyseeChannelHandler,
         RedditUrlHandler,

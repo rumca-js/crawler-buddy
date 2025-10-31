@@ -1,5 +1,6 @@
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
+from concurrent.futures import ThreadPoolExecutor
 
 from utils.dateutils import DateUtils
 
@@ -86,8 +87,16 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             url=self.url, text="", status_code=PageResponseObject.STATUS_CODE_ERROR
         )
 
+        with ThreadPoolExecutor() as executor:
+            # TODO maybe we should ask HTML page for details, and use JSON for social data only
+            thread_result_json = executor.submit(self.get_response_json)
+            thread_result_return = executor.submit(self.get_response_return_dislike)
+
+            thread_result_json.result()
+            thread_result_return.result()
+
         status = False
-        if self.download_details():
+        if self.get_response_json():
             response.set_text(self.yt_text, "utf-8")
             response.status_code = PageResponseObject.STATUS_CODE_OK
             response.url = self.get_link_classic()
@@ -229,7 +238,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         json_data = {}
 
         if not self.yt_ob:
-            self.download_details_youtube()
+            self.get_response_json()
         if self.yt_ob is None:
             WebLogger.error("Url:{}:Could not download youtube details".format(self.url))
             return
@@ -252,7 +261,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         json_data = {}
 
         if not self.rd_ob:
-            self.download_details_return_dislike()
+            self.get_response_return_dislike()
         if not self.rd_ob:
             WebLogger.error("Url:{}:Could not download return dislike details".format(self.url))
             return
@@ -330,13 +339,6 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         return True
 
-    def download_details(self):
-        if not self.download_details_youtube():
-            WebLogger.error("Cannot load youtube details. Is yt-dlp update required?")
-            return False
-
-        return True
-
     def get_streams(self):
         if self.yt_text:
             self.streams["yt-dlp JSON"] = (
@@ -349,7 +351,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         return self.streams
 
-    def download_details_youtube(self):
+    def get_response_json(self):
         if self.yt_text is not None:
             return True
 
@@ -365,7 +367,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
     def get_return_dislike_url(self):
         return "https://returnyoutubedislikeapi.com/votes?videoId=" + self.get_video_code()
 
-    def download_details_return_dislike(self):
+    def get_response_return_dislike(self):
         if self.rd_text is not None:
             return True
 

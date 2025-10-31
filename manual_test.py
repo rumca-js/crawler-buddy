@@ -121,6 +121,7 @@ def test_crawlers():
         time = time_data[1]
         response = time_data[2]
 
+        print("--------------------")
         if response and response.is_valid():
             print("{}:\t{}".format(name, time))
         else:
@@ -142,13 +143,14 @@ def test_youtube():
         time = time_data[1]
         response = time_data[2]
 
+        print("--------------------")
         if response and response.is_valid():
             print("{}:\t{}".format(name, time))
         else:
             print("{} Failed".format(name))
 
 def main():
-    test_crawlers()
+    #test_crawlers()
     test_youtube()
 
 main()

@@ -47,4 +47,4 @@ test: test-min test-man
 test-min:
 	poetry run python -m unittest discover -v  2>&1 | tee test_output.txt
 test-man:
-	poetry run python manual_test_crawlers.py 2>&1 | tee test_output.txt
+	poetry run python manual_test.py 2>&1 | tee test_output.txt

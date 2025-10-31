@@ -12,7 +12,6 @@ import traceback
 from utils.dateutils import DateUtils
 from src.webtools import (
     YouTubeJsonHandler,
-    YouTubeChannelHandlerYdlp,
     Url,
     WebConfig,
 )
@@ -22,6 +21,7 @@ from webtoolkit import (
     WebLogger,
     ResponseHeaders,
     CrawlerInterface,
+    YouTubeChannelHandler,
 )
 from webtoolkit.tests.mocks import (
     MockRequestCounter,
@@ -135,8 +135,11 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
     def __init__(self, url, request=None, url_builder=None):
         super().__init__(url, request=request, url_builder=url_builder)
 
-    def download_details_youtube(self):
+    def get_response_json(self):
         MockRequestCounter.requested(self.url)
+
+        if self.yt_text:
+            return True
 
         if self.get_video_code() == "1234":
             self.yt_text = """{"_filename" : "1234 test file name",
@@ -208,7 +211,7 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
         return str(tuple[0]) + str(tuple[1]) + str(tuple[2])
 
 
-class YouTubeChannelHandlerMock(YouTubeChannelHandlerYdlp):
+class YouTubeChannelHandlerMock(YouTubeChannelHandler):
     def __init__(self, url=None):
         super().__init__(url)
 
