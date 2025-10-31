@@ -12,7 +12,7 @@
         {
             "id": 2,
             "enabled": true,
-            "rule_url": "mashable.com, www.youtube.com/user",
+            "rule_url": "mashable.com",
             "rule_name": "Crawlee",
             "block": false,
             "auto_tag": "",

@@ -248,7 +248,6 @@ class Url(ContentInterface):
                     return
 
             self.response = self.handler.get_response()
-
             if self.response:
                 if not self.response.is_valid():
                     WebLogger.error(
@@ -591,18 +590,13 @@ class Url(ContentInterface):
             return handler.get_contents_body_hash()
 
     def get_properties(self, full=False, include_social=False, check_robots=False):
-        basic_properties = super().get_properties()
-        basic_properties["link_request"] = self.request_url
-
-        if not full:
-            return basic_properties
-
         response = self.get_response()
-        page_handler = self.get_handler()
-
-        all_properties = []
 
         properties_data = self.get_properties_data()
+        if not full:
+            return properties_data
+
+        all_properties = []
 
         all_properties.append({"name": "Properties", "data": properties_data})
 
@@ -649,7 +643,6 @@ class Url(ContentInterface):
 
     def get_properties_data(self):
         properties = super().get_properties()
-        response = self.get_response()
         page_handler = self.get_handler()
 
         properties["link_request"] = self.request_url
@@ -660,31 +653,32 @@ class Url(ContentInterface):
             for key, feed in enumerate(feeds):
                 properties["feeds"].append(feed)
 
-        if type(page_handler) is Url.youtube_channel_handler:
-            if page_handler.get_channel_name():
-                properties["channel_name"] = page_handler.get_channel_name()
-                properties["channel_url"] = page_handler.get_channel_url()
+        if page_handler:
+            if type(page_handler) is Url.youtube_channel_handler:
+                if page_handler.get_channel_name():
+                    properties["channel_name"] = page_handler.get_channel_name()
+                    properties["channel_url"] = page_handler.get_channel_url()
 
-        if type(page_handler) is Url.youtube_video_handler:
-            if page_handler.get_channel_name():
-                properties["channel_name"] = page_handler.get_channel_name()
-                properties["channel_url"] = page_handler.get_channel_url()
+            if type(page_handler) is Url.youtube_video_handler:
+                if page_handler.get_channel_name():
+                    properties["channel_name"] = page_handler.get_channel_name()
+                    properties["channel_url"] = page_handler.get_channel_url()
 
-        if type(page_handler) is HttpPageHandler and type(page_handler.p) is HtmlPage:
-            properties["favicon"] = page_handler.p.get_favicon()
-            properties["meta title"] = page_handler.p.get_meta_field("title")
-            properties["meta description"] = page_handler.p.get_meta_field(
-                "description"
-            )
-            properties["meta keywords"] = page_handler.p.get_meta_field("keywords")
+            if type(page_handler) is HttpPageHandler and type(page_handler.p) is HtmlPage:
+                properties["favicon"] = page_handler.p.get_favicon()
+                properties["meta title"] = page_handler.p.get_meta_field("title")
+                properties["meta description"] = page_handler.p.get_meta_field(
+                    "description"
+                )
+                properties["meta keywords"] = page_handler.p.get_meta_field("keywords")
 
-            properties["og:title"] = page_handler.p.get_og_field("title")
-            properties["og:description"] = page_handler.p.get_og_field("description")
-            properties["og:image"] = page_handler.p.get_og_field("image")
-            properties["og:site_name"] = page_handler.p.get_og_field("site_name")
-            properties["schema:thumbnailUrl"] = page_handler.p.get_schema_field(
-                "thumbnailUrl"
-            )
+                properties["og:title"] = page_handler.p.get_og_field("title")
+                properties["og:description"] = page_handler.p.get_og_field("description")
+                properties["og:image"] = page_handler.p.get_og_field("image")
+                properties["og:site_name"] = page_handler.p.get_og_field("site_name")
+                properties["schema:thumbnailUrl"] = page_handler.p.get_schema_field(
+                    "thumbnailUrl"
+                )
 
         properties["link_archives"] = self.get_urls_archive()
 
