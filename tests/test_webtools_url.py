@@ -279,7 +279,8 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(properties["link"], test_link)
         self.assertEqual(properties["link_request"], test_link)
 
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        # +1 html +1 RSS
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_properties__youtube_video__basic(self):
         MockRequestCounter.mock_page_requests = 0
@@ -401,7 +402,8 @@ class UrlTest(FakeInternetTestCase):
         self.assertTrue(entries_section)
         self.assertTrue(len(entries_section) > 0)
 
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        # +1 HTML +1 RSS
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_properties__odysee_channel__advanced(self):
         MockRequestCounter.mock_page_requests = 0

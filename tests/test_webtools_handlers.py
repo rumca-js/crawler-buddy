@@ -10,7 +10,7 @@ from src.webtools import (
    Url,
 )
 from tests.fakeinternet import (
-   FakeInternetTestCase, MockRequestCounter, YouTubeJsonHandlerMock
+   FakeInternetTestCase, MockRequestCounter
 )
 
 

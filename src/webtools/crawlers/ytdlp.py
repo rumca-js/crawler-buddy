@@ -49,7 +49,7 @@ class YtdlpCrawler(CrawlerInterface):
             self.response = PageResponseObject(
                 url=self.request.url,
                 text=str(yt.stdout) + " " + str(self.stderr),
-                status_code=200 + yt.returncode,
+                status_code=400 + yt.returncode,
                 encoding="utf-8",
                 headers=headers,
                 binary=None,

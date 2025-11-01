@@ -22,6 +22,7 @@ from webtoolkit import (
     ResponseHeaders,
     CrawlerInterface,
     YouTubeChannelHandler,
+    CrawlerInterface,
 )
 from webtoolkit.tests.mocks import (
     MockRequestCounter,
@@ -131,18 +132,20 @@ class FlaskRequest(object):
         self.args.set(key, value)
 
 
-class YouTubeJsonHandlerMock(YouTubeJsonHandler):
-    def __init__(self, url, request=None, url_builder=None):
-        super().__init__(url, request=request, url_builder=url_builder)
+class YtdlpCrawlerMock(CrawlerInterface):
 
-    def get_response_json(self):
-        MockRequestCounter.requested(self.url)
+    def run(self):
+        from utils.programwrappers import ytdlp
 
-        if self.yt_text:
-            return True
+        MockRequestCounter.requested(self.request.url, crawler_data=self.request)
 
-        if self.get_video_code() == "1234":
-            self.yt_text = """{"_filename" : "1234 test file name",
+        code = (self.request.url)
+
+        yt_text = ""
+        status_code = 200
+
+        if code == "1234":
+            yt_text = """{"_filename" : "1234 test file name",
             "title" : "1234 test title",
             "description" : "1234 test description",
             "channel_url" : "https://youtube.com/channel/1234-channel",
@@ -154,10 +157,10 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
             "view_count" : "2",
             "live_status" : "False"
             }""".replace("${date}", self.get_now())
-        if self.get_video_code() == "666":
-            pass
-        if self.get_video_code() == "555555":
-            self.yt_text = """{"_filename" : "555555 live video.txt",
+        if code == "666":
+            status_code = 401
+        if code == "555555":
+            yt_text = """{"_filename" : "555555 live video.txt",
             "title" : "555555 live video",
             "description" : "555555 live video description",
             "channel_url" : "https://youtube.com/channel/test.txt",
@@ -169,8 +172,8 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
             "view_count" : "2",
             "live_status" : "True"
             }""".replace("${date}", self.get_now())
-        if self.get_video_code() == "archived":
-            self.yt_text = """{"_filename" : "555555 live video.txt",
+        if code == "archived":
+            yt_text = """{"_filename" : "555555 live video.txt",
             "title" : "555555 live video",
             "description" : "555555 live video description",
             "channel_url" : "https://youtube.com/channel/test.txt",
@@ -183,7 +186,7 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
             "live_status" : "False"
             }""".replace("${date}", self.get_now())
         else:
-            self.yt_text = """{"_filename" : "test.txt",
+            yt_text = """{"_filename" : "test.txt",
             "title" : "test.txt",
             "description" : "test.txt",
             "channel_url" : "https://youtube.com/channel/test.txt",
@@ -196,10 +199,23 @@ class YouTubeJsonHandlerMock(YouTubeJsonHandler):
             "live_status" : "False"
             }""".replace("${date}", self.get_now())
 
-        if self.get_video_code() == "666":
-            return False
-        else:
-            return self.load_details_youtube()
+        headers = {}
+        headers["Content-Type"] = "text/json"
+
+        self.response = PageResponseObject(
+            url=self.request.url,
+            text=yt_text,
+            status_code=status_code,
+            encoding="utf-8",
+            headers=headers,
+            binary=None,
+            request_url=self.request.url,
+        )
+
+        return self.response
+
+    def is_valid(self):
+        return True
 
     def get_now(self):
         """
@@ -224,15 +240,18 @@ class FakeInternetTestCase(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         MockRequestCounter.reset()
+        self.get_response_saved = Url.get_response
 
     def disable_web_pages(self):
-        WebConfig.get_default_crawler = FakeInternetTestCase.get_default_crawler
-
-        Url.youtube_video_handler = YouTubeJsonHandlerMock
-        Url.handlers[0] = YouTubeJsonHandlerMock
-
         WebConfig.use_print_logging()
+
+        WebConfig.get_default_crawler = FakeInternetTestCase.get_default_crawler
         WebConfig.get_crawler_from_string = FakeInternetTestCase.get_crawler_from_string
+
+    def get_response(self):
+        if self.request.crawler_name == "YtdlpCrawler":
+            self.request.crawler_type = YtdlpCrawlerMock(request=self.request)
+        return self.get_response_saved()
 
     def get_default_crawler(url):
         data = {}
@@ -248,6 +267,9 @@ class FakeInternetTestCase(unittest.TestCase):
 
         if crawler_string == "MockCrawler":
             return MockCrawler
+
+        if crawler_string == "YtdlpCrawler":
+            return YtdlpCrawlerMock
 
         crawlers = WebConfig.get_crawlers_raw()
         for crawler in crawlers:

@@ -1,8 +1,13 @@
+from datetime import date
+from datetime import datetime
+
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 from concurrent.futures import ThreadPoolExecutor
 
 from utils.dateutils import DateUtils
+from utils.serializers import YouTubeJson
+from utils.programwrappers import ytdlp
 
 from webtoolkit import PageResponseObject, UrlLocation, HtmlPage, ContentInterface
 from webtoolkit import WebLogger
@@ -57,6 +62,10 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         super().__init__(url=url, request=request, url_builder=url_builder)
 
         self.social_data = {}
+
+        self.json_url = None
+        self.return_url = None
+
         self.yt_text = None
         self.yt_ob = None
 
@@ -131,12 +140,6 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
     def get_date_published(self):
         if self.yt_ob:
-            # TODO use dateutils
-
-            from datetime import date
-            from datetime import datetime
-            from pytz import timezone
-
             date_string = self.yt_ob.get_date_published()
             date = datetime.strptime(date_string, "%Y%m%d")
             dt = datetime.combine(date, datetime.min.time())
@@ -326,8 +329,6 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if self.yt_ob is not None:
             return True
 
-        from utils.serializers import YouTubeJson
-
         self.yt_ob = YouTubeJson()
 
         if self.yt_text and not self.yt_ob.loads(self.yt_text):
@@ -481,8 +482,6 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             return self.yt_ob.get_tags()
 
     def get_entries(self):
-        from utils.programwrappers import ytdlp
-        from utils.serializers import YouTubeJson
 
         entries = []
 
