@@ -29,6 +29,13 @@
   },
   {
     "enabled": true,
+    "name": "YtdlpCrawler",
+    "settings": {
+      "timeout_s": 40
+    }
+  },
+  {
+    "enabled": true,
     "name": "SeleniumUndetected",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",

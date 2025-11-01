@@ -36,13 +36,17 @@ class YTDLP(YouTubeDownloader):
         ]
 
         proc = subprocess.run(
-            cmds, cwd=self._cwd, capture_output=True, timeout=self.timeout_s
+            cmds,
+            cwd=self._cwd,
+            capture_output=True,
+            timeout=self.timeout_s
         )
 
         if proc.returncode != 0:
             return None
 
-        out = self.get_output_ignore(proc)
+        self.stdout = self.get_output_ignore(proc)
+        self.stderr = self.get_error_ignore(proc)
 
         return proc
 
@@ -56,7 +60,8 @@ class YTDLP(YouTubeDownloader):
         if proc.returncode != 0:
             return None
 
-        out = self.get_output_ignore(proc)
+        self.stdout = self.get_output_ignore(proc)
+        self.stderr = self.get_error_ignore(proc)
 
         return proc
 
@@ -74,8 +79,9 @@ class YTDLP(YouTubeDownloader):
 
         proc = subprocess.run(cmds, capture_output=True, timeout=self.timeout_s)
 
-        out = self.get_output_ignore(proc)
-        error = self.get_error_ignore(proc)
+        self.returncode = proc.returncode
+        self.stdout = self.get_output_ignore(proc)
+        self.stderr = self.get_error_ignore(proc)
 
         # return code 101 is returned due to --max-downloads limit
         # everything is fine
@@ -88,7 +94,7 @@ class YTDLP(YouTubeDownloader):
             )
             return None
 
-        self._json_data = out.strip()
+        self._json_data = self.stdout.strip()
 
         if path is not None:
             path.write_text(self._json_data)
@@ -148,6 +154,15 @@ class YTDLP(YouTubeDownloader):
 
         json = json.loads(json_text)
         return json
+
+    def is_valid(self):
+        # return code 101 is returned due to --max-downloads limit
+        # everything is fine
+
+        if self.returncode == 0 or self.returncode == 101:
+            return True
+
+        return False
 
     @staticmethod
     def validate():

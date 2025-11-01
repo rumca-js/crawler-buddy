@@ -15,6 +15,8 @@ class YouTubeDownloader(object):
         self._url = url
         self._cwd = cwd
         self.timeout_s = timeout_s
+        self.stdout = None
+        self.stderr = None
 
     def get_video_ext(self):
         return "mp4"
@@ -39,10 +41,16 @@ class YouTubeDownloader(object):
         ]
         logging.info("Downloading: " + " ".join(cmds))
         proc = subprocess.run(
-            cmds, cwd=self._cwd, stdout=subprocess.PIPE, timeout=self.timeout_s
+            cmds,
+            cwd=self._cwd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=self.timeout_s
         )
 
-        out = self.get_output_ignore(proc)
+        self.returncode = proc.returncode
+        self.stdout = self.get_output_ignore(proc)
+        self.stderr = self.get_error_ignore(proc)
 
         return proc
 
@@ -53,10 +61,16 @@ class YouTubeDownloader(object):
         cmds = ["youtube-dl", "-o", file_name, self._url]
         logging.info("Downloading: " + " ".join(cmds))
         proc = subprocess.run(
-            cmds, cwd=self._cwd, stdout=subprocess.PIPE, timeout=self.timeout_s
+            cmds,
+            cwd=self._cwd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=self.timeout_s
         )
 
-        out = self.get_output_ignore(proc)
+        self.returncode = proc.returncode
+        self.stdout = self.get_output_ignore(proc)
+        self.stderr = self.get_error_ignore(proc)
 
         return proc
 
@@ -77,10 +91,15 @@ class YouTubeDownloader(object):
         proc = subprocess.run(
             ["youtube-dl", "--dump-json", self._url],
             stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             timeout=self.timeout_s,
         )
-        out = self.get_output_ignore(proc)
-        self._json_data = out.strip()
+
+        self.returncode = proc.returncode
+        self.stdout = self.get_output_ignore(proc)
+        self.stderr = self.get_error_ignore(proc)
+
+        self._json_data = self.stdout.strip()
         return self._json_data
 
     def get_json(self):

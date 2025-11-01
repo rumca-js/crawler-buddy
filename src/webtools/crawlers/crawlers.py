@@ -4,18 +4,9 @@ Provides cralwers implmenetation that can be used directly in program.
 Some crawlers / scrapers cannot be easily called from a thread, etc, because of asyncio.
 """
 
-import json
-import traceback
 import time
-from pathlib import Path
-import shutil
-import os
-import subprocess
 import threading
 import urllib.parse
-import tempfile
-
-from utils.basictypes import fix_path_for_os
 
 from webtoolkit import (
     RssPage,
