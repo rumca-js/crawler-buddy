@@ -59,7 +59,6 @@ The getj Entpoint request arguments
 
 - url (string): The URL to crawl
 - crawler_name (optional, string): The name of the crawler
-- crawler_data (optional, dict): Additional data for the crawler
 - handler-name (optional, string): The name of the handler
 - timeout_s (optional, int): timeout
 - delay_s (optional, int): delay after load of page, necessary for javascript
