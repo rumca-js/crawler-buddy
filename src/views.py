@@ -9,6 +9,58 @@ from webtoolkit import (
 )
 
 
+def level2color(level):
+    if level == "WARNING":
+        return "yellow"
+    elif level == "ERROR":
+        return "red"
+    elif level == "NOTIFY":
+        return "blue"
+    return ""
+
+
+def status2color(status_code):
+    valid = is_status_code_valid(status_code)
+    invalid = is_status_code_invalid(status_code)
+
+    if valid:
+        return "green"
+    if invalid:
+        return "red"
+    elif status_code == 0:
+        return ""
+    else:
+        return "orange"
+
+
+def list_to_options(options_list):
+    """
+    Generates an HTML form with a select dropdown based on a list of options.
+
+    Parameters:
+        options_list (list): A list of strings for the dropdown options.
+    Returns:
+        str: An HTML string containing the options.
+    """
+    options_list = [str(item) for item in options_list]
+
+    options_html = "\n".join(f'        <option value="{item}">{item}</option>' for item in options_list)
+    return options_html
+
+
+def get_select_widget(field_name, options_list):
+    options_html = list_to_options(options_list)
+
+    select_html = f"""
+    <label for="{field_name}">{field_name}</label><br>
+    <select type="text" id="{field_name}" name="{field_name}"><br><br>
+      {options_html}
+    </select>
+    """
+
+    return select_html
+
+
 def get_template(name, context=None):
     with open("static/templates/" + name) as fh:
         data = fh.read()
@@ -47,30 +99,6 @@ def get_html(id, body, title="", index=False):
     )
 
     return html
-
-
-def level2color(level):
-    if level == "WARNING":
-        return "yellow"
-    elif level == "ERROR":
-        return "red"
-    elif level == "NOTIFY":
-        return "blue"
-    return ""
-
-
-def status2color(status_code):
-    valid = is_status_code_valid(status_code)
-    invalid = is_status_code_invalid(status_code)
-
-    if valid:
-        return "green"
-    if invalid:
-        return "red"
-    elif status_code == 0:
-        return ""
-    else:
-        return "orange"
 
 
 def get_entry_html(id, index, url, timestamp, all_properties):

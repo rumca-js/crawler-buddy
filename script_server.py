@@ -34,6 +34,7 @@ from src import webtools
 from src.configuration import Configuration
 from src.crawler import Crawler
 from src.views import (
+    get_select_widget,
     get_entry_html,
     level2color,
     rssify,
@@ -52,6 +53,25 @@ configuration = Configuration()
 crawler_main = Crawler()
 
 
+def get_crawlers():
+    result = [""]
+
+    config = configuration.get_crawler_config()
+    for item in config:
+        name = item["name"]
+        result.append(name)
+
+    return result
+
+
+def get_handlers():
+    handlers = [""]
+    for handler in webtools.Url.handlers:
+        handlers.append(handler.__name__)
+
+    return handlers
+
+
 def get_crawler_text():
     text = ""
 
@@ -67,24 +87,23 @@ def get_crawler_text():
 
 
 def get_crawling_form(title, action_url, id=""):
-    crawlers_text = get_crawler_text()
+    crawlers = get_crawlers()
+    handlers = get_handlers()
+
+    crawler_select_html = get_select_widget("crawler_name", crawlers)
+    handler_select_html = get_select_widget("handler_name", handlers)
 
     form_html = f"""
         <h1>{title}</h1>
         <form action="{action_url}?id={id}" method="get">
-            <label for="url">URL:</label><br>
+            <label for="url">URL</label><br>
             <input type="url" id="url" name="url" required autofocus><br><br>
 
-            <label for="name">Name (optional):</label><br>
-            <input type="text" id="crawler_name" name="crawler_name"><br><br>
+            {crawler_select_html}
+            {handler_select_html}
 
             <button type="submit">Submit</button>
         </form>
-
-        <h1>Available crawlers:</h1>
-        <div style="margin-top:20px">
-        {crawlers_text}
-        </div>
         """
 
     return form_html
@@ -378,28 +397,16 @@ def find():
         return get_html(id=id, body="Cannot access this view", title="Error")
 
     url = request.args.get("url")
-    name = request.args.get("crawler_name")
+    crawler_name = request.args.get("crawler_name")
+    handler_name = request.args.get("handler_name")
 
-    if not url and not name and not crawler:
-        form_html = """
-            <h1>Submit Your Details</h1>
-            <form action="/findj?id={}" method="get">
-                <label for="url">URL:</label><br>
-                <input type="text" id="url" name="url" required autofocus><br><br>
-
-                <label for="name">Name (optional):</label><br>
-                <input type="text" id="name" name="name"><br><br>
-
-                <button type="submit">Submit</button>
-            </form>
-            """.format(
-            id
-        )
+    if not url and not crawler_name:
+        form_html = get_crawling_form("Find", "/findj", id)
 
         return get_html(id=id, body=form_html, title="Find")
     else:
         things = crawler_main.url_history.find(
-            url=url, crawler_name=name, crawler=crawler
+            url=url, crawler_name=name,
         )
 
         if not things:
