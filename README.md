@@ -60,18 +60,18 @@ The getj Entpoint request arguments
 - url (string): The URL to crawl
 - crawler_name (optional, string): The name of the crawler
 - crawler_data (optional, dict): Additional data for the crawler
-
-crawler_data is a dict, with settings:
- - crawler_name (optional, string)
- - settings (dict)
+- handler-name (optional, string): The name of the handler
+- timeout_s (optional, int): timeout
+- delay_s (optional, int): delay after load of page, necessary for javascript
+- ssl_verify (optional, bool): indicates whether SSL problems should lead to errors
+- bytes_limit (optional, int): accepted length limit of response bytes
+- accept_types (optional, string): accepted types, "all" by default
+- User-Agent (optional, string): define user agent
+- request_headers (optional, dict): define headers
+- settings (dict)
 
 settings is a dict, with settings:
- - Accept (string): accept only specified type of contents. For example text/html can be speified
- - User-Agent (string): define user agent for crawler. Crawle can ignore this setting
- - timeout_s (int): the amount of time we wait for a page response. Default value is often individually provided for each crawler
- - delay_s (int): delay which should be used after visiting a page using crawler. Useful if it is needed to wait for javascript.
  - driver_executable (string): string to driver executable. Useful for selenium
- - byte_limit (int): content length limit. Sometime I just don't want to download 1GB of data before checking what's in it. Default value is 5MB
  - script (string): string informing which script should be used. Useful if ScriptCrawler is used
 
 ## /getj response
@@ -80,7 +80,7 @@ Fields:
 
  - Properties - general properties, like title, description, thumbnail, language, date\_published, feed\_url
  - Streams - some handlers provide more data streams than "Text" or "Binary". For youtube we collect also yt-dlp JSON output, or return dislike data
- - Response - commonly used response fields Provides Content-Type, Content-Length, status\_code, etc.
+ - Response - commonly used response fields Provides Content-Type, Content-Length, status\_code, etc. Contains also request data
  - Headers - all response headers of page. Provides Content-Type, Content-Length, etc.
  - Entries - if the link contains subordinate elements, like RSS, this field is populated with their meta data
 
@@ -170,7 +170,6 @@ No need to select methods manually, as some methods are already predefined and u
  - HackerNews - social media
  - GitHub - social media
  - Reddit - RSS feed discovery, social media data
- - 4chan - RSS feed discovery
  - HTML pages - RSS feed discovery for links
 
 File support
