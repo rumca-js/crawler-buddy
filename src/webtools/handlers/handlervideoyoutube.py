@@ -97,9 +97,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         status = False
         if self.get_response_json():
-            response.set_text(self.yt_text, "utf-8")
-            response.status_code = PageResponseObject.STATUS_CODE_OK
-            response.url = self.get_link_classic()
+            response = self.json_url.get_response()
 
             status = True
 
@@ -109,8 +107,6 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         self.response = response
         self.contents = self.response.get_text()
-
-        self.social_data = self.get_json_data()
 
         if (
             not self.response
@@ -272,17 +268,17 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         try:
             view_count = int(self.rd_ob.get_view_count())
-        except (ValueError, AttributeError) as E:
+        except (ValueError, AttributeError, TypeError) as E:
             pass
 
         try:
             thumbs_up = int(self.rd_ob.get_thumbs_up())
-        except (ValueError, AttributeError) as E:
+        except (ValueError, AttributeError, TypeError) as E:
             pass
 
         try:
             thumbs_down = int(self.rd_ob.get_thumbs_down())
-        except (ValueError, AttributeError) as E:
+        except (ValueError, AttributeError, TypeError) as E:
             pass
 
         json_data["view_count"] = view_count
@@ -355,11 +351,19 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if self.yt_text is not None:
             return True
 
-        from utils.programwrappers import ytdlp
+        self.json_url = self.get_page_url(url = self.url, crawler_name="YtdlpCrawler")
+        response = self.json_url.get_response()
+        if response is None:
+            WebLogger.debug("Url:{} No response".format(url))
+            return False
 
-        yt = ytdlp.YTDLP(self.url)
-        self.yt_text = yt.download_data()
-        if self.yt_text is None:
+        if not response.is_valid():
+            WebLogger.debug("Url:{} response is not valid".format(url))
+            return False
+
+        self.yt_text = response.get_text()
+        if not self.yt_text:
+            WebLogger.debug("Url:{} response no text".format(url))
             return False
 
         return self.load_details_youtube()
@@ -373,15 +377,21 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         request_url = self.get_return_dislike_url()
 
-        url = self.build_default_url(url = request_url)
-        response = url.get_response()
-        if response is None or not response.is_valid():
+        self.return_url = self.build_default_url(url = request_url)
+        response = self.return_url.get_response()
+        if response is None:
+            WebLogger.debug("Url:{} No response".format(url))
+            return False
+
+        if not response.is_valid():
+            WebLogger.debug("Url:{} response is not valid".format(url))
             return False
 
         self.rd_text = response.get_text()
         if not self.rd_text:
+            WebLogger.debug("Url:{} response no text".format(url))
             return False
-        handler = url.get_handler()
+        handler = self.return_url.get_handler()
 
         handler.load_response()
         self.rd_ob = handler
