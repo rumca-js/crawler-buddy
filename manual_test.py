@@ -150,7 +150,7 @@ def test_youtube():
             print("{} Failed".format(name))
 
 def main():
-    #test_crawlers()
+    test_crawlers()
     test_youtube()
 
 main()

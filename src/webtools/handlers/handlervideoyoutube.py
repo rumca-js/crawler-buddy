@@ -65,6 +65,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         self.json_url = None
         self.return_url = None
+        self.html_url = None
 
         self.yt_text = None
         self.yt_ob = None
@@ -98,30 +99,19 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         with ThreadPoolExecutor() as executor:
             # TODO maybe we should ask HTML page for details, and use JSON for social data only
-            thread_result_json = executor.submit(self.get_response_json)
-            thread_result_return = executor.submit(self.get_response_return_dislike)
+            thread_result_html = executor.submit(self.get_html_url)
+            thread_result_return = executor.submit(self.get_return_dislike_url)
 
-            thread_result_json.result()
-            thread_result_return.result()
+            self.html_url = thread_result_html.result()
+            self.return_url = thread_result_return.result()
 
-        status = False
-        if self.get_response_json():
-            response = self.json_url.get_response()
+        if self.html_url:
+            self.response = self.html_url.get_response()
+        elif self.json_url:
+            self.response = self.json_url.get_response()
 
-            status = True
-
-            WebLogger.info("YouTube video handler: {} DONE".format(self.url))
-        else:
-            WebLogger.error("Url:{} Cannot download youtube details".format(self.url))
-
-        self.response = response
-        self.contents = self.response.get_text()
-
-        if (
-            not self.response
-            or self.response.status_code == PageResponseObject.STATUS_CODE_ERROR
-        ):
-            self.dead = True
+        if self.response:
+            self.contents = self.response.get_text()
 
         return self.response
 
@@ -131,14 +121,21 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             return status
 
     def get_title(self):
+        if self.html_url:
+            return self.html_url.get_title()
         if self.yt_ob:
             return self.yt_ob.get_title()
 
     def get_description(self):
+        if self.html_url:
+            return self.html_url.get_description()
         if self.yt_ob:
             return self.yt_ob.get_description()
 
     def get_date_published(self):
+        if self.html_url:
+            return self.html_url.get_date_published()
+
         if self.yt_ob:
             date_string = self.yt_ob.get_date_published()
             date = datetime.strptime(date_string, "%Y%m%d")
@@ -149,6 +146,9 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             return dt
 
     def get_thumbnail(self):
+        if self.html_url:
+            return self.html_url.get_thumbnail()
+
         if self.yt_ob:
             return self.yt_ob.get_thumbnail()
 
@@ -214,6 +214,18 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
     def get_json_text(self):
         if self.yt_ob:
             return self.yt_ob.get_json_data()
+
+    def get_html_url(self):
+        if self.html_url:
+            return self.html_url
+
+        self.html_url = self.get_page_url(self.url)
+        if not self.html_url:
+            return
+
+        self.html_url.get_response()
+
+        return self.html_url
 
     def get_json_data(self):
         if self.social_data != {}:
@@ -402,10 +414,6 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         return True
 
-    def get_thumbnail(self):
-        if self.yt_ob:
-            return self.yt_ob.get_thumbnail()
-
     def get_upload_date(self):
         if self.yt_ob:
             return self.yt_ob.get_upload_date()
@@ -482,7 +490,6 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             return self.yt_ob.get_tags()
 
     def get_entries(self):
-
         entries = []
 
         location = UrlLocation(self.url)
