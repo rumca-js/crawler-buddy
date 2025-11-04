@@ -17,6 +17,7 @@ import asyncio
 import base64
 
 from webtoolkit import (
+    calculate_hash,
     ContentInterface,
     DefaultContentPage,
     RssPage,
@@ -600,6 +601,9 @@ class Url(ContentInterface):
 
         all_properties.append({"name": "Properties", "data": properties_data})
 
+        properties_hash = self.property_encode(calculate_hash(str(properties_data)))
+        all_properties.append({"name": "PropertiesHash", "data": properties_hash})
+
         if response:
             if response.get_text():
                 all_properties.append(
@@ -693,17 +697,6 @@ class Url(ContentInterface):
             is_allowed = self.is_allowed()
 
         response_data["is_allowed"] = is_allowed
-
-        if self.get_contents_hash():
-            response_data["hash"] = self.property_encode(self.get_contents_hash())
-        else:
-            response_data["hash"] = ""
-        if self.get_contents_body_hash():
-            response_data["body_hash"] = self.property_encode(
-                self.get_contents_body_hash()
-            )
-        else:
-            response_data["body_hash"] = ""
 
         return response_data
 
