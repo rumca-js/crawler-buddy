@@ -78,15 +78,6 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         self.dead = False
         self.response = None
 
-    def get_contents(self):
-        if self.response and self.response.get_text():
-            return self.response.get_text()
-
-        if self.dead:
-            return
-
-        return self.get_response().get_text()
-
     def get_response(self):
         if self.response:
             return self.response
@@ -114,6 +105,28 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             self.contents = self.response.get_text()
 
         return self.response
+
+    def get_html_url(self):
+        if self.html_url:
+            return self.html_url
+
+        self.html_url = self.get_page_url(self.url)
+        if not self.html_url:
+            return
+
+        self.html_url.get_response()
+
+        return self.html_url
+
+    def get_return_dislike_url(self):
+        if self.return_url:
+            return self.return_url
+
+        return_dislike_link = self.get_return_dislike_url_link()
+        return_url = self.build_default_url(url = return_dislike_link)
+        return_url.get_response()
+
+        return return_url
 
     def is_valid(self):
         if self.response:
@@ -214,18 +227,6 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
     def get_json_text(self):
         if self.yt_ob:
             return self.yt_ob.get_json_data()
-
-    def get_html_url(self):
-        if self.html_url:
-            return self.html_url
-
-        self.html_url = self.get_page_url(self.url)
-        if not self.html_url:
-            return
-
-        self.html_url.get_response()
-
-        return self.html_url
 
     def get_json_data(self):
         if self.social_data != {}:
@@ -349,13 +350,13 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         return True
 
     def get_streams(self):
-        if self.yt_text:
-            self.streams["yt-dlp JSON"] = (
-                self.yt_text
+        if self.html_url is not None:
+            self.streams["HTML"] = (
+                self.html_url.get_response()
             )  # TODO this should be response object
-        if self.rd_text:
+        if self.return_url is not None:
             self.streams["ReturnDislike JSON"] = (
-                self.rd_text
+                self.return_url.get_response()
             )  # TODO this should be response object
 
         return self.streams
@@ -381,14 +382,14 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         return self.load_details_youtube()
 
-    def get_return_dislike_url(self):
+    def get_return_dislike_url_link(self):
         return "https://returnyoutubedislikeapi.com/votes?videoId=" + self.get_video_code()
 
     def get_response_return_dislike(self):
         if self.rd_text is not None:
             return True
 
-        request_url = self.get_return_dislike_url()
+        request_url = self.get_return_dislike_url_link()
 
         self.return_url = self.build_default_url(url = request_url)
         response = self.return_url.get_response()

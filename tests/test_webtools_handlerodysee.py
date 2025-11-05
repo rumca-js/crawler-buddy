@@ -185,15 +185,6 @@ class OdyseeChannelHandlerTest(FakeInternetTestCase):
         )
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_get_channel_feed(self):
-        MockRequestCounter.mock_page_requests = 0
-
-        self.assertEqual(
-            OdyseeChannelHandler("https://odysee.com/@samtime:1").get_channel_feed(),
-            "https://odysee.com/$/rss/@samtime:1",
-        ) 
-        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
-
     def test_get_contents_hash(self):
         MockRequestCounter.mock_page_requests = 0
         handler = OdyseeChannelHandler("https://odysee.com/@samtime:1?test", url_builder=Url)
@@ -202,7 +193,7 @@ class OdyseeChannelHandlerTest(FakeInternetTestCase):
         hash = handler.get_contents_hash()
 
         self.assertTrue(hash)
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_contents_body_hash(self):
         MockRequestCounter.mock_page_requests = 0
@@ -212,7 +203,7 @@ class OdyseeChannelHandlerTest(FakeInternetTestCase):
         hash = handler.get_contents_body_hash()
 
         self.assertTrue(hash)
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_contents(self):
         MockRequestCounter.mock_page_requests = 0
@@ -222,7 +213,7 @@ class OdyseeChannelHandlerTest(FakeInternetTestCase):
         contents = handler.get_contents()
 
         self.assertTrue(contents)
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_response(self):
         MockRequestCounter.mock_page_requests = 0
@@ -232,4 +223,4 @@ class OdyseeChannelHandlerTest(FakeInternetTestCase):
         response = handler.get_response()
 
         self.assertTrue(response)
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)

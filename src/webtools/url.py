@@ -259,18 +259,24 @@ class Url(ContentInterface):
             return self.response
 
     def get_streams(self):
-        if self.handler is not None:
-            return self.handler.get_streams()
+        streams = []
+        streams_data = []
 
-        self.handler = self.get_handler_implementation()
+        handler = self.get_handler()
 
-        if self.handler:
-            if (self.request.respect_robots):
+        if handler:
+            if self.request.respect_robots:
                 if not self.is_allowed():
-                    return
+                    return []
 
             streams = self.handler.get_streams()
-            return streams
+
+        if streams:
+            for response in streams.values():
+                response_json = response_to_json(response)
+                streams_data.append(response_json)
+
+        return streams_data
 
     def get_headers(self):
         # TODO implement
@@ -710,13 +716,17 @@ class Url(ContentInterface):
 
     def get_entry_data(self):
         index = 0
-        entries = []
-        for entry in self.get_entries():
-            if "feed_entry" in entry:
-                del entry["feed_entry"]
-            entries.append(entry)
+        result = []
 
-        return entries
+        entries = self.get_entries()
+
+        if entries:
+            for entry in entries:
+                if "feed_entry" in entry:
+                    del entry["feed_entry"]
+                result.append(entry)
+
+        return result
 
     def property_encode(self, byte_property):
         return base64.b64encode(byte_property).decode("utf-8")

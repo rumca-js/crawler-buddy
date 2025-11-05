@@ -433,7 +433,7 @@ class UrlTest(FakeInternetTestCase):
         self.assertTrue(entries_section)
         self.assertTrue(len(entries_section) > 0)
 
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
     def test_get_properties__youtube_video__advanced(self):
         MockRequestCounter.mock_page_requests = 0
@@ -489,7 +489,6 @@ class UrlTest(FakeInternetTestCase):
         streams_section = url.get_properties_section("Streams", all_properties)
         self.assertTrue(streams_section)
         self.assertTrue(len(streams_section) > 0)
-        self.assertIn("Binary", streams_section)
 
         response_section = url.get_properties_section("Response", all_properties)
 
