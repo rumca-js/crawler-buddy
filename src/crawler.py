@@ -150,12 +150,6 @@ class Crawler(object):
             }}]
 
         response = RemoteServer.read_properties_section("Response", all_properties)
-        if "text" in response:
-            del response["text"]
-        if "binary" in response:
-            del response["binary"]
-        if "streams" in response:
-            del response["streams"]
         WebLogger.debug(info_text = "Crawling response: ", detail_text = str(response))
 
         return all_properties
