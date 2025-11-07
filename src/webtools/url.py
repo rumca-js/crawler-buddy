@@ -68,25 +68,6 @@ class Url(BaseUrl):
     Encapsulates data page, and builder to make request
     """
 
-    #fmt off
-
-    handlers = [
-        YouTubeJsonHandler,
-        OdyseeVideoHandler,
-        OdyseeChannelHandler,
-        RedditUrlHandler,
-        ReturnDislike,
-        GitHubUrlHandler,
-        HackerNewsHandler,
-        InternetArchive,
-        FourChanChannelHandler,
-        TwitterUrlHandler,
-        YouTubeVideoHandler,        # present here, if somebody wants to call it by name
-        YouTubeChannelHandler,      # present here, if somebody wants to call it by name
-        HttpPageHandler,            # default
-    ]
-    #fmt on
-
     def __init__(self, url=None, settings=None, request=None, url_builder=None):
         """
         @param handler_class Allows to enforce desired handler to be used to process link
@@ -121,3 +102,22 @@ class Url(BaseUrl):
 
     def get_init_request(self):
         return WebConfig.get_default_request(self.url)
+
+    def get_handlers(self):
+        #fmt off
+        return [
+            YouTubeJsonHandler,
+            OdyseeVideoHandler,
+            OdyseeChannelHandler,
+            RedditUrlHandler,
+            ReturnDislike,
+            GitHubUrlHandler,
+            HackerNewsHandler,
+            InternetArchive,
+            FourChanChannelHandler,
+            TwitterUrlHandler,
+            YouTubeVideoHandler,        # present here, if somebody wants to call it by name
+            YouTubeChannelHandler,      # present here, if somebody wants to call it by name
+            HttpPageHandler,            # default
+        ]
+        #fmt on
