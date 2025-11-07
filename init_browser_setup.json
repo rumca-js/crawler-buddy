@@ -1,6 +1,13 @@
 [
   {
     "enabled": true,
+    "name": "CurlCffiCrawler",
+    "settings": {
+      "timeout_s": 40
+    }
+  },
+  {
+    "enabled": true,
     "name": "RequestsCrawler",
     "settings": {
       "timeout_s": 20
@@ -9,13 +16,6 @@
   {
     "enabled": true,
     "name": "StealthRequestsCrawler",
-    "settings": {
-      "timeout_s": 40
-    }
-  },
-  {
-    "enabled": true,
-    "name": "CurlCffiCrawler",
     "settings": {
       "timeout_s": 40
     }

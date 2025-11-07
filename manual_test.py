@@ -190,8 +190,8 @@ def test_urls():
 
 
 def main():
-    #test_crawlers()
-    #test_crawl_script()
+    test_crawlers()
+    test_crawl_script()
     test_urls()
 
 main()
