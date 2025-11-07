@@ -58,6 +58,7 @@ from webtoolkit import (
 )
 from .handlers import (
     YouTubeJsonHandler,
+    YouTubeChannelHandlerJson
 )
 
 from utils.dateutils import DateUtils
@@ -92,9 +93,13 @@ class Url(BaseUrl):
         return WebConfig.get_default_request(url)
 
     def get_request_for_request(self, request):
-        default_request = WebConfig.get_default_request(request.url)
-        request.crawler_name = default_request.crawler_name
-        request.crawler_type = default_request.crawler_type
+        if request.crawler_name and request.crawler_type is None:
+            crawler = WebConfig.get_crawler_from_string(self.request.crawler_name)
+            self.request.crawler_type = crawler(request.url)
+        else:
+            default_request = WebConfig.get_default_request(request.url)
+            request.crawler_name = default_request.crawler_name
+            request.crawler_type = default_request.crawler_type
         return request
 
     def get_init_settings(self):
@@ -107,6 +112,7 @@ class Url(BaseUrl):
         #fmt off
         return [
             YouTubeJsonHandler,
+            YouTubeChannelHandlerJson,
             OdyseeVideoHandler,
             OdyseeChannelHandler,
             RedditUrlHandler,

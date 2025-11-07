@@ -5,9 +5,12 @@ from datetime import datetime
 
 
 class YouTubeJson(object):
-    def __init__(self, url=None):
+    def __init__(self, url=None, contents=None):
         self._json = {}
         self.url = url
+        self.contents = contents
+        if self.contents:
+            self.loads(self.contents)
 
     def get_json_data(self):
         return json.dumps(self._json)
@@ -19,11 +22,8 @@ class YouTubeJson(object):
         return self._json
 
     def loads(self, data):
-        try:
-            self._json = json.loads(data)
-            return self._json
-        except ValueError as E:
-            logging.critical(E, exc_info=True)
+        self._json = json.loads(data)
+        return self._json
 
     def write(self, file_name, force=True):
         file_dir = os.path.split(file_name)[0]

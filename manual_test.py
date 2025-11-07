@@ -186,7 +186,7 @@ def test_urls():
     test_url(url = "https://www.youtube.com/@LinusTechTips")
     test_url(url = "https://www.google.com")
     test_url(url = "https://www.github.com/rumca-js/Internet-Places-Database")
-    test_url(url = "https://www.github.com/r/wizardposting")
+    test_url(url = "https://www.reddit.com/r/wizardposting")
 
 
 def main():
