@@ -21,6 +21,7 @@ from webtoolkit import (
    WebLogger,
    RemoteUrl,
    RemoteServer,
+   PageRequestObject,
    PageResponseObject,
    ContentLinkParser,
    HTTP_STATUS_CODE_CONNECTION_ERROR,
@@ -41,6 +42,7 @@ from src.views import (
     get_html,
 )
 from src import CrawlerHistory
+from src.webtools import Url
 from commandlineparser import CommandLineParser
 
 
@@ -66,7 +68,8 @@ def get_crawlers():
 
 def get_handlers():
     handlers = [""]
-    for handler in webtools.Url.handlers:
+    request = PageRequestObject("")
+    for handler in Url(url="", request=request).get_handlers():
         handlers.append(handler.__name__)
 
     return handlers
