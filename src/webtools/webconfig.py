@@ -10,10 +10,13 @@ from pathlib import Path
 from urllib3.exceptions import InsecureRequestWarning
 from urllib3 import disable_warnings
 
-from webtoolkit import WebLogger, PageRequestObject
+from webtoolkit import (
+    RequestsCrawler,
+    PageRequestObject,
+    WebLogger,
+)
 
 from .crawlers import (
-    RequestsCrawler,
     SeleniumChromeHeadless,
     SeleniumChromeFull,
     SeleniumUndetected,

@@ -22,6 +22,7 @@ from pathlib import Path
 from webtoolkit import file_to_response
 import src.webtools.crawlers
 from src.webtools import Url
+from src.webtools.webconfig import WebConfig
 
 
 # change test webpage to see if other pages can be scraped using different scrapers
@@ -78,7 +79,7 @@ def call_crawler(name):
     execution_time = None
     response = None
 
-    crawler_class = getattr(src.webtools.crawlers, name)
+    crawler_class = WebConfig.get_crawler_from_string(name)
     crawler = crawler_class(url=test_webpage)
     if not crawler.is_valid():
         print(f"Crawler is {name} disabled")

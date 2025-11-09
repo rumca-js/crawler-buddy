@@ -2,14 +2,6 @@
 Provides various crawling mechanisms, libraries that can crawl.
 """
 
-from .crawlers import (
-   RequestsCrawler,
-   CurlCffiCrawler,
-   HttpxCrawler,
-   StealthRequestsCrawler,
-   BotasaurusCrawler,
-)
-
 from .seleniumbased import (
    SeleniumDriver,
    SeleniumChromeHeadless,
@@ -20,3 +12,8 @@ from .seleniumbased import (
 )
 from .scriptcrawler import *
 from .ytdlp import *
+
+from .botasaurus import BotasaurusCrawler
+from .curlcffi import CurlCffiCrawler
+from .httpx import HttpxCrawler
+from .stealth import StealthRequestsCrawler

@@ -22,6 +22,13 @@
   },
   {
     "enabled": true,
+    "name": "HttpMorphCrawler",
+    "settings": {
+      "timeout_s": 40
+    }
+  },
+  {
+    "enabled": true,
     "name": "HttpxCrawler",
     "settings": {
       "timeout_s": 40

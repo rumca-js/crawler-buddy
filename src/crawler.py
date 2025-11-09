@@ -150,7 +150,7 @@ class Crawler(object):
             }}]
 
         response = RemoteServer.read_properties_section("Response", all_properties)
-        WebLogger.debug(info_text = "Crawling response: ", detail_text = str(response))
+        # WebLogger.debug(info_text = "Crawling response: ", detail_text = str(response))
 
         return all_properties
 

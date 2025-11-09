@@ -11,13 +11,14 @@ from .handlers import (
 )
 
 from .crawlers import (
-    RequestsCrawler,
     SeleniumDriver,
     SeleniumChromeHeadless,
     SeleniumChromeFull,
     SeleniumUndetected,
     ScriptCrawler,
     StealthRequestsCrawler,
+    CurlCffiCrawler,
+    HttpxCrawler,
 )
 from .scriptcrawlerparser import (
     ScriptCrawlerParser,
