@@ -20,7 +20,7 @@ pytz = "^2024.2"
 psutil="*"
 flask="*"
 url-cleaner="*"
-webtoolkit="^0.0.113"
+webtoolkit="^0.0.115"
 
 # Enable and crawlers as needed
 
@@ -45,7 +45,7 @@ stealth-requests = "^2.0.4"
 # [Httpx]
 httpx = "0.28.1"
 
-httpmorph="0.2.4"
+httpmorph="0.2.5"
 
 # [botasaurus]
 # botasaurus = "*"

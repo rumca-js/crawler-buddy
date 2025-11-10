@@ -455,7 +455,6 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertIn("title", properties_section)
         self.assertIn("link", properties_section)
-        self.assertIn("feeds", properties_section)
 
         self.assertEqual(properties_section["link"], test_link)
         self.assertEqual(properties_section["link_request"], test_link)

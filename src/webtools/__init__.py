@@ -19,6 +19,7 @@ from .crawlers import (
     StealthRequestsCrawler,
     CurlCffiCrawler,
     HttpxCrawler,
+    HttpMorphCrawler,
 )
 from .scriptcrawlerparser import (
     ScriptCrawlerParser,

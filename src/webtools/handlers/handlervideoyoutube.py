@@ -78,26 +78,35 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         self.dead = False
         self.response = None
 
+    def get_channel_sources(self):
+        sources = []
+        sources.append(self.url)
+
+        return sources
+
     def is_valid(self):
         if self.response:
             status = not self.is_live()
             return status
 
     def get_title(self):
-        if self.html_url:
-            return self.html_url.get_title()
-        if self.yt_ob:
-            return self.yt_ob.get_title()
+        title = super().get_title()
+        if title is None:
+            if self.yt_ob:
+                return self.yt_ob.get_title()
+        else:
+            return title
 
     def get_description(self):
-        if self.html_url:
-            return self.html_url.get_description()
-        if self.yt_ob:
+        description = super().get_description()
+        if description is None:
             return self.yt_ob.get_description()
+        return description
 
     def get_date_published(self):
-        if self.html_url:
-            return self.html_url.get_date_published()
+        date_published = super().get_date_published()
+        if date_published is not None:
+            return date_published
 
         if self.yt_ob:
             date_string = self.yt_ob.get_date_published()
@@ -109,8 +118,9 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             return dt
 
     def get_thumbnail(self):
-        if self.html_url:
-            return self.html_url.get_thumbnail()
+        thumbnail = super().get_thumbnail()
+        if thumbnail is not None:
+            return thumbnail
 
         if self.yt_ob:
             return self.yt_ob.get_thumbnail()
@@ -444,6 +454,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if self.yt_ob:
             return self.yt_ob.get_tags()
 
+    """
     def get_entries(self):
         entries = []
 
@@ -486,3 +497,4 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
                     entries.append(entry_data)
 
         return entries
+    """

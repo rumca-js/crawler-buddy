@@ -27,6 +27,7 @@ from .crawlers import (
     CurlCffiCrawler,
     HttpxCrawler,
     YtdlpCrawler,
+    HttpMorphCrawler,
 )
 
 
@@ -80,6 +81,7 @@ class WebConfig(object):
             CrawleePlaywrightScript,
             ScrapyScript,
             YtdlpCrawler,
+            HttpMorphCrawler,
         ]
 
         return crawlers
@@ -96,6 +98,7 @@ class WebConfig(object):
         mapping.append(WebConfig.get_default_browser_setup(CurlCffiCrawler))
         mapping.append(WebConfig.get_default_browser_setup(HttpxCrawler))
         mapping.append(WebConfig.get_default_browser_setup(YtdlpCrawler))
+        mapping.append(WebConfig.get_default_browser_setup(HttpMorphCrawler))
 
         mapping.append(WebConfig.get_seleniumundetected())
         mapping.append(WebConfig.get_seleniumheadless())

@@ -110,6 +110,9 @@ def test_url(url):
     if response and response.is_invalid():
         print("Response is invalid")
 
+    if url.get_title() is None:
+        print("Title is None!")
+
     feeds = url.get_feeds()
     if feeds:
         print("Feeds {}".format(len(feeds)))
@@ -163,6 +166,7 @@ def test_crawlers():
     call_crawler("RequestsCrawler")
     call_crawler("CurlCffiCrawler")
     call_crawler("HttpxCrawler")
+    call_crawler("HttpMorphCrawler")
     call_crawler("StealthRequestsCrawler")
     call_crawler("SeleniumChromeHeadless")
     call_crawler("SeleniumChromeFull")
@@ -188,6 +192,7 @@ def test_urls():
     test_url(url = "https://www.google.com")
     test_url(url = "https://www.github.com/rumca-js/Internet-Places-Database")
     test_url(url = "https://www.reddit.com/r/wizardposting")
+    test_url(url = "https://www.reddit.com/r/wizardposting/comments/1olomjs/screw_human_skeletons_im_gonna_get_more_creative/")
 
 
 def main():
