@@ -8,6 +8,7 @@ from .url import Url
 
 from .handlers import (
     YouTubeJsonHandler,
+    YouTubeChannelHandlerJson,
 )
 
 from .crawlers import (

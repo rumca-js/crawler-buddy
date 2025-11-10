@@ -141,8 +141,8 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         hash = handler.get_contents_hash()
 
         self.assertTrue(hash)
-        # +1 for yt-flp +1 for return dislike
-        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
+        # +1 for HTML
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_contents_body_hash(self):
         MockRequestCounter.mock_page_requests = 0
@@ -165,8 +165,8 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         contents = handler.get_contents()
 
         self.assertTrue(contents)
-        # +1 yt-dlp +1 return dislike
-        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
+        # +1 HTML
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_response(self):
         MockRequestCounter.mock_page_requests = 0
@@ -178,8 +178,8 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         response = handler.get_response()
 
         self.assertTrue(response)
-        # +1 yt-dlp +1 return dislike
-        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
+        # +1 HTML
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_date_published(self):
         MockRequestCounter.mock_page_requests = 0

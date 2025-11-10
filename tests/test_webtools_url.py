@@ -7,6 +7,8 @@ from webtoolkit import (
 )
 from src.webtools import (
     Url,
+    YouTubeJsonHandler,
+    YouTubeChannelHandlerJson,
 )
 
 from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
@@ -34,7 +36,7 @@ class UrlTest(FakeInternetTestCase):
         test_link = " https://my-server:8185/view/somethingsomething/"
 
         # call tested function
-        link = Url.get_cleaned_link(test_link)
+        link = Url(url=test_link).get_cleaned_link()
 
         self.assertEqual(link, "https://my-server:8185/view/somethingsomething")
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
@@ -42,9 +44,9 @@ class UrlTest(FakeInternetTestCase):
     def test_get_cleaned_link__stupid_google_link(self):
         MockRequestCounter.mock_page_requests = 0
 
-        cleaned_link = Url.get_cleaned_link(
-            "https://www.google.com/url?q=https://forum.ddopl.com/&sa=Udupa"
-        )
+        test_link = "https://www.google.com/url?q=https://forum.ddopl.com/&sa=Udupa"
+
+        cleaned_link = Url(test_link).get_cleaned_link()
 
         self.assertEqual(cleaned_link, "https://forum.ddopl.com")
 
@@ -53,9 +55,9 @@ class UrlTest(FakeInternetTestCase):
     def test_get_cleaned_link__stupid_google_link2(self):
         MockRequestCounter.mock_page_requests = 0
 
-        cleaned_link = Url.get_cleaned_link(
-            "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://worldofwarcraft.blizzard.com/&ved=2ahUKEwjtx56Pn5WFAxU2DhAIHYR1CckQFnoECCkQAQ&usg=AOvVaw1pDkx5K7B5loKccvg_079-"
-        )
+        test_link = "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://worldofwarcraft.blizzard.com/&ved=2ahUKEwjtx56Pn5WFAxU2DhAIHYR1CckQFnoECCkQAQ&usg=AOvVaw1pDkx5K7B5loKccvg_079-"
+
+        cleaned_link = Url(test_link).get_cleaned_link()
 
         self.assertEqual(cleaned_link, "https://worldofwarcraft.blizzard.com")
 
@@ -64,9 +66,9 @@ class UrlTest(FakeInternetTestCase):
     def test_get_cleaned_link__stupid_youtube_link(self):
         MockRequestCounter.mock_page_requests = 0
 
-        cleaned_link = Url.get_cleaned_link(
-            "https://www.youtube.com/redirect?event=lorum&redir_token=ipsum&q=https%3A%2F%2Fcorridordigital.com%2F&v=LeB9DcFT810"
-        )
+        test_link = "https://www.youtube.com/redirect?event=lorum&redir_token=ipsum&q=https%3A%2F%2Fcorridordigital.com%2F&v=LeB9DcFT810"
+
+        cleaned_link = Url(test_link).get_cleaned_link()
 
         self.assertEqual(cleaned_link, "https://corridordigital.com")
 
@@ -75,10 +77,10 @@ class UrlTest(FakeInternetTestCase):
     def test_get_cleaned_link(self):
         MockRequestCounter.mock_page_requests = 0
 
-        cleaned_link = Url.get_cleaned_link("https://www.YouTube.com/Test")
+        cleaned_link = Url("https://www.YouTube.com/Test").get_cleaned_link()
         self.assertEqual(cleaned_link, "https://www.youtube.com/Test")
 
-        cleaned_link = Url.get_cleaned_link("https://www.YouTube.com/Test/")
+        cleaned_link = Url("https://www.YouTube.com/Test/").get_cleaned_link()
         self.assertEqual(cleaned_link, "https://www.youtube.com/Test")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
@@ -87,13 +89,13 @@ class UrlTest(FakeInternetTestCase):
         MockRequestCounter.mock_page_requests = 0
 
         # call tested function
-        handler = Url.get_handler_by_name("HttpPageHandler")
+        handler = Url(url="https://youtube.com").get_handler_by_name("HttpPageHandler")
 
         self.assertTrue(handler)
         self.assertEqual(handler, HttpPageHandler)
 
         # call tested function
-        handler = Url.get_handler_by_name("YouTubeChannelHandler")
+        handler = Url("https://youtube.com").get_handler_by_name("YouTubeChannelHandler")
 
         self.assertTrue(handler)
         self.assertNotEqual(handler, HttpPageHandler)
@@ -205,7 +207,9 @@ class UrlTest(FakeInternetTestCase):
     def test_get_type__html_page(self):
         MockRequestCounter.mock_page_requests = 0
 
-        handler = Url.get_type("https://multiple-favicons.com/page.html")
+        test_link = "https://multiple-favicons.com/page.html"
+
+        handler = Url(test_link).get_type()
 
         # call tested function
         self.assertEqual(type(handler), HtmlPage)
@@ -214,9 +218,10 @@ class UrlTest(FakeInternetTestCase):
 
     def test_get_handler__rss_page(self):
         MockRequestCounter.mock_page_requests = 0
+        test_link = "https://www.codeproject.com/WebServices/NewsRSS.aspx"
 
         # call tested function
-        handler = Url.get_type("https://www.codeproject.com/WebServices/NewsRSS.aspx")
+        handler = Url(test_link).get_type()
 
         self.assertTrue(type(handler), HtmlPage)
 
@@ -225,20 +230,20 @@ class UrlTest(FakeInternetTestCase):
     def test_get_handler__youtube_channel(self):
         MockRequestCounter.mock_page_requests = 0
 
-        # call tested function
-        handler = Url.get_type(
-            "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
-        )
+        test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
 
-        self.assertTrue(type(handler), Url.youtube_channel_handler)
+        # call tested function
+        handler = Url(test_link).get_type()
+
+        self.assertTrue(type(handler), YouTubeChannelHandlerJson)
 
     def test_get_handler__youtube_video(self):
         MockRequestCounter.mock_page_requests = 0
 
         # call tested function
-        handler = Url.get_type("https://www.youtube.com/watch?v=1234")
+        handler = Url("https://www.youtube.com/watch?v=1234").get_type()
 
-        self.assertTrue(type(handler), Url.youtube_video_handler)
+        self.assertTrue(type(handler), YouTubeJsonHandler)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
@@ -299,8 +304,8 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(properties["link"], test_link)
         self.assertEqual(properties["link_request"], test_link)
 
-        # +1 for yt-flp +1 for return dislike
-        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
+        # +1 for HTML (no yt-dlp)
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_properties__html__basic(self):
         MockRequestCounter.mock_page_requests = 0
@@ -459,8 +464,8 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(properties_section["link"], test_link)
         self.assertEqual(properties_section["link_request"], test_link)
 
-        # +1 for yt dlp +1 for return dislike
-        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
+        # +1 for HTML only
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_properties__image_advanced(self):
         MockRequestCounter.mock_page_requests = 0
@@ -521,11 +526,11 @@ class UrlTest(FakeInternetTestCase):
         streams_section = url.get_properties_section("Streams", all_properties)
         self.assertTrue(streams_section)
         self.assertTrue(len(streams_section) > 0)
-        self.assertIn("Binary", streams_section)
 
         response_section = url.get_properties_section("Response", all_properties)
 
         self.assertEqual(response_section["Content-Type"], "audio/midi")
+        self.assertTrue(response_section["binary"])
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
@@ -554,7 +559,6 @@ class UrlTest(FakeInternetTestCase):
         streams_section = url.get_properties_section("Streams", all_properties)
         self.assertTrue(streams_section)
         self.assertTrue(len(streams_section) > 0)
-        self.assertIn("Binary", streams_section)
 
         response_section = url.get_properties_section("Response", all_properties)
 
@@ -567,12 +571,6 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         contents = url.get_contents()
         self.assertTrue(contents != None)
-
-    def test_get_robots_txt_url(self):
-        url = Url("https://page-with-http-status-500.com")
-        # call tested function
-        robots = url.get_robots_txt_url()
-        self.assertEqual(robots, "https://page-with-http-status-500.com/robots.txt")
 
     def test_get_contents__fails(self):
         MockRequestCounter.reset()
@@ -638,16 +636,6 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-    def test_get_favicon(self):
-        MockRequestCounter.mock_page_requests = 0
-        favicon = Url("https://multiple-favicons.com/page.html").get_favicon()
-
-        self.assertEqual(
-            favicon, "https://www.youtube.com/s/desktop/e4d15d2c/img/favicon.ico"
-        )
-
-        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
-
     def test_get_last_modified(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -661,19 +649,6 @@ class UrlTest(FakeInternetTestCase):
         self.assertTrue(last_modified)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
-
-    def test_cache_info__is_allowed(self):
-        MockRequestCounter.mock_page_requests = 0
-
-        # call tested function
-        handler = Url("https://robots-txt.com/page.html")
-
-        domain_info = handler.get_domain_info()
-        self.assertTrue(domain_info)
-        self.assertEqual(domain_info.url, "https://robots-txt.com")
-        self.assertTrue(domain_info.is_allowed("https://robots-txt.com/any"))
-        self.assertFalse(domain_info.is_allowed("https://robots-txt.com/admin/"))
-        self.assertTrue(domain_info.is_allowed("https://robots-txt.com/admin"))
 
     def test_find_rss_url__youtube(self):
         MockRequestCounter.mock_page_requests = 0

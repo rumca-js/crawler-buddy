@@ -194,6 +194,10 @@ def test_urls():
     test_url(url = "https://www.reddit.com/r/wizardposting")
     test_url(url = "https://www.reddit.com/r/wizardposting/comments/1olomjs/screw_human_skeletons_im_gonna_get_more_creative/")
 
+    import httpmorph
+    response =  httpmorph.get("https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw", timeout=30)
+    print(reponse.status_code)
+
 
 def main():
     test_crawlers()
