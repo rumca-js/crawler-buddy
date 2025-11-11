@@ -270,6 +270,7 @@ class WebConfig(object):
         if crawler_data:
             request = PageRequestObject(url)
             request.crawler_name = crawler_data["name"]
+            request.crawler_type = crawler_data["crawler"]
             return request
 
     def use_logger(Logger):

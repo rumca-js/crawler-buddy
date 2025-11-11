@@ -736,30 +736,6 @@ class UrlTest(FakeInternetTestCase):
         self.assertEqual(result, url)
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-    def test_get_init_settings__yahoo(self):
-        MockRequestCounter.mock_page_requests = 0
-
-        settings = Url("https://yahoo.com/test_link").get_init_settings()
-
-        self.assertIn("name", settings)
-        self.assertIn("settings", settings)
-
-        self.assertEqual(settings["name"], "MockCrawler")
-
-        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
-
-    def test_get_init_settings__techcrunch(self):
-        MockRequestCounter.mock_page_requests = 0
-
-        settings = Url("https://techcrunch.com/test_link").get_init_settings()
-
-        self.assertIn("name", settings)
-        self.assertIn("settings", settings)
-
-        self.assertEqual(settings["name"], "MockCrawler")
-
-        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
-
     def test_get_contents_hash__html(self):
         MockRequestCounter.mock_page_requests = 0
 

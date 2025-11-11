@@ -80,11 +80,10 @@ class Url(BaseUrl):
             request.crawler_type = default_request.crawler_type
         return request
 
-    def get_init_settings(self):
-        return WebConfig.get_default_crawler(self.url)
-
     def get_init_request(self):
-        return WebConfig.get_default_request(self.url)
+        request = WebConfig.get_default_request(self.url)
+        request = self.get_request_for_request(request) 
+        return request
 
     def get_handlers(self):
         #fmt off

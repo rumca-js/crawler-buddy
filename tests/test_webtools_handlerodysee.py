@@ -83,7 +83,7 @@ class OdyseeVideoHandlerTest(FakeInternetTestCase):
 
         handler = OdyseeVideoHandler(test_link, request=request, url_builder=Url)
 
-        handler.get_response()
+        response = handler.get_response()
 
         # call tested function
         hash = handler.get_contents_hash()
@@ -96,7 +96,7 @@ class OdyseeVideoHandlerTest(FakeInternetTestCase):
 
         handler = OdyseeVideoHandler(test_link, request=request, url_builder=Url)
 
-        handler.get_response()
+        response = handler.get_response()
 
         # call tested function
         hash = handler.get_contents_body_hash()
