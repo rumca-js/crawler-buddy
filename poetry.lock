@@ -2768,13 +2768,13 @@ files = [
 
 [[package]]
 name = "webtoolkit"
-version = "0.0.115"
+version = "0.0.116"
 description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "webtoolkit-0.0.115-py3-none-any.whl", hash = "sha256:385dd957cba3e67f731b7d4d3ec21002b88d21fe5c44022d6db54da21e77efa6"},
-    {file = "webtoolkit-0.0.115.tar.gz", hash = "sha256:d6e6be6eddc8454e09852446faad79c5942065286187ae02dc188dcdb51ef0bd"},
+    {file = "webtoolkit-0.0.116-py3-none-any.whl", hash = "sha256:5271bebed6ecd85c9034bba287e1cfbbc6f826155340cf4165435b4a11d67343"},
+    {file = "webtoolkit-0.0.116.tar.gz", hash = "sha256:f19ae119aa1fbbbec56876fccf523ef8da5d4427f9a4d02c67ddb5fa05b12bae"},
 ]
 
 [package.dependencies]
@@ -2808,17 +2808,17 @@ watchdog = ["watchdog (>=2.3)"]
 
 [[package]]
 name = "wsproto"
-version = "1.2.0"
-description = "WebSockets state-machine based protocol implementation"
+version = "1.3.0"
+description = "Pure-Python WebSocket protocol implementation"
 optional = false
-python-versions = ">=3.7.0"
+python-versions = ">=3.10"
 files = [
-    {file = "wsproto-1.2.0-py3-none-any.whl", hash = "sha256:b9acddd652b585d75b20477888c56642fdade28bdfd3579aa24a4d2c037dd736"},
-    {file = "wsproto-1.2.0.tar.gz", hash = "sha256:ad565f26ecb92588a3e43bc3d96164de84cd9902482b130d0ddbaa9664a85065"},
+    {file = "wsproto-1.3.0-py3-none-any.whl", hash = "sha256:e7fbb3152a38700757e385c23839dc53086515e663136c48de004ffbaf033ab7"},
+    {file = "wsproto-1.3.0.tar.gz", hash = "sha256:3f220331388cdf229a08bda06f9a377defadfaab7b0d608484fce726830368f9"},
 ]
 
 [package.dependencies]
-h11 = ">=0.9.0,<1"
+h11 = ">=0.16.0,<1"
 
 [[package]]
 name = "yarl"
@@ -3139,4 +3139,4 @@ cffi = ["cffi (>=1.17,<2.0)", "cffi (>=2.0.0b)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "742a16f64d08036f5353a532dc9904dc80989cd509b0bdd88f73dca09932d896"
+content-hash = "582095bf6ca409da55eb7bc0ae3b07300b953c09c8ab22b44a75ba69f8152ddc"

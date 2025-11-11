@@ -183,20 +183,21 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
 
     def test_get_date_published(self):
         MockRequestCounter.mock_page_requests = 0
-        test_link = "https://www.youtube.com/watch?v=archived"
+        test_link = "https://www.youtube.com/watch?v=date_published"
 
         handler = YouTubeJsonHandler(test_link, url_builder=Url)
 
         response = handler.get_response()
+
         # call tested function
         date = handler.get_date_published()
 
-        expected_date_published = DateUtils.from_string("2023-11-13;00:00", "%Y-%m-%d;%H:%M")
+        expected_date_published = DateUtils.from_string("2023-11-13;03:21:12", "%Y-%m-%d;%H:%M:%S")
         expected_date_published = DateUtils.to_utc_date(expected_date_published)
 
         self.assertEqual(date, expected_date_published)
-        # +1 for yt-dlp +1 for return dislike
-        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
+        # +1 for HTML
+        self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
     def test_get_social_data__none(self):
         MockRequestCounter.mock_page_requests = 0
