@@ -44,7 +44,7 @@ backfiles:
 
 test: test-min test-man
 
-test-min:
+test-unit:
 	poetry run python -m unittest discover -v  2>&1 | tee test_output.txt
-test-man:
+test-real:
 	poetry run python -u manual_test.py 2>&1 | tee test_output.txt
