@@ -650,18 +650,6 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-    def test_find_rss_url__youtube(self):
-        MockRequestCounter.mock_page_requests = 0
-
-        test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
-
-        url = Url(test_link)
-
-        result = Url.find_rss_url(url)
-        self.assertEqual(result.url, url.get_feeds()[0])
-
-        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
-
     def test_get_feeds__youtube_channel(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -669,6 +657,7 @@ class UrlTest(FakeInternetTestCase):
         test_link_result = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
         url = Url(test_link)
 
+        # call tested function
         feeds = url.get_feeds()
         self.assertIn(test_link_result, feeds)
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
@@ -679,6 +668,7 @@ class UrlTest(FakeInternetTestCase):
         test_link_result = "https://odysee.com/$/rss/@samtime:1"
         url = Url(test_link)
 
+        # call tested function
         feeds = url.get_feeds()
         self.assertIn(test_link_result, feeds)
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
@@ -690,6 +680,7 @@ class UrlTest(FakeInternetTestCase):
         url = Url(test_link)
         url.get_response()
 
+        # call tested function
         feeds = url.get_feeds()
         self.assertIn(test_link, feeds)
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
@@ -702,6 +693,7 @@ class UrlTest(FakeInternetTestCase):
         url = Url(test_link)
         url.get_response()
 
+        # call tested function
         feeds = url.get_feeds()
         self.assertIn(test_link_result, feeds)
         self.assertNotIn(test_link, feeds)
@@ -713,18 +705,33 @@ class UrlTest(FakeInternetTestCase):
         test_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
         url = Url(test_link)
 
-        result = Url.find_rss_url(url)
+        # call tested function
+        result = url.find_rss_url()
         self.assertEqual(
             result.url,
             "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw",
         )
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
+    def test_find_rss_url__youtube(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
+
+        url = Url(test_link)
+
+        # call tested function
+        result = Url.find_rss_url(url)
+        self.assertEqual(result.url, url.get_feeds()[0])
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
     def test_find_rss_url__odysee(self):
         MockRequestCounter.mock_page_requests = 0
         url = Url("https://odysee.com/@samtime:1?test")
 
-        result = Url.find_rss_url(url)
+        # call tested function
+        result = url.find_rss_url()
         self.assertEqual(result.url, "https://odysee.com/$/rss/@samtime:1")
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
@@ -732,7 +739,11 @@ class UrlTest(FakeInternetTestCase):
         MockRequestCounter.mock_page_requests = 0
         url = Url("https://www.codeproject.com/WebServices/NewsRSS.aspx")
 
-        result = Url.find_rss_url(url)
+        # requires response
+        url.get_response()
+
+        # call tested function
+        result = url.find_rss_url()
         self.assertEqual(result, url)
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 

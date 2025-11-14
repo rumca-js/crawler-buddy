@@ -11,7 +11,7 @@ from utils.programwrappers import ytdlp
 
 from webtoolkit import PageResponseObject, UrlLocation, HtmlPage, ContentInterface
 from webtoolkit import WebLogger
-from webtoolkit import DefaultUrlHandler, YouTubeVideoHandler
+from webtoolkit import DefaultUrlHandler, YouTubeVideoHandler, HandlerInterface
 
 
 class YouTubeHtmlHandler(YouTubeVideoHandler):
@@ -61,7 +61,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         """
         super().__init__(url=url, request=request, url_builder=url_builder)
 
-        self.social_data = {}
+        self.social_data = None
 
         self.json_url = None
         self.return_url = None
@@ -188,8 +188,14 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if self.yt_ob:
             return self.yt_ob.get_json_data()
 
+    def get_social_data(self):
+        if self.social_data is None:
+            self.get_json_data()
+
+        return HandlerInterface.get_social_data(self)
+
     def get_json_data(self):
-        if self.social_data != {}:
+        if self.social_data != None:
             return self.social_data
 
         self.social_data = {}
@@ -218,6 +224,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         view_count = None
         thumbs_up = None
         thumbs_down = None
+        followers_count = None
 
         try:
             view_count = int(self.yt_ob.get_view_count())
@@ -225,8 +232,24 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             pass
         except AttributeError as E:
             pass
-
         json_data["view_count"] = view_count
+
+        try:
+            thumbs_up = int(self.yt_ob.get_thumbs_up())
+        except ValueError as E:
+            pass
+        except AttributeError as E:
+            pass
+        json_data["thumbs_up"] = thumbs_up
+
+        try:
+            followers_count = int(self.yt_ob.get_followers_count())
+        except ValueError as E:
+            pass
+        except AttributeError as E:
+            pass
+        json_data["followers_count"] = followers_count
+
         return json_data
 
     def get_json_data_from_rd(self):
@@ -271,7 +294,7 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if not self.get_response():
             return {}
 
-        youtube_props = ContentInterface.get_properties(self)
+        youtube_props = super().get_properties(self)
 
         yt_json = self.yt_ob._json
 
@@ -325,7 +348,9 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if self.yt_text is not None:
             return True
 
-        self.json_url = self.get_page_url(url = self.url, crawler_name="YtdlpCrawler")
+        url = self.get_link_classic()
+
+        self.json_url = self.get_page_url(url = url, crawler_name="YtdlpCrawler")
         response = self.json_url.get_response()
         if response is None:
             WebLogger.debug("Url:{} No response".format(url))
@@ -354,16 +379,16 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         self.return_url = self.build_default_url(url = request_url)
         response = self.return_url.get_response()
         if response is None:
-            WebLogger.debug("Url:{} No response".format(url))
+            WebLogger.debug("Url:{} No response".format(request_url))
             return False
 
         if not response.is_valid():
-            WebLogger.debug("Url:{} response is not valid".format(url))
+            WebLogger.debug("Url:{} response is not valid".format(request_url))
             return False
 
         self.rd_text = response.get_text()
         if not self.rd_text:
-            WebLogger.debug("Url:{} response no text".format(url))
+            WebLogger.debug("Url:{} response no text".format(request_url))
             return False
         handler = self.return_url.get_handler()
 
@@ -385,39 +410,29 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
     def is_html(self, fast_check=True):
         return False
 
-    def get_view_count(self):
-        if self.response:
-            view_count = None
-
-            if not view_count and self.rd_ob:
-                view_count = self.rd_ob.get_view_count()
-
-            if not view_count and self.yt_ob:
-                view_count = self.yt_ob.get_view_count()
-
-            return view_count
-
     def get_thumbs_up(self):
-        if self.rd_ob:
-            return self.rd_ob.get_thumbs_up()
+        if self.social_data:
+            return self.social_data.get("thumbs_up")
 
     def get_thumbs_down(self):
-        if self.rd_ob:
-            return self.rd_ob.get_thumbs_down()
+        if self.social_data:
+            return self.social_data.get("thumbs_down")
 
     def get_followers_count(self):
-        if self.yt_ob:
-            return self.yt_ob.get_followers_count()
+        if self.social_data:
+            return self.social_data.get("followers_count")
 
     def get_channel_code(self):
         if self.yt_ob:
             return self.yt_ob.get_channel_code()
 
     def get_view_count(self):
-        if self.rd_ob:
-            return self.rd_ob.get_view_count()
-        if self.yt_ob:
-            return self.yt_ob.get_view_count()
+        if self.social_data:
+            return self.social_data.get("view_count")
+
+    def get_rating(self):
+        if self.social_data:
+            return self.social_data.get("rating")
 
     def get_feeds(self):
         result = []
@@ -453,48 +468,3 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
     def get_tags(self):
         if self.yt_ob:
             return self.yt_ob.get_tags()
-
-    """
-    def get_entries(self):
-        entries = []
-
-        location = UrlLocation(self.url)
-        params = location.get_params()
-
-        if params and "list" in params:
-            yt = ytdlp.YTDLP(self.url)
-            json = yt.get_video_list_json()
-
-            if not json:
-                return entries
-
-            for video in json:
-                j = YouTubeJson()
-                j._json = video
-
-                if "url" in video and video["url"] is not None:
-                    url = j.get_link()
-                    title = j.get_title()
-                    description = j.get_description()
-                    channel_url = j.get_channel_url()
-                    date_published = j.get_date_published()
-                    view_count = j.get_view_count()
-                    live_status = j.is_live()
-                    thumbnail = j.get_thumbnail()
-
-                    entry_data = {
-                        "link": url,
-                        "title": title,
-                        "description": description,
-                        "date_published": date_published,
-                        "thumbnail": thumbnail,
-                        "live": live_status,
-                        "view_count": view_count,
-                        "channel_url": channel_url,
-                        "source_url": channel_url,
-                    }
-
-                    entries.append(entry_data)
-
-        return entries
-    """

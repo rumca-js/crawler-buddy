@@ -205,7 +205,6 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         test_link = "https://www.youtube.com/watch?v=123"
 
         handler = YouTubeJsonHandler(test_link, url_builder=Url)
-        handler.get_response()
 
         # call tested function
         social_data = handler.get_social_data()
@@ -215,12 +214,12 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         self.assertTrue(social_data["thumbs_up"])
         self.assertTrue(social_data["thumbs_down"])
         self.assertTrue(social_data["view_count"])
-        self.assertTrue(social_data["rating"])
-        self.assertFalse(social_data["upvote_ratio"])
-        self.assertFalse(social_data["upvote_diff"])
-        self.assertFalse(social_data["upvote_view_ratio"])
+        self.assertFalse(social_data["rating"])
+        self.assertTrue(social_data["upvote_ratio"])
+        self.assertTrue(social_data["upvote_diff"])
+        self.assertTrue(social_data["upvote_view_ratio"])
         self.assertFalse(social_data["stars"])
-        self.assertFalse(social_data["followers_count"])
+        self.assertTrue(social_data["followers_count"])
 
     def test_get_social_data__none(self):
         MockRequestCounter.mock_page_requests = 0
@@ -228,6 +227,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         test_link = "https://www.youtube.com/watch?v=666"
 
         handler = YouTubeJsonHandler(test_link, url_builder=Url)
+
         # call tested function
         social_data = handler.get_social_data()
 

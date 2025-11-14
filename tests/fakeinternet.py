@@ -23,6 +23,7 @@ from webtoolkit import (
     ResponseHeaders,
     CrawlerInterface,
     YouTubeChannelHandler,
+    YouTubeVideoHandler,
     CrawlerInterface,
 )
 from webtoolkit.tests.mocks import (
@@ -140,7 +141,8 @@ class YtdlpCrawlerMock(CrawlerInterface):
 
         MockRequestCounter.requested(self.request.url, crawler_data=self.request)
 
-        code = (self.request.url)
+        h = YouTubeVideoHandler(self.request.url)
+        code = h.get_video_code()
 
         yt_text = ""
         status_code = 200
@@ -157,6 +159,7 @@ class YtdlpCrawlerMock(CrawlerInterface):
             "thumbnail" : "https://youtube.com/files/1234-thumbnail.png",
             "upload_date" : "${date}",
             "view_count" : "2",
+            "like_count" : 5,
             "live_status" : "False"
             }""".replace("${date}", self.get_now())
         if code == "666":
@@ -173,6 +176,7 @@ class YtdlpCrawlerMock(CrawlerInterface):
             "thumbnail" : "https://youtube.com/files/whatever.png",
             "upload_date" : "${date}",
             "view_count" : "2",
+            "like_count" : 5,
             "live_status" : "True"
             }""".replace("${date}", self.get_now())
         if code == "archived":
@@ -187,6 +191,7 @@ class YtdlpCrawlerMock(CrawlerInterface):
             "thumbnail" : "https://youtube.com/files/whatever.png",
             "upload_date" : "20231113",
             "view_count" : "2",
+            "like_count" : 5,
             "live_status" : "False"
             }""".replace("${date}", self.get_now())
         else:
@@ -201,6 +206,7 @@ class YtdlpCrawlerMock(CrawlerInterface):
             "thumbnail" : "https://youtube.com/files/whatever.png",
             "upload_date" : "${date}",
             "view_count" : "2",
+            "like_count" : 5,
             "live_status" : "False"
             }""".replace("${date}", self.get_now())
 
