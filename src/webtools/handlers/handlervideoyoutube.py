@@ -1,5 +1,6 @@
 from datetime import date
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor
 
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
@@ -200,23 +201,44 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         self.social_data = {}
 
-        if self.return_dislike:
-            self.social_data = self.get_json_data_from_rd()
-            if not self.social_data:
-                self.social_data = {}
+        with ThreadPoolExecutor() as executor:
+            handle_rd = executor.submit(self.get_json_data_from_rd)
+            handle_yt = executor.submit(self.get_json_data_from_yt)
 
-        social_data = self.get_json_data_from_yt()
-        if social_data:
-            for key, value in social_data.items():
-                self.social_data.setdefault(key, value)
+            rd_social = handle_rd.result()
+            yt_social = handle_yt.result()
+
+            if rd_social:
+                self.social_data = rd_social
+            elif yt_social:
+                self.social_data = yt_social
+
+            if yt_social:
+                for key, value in yt_social.items():
+                    self.social_data.setdefault(key, value)
 
         return self.social_data
+
+    def get_yt_json_url(self):
+        if self.json_url:
+            return self.json_url
+        
+        url = self.get_link_classic()
+
+        self.json_url = self.get_page_url(url = url, crawler_name="YtdlpCrawler")
+        return self.json_url
+
+    def get_rd_json_url(self):
+        request_url = self.get_return_dislike_url_link()
+
+        self.return_url = self.build_default_url(url = request_url)
+        return self.return_url
 
     def get_json_data_from_yt(self):
         json_data = {}
 
         if not self.yt_ob:
-            self.get_response_json()
+            self.get_response_yt_json()
         if self.yt_ob is None:
             WebLogger.error("Url:{}:Could not download youtube details".format(self.url))
             return
@@ -344,25 +366,23 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         return self.streams
 
-    def get_response_json(self):
+    def get_response_yt_json(self):
         if self.yt_text is not None:
             return True
 
-        url = self.get_link_classic()
-
-        self.json_url = self.get_page_url(url = url, crawler_name="YtdlpCrawler")
-        response = self.json_url.get_response()
+        url = self.get_yt_json_url()
+        response = url.get_response()
         if response is None:
-            WebLogger.debug("Url:{} No response".format(url))
+            WebLogger.debug("Url:{} No response".format(url.get_url()))
             return False
 
         if not response.is_valid():
-            WebLogger.debug("Url:{} response is not valid".format(url))
+            WebLogger.debug("Url:{} response is not valid".format(url.get_url()))
             return False
 
         self.yt_text = response.get_text()
         if not self.yt_text:
-            WebLogger.debug("Url:{} response no text".format(url))
+            WebLogger.debug("Url:{} response no text".format(url.get_url()))
             return False
 
         return self.load_details_youtube()
@@ -374,21 +394,19 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if self.rd_text is not None:
             return True
 
-        request_url = self.get_return_dislike_url_link()
-
-        self.return_url = self.build_default_url(url = request_url)
-        response = self.return_url.get_response()
+        url = self.get_rd_json_url()
+        response = url.get_response()
         if response is None:
-            WebLogger.debug("Url:{} No response".format(request_url))
+            WebLogger.debug("Url:{} No response".format(url.get_url()))
             return False
 
         if not response.is_valid():
-            WebLogger.debug("Url:{} response is not valid".format(request_url))
+            WebLogger.debug("Url:{} response is not valid".format(url.get_url()))
             return False
 
         self.rd_text = response.get_text()
         if not self.rd_text:
-            WebLogger.debug("Url:{} response no text".format(request_url))
+            WebLogger.debug("Url:{} response no text".format(url.get_url()))
             return False
         handler = self.return_url.get_handler()
 

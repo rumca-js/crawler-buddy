@@ -1,5 +1,4 @@
 import traceback
-from concurrent.futures import ThreadPoolExecutor
 
 from webtoolkit import YouTubeChannelHandler
 
@@ -21,7 +20,7 @@ class YouTubeChannelHandlerJson(YouTubeChannelHandler):
         for entry in entries:
             u = self.build_default_url(entry["link"])
             handler = u.get_handler()
-            json = handler.get_response_json()
+            json = handler.get_response_yt_json()
             self.social_data["followers_count"] = json.get_followers_count()
             return self.social_data
 
