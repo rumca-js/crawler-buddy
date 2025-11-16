@@ -16,6 +16,7 @@ class YouTubeChannelHandlerJson(YouTubeChannelHandler):
         )
 
     def get_json_data(self):
+        self.get_response()
         entries = self.get_entries()
         for entry in entries:
             u = self.build_default_url(entry["link"])
@@ -30,5 +31,7 @@ class YouTubeChannelHandlerJson(YouTubeChannelHandler):
         return self.social_data.get("followers_count")
 
     def get_social_data(self):
-        if len(self.social_data) != 0:
-            return super().get_social_data()
+        if len(self.social_data) == 0:
+            self.get_json_data()
+
+        return super().get_social_data()
