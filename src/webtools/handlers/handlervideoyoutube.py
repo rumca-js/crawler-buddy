@@ -356,13 +356,16 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
     def get_streams(self):
         if self.html_url is not None:
-            self.streams["HTML"] = (
+            self.streams[self.html_url.get_url()] = (
                 self.html_url.get_response()
             )  # TODO this should be response object
         if self.return_url is not None:
-            self.streams["ReturnDislike JSON"] = (
+            self.streams[self.return_url.get_url()] = (
                 self.return_url.get_response()
             )  # TODO this should be response object
+
+        for key in self.channel_sources_urls:
+            self.streams[key] = self.channel_sources_urls[key].get_response()
 
         return self.streams
 
