@@ -113,98 +113,6 @@ class WebConfig(object):
 
         return mapping
 
-    def get_default_browser_setup(browser, enabled=True, timeout_s=30):
-        return {
-            "enabled": enabled,
-            "name": browser.__name__,
-            "settings": {"timeout_s": timeout_s},
-        }
-
-    def get_requests():
-        return {
-            "enabled": True,
-            "name": "RequestsCrawler",
-            "settings": {"timeout_s": 40},
-        }
-
-    def get_seleniumheadless():
-        chromedriver_path = Path("/usr/bin/chromedriver")
-
-        if chromedriver_path.exists():
-            return {
-                "enabled": False,
-                "name": "SeleniumChromeHeadless",
-                "settings": {
-                    "driver_executable": str(chromedriver_path),
-                    "timeout_s": 60,
-                },
-            }
-        else:
-            return {
-                "enabled": True,
-                "name": "SeleniumChromeHeadless",
-                "settings": {"driver_executable": None, "timeout_s": 60},
-            }
-
-    def get_seleniumfull():
-        chromedriver_path = Path("/usr/bin/chromedriver")
-
-        if chromedriver_path.exists():
-            return {
-                "enabled": False,
-                "name": "SeleniumChromeFull",
-                "settings": {
-                    "driver_executable": str(chromedriver_path),
-                    "timeout_s": 40,
-                },
-            }
-        else:
-            return {
-                "enabled": False,
-                "name": "SeleniumChromeFull",
-                "settings": {"driver_executable": None, "timeout_s": 60},
-            }
-
-    def get_seleniumundetected():
-        chromedriver_path = Path("/usr/bin/chromedriver")
-
-        if chromedriver_path.exists():
-            return {
-                "enabled": False,
-                "name": "SeleniumUndetected",
-                "settings": {
-                    "driver_executable": str(chromedriver_path),
-                    "timeout_s": 60,
-                },
-            }
-        else:
-            return {
-                "enabled": False,
-                "name": "SeleniumUndetected",
-                "settings": {"driver_executable": None, "timeout_s": 60},
-            }
-
-    def get_seleniumbase():
-        return {
-            "enabled": False,
-            "name": "SeleniumBase",
-            "settings": {},
-        }
-
-    def get_script_path(script_relative):
-        """
-        script_relative example crawleebeautifulsoup.py
-        """
-        import os
-
-        poetry_path = ""
-        if "POETRY_ENV" in os.environ:
-            poetry_path = os.environ["POETRY_ENV"] + "/bin/"
-
-        script_relative = poetry_path + "poetry run python {}".format(script_relative)
-
-        return script_relative
-
     def get_crawler_names():
         """
         Returns string representation
@@ -248,14 +156,11 @@ class WebConfig(object):
         if c.is_valid():
             return c
 
-    def get_crawlers(only_enabled=False):
+    def get_crawlers():
         result = []
         mapping = WebConfig.get_init_crawler_config()
         for crawler in mapping:
-            if only_enabled and crawler["enabled"]:
-                result.append(crawler)
-            else:
-                result.append(crawler)
+            result.append(crawler)
 
         return result
 
@@ -363,3 +268,87 @@ class WebConfig(object):
 
     def get_bytes_limit():
         return 5000000  # 5 MB. There are some RSS more than 1MB
+
+    def get_default_browser_setup(browser, timeout_s=30):
+        return {
+            "name": browser.__name__,
+            "settings": {"timeout_s": timeout_s},
+        }
+
+    def get_requests():
+        return {
+            "name": "RequestsCrawler",
+            "settings": {"timeout_s": 40},
+        }
+
+    def get_seleniumheadless():
+        chromedriver_path = Path("/usr/bin/chromedriver")
+
+        if chromedriver_path.exists():
+            return {
+                "name": "SeleniumChromeHeadless",
+                "settings": {
+                    "driver_executable": str(chromedriver_path),
+                    "timeout_s": 60,
+                },
+            }
+        else:
+            return {
+                "name": "SeleniumChromeHeadless",
+                "settings": {"driver_executable": None, "timeout_s": 60},
+            }
+
+    def get_seleniumfull():
+        chromedriver_path = Path("/usr/bin/chromedriver")
+
+        if chromedriver_path.exists():
+            return {
+                "name": "SeleniumChromeFull",
+                "settings": {
+                    "driver_executable": str(chromedriver_path),
+                    "timeout_s": 40,
+                },
+            }
+        else:
+            return {
+                "name": "SeleniumChromeFull",
+                "settings": {"driver_executable": None, "timeout_s": 60},
+            }
+
+    def get_seleniumundetected():
+        chromedriver_path = Path("/usr/bin/chromedriver")
+
+        if chromedriver_path.exists():
+            return {
+                "name": "SeleniumUndetected",
+                "settings": {
+                    "driver_executable": str(chromedriver_path),
+                    "timeout_s": 60,
+                },
+            }
+        else:
+            return {
+                "name": "SeleniumUndetected",
+                "settings": {"driver_executable": None, "timeout_s": 60},
+            }
+
+    def get_seleniumbase():
+        return {
+            "name": "SeleniumBase",
+            "settings": {},
+        }
+
+    def get_script_path(script_relative):
+        """
+        script_relative example crawleebeautifulsoup.py
+        """
+        import os
+
+        poetry_path = ""
+        if "POETRY_ENV" in os.environ:
+            poetry_path = os.environ["POETRY_ENV"] + "/bin/"
+
+        script_relative = poetry_path + "poetry run python {}".format(script_relative)
+
+        return script_relative
+

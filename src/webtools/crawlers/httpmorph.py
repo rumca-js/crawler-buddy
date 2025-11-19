@@ -126,5 +126,4 @@ class HttpMorphCrawler(CrawlerInterface):
 
             return True
         except Exception as E:
-            print(str(E))
             return False

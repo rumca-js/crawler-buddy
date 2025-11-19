@@ -30,7 +30,7 @@ class Configuration(object):
         # increment major version digit for releases, or link name changes
         # increment minor version digit for JSON data changes
         # increment last digit for small changes
-        self.__version__ = "6.0.37"
+        self.__version__ = "6.0.38"
 
     def is_set(self, name):
         if name in self.data:
@@ -45,16 +45,26 @@ class Configuration(object):
     def read_crawler_config(self):
         path = Path("init_browser_setup.json")
         if path.exists():
-            print("Reading crawler config from file")
+            print(f"Reading crawler config from file {path}")
             with path.open("r") as file:
                 config = json.load(file)
-                self.crawler_config = config
-
-                return self.crawler_config
+                crawler_config = config
         else:
-            print("Reading crawler config from webtools")
-            self.crawler_config = webtools.WebConfig.get_init_crawler_config()
-            return self.crawler_config
+            print("Using default crawler config")
+            crawler_config = webtools.WebConfig.get_init_crawler_config()
+
+        self.crawler_config = []
+
+        for item in crawler_config:
+            name = item["name"]
+            crawler = webtools.WebConfig.get_crawler_from_string(name)
+            if not crawler:
+                print(f"Could not find crawler {name}")
+                continue
+            if crawler("https://").is_valid():
+                self.crawler_config.append(item)
+
+        return self.crawler_config
 
     def read_configuration(self):
         path = Path("configuration.json")

@@ -41,7 +41,6 @@ example_requests_properties = """
   {
     "data": {
       "bytes_limit": 5000000,
-      "enabled": true,
       "crawler_name": "RequestsCrawler",
       "settings": {
         "remote_server": "http://127.0.0.1:3000",

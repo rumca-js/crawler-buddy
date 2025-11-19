@@ -1,55 +1,47 @@
 [
   {
-    "enabled": true,
     "name": "CurlCffiCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
-    "enabled": true,
     "name": "RequestsCrawler",
     "settings": {
       "timeout_s": 20
     }
   },
   {
-    "enabled": true,
     "name": "StealthRequestsCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
-    "enabled": true,
     "name": "HttpMorphCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
-    "enabled": true,
     "name": "HttpxCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
-    "enabled": true,
     "name": "HttpMorphCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
-    "enabled": true,
     "name": "YtdlpCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
-    "enabled": true,
     "name": "SeleniumUndetected",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
@@ -57,7 +49,6 @@
     }
   },
   {
-    "enabled": true,
     "name": "SeleniumChromeHeadless",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
@@ -65,7 +56,6 @@
     }
   },
   {
-    "enabled": true,
     "name": "SeleniumChromeFull",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
@@ -74,7 +64,6 @@
     }
   },
   {
-    "enabled": true,
     "name": "CrawleeBeautifulScript",
     "settings": {
       "script": "poetry run python crawleebeautifulsoup.py",
@@ -82,7 +71,6 @@
     }
   },
   {
-    "enabled": true,
     "name": "CrawleePlaywrightScript",
     "settings": {
       "script": "poetry run python crawleeplaywright.py",
@@ -90,7 +78,6 @@
     }
   },
   {
-    "enabled": true,
     "name": "ScrapyCrawler",
     "settings": {
       "script": "poetry run python crawlerscrapy.py",
@@ -98,7 +85,6 @@
     }
   },
   {
-    "enabled": true,
     "name": "SeleniumWireFull",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
@@ -107,7 +93,6 @@
     }
   },
   {
-    "enabled": false,
     "name": "SeleniumBase",
     "settings": {
       "timeout_s": 60,
