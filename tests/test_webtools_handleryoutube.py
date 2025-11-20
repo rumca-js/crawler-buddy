@@ -131,27 +131,27 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         self.assertTrue(response)
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-    def test_get_contents_hash(self):
+    def test_get_hash(self):
         MockRequestCounter.mock_page_requests = 0
         test_link = "https://www.youtube.com/watch?v=123"
 
         handler = YouTubeJsonHandler(test_link, url_builder=Url)
 
         # call tested function
-        hash = handler.get_contents_hash()
+        hash = handler.get_hash()
 
         self.assertTrue(hash)
         # +1 for HTML
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-    def test_get_contents_body_hash(self):
+    def test_get_body_hash(self):
         MockRequestCounter.mock_page_requests = 0
         test_link = "https://www.youtube.com/watch?v=123"
 
         handler = YouTubeJsonHandler(test_link, url_builder=Url)
 
         # call tested function
-        hash = handler.get_contents_body_hash()
+        hash = handler.get_body_hash()
 
         self.assertTrue(hash)
 
@@ -393,7 +393,7 @@ class YouTubeChannelHandlerTest(FakeInternetTestCase):
         # +1 html +1 RSS
         self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
-    def test_get_contents_hash(self):
+    def test_get_hash(self):
         MockRequestCounter.mock_page_requests = 0
         handler = YouTubeChannelHandler(
             "https://www.youtube.com/feeds/videos.xml?channel_id=SAMTIMESAMTIMESAMTIMESAM",
@@ -401,13 +401,13 @@ class YouTubeChannelHandlerTest(FakeInternetTestCase):
         )
 
         # call tested function
-        hash = handler.get_contents_hash()
+        hash = handler.get_hash()
 
         self.assertTrue(hash)
         # +1 html +1 RSS
         self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
-    def test_get_contents_body_hash(self):
+    def test_get_body_hash(self):
         MockRequestCounter.mock_page_requests = 0
         handler = YouTubeChannelHandler(
             "https://www.youtube.com/feeds/videos.xml?channel_id=SAMTIMESAMTIMESAMTIMESAM",
@@ -415,7 +415,7 @@ class YouTubeChannelHandlerTest(FakeInternetTestCase):
         )
 
         # call tested function
-        hash = handler.get_contents_body_hash()
+        hash = handler.get_body_hash()
 
         self.assertTrue(hash)
         # +1 html +1 RSS
