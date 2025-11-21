@@ -5,9 +5,7 @@ Main Url handling class
 url = Url(link = "https://google.com")
 response = url.get_response()
 
-options.request.url
-options.mode_mapping
-
+url.get_title()
 """
 
 from urllib.parse import unquote, urlparse, parse_qs
@@ -44,15 +42,12 @@ from utils.dateutils import DateUtils
 
 class Url(BaseUrl):
     """
-    Encapsulates data page, and builder to make request
+    Represents network location
     """
 
     def __init__(self, url=None, settings=None, request=None, url_builder=None):
         """
-        @param handler_class Allows to enforce desired handler to be used to process link
-
-        There are various ways url can be specified. For simplicity we cleanup it.
-        I do not like trailing slashes, no google stupid links, etc.
+        Constructor. Pass url_builder, if any subsequent calls will be created using this builder.
         """
         if not url_builder:
             url_builder = Url
@@ -68,9 +63,15 @@ class Url(BaseUrl):
             self.request.crawler_type = crawler(url=url)
 
     def get_request_for_url(self, url):
+        """
+        Returns request for URL
+        """
         return WebConfig.get_default_request(url)
 
     def get_request_for_request(self, request):
+        """
+        Fills necessary fields within request
+        """
         if request.crawler_name and request.crawler_type is None:
             crawler = WebConfig.get_crawler_from_string(self.request.crawler_name)
             self.request.crawler_type = crawler(request.url)
@@ -81,11 +82,17 @@ class Url(BaseUrl):
         return request
 
     def get_init_request(self):
+        """
+        Returns initial request. TODO seems redundant
+        """
         request = WebConfig.get_default_request(self.url)
         request = self.get_request_for_request(request) 
         return request
 
     def get_handlers(self):
+        """
+        Returns available handlers.
+        """
         #fmt off
         return [
             YouTubeJsonHandler,

@@ -1,3 +1,7 @@
+"""
+Stealthrequests crawler implementation
+https://github.com/jpjacobpadilla/Stealth-Requests
+"""
 import time
 import threading
 import urllib.parse
@@ -15,6 +19,9 @@ class StealthRequestsCrawler(CrawlerInterface):
     """
 
     def run(self):
+        """
+        Runs crawler
+        """
         if not self.is_valid():
             return
 
@@ -91,7 +98,10 @@ class StealthRequestsCrawler(CrawlerInterface):
             )
             self.response.add_error("Url:{} Connection error".format(self.request.url))
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
+        """
+        Returns indication if crawler can be used
+        """
         try:
             import stealth_requests as requests
 

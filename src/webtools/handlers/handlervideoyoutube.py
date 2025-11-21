@@ -1,3 +1,8 @@
+"""
+Handles YouTube video contents
+
+Provided because we have yt-dlp crawler now.
+"""
 from datetime import date
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
@@ -15,50 +20,15 @@ from webtoolkit import WebLogger
 from webtoolkit import DefaultUrlHandler, YouTubeVideoHandler, HandlerInterface
 
 
-class YouTubeHtmlHandler(YouTubeVideoHandler):
-    def __init__(self, url, request=None, url_builder=None):
-        super().__init__(url, request=request, url_builder=url_builder)
-
-    def is_valid(self):
-        """
-        Either use html or JSON.
-        """
-        if not self.is_youtube():
-            return False
-
-        if not super().is_valid():
-            return False
-
-        # TODO make this configurable in config
-        block_live_videos = True
-
-        # TODO
-        # invalid_text = '{"simpleText":"GO TO HOME"}'
-        # contents = self.h.get_contents()
-        # if contents and contents.find(invalid_text) >= 0:
-        #    return False
-
-        if block_live_videos:
-            live_field = self.h.get_meta_custom_field("itemprop", "isLiveBroadcast")
-            if live_field and live_field.lower() == "true":
-                return False
-
-        return True
-
-        if self.is_live():
-            return False
-
-        return True
-
-
 class YouTubeJsonHandler(YouTubeVideoHandler):
     """
+    YouTube JSON enabled video handler.
     TODO Rename to YouTubeVideoHandlerYtdlp
     """
 
     def __init__(self, url, request=None, url_builder=None):
         """
-        TODO We should , most probably call the parnet constructor
+        Constructor
         """
         super().__init__(url=url, request=request, url_builder=url_builder)
 
@@ -85,12 +55,19 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         return sources
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
+        """
+        Returns indication if is valid
+        """
         if self.response:
             status = not self.is_live()
             return status
+        return False
 
-    def get_title(self):
+    def get_title(self) -> str | None:
+        """
+        Returns title
+        """
         title = super().get_title()
         if title is None:
             if self.yt_ob:
@@ -98,13 +75,19 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         else:
             return title
 
-    def get_description(self):
+    def get_description(self) -> str | None:
+        """
+        Returns description
+        """
         description = super().get_description()
         if description is None:
             return self.yt_ob.get_description()
         return description
 
     def get_date_published(self):
+        """
+        Returns date published
+        """
         date_published = super().get_date_published()
         if date_published is not None:
             return date_published
@@ -119,6 +102,9 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             return dt
 
     def get_thumbnail(self):
+        """
+        Returns thumbnail
+        """
         thumbnail = super().get_thumbnail()
         if thumbnail is not None:
             return thumbnail
@@ -126,35 +112,37 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if self.yt_ob:
             return self.yt_ob.get_thumbnail()
 
+    def get_author(self):
+        """
+        Returns author
+        """
+        if self.yt_ob:
+            return self.get_channel_name()
+
+    def get_album(self):
+        """
+        Returns album
+        """
+        return None
+
     def get_upload_date(self):
+        """
+        Returns upload date
+        """
         if self.yt_ob:
             return self.yt_ob.get_upload_date()
 
-    def get_view_count(self):
-        if self.response:
-            view_count = None
-
-            if not view_count:
-                if self.yt_ob:
-                    view_count = self.yt_ob.get_view_count()
-            if not view_count:
-                if self.rd_ob:
-                    view_count = self.rd_ob.get_view_count()
-            return view_count
-
-    def get_thumbs_up(self):
-        if self.rd_ob:
-            return self.rd_ob.get_thumbs_up()
-
-    def get_thumbs_down(self):
-        if self.rd_ob:
-            return self.rd_ob.get_thumbs_down()
-
     def get_channel_code(self):
+        """
+        Returns channel code
+        """
         if self.yt_ob:
             return self.yt_ob.get_channel_code()
 
     def get_feeds(self):
+        """
+        Returns feeds
+        """
         result = []
         if self.yt_ob:
             return [self.yt_ob.get_channel_feed_url()]
@@ -162,10 +150,16 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         return result
 
     def get_channel_name(self):
+        """
+        Returns channel name
+        """
         if self.yt_ob:
             return self.yt_ob.get_channel_name()
 
     def get_channel_url(self):
+        """
+        Returns channel url
+        """
         if self.yt_ob:
             return self.yt_ob.get_channel_url()
 
@@ -174,22 +168,21 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             return self.yt_ob.get_link_url()
 
     def is_live(self):
+        """
+        Returns indication if video is live
+        """
         if self.yt_ob:
             return self.yt_ob.is_live()
         return False
-
-    def get_author(self):
-        if self.yt_ob:
-            return self.get_channel_name()
-
-    def get_album(self):
-        return None
 
     def get_json_text(self):
         if self.yt_ob:
             return self.yt_ob.get_json_data()
 
     def get_social_data(self):
+        """
+        Returns social data map. View counts, thumbs ups, stars, followers counts, etc..
+        """
         if self.social_data is None:
             self.get_json_data()
 
@@ -235,6 +228,9 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         return self.return_url
 
     def get_json_data_from_yt(self):
+        """
+        Returns social data captured from YouTube JSON
+        """
         json_data = {}
 
         if not self.yt_ob:
@@ -275,6 +271,9 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         return json_data
 
     def get_json_data_from_rd(self):
+        """
+        Returns social data captured from YouTube return dislike page
+        """
         json_data = {}
 
         if not self.rd_ob:
@@ -313,6 +312,9 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
             return self.yt_ob.get_tags()
 
     def get_properties(self):
+        """
+        Returns properties
+        """
         if not self.get_response():
             return {}
 
@@ -355,6 +357,9 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         return self.yt_ob
 
     def get_streams(self):
+        """
+        Returns streams
+        """
         if self.html_url is not None:
             self.streams[self.html_url.get_url()] = (
                 self.html_url.get_response()
@@ -421,71 +426,52 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         return True
 
-    def get_upload_date(self):
-        if self.yt_ob:
-            return self.yt_ob.get_upload_date()
+    def get_view_count(self):
+        """
+        Returns view count
+        """
+        if self.response:
+            view_count = None
 
-    def is_rss(self, fast_check=True):
-        return False
-
-    def is_html(self, fast_check=True):
-        return False
+            if not view_count:
+                if self.yt_ob:
+                    view_count = self.yt_ob.get_view_count()
+            if not view_count:
+                if self.rd_ob:
+                    view_count = self.rd_ob.get_view_count()
+            return view_count
 
     def get_thumbs_up(self):
+        """
+        Returns thumbs up
+        """
         if self.social_data:
             return self.social_data.get("thumbs_up")
 
     def get_thumbs_down(self):
+        """
+        Returns thumbs down
+        """
         if self.social_data:
             return self.social_data.get("thumbs_down")
 
     def get_followers_count(self):
+        """
+        Returns followers count
+        """
         if self.social_data:
             return self.social_data.get("followers_count")
 
-    def get_channel_code(self):
-        if self.yt_ob:
-            return self.yt_ob.get_channel_code()
-
     def get_view_count(self):
+        """
+        Returns view count
+        """
         if self.social_data:
             return self.social_data.get("view_count")
 
     def get_rating(self):
+        """
+        Returns rating
+        """
         if self.social_data:
             return self.social_data.get("rating")
-
-    def get_feeds(self):
-        result = []
-        if self.yt_ob:
-            return [self.yt_ob.get_channel_feed_url()]
-
-        return result
-
-    def get_channel_name(self):
-        if self.yt_ob:
-            return self.yt_ob.get_channel_name()
-
-    def get_link_url(self):
-        if self.yt_ob:
-            return self.yt_ob.get_link_url()
-
-    def is_live(self):
-        if self.yt_ob:
-            return self.yt_ob.is_live()
-        return True
-
-    def get_author(self):
-        if self.yt_ob:
-            return self.get_channel_name()
-
-    def get_album(self):
-        return None
-
-    def get_json_text(self):
-        if self.yt_ob:
-            return self.yt_ob.get_json_data()
-
-    def get_tags(self):
-        if self.yt_ob:
-            return self.yt_ob.get_tags()

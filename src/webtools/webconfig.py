@@ -1,6 +1,5 @@
 """
-TODO
-these scripts will not work in case of multithreaded app
+Provides default web configuratoin
 """
 
 import os

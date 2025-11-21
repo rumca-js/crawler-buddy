@@ -1,3 +1,9 @@
+"""
+Yt-dlp crawler implementation.
+@note works only for youtube contents!
+
+https://github.com/yt-dlp/yt-dlp
+"""
 from webtoolkit import (
     CrawlerInterface,
     PageResponseObject,
@@ -15,8 +21,14 @@ from webtoolkit import (
 
 
 class YtdlpCrawler(CrawlerInterface):
+    """
+    yt-dlp crawler implementation
+    """
 
     def run(self):
+        """
+        Run crawler
+        """
         from utils.programwrappers import ytdlp
 
         self.response = PageResponseObject(
@@ -58,7 +70,10 @@ class YtdlpCrawler(CrawlerInterface):
 
         return self.response
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
+        """
+        Returns indication if crawler is available
+        """
         try:
             from utils.programwrappers import ytdlp
             return True

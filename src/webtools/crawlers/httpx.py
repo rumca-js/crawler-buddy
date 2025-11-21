@@ -1,3 +1,7 @@
+"""
+Httpx crawler implementation
+https://github.com/luminati-io/httpx-web-scraping
+"""
 import time
 import threading
 import urllib.parse
@@ -11,10 +15,13 @@ from webtoolkit import (
 
 class HttpxCrawler(CrawlerInterface):
     """
-    Python httpx
+    Python httpx crawler
     """
 
     def run(self):
+        """
+        Runs crawler
+        """
         if not self.is_valid():
             return
 
@@ -97,7 +104,10 @@ class HttpxCrawler(CrawlerInterface):
             )
             self.response.add_error("Url:{} Cannot create request".format(str(E)))
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
+        """
+        Returns information if crawler is valid
+        """
         try:
             import httpx
 

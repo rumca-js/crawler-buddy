@@ -1,7 +1,16 @@
 """
-Provides cralwers implmenetation that can be used directly in program.
+Provides selenium based cralwers implmenetations
 
-Some crawlers / scrapers cannot be easily called from a thread, etc, because of asyncio.
+Benefits of using selenium:
+ - you do not have to be smart to use it
+ - you do not have to worry about imitating a browser, you are running a browser
+
+Cons:
+ - not scalable
+ - definitely not fast
+ - sometimes can stay in memory, can break
+ - you have to have working pair of chrome driver and a browser
+ - it is a pain in the *
 """
 
 import json
@@ -59,6 +68,7 @@ class SeleniumDriver(CrawlerInterface):
         driver_executable=None,
         settings=None,
     ):
+        """ Constructor """
 
         self.driver_executable = driver_executable
         self.driver = None
@@ -88,11 +98,12 @@ class SeleniumDriver(CrawlerInterface):
 
     def get_driver(self):
         """
+        Returns driver
+
         https://www.lambdatest.com/blog/internationalization-with-selenium-webdriver/
 
-        locale="en-US"
-
         For chrome
+        locale="en-US"
         options.add_argument("--lang={}".format(locale))
 
         # For firefox:
@@ -133,9 +144,7 @@ class SeleniumDriver(CrawlerInterface):
 
     def run(self):
         """
-        To obtain RSS page you have to run real, full blown browser.
-
-        It may require some magic things to make the browser running.
+        Runs crawler.
 
         https://stackoverflow.com/questions/50642308/webdriverexception-unknown-error-devtoolsactiveport-file-doesnt-exist-while-t
         """
@@ -425,7 +434,10 @@ class SeleniumChromeHeadless(SeleniumDriver):
             self.response.add_error(str(E))
             return None
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
+        """
+        Returns indication if crawler can be used
+        """
         selenium_feataure_enabled = True
         try:
             from selenium import webdriver
@@ -443,7 +455,7 @@ class SeleniumChromeHeadless(SeleniumDriver):
 
 class SeleniumChromeFull(SeleniumDriver):
     """
-    Selenium chrome full - TODO
+    Selenium chrome full
     """
 
     def get_driver(self):
@@ -545,7 +557,10 @@ class SeleniumChromeFull(SeleniumDriver):
             WebLogger.error(f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}")
             return None
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
+        """
+        Returns indication if crawler can be used
+        """
         selenium_feataure_enabled = True
         try:
             from selenium import webdriver
@@ -604,7 +619,10 @@ class SeleniumUndetected(SeleniumDriver):
             )
             return
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
+        """
+        Returns indication if crawler can be used
+        """
         try:
             import undetected_chromedriver as uc
 
@@ -614,8 +632,14 @@ class SeleniumUndetected(SeleniumDriver):
 
 
 class SeleniumWireFull(SeleniumDriver):
+    """
+    Selenium wire crawler
+    """
 
     def get_driver(self):
+        """
+        Returns driver
+        """
         selenium_feature_enabled = True
         try:
             from selenium.webdriver.chrome.service import Service
@@ -705,7 +729,10 @@ class SeleniumWireFull(SeleniumDriver):
             request_url=self.request.url,
         )
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
+        """
+        Returns indication if crawler can be used
+        """
         try:
             from seleniumwire import webdriver as wire_webdriver
             from selenium.webdriver.common.proxy import Proxy, ProxyType
@@ -727,11 +754,15 @@ class SeleniumBase(CrawlerInterface):
         driver_executable=None,
         settings=None,
     ):
+        """ Constructor TODO can it be removed? """
         super().__init__(
             request=request,
         )
 
     def run(self):
+        """
+        Runs crawler
+        """
         if not self.is_valid():
             return
 
@@ -761,5 +792,8 @@ class SeleniumBase(CrawlerInterface):
 
             return response
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
+        """
+        Returns indication if crawler can be used
+        """
         return True

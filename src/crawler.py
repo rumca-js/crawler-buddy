@@ -1,3 +1,6 @@
+"""
+Main crawler
+"""
 import subprocess
 import psutil
 import json
@@ -18,7 +21,11 @@ from src import CrawlerData
 
 
 class Crawler(object):
+    """
+    Crawler
+    """
     def __init__(self):
+        """ Constructor """
         self.configuration = Configuration()
 
         """

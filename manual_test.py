@@ -134,34 +134,6 @@ def test_url(url):
     print_bar()
 
 
-def call_requests():
-    return call_process("crawlerrequests.py")
-
-
-def call_crawleebeautiful():
-    return call_process("crawleebeautifulsoup.py")
-
-
-def call_crawleeplaywright():
-    return call_process("crawleeplaywright.py")
-
-
-def call_seleniumchromeheadless():
-    return call_process("crawlerseleniumheadless.py")
-
-
-def call_seleniumchromefull():
-    return call_process("crawlerseleniumfull.py")
-
-
-def call_seleniumchromeundetected():
-    return call_process("crawlerseleniumundetected.py")
-
-
-def call_seleniumbase():
-    return call_process("crawlerseleniumbase.py")
-
-
 def test_crawlers():
     call_crawler("RequestsCrawler")
     call_crawler("CurlCffiCrawler")

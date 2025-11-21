@@ -1,3 +1,6 @@
+"""
+Provides configuration
+"""
 import json
 import logging
 from pathlib import Path
@@ -7,7 +10,7 @@ from src import webtools
 class Configuration(object):
     def __init__(self):
         """
-        This should be a place that well describes what is in the configuration
+        Constructor.
         """
         self.data = {}
         self.data["respect_robots_txt"] = False
@@ -30,19 +33,28 @@ class Configuration(object):
         # increment major version digit for releases, or link name changes
         # increment minor version digit for JSON data changes
         # increment last digit for small changes
-        self.__version__ = "6.0.39"
+        self.__version__ = "6.0.40"
 
-    def is_set(self, name):
-        if name in self.data:
-            return self.data[name]
+    def is_set(self, name) -> bool:
+        """
+        Returns information if 'name' setting was defined
+        """
+        if name in self.data and self.data[name]:
+            return True
 
         return False
 
     def get(self, name):
+        """
+        Returns name setting
+        """
         if name in self.data:
             return self.data[name]
 
     def read_crawler_config(self):
+        """
+        Reads crawler config
+        """
         path = Path("init_browser_setup.json")
         if path.exists():
             print(f"Reading crawler config from file {path}")
@@ -67,6 +79,9 @@ class Configuration(object):
         return self.crawler_config
 
     def read_configuration(self):
+        """
+        Reads configuration file
+        """
         path = Path("configuration.json")
         if path.exists():
             print("Reading configuration:{}".format(str(path)))
@@ -75,6 +90,9 @@ class Configuration(object):
                 self.read_json_config(json_config)
 
     def read_json_config(self, json_config):
+        """
+        Reads particular options from JSON to internal structures
+        """
         self.read_json_config_field(json_config, "debug")
         self.read_json_config_field(json_config, "respect_robots_txt")
         self.read_json_config_field(json_config, "ssl_verify")
@@ -89,20 +107,32 @@ class Configuration(object):
         self.read_json_config_field(json_config, "history_size")
 
     def read_json_config_field(self, json_config, field):
+        """
+        Reads JSON structure field to internal placeholder
+        """
         if field in json_config:
             self.data[field] = json_config[field]
 
     def get_crawler_config(self):
+        """
+        Returns crawler configuration
+        """
         return self.crawler_config
 
     def get_crawler(self, name=None):
+        """
+        Returns crawler
+        """
         config = self.crawler_config
         for item in config:
             if name:
                 if name == item["name"]:
                     return dict(item)
 
-    def is_allowed(self, id):
+    def is_allowed(self, id) -> bool:
+        """
+        Returns information if 'id' token is allowed
+        """
         if "allowed_ids" in self.data:
             if len(self.data["allowed_ids"]) == 0:
                 return True

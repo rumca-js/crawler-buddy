@@ -1,3 +1,7 @@
+"""
+CurlCffi crawler implementation
+https://github.com/lexiforest/curl_cffi
+"""
 import time
 import threading
 import urllib.parse
@@ -12,10 +16,13 @@ from webtoolkit import (
 
 class CurlCffiCrawler(CrawlerInterface):
     """
-    Python steath requests
+    Python curl_cffi requests
     """
 
     def run(self):
+        """
+        Run crawler
+        """
         if not self.is_valid():
             return
 
@@ -110,7 +117,10 @@ class CurlCffiCrawler(CrawlerInterface):
             )
             self.response.add_error("Url:{} Cannot create request".format(str(E)))
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
+        """
+        Returns indication if crawler is available
+        """
         try:
             from curl_cffi import requests
 

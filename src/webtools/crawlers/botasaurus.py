@@ -1,7 +1,6 @@
 """
-Provides cralwers implmenetation that can be used directly in program.
-
-Some crawlers / scrapers cannot be easily called from a thread, etc, because of asyncio.
+Provides botasaurus crawler implementation.
+https://github.com/omkarcloud/botasaurus
 """
 
 import time
@@ -22,6 +21,9 @@ class BotasaurusCrawler(CrawlerInterface):
     """
 
     def run(self):
+        """
+        Runs crawler.
+        """
         if not self.is_valid():
             return
 
@@ -86,7 +88,10 @@ class BotasaurusCrawler(CrawlerInterface):
 
         return get_html()
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
+        """
+        Returns indication if crawler is available
+        """
         try:
             from botasaurus import bts
 

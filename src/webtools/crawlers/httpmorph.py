@@ -1,3 +1,7 @@
+"""
+httpmorph crawler implmementation
+https://github.com/arman-bd/httpmorph
+"""
 import time
 import threading
 import urllib.parse
@@ -13,10 +17,13 @@ from webtoolkit import (
 
 class HttpMorphCrawler(CrawlerInterface):
     """
-    Python steath requests
+    Python httpmorph requests
     """
 
     def run(self):
+        """
+        Runs crawler
+        """
         if not self.is_valid():
             return
 
@@ -120,7 +127,10 @@ class HttpMorphCrawler(CrawlerInterface):
             )
             self.response.add_error("Url:{} Cannot create request".format(str(E)))
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
+        """
+        Returns information if crawler is available
+        """
         try:
             import httpmorph
 
