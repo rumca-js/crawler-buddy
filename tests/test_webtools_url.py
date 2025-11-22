@@ -327,7 +327,7 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-    def test_get_properties__html__advanced(self):
+    def test_get_all_properties__html__advanced(self):
         MockRequestCounter.mock_page_requests = 0
 
         test_link = "https://page-with-two-links.com"
@@ -337,7 +337,7 @@ class UrlTest(FakeInternetTestCase):
         url.get_response()
 
         # call tested function
-        all_properties = url.get_properties(full=True)
+        all_properties = url.get_all_properties()
         self.assertTrue(len(all_properties) > 0)
 
         properties_section = RemoteServer.read_properties_section("Properties", all_properties)
@@ -351,7 +351,7 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-    def test_get_properties__rss__advanced(self):
+    def test_get_all_properties__rss__advanced(self):
         MockRequestCounter.mock_page_requests = 0
 
         test_link = "https://www.codeproject.com/WebServices/NewsRSS.aspx"
@@ -361,7 +361,7 @@ class UrlTest(FakeInternetTestCase):
         url.get_response()
 
         # call tested function
-        all_properties = url.get_properties(full=True)
+        all_properties = url.get_all_properties()
         self.assertTrue(len(all_properties) > 0)
 
         properties_section = RemoteServer.read_properties_section("Properties", all_properties)
@@ -380,7 +380,7 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-    def test_get_properties__youtube_channel__advanced(self):
+    def test_get_all_properties__youtube_channel__advanced(self):
         MockRequestCounter.mock_page_requests = 0
 
         test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
@@ -391,7 +391,7 @@ class UrlTest(FakeInternetTestCase):
         url.get_response()
 
         # call tested function
-        all_properties = url.get_properties(full=True)
+        all_properties = url.get_all_properties()
         self.assertTrue(len(all_properties) > 0)
 
         properties_section = RemoteServer.read_properties_section("Properties", all_properties)
@@ -411,7 +411,7 @@ class UrlTest(FakeInternetTestCase):
         # +1 HTML +1 RSS
         self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
-    def test_get_properties__odysee_channel__advanced(self):
+    def test_get_all_properties__odysee_channel__advanced(self):
         MockRequestCounter.mock_page_requests = 0
 
         test_link = "https://odysee.com/$/rss/@DistroTube:2"
@@ -420,7 +420,7 @@ class UrlTest(FakeInternetTestCase):
         url = Url(test_link)
 
         url.get_response()
-        all_properties = url.get_properties(full=True)
+        all_properties = url.get_all_properties()
 
         self.assertTrue(len(all_properties) > 0)
         self.assertEqual(all_properties[0]["name"], "Properties")
@@ -441,7 +441,7 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 2)
 
-    def test_get_properties__youtube_video__advanced(self):
+    def test_get_all_properties__youtube_video__advanced(self):
         MockRequestCounter.mock_page_requests = 0
 
         test_link = "https://www.youtube.com/watch?v=1234"
@@ -451,7 +451,7 @@ class UrlTest(FakeInternetTestCase):
         url.get_response()
 
         # call tested function
-        all_properties = url.get_properties(full=True)
+        all_properties = url.get_all_properties()
 
         self.assertTrue(len(all_properties) > 0)
         self.assertEqual(all_properties[0]["name"], "Properties")
@@ -468,7 +468,7 @@ class UrlTest(FakeInternetTestCase):
         # +1 for HTML only
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-    def test_get_properties__image_advanced(self):
+    def test_get_all_properties__image_advanced(self):
         MockRequestCounter.mock_page_requests = 0
 
         test_link = "https://binary.jpg.com"
@@ -477,7 +477,7 @@ class UrlTest(FakeInternetTestCase):
         url.get_response()
 
         # call tested function
-        all_properties = url.get_properties(full=True)
+        all_properties = url.get_all_properties()
 
         self.assertTrue(len(all_properties) > 0)
         self.assertEqual(all_properties[0]["name"], "Properties")
@@ -501,7 +501,7 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-    def test_get_properties__audio_advanced(self):
+    def test_get_all_properties__audio_advanced(self):
         MockRequestCounter.mock_page_requests = 0
 
         test_link = "https://audio.jpg.com"
@@ -510,7 +510,7 @@ class UrlTest(FakeInternetTestCase):
 
         url.get_response()
         # call tested function
-        all_properties = url.get_properties(full=True)
+        all_properties = url.get_all_properties()
 
         self.assertTrue(len(all_properties) > 0)
         self.assertEqual(all_properties[0]["name"], "Properties")
@@ -535,7 +535,7 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-    def test_get_properties__video_advanced(self):
+    def test_get_all_properties__video_advanced(self):
         MockRequestCounter.mock_page_requests = 0
 
         test_link = "https://video.jpg.com"
@@ -545,7 +545,7 @@ class UrlTest(FakeInternetTestCase):
         url.get_response()
 
         # call tested function
-        all_properties = url.get_properties(full=True)
+        all_properties = url.get_all_properties()
         self.assertTrue(len(all_properties) > 0)
 
         properties_section = RemoteServer.read_properties_section("Properties", all_properties)

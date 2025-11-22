@@ -15,7 +15,7 @@ class ViewsTest(FakeInternetTestCase):
 
         url = Url("https://multiple-favicons.com/page.html")
         url.get_response()
-        all_properties = url.get_properties(full=True)
+        all_properties = url.get_all_properties()
 
         stamp = datetime.now()
 

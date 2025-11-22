@@ -180,7 +180,7 @@ class Crawler(object):
             print("Running:{}, with:{}".format(url, request))
 
             response = page_url.get_response()
-            all_properties = page_url.get_properties(full=True, include_social=False)
+            all_properties = page_url.get_all_properties(include_social=False)
         except Exception as e:
             raise
 

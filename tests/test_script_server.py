@@ -38,7 +38,7 @@ class ScriptServerTest(FakeInternetTestCase):
 
         self.assertTrue(url)
 
-        all_properties = url.get_properties(full=True)
+        all_properties = url.get_all_properties()
 
         self.assertTrue(all_properties)
 

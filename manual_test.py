@@ -145,7 +145,7 @@ def test_crawlers():
     call_crawler("SeleniumUndetected")
     call_crawler("SeleniumWireFull")
 
-    call_crawleebeautiful()
+    call_process("crawleebeautifulsoup.py")
     # call_crawleeplaywright()
 
 
