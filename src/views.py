@@ -1,11 +1,11 @@
 from utils import PermanentLogger
-from src import CrawlerHistory
 from webtoolkit import (
    status_code_to_text,
    is_status_code_valid,
    is_status_code_invalid,
    json_to_request,
    json_to_response,
+   RemoteServer,
 )
 
 
@@ -115,8 +115,8 @@ def get_entry_html(id, index, url, timestamp, all_properties):
         find_link, timestamp_str, url, remove_link
     )
 
-    response_json = CrawlerHistory.read_properties_section("Response", all_properties)
-    request_json = CrawlerHistory.read_properties_section("Request", all_properties)
+    response_json = RemoteServer.read_properties_section("Response", all_properties)
+    request_json = RemoteServer.read_properties_section("Request", all_properties)
     response = json_to_response(response_json)
     request = json_to_request(request_json)
 
@@ -159,6 +159,30 @@ def get_entry_html(id, index, url, timestamp, all_properties):
     text += f"Crawler name:{crawler_name} "
     text += f"Crawler:{crawler_crawler} "
     text += "</div>\n"
+
+    return text
+
+
+def get_crawl_data(id, crawl_data):
+    text = ""
+
+    crawl_type = crawl_data.crawl_type
+    url = crawl_data.url
+    timestamp = crawl_data.timestamp
+    crawl_id = crawl_data.crawl_id
+    crawl_data = crawl_data.data
+
+    find_link = "/findj?id={}&index={}".format(id, str(crawl_id))
+    remove_link = "/removej?id={}&index={}".format(id, str(crawl_id))
+
+    text += f"""
+<a href="{find_link}">
+   <h2 style="margin-bottom:0px">[{timestamp}] {url}</h2>
+   <div>Crawl Type:{crawl_type} Crawl ID:{crawl_id}</div>
+</a>
+<a href="{remove_link}">Remove</a>
+    """
+    text += f"<div><pre>{crawl_data}</pre></div>"
 
     return text
 

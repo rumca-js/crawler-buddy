@@ -37,11 +37,12 @@ from src.crawler import Crawler
 from src.views import (
     get_select_widget,
     get_entry_html,
+    get_crawl_data,
     level2color,
     rssify,
     get_html,
 )
-from src import CrawlerHistory
+from src import CrawlerContainer
 from src.webtools import Url
 from commandlineparser import CommandLineParser
 
@@ -140,9 +141,6 @@ def index():
     command_links.append({"link" : "/info", "name":"Info", "description":"shows configuration"})
     command_links.append({"link" : "/infoj", "name":"Info JSON", "description":"configuration JSON information"})
     command_links.append({"link" : "/system", "name":"System monitoring", "description":"system monitoring"})
-    command_links.append({"link" : "/history", "name":"History", "description":"crawl history"})
-    command_links.append({"link" : "/historyj", "name":"History JSON", "description":"shows history JSON"})
-    command_links.append({"link" : "/debug", "name":"Debug", "description":"shows debug information"})
 
     operational_links = []
     operational_links.append({"link" : "/get", "name":"Get", "description":"form for getting web page crawl JSON information"})
@@ -163,10 +161,13 @@ def index():
     operational_links.append({"link" : "/scanlinksj", "name":"Scan links", "description":"JSON for scannign links"})
 
     mgmt_links = []
-    mgmt_links.append({"link" : "/find", "name":"Find", "description":"form for finding response"})
-    mgmt_links.append({"link" : "/findj", "name":"Find JSON", "description":"returns information about history entry JSON"})
+    mgmt_links.append({"link" : "/history", "name":"History", "description":"crawl history"})
     mgmt_links.append({"link" : "/queue", "name":"Queue", "description":"shows current queue"})
+    mgmt_links.append({"link" : "/find", "name":"Find", "description":"form for finding response"})
+    mgmt_links.append({"link" : "/historyj", "name":"History JSON", "description":"shows history JSON"})
+    mgmt_links.append({"link" : "/findj", "name":"Find JSON", "description":"returns information about history entry JSON"})
     mgmt_links.append({"link" : "/removej", "name":"Remove history", "description":"Removes history entry"})
+    mgmt_links.append({"link" : "/debug", "name":"Debug", "description":"shows debug information"})
 
     # fmt: on
 
@@ -265,16 +266,21 @@ def history():
 
     text += "<h1>History</h1>\n"
 
-    if crawler_main.url_history.get_size() == 0:
+    if crawler_main.container.get_size() == 0:
         text += "<div>No history yet!</div>"
     else:
-        for datetime, index, things in reversed(crawler_main.url_history.container):
-            url = things[0]
-            all_properties = things[1]
+        for crawl_data in reversed(crawler_main.container.container):
+            crawl_type = crawl_data.crawl_type
+            url = crawl_data.url
+            timestamp = crawl_data.timestamp
+            crawl_id = crawl_data.crawl_id
 
-            entry_text = get_entry_html(id, index, url, datetime, all_properties)
-
-            text += entry_text
+            if crawl_type == CrawlerContainer.CRAWL_TYPE_GET:
+                all_properties = crawl_data.data
+                entry_text = get_entry_html(id, crawl_id, url, timestamp, all_properties)
+                text += entry_text
+            else:
+                text += get_crawl_data(id, crawl_data)
 
     return get_html(id=id, body=text, title="History")
 
@@ -287,12 +293,18 @@ def historyj():
 
     json_history = []
 
-    if crawler_main.url_history.get_size() == 0:
+    if crawler_main.container.get_size() == 0:
         return json_history
 
-    for datetime, index, things in reversed(crawler_main.url_history.container):
-        url = things[0]
-        all_properties = things[1]
+    for crawl_data in reversed(crawler_main.container.container):
+        crawl_type = crawl_data.crawl_type
+        url = crawl_data.url
+        timestamp = crawl_data.timestamp
+        crawl_id = crawl_data.crawl_id
+        all_properties = crawl_data.data
+
+        if crawl_type != CrawlerContainer.CRAWL_TYPE_GET:
+            continue
 
         json_history.append(
             {"datetime": datetime, "url": url, "properties": all_properties}
@@ -349,7 +361,7 @@ def set_response():
 
     all_properties = u.get_properties(full=True)
 
-    crawler_main.url_history.add((url, all_properties))
+    crawler_main.container.add(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url=url, data=all_properties)
 
     return jsonify({"success": True, "received": contents})
 
@@ -408,16 +420,18 @@ def find():
 
         return get_html(id=id, body=form_html, title="Find")
     else:
-        things = crawler_main.url_history.find(
+        crawler_data = crawler_main.container.get(
             url=url, crawler_name=name,
         )
 
-        if not things:
+        if not crawler_data:
             return get_html(
                 id=id, body="Cannot find any entry matching data", title="Find"
             )
 
-        index, timestamp, all_properties = things
+        index = crawler_data.crawl_id 
+        timestamp = crawler_data.timestamp 
+        all_properties = crawler_data.data 
 
         entry_text = get_entry_html(id, index, url, timestamp, all_properties)
 
@@ -437,14 +451,16 @@ def findj():
     if index:
         index = int(index)
 
-    things = crawler_main.url_history.find(
-        index=index, url=url, crawler_name=name,
+    crawler_data = crawler_main.container.get(
+        crawl_id=index, url=url, crawler_name=name,
     )
 
-    if not things:
+    if not crawler_data:
         return jsonify({"success": False, "error": "No properties found"}), 400
 
-    index, timestamp, all_properties = things
+    index = crawler_data.crawl_id
+    timestamp = crawler_data.timestamp
+    all_properties = crawler_data.data
 
     if not all_properties:
         return jsonify({"success": False, "error": "No properties found"}), 400
@@ -463,7 +479,7 @@ def removej():
     if index:
         index = int(index)
 
-    if crawler_main.url_history.remove(index=index):
+    if crawler_main.container.remove(crawl_id=index):
         return jsonify({"success": True})
 
     return jsonify({"success": False, "error": "Could not remove"}), 400
@@ -879,17 +895,21 @@ def archivesj():
     return jsonify(properties)
 
 
-def display_queue(queue):
+def display_queue(container):
     text = ""
-    for index in queue.queue:
-        things = queue.queue[index]
-        timestamp, url, crawler_data = things
+    for crawl_data in container.container:
+        crawl_id = crawl_data.crawl_id
+        crawl_type = crawl_data.crawl_type
+        timestamp = crawl_data.timestamp
+        url = crawl_data.url
+        crawler_data = crawl_data.data
+
+        if crawler_data is not None:
+            continue
 
         timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
-        text += '<div style="margin-bottom:1em;">{} {} {} {}</div>\n'.format(
-            index, timestamp_str, url, crawler_data
-        )
+        text += f'<div style="margin-bottom:1em;">[{timestamp_str}] {crawl_id} {crawl_type} {url} {request}</div>\n'
 
     return text
 
@@ -900,7 +920,7 @@ def queue():
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-    size = crawler_main.queue.get_size()
+    size = crawler_main.container.get_size()
 
     text = """
     <div>Currently processing:{}</div>
@@ -909,10 +929,7 @@ def queue():
     )
 
     text += "<h1>Queue</h1>\n"
-    text += display_queue(crawler_main.queue)
-
-    text += "<h1>Social queue</h1>\n"
-    text += display_queue(crawler_main.social_queue)
+    text += display_queue(crawler_main.container)
 
     return get_html(id=id, body=text, title="Queue")
 
@@ -979,8 +996,8 @@ if __name__ == "__main__":
 
     history_length = p.args.history_length
 
-    crawler_main.url_history.set_size(history_length)
-    crawler_main.url_history.set_time_cache(p.args.time_cache_minutes)
+    crawler_main.container.set_records_size(history_length)
+    crawler_main.container.set_time_cache(p.args.time_cache_minutes)
 
     port = configuration.get("port")
     host = configuration.get("host")

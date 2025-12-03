@@ -237,15 +237,13 @@ class CrawlerTest(FakeInternetTestCase):
         request.set("url", test_url)
         request.set("crawler_name", "RequestsCrawler")
 
-        self.assertEqual(crawler.url_history.get_size(), 0)
-        self.assertEqual(crawler.queue.get_size(), 0)
+        self.assertEqual(crawler.container.get_size(), 0)
 
         # call tested function
         props = crawler.get_all_properties(request)
         self.assertTrue(props)
 
-        self.assertEqual(crawler.url_history.get_size(), 1)
-        self.assertEqual(crawler.queue.get_size(), 0)
+        self.assertEqual(crawler.container.get_size(), 1)
 
     def test_get_all_properties__from_history(self):
         crawler = Crawler()
@@ -256,19 +254,16 @@ class CrawlerTest(FakeInternetTestCase):
         request.set("url", test_url)
         request.set("crawler_name", "RequestsCrawler")
 
-        self.assertEqual(crawler.url_history.get_size(), 0)
-        self.assertEqual(crawler.queue.get_size(), 0)
+        self.assertEqual(crawler.container.get_size(), 0)
 
         # call tested function
         props = crawler.get_all_properties(request)
         self.assertTrue(props)
 
-        self.assertEqual(crawler.url_history.get_size(), 1)
-        self.assertEqual(crawler.queue.get_size(), 0)
+        self.assertEqual(crawler.container.get_size(), 1)
 
         # call tested function
         props = crawler.get_all_properties(request)
         self.assertTrue(props)
 
-        self.assertEqual(crawler.url_history.get_size(), 1) # no new history was created
-        self.assertEqual(crawler.queue.get_size(), 0)
+        self.assertEqual(crawler.container.get_size(), 1) # no new history was created

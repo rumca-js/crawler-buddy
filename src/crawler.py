@@ -15,8 +15,7 @@ from webtoolkit import (
 
 from src import webtools
 from src.configuration import Configuration
-from src import CrawlerHistory
-from src import CrawlerQueue
+from src import CrawlerContainer
 from src import CrawlerData
 
 
@@ -33,33 +32,33 @@ class Crawler(object):
         Configurable because people might want more.
         """
 
-        self.queue = CrawlerQueue(self.configuration.get("max_queue_size"))
-        self.url_history = CrawlerHistory(self.configuration.get("history_size"))
+        row_size = self.configuration.get("history_size")
 
-        self.social_queue = CrawlerQueue(self.configuration.get("max_queue_size"))
-        self.social_history = CrawlerHistory(self.configuration.get("history_size"))
+        self.container = CrawlerContainer(records_size = row_size)
 
         self.data = CrawlerData(self.configuration)
-
-    def get_history(self):
-        return self.url_history
 
     def get_request_data(self, request):
         self.data.set_request(request)
         return self.data.get_request_data()
 
+    def get_page_url(self, url, request):
+        """ """
+
+        page_url = webtools.Url(url, request=request)
+        return page_url
+
     def get_social_properties(self, request, url):
         force = request.args.get("force")
 
         if not force:
-            things = self.social_history.find(url=url)
+            things = self.container.get(url=url, request=request)
             if things:
-                index, timestamp, all_properties = things
-
+                all_properties = things.data
                 return all_properties
 
-        crawler_index = self.social_queue.enter(url)
-        if crawler_index is None:
+        crawler_id = self.container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url=url, request=request)
+        if crawler_id is None:
             WebLogger.error(
                 info_text=f"{url} Cannot call socialj".format(url)
             )
@@ -75,16 +74,9 @@ class Crawler(object):
             )
             properties = None
 
-        self.social_queue.leave(crawler_index)
-        self.social_history.add((url, properties))
+        self.container.update(crawl_id=crawler_id, data=properties)
 
         return properties
-
-    def get_page_url(self, url, request):
-        """ """
-
-        page_url = webtools.Url(url, request=request)
-        return page_url
 
     def get_all_properties(self, request, headers=False, ping=False):
         url = request.args.get("url")
@@ -106,21 +98,17 @@ class Crawler(object):
             }}]
             return all_properties
 
-        name = request.crawler_name
-
         if not force:
-            things = self.get_history().find(url=url, crawler_name=name)
-
+            things = self.container.get(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url=url, request=request)
             if things:
-                print("Returning from saved properties")
-                index, timestamp, all_properties = things
+                all_properties = things.data
 
                 if all_properties:
                     return all_properties
 
         # TODO what if there is exception
-        crawl_index = self.queue.enter(url, request)
-        if crawl_index is None:
+        crawl_id = self.container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url=url, request=request)
+        if crawl_id is None:
             WebLogger.error("Too many crawler calls".format(url, request))
             all_properties = [{"name": "Response", "data": {
                 "status_code" : HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
@@ -143,8 +131,7 @@ class Crawler(object):
             )
             all_properties = None
 
-        self.queue.leave(crawl_index)
-        self.url_history.add((url, all_properties))
+        self.container.update(crawl_id=crawl_id, data=all_properties)
 
         if webtools.SeleniumDriver.counter == 0 and webtools.WebConfig.count_chrom_processes() > 10:
             webtools.WebConfig.kill_chrom_processes()

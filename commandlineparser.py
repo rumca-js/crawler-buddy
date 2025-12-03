@@ -11,7 +11,7 @@ class CommandLineParser(object):
         self.parser.add_argument(
             "-l",
             "--history-length",
-            default=200,
+            default=1000,
             type=int,
             help="Length of history",
         )
