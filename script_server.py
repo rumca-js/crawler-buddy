@@ -922,11 +922,7 @@ def queue():
 
     size = crawler_main.container.get_size()
 
-    text = """
-    <div>Currently processing:{}</div>
-    """.format(
-        size
-    )
+    text = ""
 
     text += "<h1>Queue</h1>\n"
     text += display_queue(crawler_main.container)
