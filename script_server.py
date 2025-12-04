@@ -211,9 +211,17 @@ def info():
 
     text += get_crawler_text()
 
-    text += "<h2>Data</h2>"
+    text += "<h2>Configuration</h2>"
     for key, value in configuration.data.items():
         text += "<div>{}:{}</div>".format(key, value)
+
+    text += "<h2>System</h2>"
+    size = crawler_main.container.get_size()
+    records_size = crawler_main.container.records_size
+    time_span = crawler_main.container.time_cache_m
+    text += "<div>{}:{}</div>".format("History size", size)
+    text += "<div>{}:{}</div>".format("Records size", records_size)
+    text += "<div>{}:{}</div>".format("Time cache [m]", time_span)
 
     text += "<h2>System</h2>"
     process_count = webtools.WebConfig.count_chrom_processes()
