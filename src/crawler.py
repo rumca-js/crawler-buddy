@@ -52,12 +52,12 @@ class Crawler(object):
         force = request.args.get("force")
 
         if not force:
-            things = self.container.get(url=url, request=request)
+            things = self.container.get(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url=url)
             if things:
                 all_properties = things.data
                 return all_properties
 
-        crawler_id = self.container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url=url, )
+        crawler_id = self.container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url=url)
         if crawler_id is None:
             WebLogger.error(
                 info_text=f"{url} Cannot call socialj".format(url)

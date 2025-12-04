@@ -144,7 +144,13 @@ class CrawlerContainer(object):
     def expire_old(self):
         """Remove entries older than the time_cache window."""
         cutoff = datetime.now() - timedelta(seconds=self.time_cache_m * 60)
+        previous_length = len(self.container)
+
         self.container = [c for c in self.container if c.timestamp >= cutoff]
+
+        now_length = len(self.container)
+        if previous_length != now_length:
+            WebLogger.debug("Container: Some entries expired!!!")
 
     def trim_size(self):
         """Enforce the records_size limit."""
@@ -152,6 +158,7 @@ class CrawlerContainer(object):
             # drop oldest entries
             overflow = len(self.container) - self.records_size
             self.container = self.container[overflow:]
+            WebLogger.debug("Container: trimmed")
 
     def _match(self, item, crawl_type, crawler_name=None, url=None, request=None):
         if not item:
