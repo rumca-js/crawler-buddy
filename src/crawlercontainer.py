@@ -162,16 +162,28 @@ class CrawlerContainer(object):
         if url and item.url != url:
             return False
 
-        # TODO code below should be not needed
-        if item.request:
-            item.request["crawler_type"]=None
-        request = request_to_json(request)
-        if request:
-            request["crawler_type"]=None
-        if request and item.request != request:
+        input_json_request = request_to_json(request)
+        if request and not self.match_requests(item.request, input_json_request):
             return False
 
         return True
+
+    def match_requests(self, one_request,  two_request):
+        if one_request and "crawler_type" in one_request:
+            one_request["crawler_type"]=None
+        if two_request and "crawler_type" in two_request:
+            two_request["crawler_type"]=None
+        if one_request and "handler_type" in one_request:
+            one_request["handler_type"]=None
+        if two_request and "handler_type" in two_request:
+            two_request["handler_type"]=None
+        if one_request and two_request and one_request == two_request:
+            return True
+
+        if one_request is None and two_request is None:
+            return True
+
+        return False
 
     def remove(self, crawl_id):
         """
