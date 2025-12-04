@@ -44,8 +44,6 @@ class CrawlerContainer(object):
         Either finds crawl with parameters, or adds new crawl.
         Returns ID of request or None.
         """
-        self.expire_old()
-
         # Try to find existing
         found = self.find(crawl_type, crawler_name=crawler_name, url=url, request=request)
         if found is not None:
@@ -64,8 +62,8 @@ class CrawlerContainer(object):
         )
         self.container.append(item)
 
-        if len(self.container) >= self.records_size:
-            self.trim_size()
+        self.expire_old()
+        self.trim_size()
 
         return crawl_id
 
@@ -73,7 +71,6 @@ class CrawlerContainer(object):
         """
         Finds crawl with parameters. Returns ID or None.
         """
-        self.expire_old()
 
         for item in self.container:
             if self._match(item, crawl_type, crawler_name=crawler_name, url=url, request=request):
@@ -106,10 +103,11 @@ class CrawlerContainer(object):
 
         self.container.append(item)
 
+        self.expire_old()
+        self.trim_size()
+
     def get(self, crawl_id=None, crawl_type=None, crawler_name=None, url=None, request=None) -> CrawlItem | None:
         """Get crawl item by ID if not expired."""
-        self.expire_old()
-
         if not crawl_id:
             crawl_id = self.find(crawl_type=crawl_type,
                       crawler_name=crawler_name,
@@ -134,7 +132,6 @@ class CrawlerContainer(object):
 
     def get_size(self):
         """Returns size of the container."""
-        self.expire_old()
         return len(self.container)
 
     # ------------------------------
