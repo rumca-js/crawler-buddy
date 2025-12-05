@@ -48,7 +48,7 @@ class Crawler(object):
         page_url = webtools.Url(url, request=request)
         return page_url
 
-    def get_social_properties(self, request, url):
+    def get_social_properties(self, server_request, url):
         force = request.args.get("force")
 
         if not force:
@@ -78,9 +78,9 @@ class Crawler(object):
 
         return properties
 
-    def get_all_properties(self, request, headers=False, ping=False):
-        url = request.args.get("url")
-        force = request.args.get("force")
+    def get_all_properties(self, server_request, headers=False, ping=False):
+        url = server_request.args.get("url")
+        force = server_request.args.get("force")
 
         if not url:
             all_properties = [{"name": "Response", "data": {
@@ -89,7 +89,7 @@ class Crawler(object):
             }}]
             return all_properties
 
-        request = self.get_request_data(request)
+        request = self.get_request_data(server_request)
 
         if not request:
             all_properties = [{"name": "Response", "data": {

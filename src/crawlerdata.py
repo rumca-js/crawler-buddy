@@ -1,3 +1,4 @@
+import os
 import json
 from webtoolkit import WebLogger, json_to_request
 from src.webtools import WebConfig
@@ -89,6 +90,19 @@ class CrawlerData(object):
             page_request.bytes_limit = WebConfig.get_bytes_limit()
         if page_request.accept_types is None:
             page_request.accept_types = "all"
+
+        http_proxy = os.environ.get("http_proxy")
+        if http_proxy:
+            page_request.http_proxy = http_proxy
+        https_proxy = os.environ.get("https_proxy")
+        if https_proxy:
+            page_request.https_proxy = https_proxy
+        http_proxy = os.environ.get("HTTP_PROXY")
+        if http_proxy:
+            page_request.http_proxy = http_proxy
+        https_proxy = os.environ.get("HTTPS_PROXY")
+        if https_proxy:
+            page_request.https_proxy = https_proxy
 
         return page_request
 
