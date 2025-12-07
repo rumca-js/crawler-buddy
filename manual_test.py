@@ -177,3 +177,20 @@ def main():
     test_urls()
 
 main()
+
+
+#import time
+#from src.taskrunner import start_runner_thread
+#from src.crawlercontainer import CrawlerContainer
+#
+#container = CrawlerContainer()
+#container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://google.com")
+#container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+#thread, runner = start_runner_thread(container)
+#
+#while(True):
+#    if runner.is_empty():
+#        runner.stop()
+#        thread.join()
+#        break
+#    time.sleep(1)

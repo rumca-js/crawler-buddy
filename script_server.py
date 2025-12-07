@@ -15,7 +15,6 @@ import base64
 import traceback
 from datetime import datetime
 
-import webtoolkit
 from webtoolkit import (
    HttpPageHandler,
    WebLogger,
