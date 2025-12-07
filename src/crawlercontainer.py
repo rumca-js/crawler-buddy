@@ -15,6 +15,7 @@ class CrawlItem(object):
         self.crawler_name = crawler_name
         self.url = url
         self.request = request_to_json(request)
+        self.request_real = request
 
     def __str__(self):
         return f"{self.crawl_id} {self.crawl_type} {self.timestamp} {self.crawler_name} {self.url}"

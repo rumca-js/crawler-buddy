@@ -19,6 +19,98 @@ from src import CrawlerContainer
 from src import CrawlerData
 
 
+class CrawlerGet(object):
+    def __init__(self, container, crawl_item):
+        self.container = container
+        self.crawl_item = crawl_item
+
+    def run(self):
+        url = self.crawl_item.url
+        request = self.crawl_item.request
+
+        try:
+            webtools.WebConfig.start_display()
+            all_properties = self.run_internal(url, request)
+        except Exception as E:
+            WebLogger.exc(
+                E,
+                info_text="Exception when calling getj {} {}".format(url, request),
+            )
+            all_properties = [{"name": "Response", "data": {
+                "status_code" : HTTP_STATUS_CODE_EXCEPTION,
+                "errors" :  [str(E)],
+            }}]
+
+        if webtools.SeleniumDriver.counter == 0 and webtools.WebConfig.count_chrom_processes() > 10:
+            webtools.WebConfig.kill_chrom_processes()
+            webtools.WebConfig.kill_xvfb_processes()
+
+        return all_properties
+
+    def run_internal(self, url, request=None):
+        if self.crawl_item.url:
+            url = self.crawl_item.url
+        if self.crawl_item.request:
+            if self.crawl_item.request_real.url:
+                url = self.crawl_item.request_real.url
+        request = self.crawl_item.request_real
+
+        page_url = webtools.Url(url, request=request)
+
+        all_properties = None
+        try:
+            print("Running:{}, with:{}".format(url, request))
+
+            response = page_url.get_response()
+            all_properties = page_url.get_all_properties(include_social=False)
+        except Exception as E:
+            WebLogger.exc(
+                E, info_text="Exception when calling getj {}".format(url)
+            )
+            all_properties = [{"name": "Response", "data": {
+                "status_code" : HTTP_STATUS_CODE_EXCEPTION,
+                "errors" :  [str(E)],
+            }}]
+
+        self.container.update(crawl_id=self.crawl_item.crawl_id, data=all_properties)
+
+        return all_properties
+
+
+class CrawlerSocialData(object):
+    def __init__(self, container, crawl_item):
+        self.container = container
+        self.crawl_item = crawl_item
+
+    def run(self):
+        return self.run_internal()
+
+    def run_internal(self):
+        url = self.crawl_item.url
+        request = self.crawl_item.request
+        if self.crawl_item.url:
+            url = self.crawl_item.url
+        if self.crawl_item.request:
+            if self.crawl_item.request.url:
+                url = self.crawl_item.request.url
+
+        properties = None
+        try:
+            page_url = webtools.Url(url)
+            properties = page_url.get_social_properties()
+        except Exception as E:
+            WebLogger.exc(
+                E, info_text="Exception when calling socialj {}".format(url)
+            )
+            properties = [{"name": "Response", "data": {
+                "status_code" : HTTP_STATUS_CODE_EXCEPTION,
+                "errors" :  [str(E)],
+            }}]
+
+        self.container.update(crawl_id=self.crawl_item.crawl_id, data=properties)
+        return properties
+
+
 class Crawler(object):
     """
     Crawler
@@ -49,7 +141,14 @@ class Crawler(object):
         return page_url
 
     def get_social_properties(self, server_request, url):
-        force = request.args.get("force")
+        if not url:
+            all_properties = [{"name": "Response", "data": {
+                "status_code" : HTTP_STATUS_CODE_EXCEPTION,
+                "errors" :  ["No url provided"],
+            }}]
+            return all_properties
+
+        force = server_request.args.get("force")
 
         if not force:
             things = self.container.get(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url=url)
@@ -57,24 +156,19 @@ class Crawler(object):
                 all_properties = things.data
                 return all_properties
 
-        crawler_id = self.container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url=url)
-        if crawler_id is None:
+        crawl_id = self.container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url=url)
+        if crawl_id is None:
             WebLogger.error(
                 info_text=f"{url} Cannot call socialj".format(url)
             )
-            return None
+            all_properties = [{"name": "Response", "data": {
+                "status_code" : HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+                "errors" :  ["Too many crawler calls"],
+            }}]
 
-        properties = None
-        try:
-            page_url = webtools.Url(url)
-            properties = page_url.get_social_properties()
-        except Exception as E:
-            WebLogger.exc(
-                E, info_text="Exception when calling socialj {}".format(url)
-            )
-            properties = None
-
-        self.container.update(crawl_id=crawler_id, data=properties)
+        crawl_item = self.container.get(crawl_id=crawl_id)
+        crawl_runner = CrawlerSocialData(container=self.container, crawl_item=crawl_item)
+        properties = crawl_runner.run()
 
         return properties
 
@@ -84,7 +178,7 @@ class Crawler(object):
 
         if not url:
             all_properties = [{"name": "Response", "data": {
-                "status_code" : webtools.HTTP_STATUS_CODE_EXCEPTION,
+                "status_code" : HTTP_STATUS_CODE_EXCEPTION,
                 "errors" :  ["No url provided"],
             }}]
             return all_properties
@@ -106,7 +200,6 @@ class Crawler(object):
                 if all_properties:
                     return all_properties
 
-        # TODO what if there is exception
         crawl_id = self.container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url=url, request=request)
         if crawl_id is None:
             WebLogger.error("Too many crawler calls".format(url, request))
@@ -121,55 +214,8 @@ class Crawler(object):
         elif ping:
             request.request_type = "ping"
 
-        try:
-            webtools.WebConfig.start_display()
-            all_properties = self.run(url, request)
-        except Exception as E:
-            WebLogger.exc(
-                E,
-                info_text="Exception when calling getj {} {}".format(url, request),
-            )
-            all_properties = None
-
-        self.container.update(crawl_id=crawl_id, data=all_properties)
-
-        if webtools.SeleniumDriver.counter == 0 and webtools.WebConfig.count_chrom_processes() > 10:
-            webtools.WebConfig.kill_chrom_processes()
-            webtools.WebConfig.kill_xvfb_processes()
-
-        if not all_properties:
-            all_properties = [{"name": "Response", "data": {
-                "status_code" : HTTP_STATUS_CODE_EXCEPTION,
-                "errors" :  ["No properties found"],
-            }}]
-
-        response = RemoteServer.read_properties_section("Response", all_properties)
-        # WebLogger.debug(info_text = "Crawling response: ", detail_text = str(response))
+        crawl_item = self.container.get(crawl_id=crawl_id)
+        crawl_runner = CrawlerGet(container=self.container, crawl_item = crawl_item)
+        all_properties = crawl_runner.run()
 
         return all_properties
-
-    def run(self, url, request=None):
-        if not request:
-            WebLogger.error(
-                "Url:{} Cannot run request without request".format(url)
-            )
-            return
-
-        page_url = self.get_page_url(url, request)
-
-        if not page_url:
-            WebLogger.error(
-                "Could not create page url for {} {}".format(url, request)
-            )
-            return
-
-        try:
-            print("Running:{}, with:{}".format(url, request))
-
-            response = page_url.get_response()
-            all_properties = page_url.get_all_properties(include_social=False)
-        except Exception as e:
-            raise
-
-        return all_properties
-

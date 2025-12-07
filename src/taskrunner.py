@@ -1,3 +1,5 @@
+from .crawler import CrawlerGet, CrawlerSocialData
+from .crawlercontainer import CrawlerContainer
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 import threading
@@ -24,10 +26,18 @@ class TaskRunner(object):
     def run_item(self, item):
         """Actual crawl logic here."""
         print(f"[RUN]  {item.url}")
-        time.sleep(1)  # TODO simulate work
-        self.container.leave(item.crawl_id)
+        if item.crawl_type == CrawlerContainer.CRAWL_TYPE_GET:
+            crawl = CrawlerGet(container=self.container, crawl_item = item)
+            crawl.run()
+        elif item.crawl_type == CrawlerContainer.CRAWL_TYPE_SOCIAL:
+            crawl = CrawlerSocialData(container=self.container, crawl_item=item)
+            crawl.run()
+        else:
+            raise NotImplemented("Not implemented")
+
+        # self.container.leave(item.crawl_id)
         print(f"[DONE] {item.url}")
-        return item.url
+        return item.crawl_id
 
     def attempt_submit(self, item):
         """
@@ -35,9 +45,9 @@ class TaskRunner(object):
         Returns True if submitted.
         """
         with self.lock:
-            if item.url in self.running_urls:
+            if item.crawl_id in self.running_urls:
                 return False
-            self.running_urls.add(item.url)
+            self.running_urls.add(item.crawl_id)
 
         future = self.executor.submit(self.run_item, item)
         future.add_done_callback(self._on_done)
@@ -49,13 +59,13 @@ class TaskRunner(object):
     def _on_done(self, future):
         """Cleanup when tasks finish."""
         try:
-            url = future.result()
+            crawl_id = future.result()
         except Exception as e:
             print("Error in worker:", e)
             return
 
         with self.lock:
-            self.running_urls.discard(url)
+            self.running_urls.discard(crawl_id)
 
     def start(self):
         """
@@ -70,8 +80,9 @@ class TaskRunner(object):
 
             with self.container_lock:
                 for item in list(self.container.container):
-                    if item.url and self.attempt_submit(item):
-                        submitted_any = True
+                    if item.data is None:
+                        if item.crawl_id and self.attempt_submit(item):
+                            submitted_any = True
 
             # Sleep a bit if no new work appeared
             if not submitted_any:
