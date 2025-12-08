@@ -97,6 +97,9 @@ class CrawlerContainer(object):
         """
         self.expire_old()
 
+        if data is None:
+            return
+
         for item in self.container:
             if item.crawl_id == crawl_id:
                 item.data = data

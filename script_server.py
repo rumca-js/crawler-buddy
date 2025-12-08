@@ -906,11 +906,12 @@ def archivesj():
 def display_queue(container):
     text = ""
     for crawl_data in container.get_queued_items():
+        url = crawl_data.get_url()
         crawl_id = crawl_data.crawl_id
         crawl_type = crawl_data.crawl_type
         timestamp = crawl_data.timestamp
-        url = crawl_data.url
         crawler_data = crawl_data.data
+        request = crawl_data.request_real
 
         timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
