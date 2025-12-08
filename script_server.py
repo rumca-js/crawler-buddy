@@ -772,7 +772,7 @@ def pingj():
             return jsonify({"status": False})
 
     all_properties = crawler_main.get_all_properties(request, ping=True)
-    response = CrawlerHistory.read_properties_section("Response", all_properties)
+    response = RemoteServer.read_properties_section("Response", all_properties)
 
     if response:
         status_code = response["status_code"]
