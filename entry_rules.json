@@ -3,7 +3,7 @@
         {
             "id": 1,
             "enabled": true,
-            "rule_url": "politico.com, barrons.com, reuters.com, techcrunch.com, .yahoo.com, engadget.com, phys.org, wsj.com, open.spotify.com/show, washingtontimes.com, feedpress.me, axios.com, nytimes.com, reutersagency.com, geekwire.com, https://x.com, https://twitter.com, 4chan.org, facebook.com, meta.com, geekwire.com, securityweek.com",
+            "rule_url": "barrons.com, reuters.com, techcrunch.com, .yahoo.com, engadget.com, open.spotify.com/show, washingtontimes.com, feedpress.me, axios.com, nytimes.com, reutersagency.com, geekwire.com, 4chan.org, facebook.com, meta.com, ",
             "rule_name": "Selenium full",
             "block": false,
             "auto_tag": "",
@@ -12,11 +12,11 @@
         {
             "id": 2,
             "enabled": true,
-            "rule_url": "mashable.com",
-            "rule_name": "Crawlee",
+            "rule_url": "reddit.com, https://x.com, https://twitter.com, politico.com, geekwire.com, securityweek.com, phys.org, wsj.com",
+            "rule_name": "reddit",
             "block": false,
             "auto_tag": "",
-            "browser": "CrawleeBeautifulScript"
+            "browser": "CurlCffiCrawler"
         }
     ]
 }
