@@ -90,6 +90,14 @@ class CrawlerTypeSocialData(object):
         try:
             page_url = webtools.Url(url)
             properties = page_url.get_social_properties()
+
+            # TODO how to handle it?
+
+            if properties is None:
+                properties = [{"name": "Response", "data": {
+                    "status_code" : HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+                    "errors" :  ["Cannot obtain social data"],
+                }}]
         except Exception as E:
             WebLogger.exc(
                 E, info_text="Exception when calling socialj {}".format(url)

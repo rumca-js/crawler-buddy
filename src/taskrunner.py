@@ -57,6 +57,9 @@ class TaskRunner(object):
         future.add_done_callback(self._on_done)
         return True
 
+    def is_running(self, crawl_id):
+        return crawl_id in self.running_ids
+
     def is_item_crawl_ok(self, item):
         """
         If new thing to run has the same domain as the running one,

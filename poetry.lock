@@ -2686,14 +2686,14 @@ files = [
 
 [[package]]
 name = "urllib3"
-version = "2.6.0"
+version = "2.6.1"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "urllib3-2.6.0-py3-none-any.whl", hash = "sha256:c90f7a39f716c572c4e3e58509581ebd83f9b59cced005b7db7ad2d22b0db99f"},
-    {file = "urllib3-2.6.0.tar.gz", hash = "sha256:cb9bcef5a4b345d5da5d145dc3e30834f58e8018828cbc724d30b4cb7d4d49f1"},
+    {file = "urllib3-2.6.1-py3-none-any.whl", hash = "sha256:e67d06fe947c36a7ca39f4994b08d73922d40e6cca949907be05efa6fd75110b"},
+    {file = "urllib3-2.6.1.tar.gz", hash = "sha256:5379eb6e1aba4088bae84f8242960017ec8d8e3decf30480b3a1abdaa9671a3f"},
 ]
 
 [package.dependencies]
@@ -2815,14 +2815,14 @@ files = [
 
 [[package]]
 name = "webtoolkit"
-version = "0.0.138"
+version = "0.0.139"
 description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "webtoolkit-0.0.138-py3-none-any.whl", hash = "sha256:247fcfc5e21f107f940f11e8e4a8ffd99a379fbdcfeca6ced15702ea8138a83b"},
-    {file = "webtoolkit-0.0.138.tar.gz", hash = "sha256:eecbabbbc962ea262adc2d577ac5f3f871b5ab13ba89ec111aa0ec9176520815"},
+    {file = "webtoolkit-0.0.139-py3-none-any.whl", hash = "sha256:932bce5fbd3c9a28f62eb2c9772a7f20c6f15aeffacea507f2b39b0686fe917e"},
+    {file = "webtoolkit-0.0.139.tar.gz", hash = "sha256:b9d89eec637eac009febaae0c2fd14459c266cdd979baa85f22de9b367429bcb"},
 ]
 
 [package.dependencies]
@@ -3198,4 +3198,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "18970bea977200b0032b9f59756663985340abd3c3fb1e5ffde0b367cbabe0d7"
+content-hash = "3e58cce7762f0ef6debbc5bde5eee9a8cd85b59f373a4cd61a7458842fe506a3"

@@ -54,6 +54,7 @@ app = Flask(__name__)
 WebLogger.web_logger = PermanentLogger()
 configuration = Configuration()
 crawler_main = Crawler()
+task_runner = None
 
 
 def get_crawlers():
@@ -913,9 +914,17 @@ def display_queue(container):
         crawler_data = crawl_data.data
         request = crawl_data.request_real
 
+        running_text = ""
+        if task_runner:
+            running_text = "running:"
+            if task_runner.is_running(crawl_id):
+                running_text += "Yes"
+            else:
+                running_text += "No"
+
         timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
-        text += f'<div style="margin-bottom:1em;">[{timestamp_str}] {crawl_id} {crawl_type} {url} {request}</div>\n'
+        text += f'<div style="margin-bottom:1em;">[{timestamp_str}] {crawl_id} {crawl_type} {url} {request} {running_text}</div>\n'
 
     return text
 
@@ -1016,7 +1025,7 @@ if __name__ == "__main__":
     webtools.WebConfig.start_display()
 
     if p.args.multi_process:
-        start_runner_thread(crawler_main.container)
+        thread, task_runner = start_runner_thread(crawler_main.container)
         crawler_main.set_multi_process()
 
     context = None
