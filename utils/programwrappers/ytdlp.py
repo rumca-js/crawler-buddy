@@ -89,7 +89,7 @@ class YTDLP(YouTubeDownloader):
         if proc.returncode != 0 and proc.returncode != 101:
             print(
                 "yt-dlp problem. Url:{}. Return code:{}\nOut:{}\nErr:{}".format(
-                    self._url, proc.returncode, out, error
+                    self._url, proc.returncode, self.stdout, self.stderr
                 )
             )
             return None
