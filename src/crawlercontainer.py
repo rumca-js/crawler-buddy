@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from datetime import datetime
 from collections import OrderedDict
-from webtoolkit import WebLogger, request_to_json
+from webtoolkit import WebLogger, request_to_json, copy_request
 
 
 class CrawlItem(object):
@@ -15,10 +15,22 @@ class CrawlItem(object):
         self.crawler_name = crawler_name
         self.url = url
         self.request = request_to_json(request)
-        self.request_real = request
+        if request:
+            self.request_real = copy_request(request)
+        else:
+            self.request_real = None
 
     def __str__(self):
-        return f"{self.crawl_id} {self.crawl_type} {self.timestamp} {self.crawler_name} {self.url}"
+        data = "No"
+        if self.data is not None:
+            data = "Yes"
+        return f"{self.crawl_id} {self.crawl_type} {self.timestamp} {self.crawler_name} {self.url} Data:{data}"
+
+    def get_url(self):
+        if self.url:
+            return self.url
+        if self.request_real and self.request_real.url:
+            return self.request_real.url
 
 
 class CrawlerContainer(object):
@@ -207,3 +219,26 @@ class CrawlerContainer(object):
         self.container = result
 
         return last_found
+
+    def get_all_items(self):
+        return self.container
+
+    def get_queued_items(self):
+        """
+        Returns items that are not yet ready
+        """
+        crawl_items = []
+        for crawl_item in self.container:
+            if crawl_item.data is None:
+                crawl_items.append(crawl_item)
+        return crawl_items
+
+    def get_ready_items(self):
+        """
+        Returns items that are ready
+        """
+        crawl_items = []
+        for crawl_item in self.container:
+            if crawl_item.data is not None:
+                crawl_items.append(crawl_item)
+        return crawl_items

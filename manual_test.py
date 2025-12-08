@@ -190,7 +190,7 @@ main()
 #
 #while(True):
 #    if runner.is_empty():
-#        print("Empty")
+#        print("Finished all")
 #        runner.stop()
 #        thread.join()
 #        for item in container.container:

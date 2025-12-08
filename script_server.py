@@ -42,6 +42,7 @@ from src.views import (
     get_html,
 )
 from src import CrawlerContainer
+from src.taskrunner import start_runner_thread
 from src.webtools import Url
 from commandlineparser import CommandLineParser
 
@@ -276,7 +277,7 @@ def history():
     if crawler_main.container.get_size() == 0:
         text += "<div>No history yet!</div>"
     else:
-        for crawl_data in reversed(crawler_main.container.container):
+        for crawl_data in reversed(crawler_main.container.get_ready_items()):
             crawl_type = crawl_data.crawl_type
             url = crawl_data.url
             timestamp = crawl_data.timestamp
@@ -303,7 +304,7 @@ def historyj():
     if crawler_main.container.get_size() == 0:
         return json_history
 
-    for crawl_data in reversed(crawler_main.container.container):
+    for crawl_data in reversed(crawler_main.container.get_ready_items()):
         crawl_type = crawl_data.crawl_type
         url = crawl_data.url
         timestamp = crawl_data.timestamp
@@ -904,15 +905,12 @@ def archivesj():
 
 def display_queue(container):
     text = ""
-    for crawl_data in container.container:
+    for crawl_data in container.get_queued_items():
         crawl_id = crawl_data.crawl_id
         crawl_type = crawl_data.crawl_type
         timestamp = crawl_data.timestamp
         url = crawl_data.url
         crawler_data = crawl_data.data
-
-        if crawler_data is not None:
-            continue
 
         timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -1015,6 +1013,10 @@ if __name__ == "__main__":
 
     webtools.WebConfig.disable_ssl_warnings()
     webtools.WebConfig.start_display()
+
+    if p.args.multi_process:
+        start_runner_thread(crawler_main.container)
+        crawler_main.set_multi_process()
 
     context = None
     if p.args.cert_file and p.args.cert_key:

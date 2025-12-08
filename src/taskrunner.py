@@ -1,14 +1,18 @@
-from .crawler import CrawlerGet, CrawlerSocialData
-from .crawlercontainer import CrawlerContainer
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
 from datetime import datetime
 import threading
-import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from webtoolkit import UrlLocation
+
+from .crawler import crawler_builder
+from .crawlercontainer import CrawlerContainer
+
 
 
 class TaskRunner(object):
 
-    def __init__(self, container, max_workers=5, poll_interval=0.1):
+    def __init__(self, container, max_workers=5, poll_interval=0.1, verbose=True):
         """
         container: shared list of CrawlItem (updated externally)
         poll_interval: how often to poll container for new items (seconds)
@@ -16,27 +20,27 @@ class TaskRunner(object):
         self.container = container
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
 
-        self.running_urls = set()
-        self.lock = threading.Lock()           # protects running_urls
+        self.running_ids = set()
+        self.lock = threading.Lock()           # protects running_ids
         self.container_lock = threading.Lock() # protects container
 
         self.poll_interval = poll_interval
         self.shutdown_flag = False
+        self.verbose = verbose
 
     def run_item(self, item):
         """Actual crawl logic here."""
-        print(f"[RUN]  {item.url}")
-        if item.crawl_type == CrawlerContainer.CRAWL_TYPE_GET:
-            crawl = CrawlerGet(container=self.container, crawl_item = item)
-            crawl.run()
-        elif item.crawl_type == CrawlerContainer.CRAWL_TYPE_SOCIAL:
-            crawl = CrawlerSocialData(container=self.container, crawl_item=item)
-            crawl.run()
-        else:
-            raise NotImplemented("Not implemented")
+        if self.verbose:
+            print(f"[RUN]  {item.url}")
 
-        # self.container.leave(item.crawl_id)
-        print(f"[DONE] {item.url}")
+        crawl = crawler_builder(container=self.container, crawl_item=item)
+
+        if crawl:
+            crawl.run()
+
+        if self.verbose:
+            print(f"[DONE] {item.url}")
+
         return item.crawl_id
 
     def attempt_submit(self, item):
@@ -45,27 +49,67 @@ class TaskRunner(object):
         Returns True if submitted.
         """
         with self.lock:
-            if item.crawl_id in self.running_urls:
+            if not self.is_item_crawl_ok(item):
                 return False
-            self.running_urls.add(item.crawl_id)
+            self.running_ids.add(item.crawl_id)
 
         future = self.executor.submit(self.run_item, item)
         future.add_done_callback(self._on_done)
         return True
 
+    def is_item_crawl_ok(self, item):
+        """
+        If new thing to run has the same domain as the running one,
+        then do not add
+        """
+        if item.crawl_id in self.running_ids:
+            return False
+
+        selenium_limit = True
+
+        queued_urls = set()
+        queued_items = self.container.get_queued_items()
+        for queued_item in queued_items:
+            if queued_item.crawl_id in self.running_ids:
+                queued_urls.add(queued_item.get_url())
+
+                if selenium_limit:
+                    if self.is_selenium_both(item, queued_item):
+                        return False
+
+        queued_domains = set()
+        for queued_url in queued_urls:
+            location = UrlLocation(queued_url)
+            queued_domains.add(location.get_domain())
+
+        location = UrlLocation(item.get_url())
+        this_domain = location.get_domain()
+
+        if this_domain and this_domain in queued_domains:
+            return False
+
+        return True
+
+    def is_selenium_both(self, one, two):
+        if one.request_real and one.request_real.crawler_name and one.request_real.crawler_name.find("Selenium"):
+              if two.request_real and two.request_real.crawler_name and two.request_real.crawler_name.find("Selenium") >= 0:
+                  return True
+
+        return False
+
     def is_empty(self):
-        return len(self.running_urls) == 0
+        return len(self.running_ids) == 0
 
     def _on_done(self, future):
         """Cleanup when tasks finish."""
         try:
             crawl_id = future.result()
-        except Exception as e:
-            print("Error in worker:", e)
+        except Exception as E:
+            print("Error in worker:", E)
             return
 
         with self.lock:
-            self.running_urls.discard(crawl_id)
+            self.running_ids.discard(crawl_id)
 
     def start(self):
         """
@@ -73,24 +117,27 @@ class TaskRunner(object):
         Continuously checks container for new items.
         """
 
-        print("[Runner] Started (indefinite mode)")
+        print("[TaskRunner] Started (indefinite mode)")
 
-        while not self.shutdown_flag:
-            submitted_any = False
+        try:
+            while not self.shutdown_flag:
+                submitted_any = False
 
-            with self.container_lock:
-                for item in list(self.container.container):
-                    if item.data is None:
-                        if item.crawl_id and self.attempt_submit(item):
-                            submitted_any = True
+                with self.container_lock:
+                    for item in list(self.container.get_queued_items()):
+                        if item.data is None:
+                            if item.crawl_id and self.attempt_submit(item):
+                                submitted_any = True
 
-            # Sleep a bit if no new work appeared
-            if not submitted_any:
-                time.sleep(self.poll_interval)
+                # Sleep a bit if no new work appeared
+                if not submitted_any:
+                    time.sleep(self.poll_interval)
+        except Exception as E:
+            print("Exception in TaskRunner: " + str(E))
 
-        print("[Runner] Stopping… waiting for tasks to finish.")
+        print("[TaskRunner] Stopping… waiting for tasks to finish.")
         self.executor.shutdown(wait=True)
-        print("[Runner] Stopped.")
+        print("[TaskRunner] Stopped.")
 
     def stop(self):
         """Graceful stop signal."""

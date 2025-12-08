@@ -5,6 +5,7 @@ import subprocess
 import psutil
 import json
 from datetime import datetime
+import time
 
 from webtoolkit import (
   WebLogger,
@@ -19,7 +20,7 @@ from src import CrawlerContainer
 from src import CrawlerData
 
 
-class CrawlerGet(object):
+class CrawlerTypeGet(object):
     def __init__(self, container, crawl_item):
         self.container = container
         self.crawl_item = crawl_item
@@ -48,11 +49,7 @@ class CrawlerGet(object):
         return all_properties
 
     def run_internal(self, url, request=None):
-        if self.crawl_item.url:
-            url = self.crawl_item.url
-        if self.crawl_item.request:
-            if self.crawl_item.request_real.url:
-                url = self.crawl_item.request_real.url
+        url = self.crawl_item.get_url()
         request = self.crawl_item.request_real
 
         page_url = webtools.Url(url, request=request)
@@ -77,7 +74,7 @@ class CrawlerGet(object):
         return all_properties
 
 
-class CrawlerSocialData(object):
+class CrawlerTypeSocialData(object):
     def __init__(self, container, crawl_item):
         self.container = container
         self.crawl_item = crawl_item
@@ -86,13 +83,8 @@ class CrawlerSocialData(object):
         return self.run_internal()
 
     def run_internal(self):
-        url = self.crawl_item.url
+        url = self.crawl_item.get_url()
         request = self.crawl_item.request
-        if self.crawl_item.url:
-            url = self.crawl_item.url
-        if self.crawl_item.request:
-            if self.crawl_item.request.url:
-                url = self.crawl_item.request.url
 
         properties = None
         try:
@@ -111,6 +103,14 @@ class CrawlerSocialData(object):
         return properties
 
 
+def crawler_builder(container, crawl_item):
+    if crawl_item.crawl_type == CrawlerContainer.CRAWL_TYPE_GET:
+        crawl = CrawlerTypeGet(container=container, crawl_item = crawl_item)
+    elif crawl_item.crawl_type == CrawlerContainer.CRAWL_TYPE_SOCIALDATA:
+        crawl = CrawlerTypeSocialData(container=container, crawl_item=crawl_item)
+    return crawl
+
+
 class Crawler(object):
     """
     Crawler
@@ -118,6 +118,7 @@ class Crawler(object):
     def __init__(self):
         """ Constructor """
         self.configuration = Configuration()
+        self.multi_process = False
 
         """
         We cannot allow to run 100x of yt-dlp. We need to keep it real.
@@ -140,7 +141,11 @@ class Crawler(object):
         page_url = webtools.Url(url, request=request)
         return page_url
 
-    def get_social_properties(self, server_request, url):
+    def get_crawl_with_method(self, crawl_type, url=None, request=None, force=False):
+        if not url:
+            if self.request:
+                url = self.request.url
+
         if not url:
             all_properties = [{"name": "Response", "data": {
                 "status_code" : HTTP_STATUS_CODE_EXCEPTION,
@@ -148,74 +153,55 @@ class Crawler(object):
             }}]
             return all_properties
 
-        force = server_request.args.get("force")
-
         if not force:
-            things = self.container.get(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url=url)
+            things = self.container.get(crawl_type=crawl_type, url=url, request=request)
             if things:
                 all_properties = things.data
                 return all_properties
 
-        crawl_id = self.container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url=url)
+        crawl_id = self.container.crawl(crawl_type=crawl_type, url=url, request=request)
         if crawl_id is None:
             WebLogger.error(
-                info_text=f"{url} Cannot call socialj".format(url)
+                info_text=f"{url} Cannot crawl".format(url)
             )
-            all_properties = [{"name": "Response", "data": {
+            properties = [{"name": "Response", "data": {
                 "status_code" : HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
                 "errors" :  ["Too many crawler calls"],
             }}]
 
-        crawl_item = self.container.get(crawl_id=crawl_id)
-        crawl_runner = CrawlerSocialData(container=self.container, crawl_item=crawl_item)
-        properties = crawl_runner.run()
+        if self.multi_process:
+            data = self.wait_for_response(crawl_id)
+            return data
+        else:
+            crawl_item = self.container.get(crawl_id)
+            crawl = crawler_builder(self.container, crawl_item)
+            data = crawl.run()
+            return data
 
-        return properties
+    def get_social_properties(self, server_request, url):
+        url = server_request.args.get("url")
+        force = server_request.args.get("force")
+
+        result = self.get_crawl_with_method(url=url, crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, force=force)
+
+        return result
 
     def get_all_properties(self, server_request, headers=False, ping=False):
         url = server_request.args.get("url")
         force = server_request.args.get("force")
 
-        if not url:
-            all_properties = [{"name": "Response", "data": {
-                "status_code" : HTTP_STATUS_CODE_EXCEPTION,
-                "errors" :  ["No url provided"],
-            }}]
-            return all_properties
-
         request = self.get_request_data(server_request)
 
-        if not request:
-            all_properties = [{"name": "Response", "data": {
-                "status_code" : HTTP_STATUS_CODE_EXCEPTION,
-                "errors" :  ["Cannot obtain request"],
-            }}]
-            return all_properties
+        result = self.get_crawl_with_method(request=request, url=url, crawl_type=CrawlerContainer.CRAWL_TYPE_GET, force=force)
+        return result
 
-        if not force:
-            things = self.container.get(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url=url, request=request)
-            if things:
-                all_properties = things.data
+    def wait_for_response(self, crawl_id):
+        start_time = time.time()
+        while(time.time() - start_time < 100):
+            crawl_item = self.container.get(crawl_id=crawl_id)
+            if crawl_item.data is not None:
+                return crawl_item.data
+            time.sleep(0.1)
 
-                if all_properties:
-                    return all_properties
-
-        crawl_id = self.container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url=url, request=request)
-        if crawl_id is None:
-            WebLogger.error("Too many crawler calls".format(url, request))
-            all_properties = [{"name": "Response", "data": {
-                "status_code" : HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
-                "errors" :  ["Too many crawler calls"],
-            }}]
-            return all_properties
-
-        if headers:
-            request.request_type = "head"
-        elif ping:
-            request.request_type = "ping"
-
-        crawl_item = self.container.get(crawl_id=crawl_id)
-        crawl_runner = CrawlerGet(container=self.container, crawl_item = crawl_item)
-        all_properties = crawl_runner.run()
-
-        return all_properties
+    def set_multi_process(self):
+        self.multi_process = True
