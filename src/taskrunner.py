@@ -83,10 +83,10 @@ class TaskRunner(object):
         queued_domains = set()
         for queued_url in queued_urls:
             location = UrlLocation(queued_url)
-            queued_domains.add(location.get_domain())
+            queued_domains.add(location.get_domain_only(no_www=True))
 
         location = UrlLocation(item.get_url())
-        this_domain = location.get_domain()
+        this_domain = location.get_domain_only(no_www=True)
 
         if this_domain and this_domain in queued_domains:
             return False
