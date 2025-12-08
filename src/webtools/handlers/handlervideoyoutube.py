@@ -246,6 +246,8 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         try:
             view_count = int(self.yt_ob.get_view_count())
+        except TypeError as E:
+            pass
         except ValueError as E:
             pass
         except AttributeError as E:
@@ -254,6 +256,8 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         try:
             thumbs_up = int(self.yt_ob.get_thumbs_up())
+        except TypeError as E:
+            pass
         except ValueError as E:
             pass
         except AttributeError as E:
@@ -262,6 +266,8 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         try:
             followers_count = int(self.yt_ob.get_followers_count())
+        except TypeError as E:
+            pass
         except ValueError as E:
             pass
         except AttributeError as E:
