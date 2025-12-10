@@ -275,22 +275,12 @@ def history():
 
     text += "<h1>History</h1>\n"
 
-    if crawler_main.container.get_size() == 0:
+    history_items = crawler_main.container.get_ready_items()
+
+    if len(history_items) == 0:
         text += "<div>No history yet!</div>"
     else:
-        for crawl_data in reversed(crawler_main.container.get_ready_items()):
-            crawl_type = crawl_data.crawl_type
-            url = crawl_data.url
-            timestamp = crawl_data.timestamp
-            crawl_id = crawl_data.crawl_id
-
-            if crawl_type == CrawlerContainer.CRAWL_TYPE_GET:
-                all_properties = crawl_data.data
-                entry_text = get_entry_html(id, crawl_id, url, timestamp, all_properties)
-                text += entry_text
-            else:
-                text += get_crawl_data(id, crawl_data)
-
+        text += display_history(history_items)
     return get_html(id=id, body=text, title="History")
 
 
@@ -904,9 +894,9 @@ def archivesj():
     return jsonify(properties)
 
 
-def display_queue(container):
+def display_queue(queue_items):
     text = ""
-    for crawl_data in container.get_queued_items():
+    for crawl_data in queue_items:
         url = crawl_data.get_url()
         crawl_id = crawl_data.crawl_id
         crawl_type = crawl_data.crawl_type
@@ -929,6 +919,24 @@ def display_queue(container):
     return text
 
 
+def display_history(history_items):
+    text = ""
+    for crawl_data in reversed(history_items):
+        crawl_type = crawl_data.crawl_type
+        url = crawl_data.url
+        timestamp = crawl_data.timestamp
+        crawl_id = crawl_data.crawl_id
+
+        if crawl_type == CrawlerContainer.CRAWL_TYPE_GET:
+            all_properties = crawl_data.data
+            entry_text = get_entry_html(id, crawl_id, url, timestamp, all_properties)
+            text += entry_text
+        else:
+            text += get_crawl_data(id, crawl_data)
+
+    return text
+
+
 @app.route("/queue", methods=["GET"])
 def queue():
     id = request.args.get("id")
@@ -940,7 +948,13 @@ def queue():
     text = ""
 
     text += "<h1>Queue</h1>\n"
-    text += display_queue(crawler_main.container)
+
+    items = crawler_main.container.get_queued_items()
+
+    if len(items) == 0:
+        text += "<div>Nothing in queue yet!</div>"
+    else:
+        text += display_queue(items)
 
     return get_html(id=id, body=text, title="Queue")
 
@@ -1006,9 +1020,10 @@ if __name__ == "__main__":
     p.parse()
 
     history_length = p.args.history_length
-
-    crawler_main.container.set_records_size(history_length)
-    crawler_main.container.set_time_cache(p.args.time_cache_minutes)
+    if history_length:
+        crawler_main.container.set_records_size(history_length)
+    if p.args.time_cache_minutes:
+        crawler_main.container.set_time_cache(p.args.time_cache_minutes)
 
     port = configuration.get("port")
     host = configuration.get("host")
@@ -1025,7 +1040,7 @@ if __name__ == "__main__":
     webtools.WebConfig.start_display()
 
     if p.args.multi_process:
-        thread, task_runner = start_runner_thread(crawler_main.container)
+        thread, task_runner = start_runner_thread(container=crawler_main.container, max_workers=configuration.get_max_workers())
         crawler_main.set_multi_process()
 
     context = None

@@ -56,7 +56,8 @@ class EntryRules(object):
 
         urls = rule_url.split(",")
         for url in urls:
-            result.add(url.strip())
+            if url.strip() != "":
+                result.add(url.strip())
 
         return result
 

@@ -18,6 +18,9 @@ class TaskRunner(object):
         poll_interval: how often to poll container for new items (seconds)
         """
         self.container = container
+
+        if max_workers is None:
+            max_workers = 5
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
 
         self.running_ids = set()

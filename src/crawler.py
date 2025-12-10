@@ -133,7 +133,7 @@ class Crawler(object):
         Configurable because people might want more.
         """
 
-        row_size = self.configuration.get("history_size")
+        row_size = self.configuration.get("max_history_records")
 
         self.container = CrawlerContainer(records_size = row_size)
 
