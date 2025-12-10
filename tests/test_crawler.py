@@ -95,6 +95,7 @@ class CrawlerTest(FakeInternetTestCase):
 
         rules = EntryRules()
         self.assertEqual(rules.entry_rules["entryrules"][0]["browser"], "SeleniumChromeFull")
+        rules.entry_rules["entryrules"][0]["rule_url"] = "https://x.com"
 
         crawler.entry_rules = rules
 

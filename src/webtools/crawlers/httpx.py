@@ -84,7 +84,11 @@ class HttpxCrawler(CrawlerInterface):
     def build_requests(self):
         import httpx
 
-        proxies = self.request.get_proxies_map()
+        proxy=None
+        if self.request.http_proxy:
+            proxy = self.request.http_proxy
+        if self.request.https_proxy:
+            proxy = self.request.https_proxy
 
         try:
             answer = httpx.get(
@@ -92,7 +96,7 @@ class HttpxCrawler(CrawlerInterface):
                 timeout=self.get_timeout_s(),
                 verify=self.request.ssl_verify,
                 headers=self.get_request_headers(),
-                proxies=proxies,
+                proxy=proxy,
                 cookies=self.request.cookies,
                 follow_redirects=True,
                 # stream=True, # TODO
