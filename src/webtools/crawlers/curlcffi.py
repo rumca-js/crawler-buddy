@@ -90,11 +90,14 @@ class CurlCffiCrawler(CrawlerInterface):
         headers = self.get_request_headers()
 
         try:
+            proxies = self.get_request_proxies(request)
+
             answer = curl_cffi.get(
                 self.request.url,
                 timeout=self.get_timeout_s(),
                 verify=self.request.ssl_verify,
                 cookies=self.request.cookies,
+                proxy=proxies,
                 impersonate="chrome",
                 #headers=headers,
                 # stream=True, # TODO
@@ -116,6 +119,22 @@ class CurlCffiCrawler(CrawlerInterface):
                 request_url=self.request.url,
             )
             self.response.add_error("Url:{} Cannot create request".format(str(E)))
+
+    def get_request_proxies(self, request):
+        proxies = None
+        if request.http_proxy:
+            if not proxies:
+                proxies = {}
+
+            proxies["http"] = request.http_proxy
+
+        if request.https_proxy:
+            if not proxies:
+                proxies = {}
+
+            proxies["https"] = request.http_proxy
+
+        return proxies
 
     def is_valid(self) -> bool:
         """
