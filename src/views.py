@@ -120,6 +120,14 @@ def get_entry_html(id, index, url, timestamp, all_properties):
     response = json_to_response(response_json)
     request = json_to_request(request_json)
 
+    status_code = ""
+    status_code_text = ""
+    charset = ""
+    content_length = ""
+    content_type = ""
+    crawler_name = ""
+    handler_name = ""
+
     if response:
         status_code = response.get_status_code()
         # TODO maybe create a better API
@@ -131,18 +139,7 @@ def get_entry_html(id, index, url, timestamp, all_properties):
 
         if request:
             crawler_name = request.crawler_name
-            crawler_crawler = request.crawler_type
-        else:
-            crawler_name = ""
-            crawler_crawler = ""
-    else:
-        status_code = ""
-        status_code_text = ""
-        charset = ""
-        content_length = ""
-        content_type = ""
-        crawler_name = ""
-        crawler_crawler = ""
+            handler_name = request.handler_name
 
     color = ""
     try:
@@ -156,8 +153,8 @@ def get_entry_html(id, index, url, timestamp, all_properties):
     text += f"charset:{charset} "
     text += f"Content-Type:{content_type} "
     text += f"Content-Length:{content_length} "
+    text += f"Handler name:{handler_name} "
     text += f"Crawler name:{crawler_name} "
-    text += f"Crawler:{crawler_crawler} "
     text += "</div>\n"
 
     return text
