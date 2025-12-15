@@ -93,9 +93,9 @@ class CrawlerTest(FakeInternetTestCase):
     def test_get_request_data__by_entry_rule(self):
         crawler = Crawler()
 
-        rules = EntryRules()
+        rules = crawler.data.entry_rules
         self.assertEqual(rules.entry_rules["entryrules"][0]["browser"], "SeleniumChromeFull")
-        rules.entry_rules["entryrules"][0]["rule_url"] = "https://x.com"
+        rules.entry_rules["entryrules"][0]["rule_url"] = "meta.com"
 
         crawler.entry_rules = rules
 
@@ -109,7 +109,7 @@ class CrawlerTest(FakeInternetTestCase):
         }"""
 
         request = FlaskRequest("http://192.168.0.0")
-        request.set("url", "https://x.com")
+        request.set("url", "https://meta.com")
         request.set("crawler_data", crawler_data)
 
         # call tested function
