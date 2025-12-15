@@ -163,11 +163,14 @@ class WebConfig(object):
 
         return result
 
+    def get_default_crawler_name():
+        return "CurlCffiCrawler"
+
     def get_default_crawler(url):
         configured_crawlers = WebConfig.get_init_crawler_config()
-        if configured_crawlers:
-            crawler_data = dict(configured_crawlers[0])
-            return crawler_data
+        for crawler_data in configured_crawlers:
+            if crawler_data["name"] == WebConfig.get_default_crawler_name():
+                return crawler_data
 
     def get_default_request(url):
         crawler_data = WebConfig.get_default_crawler(url)
