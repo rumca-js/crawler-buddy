@@ -3,7 +3,7 @@
 
 [tool.poetry]
 name = "crawler-buddy"
-version = "6.0.64"
+version = "6.0.65"
 description = "Internet Crawler"
 authors = ["Iwan Grozny <renegat@renegat0x0.ddns.net>"]
 license = "GPL3"
@@ -23,6 +23,8 @@ url-cleaner="*"
 webtoolkit="^0.0.154"
 
 # Enable and crawlers as needed
+
+curl-cffi="0.13.0"
 
 # [Requests]
 requests = "^2.32.5"
