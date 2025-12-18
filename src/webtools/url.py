@@ -29,6 +29,7 @@ from webtoolkit import (
     TwitterUrlHandler,
     YouTubeVideoHandler,
     YouTubeChannelHandler,
+    YouTubeHandler,
 )
 
 from .webconfig import WebConfig
@@ -108,6 +109,7 @@ class Url(BaseUrl):
             TwitterUrlHandler,
             YouTubeVideoHandler,        # present here, if somebody wants to call it by name
             YouTubeChannelHandler,      # present here, if somebody wants to call it by name
+            YouTubeHandler,
             HttpPageHandler,            # default
         ]
         #fmt on

@@ -94,6 +94,8 @@ def call_crawler(name):
             print("No respone")
         if response and response.is_invalid():
             print("Response is invalid")
+        if response and response.is_valid():
+            print("Response is valid")
 
     print_bar()
 
