@@ -20,6 +20,7 @@ import importlib
 from pathlib import Path
 
 from webtoolkit import file_to_response
+import webtoolkit
 import src.webtools.crawlers
 from src.webtools import Url
 from src.webtools.webconfig import WebConfig
@@ -174,6 +175,9 @@ def test_urls():
 
 
 def main():
+    WebConfig.use_print_logging()
+    webtoolkit.WebConfig.use_print_logging()
+
     test_crawlers()
     test_crawl_script()
     test_urls()
