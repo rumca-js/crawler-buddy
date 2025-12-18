@@ -73,15 +73,15 @@ def call_process(input_script, url = None):
     return [input_script + " " + url, execution_time, response]
 
 
-def call_crawler(name):
-    print(f"Running crawler {name}")
+def call_crawler(test_link, name):
+    print(f"Running {test_link} with {name} crawler")
 
     start_time = time.time()
     execution_time = None
     response = None
 
     crawler_class = WebConfig.get_crawler_from_string(name)
-    crawler = crawler_class(url=test_webpage)
+    crawler = crawler_class(url=test_link)
     if not crawler.is_valid():
         print(f"Crawler is {name} disabled")
     else:
@@ -138,21 +138,25 @@ def test_url(url):
 
 
 def test_crawlers():
-    call_crawler("RequestsCrawler")
-    call_crawler("CurlCffiCrawler")
-    call_crawler("HttpxCrawler")
-    call_crawler("HttpMorphCrawler")
-    call_crawler("StealthRequestsCrawler")
-    call_crawler("SeleniumChromeHeadless")
-    call_crawler("SeleniumChromeFull")
-    call_crawler("SeleniumUndetected")
-    call_crawler("SeleniumWireFull")
+    call_crawler(test_webpage, "RequestsCrawler")
+    call_crawler(test_webpage, "CurlCffiCrawler")
+    call_crawler("https://www.youtube.com/@LinusTechTips", "CurlCffiCrawler")
+    call_crawler(test_webpage, "HttpxCrawler")
+    call_crawler(test_webpage, "HttpMorphCrawler")
+    call_crawler(test_webpage, "StealthRequestsCrawler")
+    call_crawler(test_webpage, "SeleniumChromeHeadless")
+    call_crawler(test_webpage, "SeleniumChromeFull")
+    call_crawler(test_webpage, "SeleniumUndetected")
+    call_crawler(test_webpage, "SeleniumWireFull")
 
     call_process("crawleebeautifulsoup.py")
     # call_crawleeplaywright()
 
 
 def test_crawl_script():
+    print("-----------")
+    print("Testing how scripts exchange request/response data")
+    print("-----------")
     call_process("crawl.py", "https://www.youtube.com/watch?v=9yanqmc01ck")
     call_process("crawl.py", "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw")
     call_process("crawl.py", "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw")
@@ -160,11 +164,11 @@ def test_crawl_script():
 
 
 def test_urls():
+    test_url(url = "https://www.google.com")
     test_url(url = "https://www.youtube.com/watch?v=9yanqmc01ck")
     test_url(url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw")
     test_url(url = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw")
     test_url(url = "https://www.youtube.com/@LinusTechTips")
-    test_url(url = "https://www.google.com")
     test_url(url = "https://www.github.com/rumca-js/Internet-Places-Database")
     test_url(url = "https://www.reddit.com/r/wizardposting")
     test_url(url = "https://www.reddit.com/r/wizardposting/comments/1olomjs/screw_human_skeletons_im_gonna_get_more_creative/")
@@ -179,8 +183,8 @@ def main():
     webtoolkit.WebConfig.use_print_logging()
 
     test_crawlers()
-    test_crawl_script()
     test_urls()
+    test_crawl_script()
 
 main()
 
