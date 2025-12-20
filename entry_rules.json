@@ -17,7 +17,7 @@
             "block": false,
             "auto_tag": "",
             "browser": "CurlCffiCrawler"
-        }
+        },
         {
             "id": 3,
             "enabled": true,
