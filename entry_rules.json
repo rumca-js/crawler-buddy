@@ -18,5 +18,14 @@
             "auto_tag": "",
             "browser": "CurlCffiCrawler"
         }
+        {
+            "id": 3,
+            "enabled": true,
+            "rule_url": "youtube.com",
+            "rule_name": "reddit",
+            "block": false,
+            "auto_tag": "",
+            "browser": "RequestsCrawler"
+        }
     ]
 }

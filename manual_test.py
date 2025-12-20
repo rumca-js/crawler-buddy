@@ -34,6 +34,11 @@ def print_bar():
     print("---------------------")
 
 
+def is_true(text, condition):
+    if not condition:
+        print(f"ERROR: {text}")
+
+
 def call_process(input_script, url = None):
     start_time = time.time()
 
@@ -107,7 +112,10 @@ def test_url(url):
 
     print(f"Url test: {url}")
     url = Url(url = url)
+
+    handler = url.get_handler()
     response = url.get_response()
+
     if not response:
         print("No respone")
     if response and response.is_invalid():
@@ -135,6 +143,7 @@ def test_url(url):
     print(properties)
 
     print_bar()
+    return handler, response
 
 
 def test_crawlers():
@@ -164,14 +173,15 @@ def test_crawl_script():
 
 
 def test_urls():
-    test_url(url = "https://www.google.com")
-    test_url(url = "https://www.youtube.com/watch?v=9yanqmc01ck")
-    test_url(url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw")
-    test_url(url = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw")
-    test_url(url = "https://www.youtube.com/@LinusTechTips")
-    test_url(url = "https://www.github.com/rumca-js/Internet-Places-Database")
-    test_url(url = "https://www.reddit.com/r/wizardposting")
-    test_url(url = "https://www.reddit.com/r/wizardposting/comments/1olomjs/screw_human_skeletons_im_gonna_get_more_creative/")
+    handler, response = test_url(url = "https://www.google.com")
+    handler, response = test_url(url = "https://www.youtube.com/watch?v=9yanqmc01ck")
+    handler, response = test_url(url = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw")
+    handler, response = test_url(url = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw")
+    handler, response = test_url(url = "https://www.youtube.com/@LinusTechTips")
+    is_true("Title", handler.get_title() == "Linus Tech Tips")
+    handler, response = test_url(url = "https://www.github.com/rumca-js/Internet-Places-Database")
+    handler, response = test_url(url = "https://www.reddit.com/r/wizardposting")
+    handler, response = test_url(url = "https://www.reddit.com/r/wizardposting/comments/1olomjs/screw_human_skeletons_im_gonna_get_more_creative/")
 
     #import httpmorph
     #response =  httpmorph.get("https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw", timeout=30)
