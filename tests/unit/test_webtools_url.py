@@ -6,13 +6,13 @@ from webtoolkit import (
     RedditUrlHandler,
     RemoteServer,
 )
+from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter
+
 from src.webtools import (
     Url,
-    YouTubeJsonHandler,
+    YouTubeVideoHandlerJson,
     YouTubeChannelHandlerJson,
 )
-
-from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 
 
 class UrlTest(FakeInternetTestCase):
@@ -244,7 +244,7 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         handler = Url("https://www.youtube.com/watch?v=1234").get_type()
 
-        self.assertTrue(type(handler), YouTubeJsonHandler)
+        self.assertTrue(type(handler), YouTubeVideoHandlerJson)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 

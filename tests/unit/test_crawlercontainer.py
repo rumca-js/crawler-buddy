@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from src import CrawlerContainer
-from tests.fakeinternet import FakeInternetTestCase
+from tests.unit.fakeinternet import FakeInternetTestCase
 
 
 data = [

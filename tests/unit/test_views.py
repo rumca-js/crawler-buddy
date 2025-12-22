@@ -3,7 +3,8 @@ from datetime import datetime
 from src.views import get_entry_html
 from src.webtools import Url
 
-from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter, FlaskRequest
+from webtoolkit.tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
+from webtoolkit.tests.fakeresponse import FlaskRequest
 
 
 class ViewsTest(FakeInternetTestCase):

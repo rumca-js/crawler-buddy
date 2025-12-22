@@ -5,7 +5,7 @@ from src.webtools import (
 )
 from script_server import set_response_impl
 
-from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter, FlaskRequest
+from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter, FlaskRequest
 
 
 class ScriptServerTest(FakeInternetTestCase):

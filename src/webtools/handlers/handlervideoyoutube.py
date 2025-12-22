@@ -20,7 +20,7 @@ from webtoolkit import WebLogger
 from webtoolkit import DefaultUrlHandler, YouTubeVideoHandler, HandlerInterface
 
 
-class YouTubeJsonHandler(YouTubeVideoHandler):
+class YouTubeVideoHandlerJson(YouTubeVideoHandler):
     """
     YouTube JSON enabled video handler.
     TODO Rename to YouTubeVideoHandlerYtdlp

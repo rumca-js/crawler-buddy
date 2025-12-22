@@ -5,17 +5,17 @@ from webtoolkit import (
 from utils.dateutils import DateUtils
 
 from src.webtools import (
-   YouTubeJsonHandler,
+   YouTubeVideoHandlerJson,
    YouTubeChannelHandlerJson,
    Url,
 )
 
-from tests.fakeinternet import (
+from tests.unit.fakeinternet import (
    FakeInternetTestCase, MockRequestCounter
 )
 
 
-class YouTubeJsonHandlerTest(FakeInternetTestCase):
+class YouTubeVideoHandlerJsonTest(FakeInternetTestCase):
     def setUp(self):
         self.disable_web_pages()
 
@@ -25,7 +25,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         test_link = "https://www.youtube.com/watch?v=123"
 
         # call tested function
-        handler = YouTubeJsonHandler(test_link, url_builder=Url)
+        handler = YouTubeVideoHandlerJson(test_link, url_builder=Url)
 
         self.assertEqual(handler.url, test_link)
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
@@ -33,19 +33,19 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
     def test_is_handled_by_video(self):
         MockRequestCounter.mock_page_requests = 0
 
-        handler = YouTubeJsonHandler("https://www.youtube.com/watch?v=1234")
+        handler = YouTubeVideoHandlerJson("https://www.youtube.com/watch?v=1234")
         self.assertTrue(handler.is_handled_by())
 
     def test_is_handled_by_short(self):
         MockRequestCounter.mock_page_requests = 0
 
-        handler = YouTubeJsonHandler("https://www.youtube.com/shorts/1234")
+        handler = YouTubeVideoHandlerJson("https://www.youtube.com/shorts/1234")
         self.assertTrue(handler.is_handled_by())
 
     def test_get_vide_code__video(self):
         MockRequestCounter.mock_page_requests = 0
 
-        handler = YouTubeJsonHandler("https://www.youtube.com/watch?v=1234")
+        handler = YouTubeVideoHandlerJson("https://www.youtube.com/watch?v=1234")
         self.assertEqual(handler.get_video_code(), "1234")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
@@ -53,7 +53,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
     def test_get_vide_code__short(self):
         MockRequestCounter.mock_page_requests = 0
 
-        handler = YouTubeJsonHandler("https://www.youtube.com/shorts/1234")
+        handler = YouTubeVideoHandlerJson("https://www.youtube.com/shorts/1234")
         self.assertEqual(handler.get_video_code(), "1234")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
@@ -61,7 +61,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
     def test_get_vide_code__watch_more_args(self):
         MockRequestCounter.mock_page_requests = 0
 
-        handler = YouTubeJsonHandler("https://www.youtube.com/watch?app=desktop&v=nkll0StZJLA&t=34s")
+        handler = YouTubeVideoHandlerJson("https://www.youtube.com/watch?app=desktop&v=nkll0StZJLA&t=34s")
         self.assertEqual(handler.get_video_code(), "nkll0StZJLA")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
@@ -69,7 +69,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
     def test_get_video_code__with_time(self):
         MockRequestCounter.mock_page_requests = 0
 
-        handler = YouTubeJsonHandler(
+        handler = YouTubeVideoHandlerJson(
             "https://www.youtube.com/watch?v=uN_ab1GTXvY&t=50s"
         )
         self.assertEqual(handler.get_video_code(), "uN_ab1GTXvY")
@@ -79,7 +79,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
     def test_get_video_code__with_time_first(self):
         MockRequestCounter.mock_page_requests = 0
 
-        handler = YouTubeJsonHandler(
+        handler = YouTubeVideoHandlerJson(
             "https://www.youtube.com/watch?t=50s&v=uN_ab1GTXvY"
         )
         self.assertEqual(handler.get_video_code(), "uN_ab1GTXvY")
@@ -89,20 +89,20 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
     def test_get_video_code__youtube(self):
         MockRequestCounter.mock_page_requests = 0
 
-        handler = YouTubeJsonHandler("https://youtu.be/1234")
+        handler = YouTubeVideoHandlerJson("https://youtu.be/1234")
         self.assertEqual(handler.get_video_code(), "1234")
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
     def test_get_video_code__youtube_time(self):
-        handler = YouTubeJsonHandler("https://www.youtu.be/1234?t=50")
+        handler = YouTubeVideoHandlerJson("https://www.youtu.be/1234?t=50")
         self.assertEqual(handler.get_video_code(), "1234")
 
     def test_code2url(self):
         MockRequestCounter.mock_page_requests = 0
 
         self.assertEqual(
-            YouTubeJsonHandler("1234").code2url("1234"),
+            YouTubeVideoHandlerJson("1234").code2url("1234"),
             "https://www.youtube.com/watch?v=1234",
         )
 
@@ -112,7 +112,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         MockRequestCounter.mock_page_requests = 0
         test_link = "https://www.youtube.com/watch?v=123"
 
-        handler = YouTubeJsonHandler(test_link, url_builder=Url)
+        handler = YouTubeVideoHandlerJson(test_link, url_builder=Url)
 
         # call tested function
         link_embed = handler.get_link_embed()
@@ -123,7 +123,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         MockRequestCounter.mock_page_requests = 0
         test_link = "https://www.youtube.com/watch?v=123"
 
-        handler = YouTubeJsonHandler(test_link, url_builder=Url)
+        handler = YouTubeVideoHandlerJson(test_link, url_builder=Url)
 
         # call tested function
         response = handler.get_response()
@@ -135,7 +135,9 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         MockRequestCounter.mock_page_requests = 0
         test_link = "https://www.youtube.com/watch?v=123"
 
-        handler = YouTubeJsonHandler(test_link, url_builder=Url)
+        handler = YouTubeVideoHandlerJson(test_link, url_builder=Url)
+
+        handler.get_response()
 
         # call tested function
         hash = handler.get_hash()
@@ -148,7 +150,9 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         MockRequestCounter.mock_page_requests = 0
         test_link = "https://www.youtube.com/watch?v=123"
 
-        handler = YouTubeJsonHandler(test_link, url_builder=Url)
+        handler = YouTubeVideoHandlerJson(test_link, url_builder=Url)
+
+        handler.get_response()
 
         # call tested function
         hash = handler.get_body_hash()
@@ -159,7 +163,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         MockRequestCounter.mock_page_requests = 0
         test_link = "https://www.youtube.com/watch?v=123"
 
-        handler = YouTubeJsonHandler(test_link, url_builder=Url)
+        handler = YouTubeVideoHandlerJson(test_link, url_builder=Url)
 
         # call tested function
         contents = handler.get_contents()
@@ -172,7 +176,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         MockRequestCounter.mock_page_requests = 0
         test_link = "https://www.youtube.com/watch?v=123"
 
-        handler = YouTubeJsonHandler(test_link, url_builder=Url)
+        handler = YouTubeVideoHandlerJson(test_link, url_builder=Url)
 
         # call tested function
         response = handler.get_response()
@@ -185,7 +189,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
         MockRequestCounter.mock_page_requests = 0
         test_link = "https://www.youtube.com/watch?v=date_published"
 
-        handler = YouTubeJsonHandler(test_link, url_builder=Url)
+        handler = YouTubeVideoHandlerJson(test_link, url_builder=Url)
 
         response = handler.get_response()
 
@@ -204,7 +208,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
 
         test_link = "https://www.youtube.com/watch?v=123"
 
-        handler = YouTubeJsonHandler(test_link, url_builder=Url)
+        handler = YouTubeVideoHandlerJson(test_link, url_builder=Url)
 
         # call tested function
         social_data = handler.get_social_data()
@@ -226,7 +230,7 @@ class YouTubeJsonHandlerTest(FakeInternetTestCase):
 
         test_link = "https://www.youtube.com/watch?v=666"
 
-        handler = YouTubeJsonHandler(test_link, url_builder=Url)
+        handler = YouTubeVideoHandlerJson(test_link, url_builder=Url)
 
         # call tested function
         social_data = handler.get_social_data()
@@ -405,6 +409,7 @@ class YouTubeChannelHandlerJsonTest(FakeInternetTestCase):
             "https://www.youtube.com/feeds/videos.xml?channel_id=SAMTIMESAMTIMESAMTIMESAM",
             url_builder=Url
         )
+        handler.get_response()
 
         # call tested function
         hash = handler.get_hash()
@@ -419,6 +424,7 @@ class YouTubeChannelHandlerJsonTest(FakeInternetTestCase):
             "https://www.youtube.com/feeds/videos.xml?channel_id=SAMTIMESAMTIMESAMTIMESAM",
             url_builder=Url
         )
+        handler.get_response()
 
         # call tested function
         hash = handler.get_body_hash()

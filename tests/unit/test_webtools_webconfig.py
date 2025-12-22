@@ -2,7 +2,7 @@ from src.webtools import (
     WebConfig,
 )
 
-from .fakeinternet import FakeInternetTestCase, MockRequestCounter
+from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter
 
 
 class WebConfigTest(FakeInternetTestCase):

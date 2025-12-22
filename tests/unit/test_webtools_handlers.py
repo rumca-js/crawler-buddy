@@ -9,7 +9,7 @@ from webtoolkit import (
 from src.webtools import (
    Url,
 )
-from tests.fakeinternet import (
+from tests.unit.fakeinternet import (
    FakeInternetTestCase, MockRequestCounter
 )
 

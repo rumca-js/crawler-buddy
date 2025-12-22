@@ -33,11 +33,24 @@ from webtoolkit import (
 
 from .webconfig import WebConfig
 from .handlers import (
-    YouTubeJsonHandler,
+    YouTubeVideoHandlerJson,
     YouTubeChannelHandlerJson
 )
 
+from ..entryrules import EntryRules
 from utils.dateutils import DateUtils
+
+
+class UrlRules(object):
+    def get_default_request(url):
+        default_request = WebConfig.get_default_request(url)
+
+        browser = EntryRules().get_browser(url)
+        if browser:
+            default_request.crawler_name = browser
+            default_request.crawler_type = None
+
+        return default_request
 
 
 class Url(BaseUrl):
@@ -66,7 +79,15 @@ class Url(BaseUrl):
         """
         Returns request for URL
         """
-        return WebConfig.get_default_request(url)
+        return UrlRules.get_default_request(url)
+
+    def get_init_request(self):
+        """
+        Returns initial request. TODO seems redundant
+        """
+        request =  UrlRules.get_default_request(url)(self.url)
+        request = self.get_request_for_request(request) 
+        return request
 
     def get_request_for_request(self, request):
         """
@@ -75,18 +96,10 @@ class Url(BaseUrl):
         if request.crawler_name and request.crawler_type is None:
             crawler = WebConfig.get_crawler_from_string(self.request.crawler_name)
             self.request.crawler_type = crawler(request.url)
-        else:
+        if request.crawler_name is None and request.crawler_type is None:
             default_request = WebConfig.get_default_request(request.url)
             request.crawler_name = default_request.crawler_name
             request.crawler_type = default_request.crawler_type
-        return request
-
-    def get_init_request(self):
-        """
-        Returns initial request. TODO seems redundant
-        """
-        request = WebConfig.get_default_request(self.url)
-        request = self.get_request_for_request(request) 
         return request
 
     def get_handlers(self):
@@ -95,7 +108,7 @@ class Url(BaseUrl):
         """
         #fmt off
         return [
-            YouTubeJsonHandler,
+            YouTubeVideoHandlerJson,
             YouTubeChannelHandlerJson,
             OdyseeVideoHandler,
             OdyseeChannelHandler,

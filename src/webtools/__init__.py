@@ -7,7 +7,7 @@ from .webconfig import WebConfig
 from .url import Url
 
 from .handlers import (
-    YouTubeJsonHandler,
+    YouTubeVideoHandlerJson,
     YouTubeChannelHandlerJson,
 )
 

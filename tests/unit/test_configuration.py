@@ -8,7 +8,7 @@ from src.webtools import (
 )
 from src.configuration import Configuration
 
-from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
+from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter
 
 
 class ScriptServerTest(FakeInternetTestCase):

@@ -11,7 +11,7 @@ import traceback
 
 from utils.dateutils import DateUtils
 from src.webtools import (
-    YouTubeJsonHandler,
+    YouTubeVideoHandlerJson,
     Url,
     WebConfig,
 )

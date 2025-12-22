@@ -11,7 +11,7 @@ from src.webtools import (
 from src.crawler import Crawler
 from src.entryrules import EntryRules
 
-from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter, FlaskRequest
+from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter, FlaskRequest
 
 
 class CrawlerTest(FakeInternetTestCase):

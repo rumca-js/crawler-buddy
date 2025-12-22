@@ -4,7 +4,7 @@ from src.webtools import (
     ScriptCrawler,
 )
 
-from tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
+from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter
 
 
 class ScriptCrawlerTest(FakeInternetTestCase):
