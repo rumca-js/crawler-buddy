@@ -17,121 +17,15 @@ from src.webtools import (
 )
 
 from webtoolkit import (
-    PageRequestObject,
     PageResponseObject,
-    WebLogger,
-    ResponseHeaders,
     CrawlerInterface,
     YouTubeChannelHandler,
     YouTubeVideoHandler,
-    CrawlerInterface,
 )
 from webtoolkit.tests.mocks import (
     MockRequestCounter,
     MockCrawler,
 )
-
-from webtoolkit.tests.fakeinternetcontents import (
-    webpage_with_real_rss_links,
-    webpage_simple_rss_page,
-    webpage_old_pubdate_rss,
-    webpage_no_pubdate_rss,
-    webpage_html_favicon,
-    webpage_with_rss_link_rss_contents,
-    webpage_html_casinos,
-    webpage_html_canonical_1,
-)
-from webtoolkit.tests.fake.geekwirecom import (
-    geekwire_feed,
-)
-from webtoolkit.tests.fake.youtube import (
-    youtube_robots_txt,
-    youtube_sitemap_sitemaps,
-    youtube_sitemap_product,
-    webpage_youtube_airpano_feed,
-    webpage_samtime_odysee,
-    webpage_samtime_youtube_rss,
-    youtube_channel_html_linus_tech_tips,
-    youtube_channel_rss_linus_tech_tips,
-)
-from webtoolkit.tests.fake.robotstxtcom import (
-    robots_txt_example_com_robots,
-)
-from webtoolkit.tests.fake.codeproject import (
-    webpage_code_project_rss,
-)
-from webtoolkit.tests.fake.opmlfile import (
-    opml_file,
-)
-from webtoolkit.tests.fake.hackernews import (
-    webpage_hackernews_rss,
-    hacker_news_item,
-)
-from webtoolkit.tests.fake.warhammercommunity import (
-    warhammer_community_rss,
-)
-from webtoolkit.tests.fake.thehill import (
-    thehill_rss,
-)
-from webtoolkit.tests.fake.reddit import (
-    reddit_rss_text,
-    reddit_entry_json,
-    reddit_subreddit_json,
-)
-from webtoolkit.tests.fake.githubcom import (
-    github_json,
-)
-from webtoolkit.tests.fake.returndislike import (
-    return_dislike_json,
-)
-from webtoolkit.tests.fake.firebog import (
-    firebog_adguard_list,
-    firebog_w3kbl_list,
-    firebog_tick_lists,
-    firebog_malware,
-)
-from webtoolkit.tests.fake.instance import (
-    instance_entries_json,
-    instance_sources_json_empty,
-    instance_entries_json_empty,
-    instance_entries_source_100_json,
-    instance_source_100_url,
-    instance_source_100_json,
-    instance_source_101_json,
-    instance_source_102_json,
-    instance_source_103_json,
-    instance_source_104_json,
-    instance_source_105_json,
-    instance_sources_page_1,
-    instance_sources_page_2,
-)
-
-
-class FlaskArgs(object):
-    def __init__(self):
-        self._map = {}
-
-    def get(self, key):
-        if key in self._map:
-            return self._map[key]
-
-    def set(self, key, value):
-        self._map[key] = value
-
-    def __contains__(self, key):
-        return key in self._map
-
-    def __getitem__(self, key):
-        return self._map[key]
-
-
-class FlaskRequest(object):
-    def __init__(self, host):
-        self.host = host
-        self.args = FlaskArgs()
-
-    def set(self, key, value):
-        self.args.set(key, value)
 
 
 class YtdlpCrawlerMock(CrawlerInterface):
@@ -236,15 +130,6 @@ class YtdlpCrawlerMock(CrawlerInterface):
         tuple = DateUtils.get_date_tuple(date)
 
         return str(tuple[0]) + str(tuple[1]) + str(tuple[2])
-
-
-class YouTubeChannelHandlerMock(YouTubeChannelHandler):
-    def __init__(self, url=None):
-        super().__init__(url)
-
-    def get_contents(self):
-        if self.dead:
-            return
 
 
 class FakeInternetTestCase(unittest.TestCase):

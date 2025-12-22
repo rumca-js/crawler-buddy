@@ -82,11 +82,12 @@ class StealthRequestsCrawler(CrawlerInterface):
         import stealth_requests as requests
 
         try:
+            self.update_request()
             proxies = self.request.get_proxies_map()
 
             answer = requests.get(
                 self.request.url,
-                timeout=self.get_timeout_s(),
+                timeout=self.request.timeout_s,
                 verify=self.request.ssl_verify,
                 proxies=proxies,
                 # stream=True,   # TODO does not work with it
@@ -100,6 +101,9 @@ class StealthRequestsCrawler(CrawlerInterface):
                 request_url=self.request.url,
             )
             self.response.add_error("Url:{} Connection error".format(self.request.url))
+
+    def update_request(self):
+        self.request.timeout_s = self.get_timeout_s()
 
     def is_valid(self) -> bool:
         """

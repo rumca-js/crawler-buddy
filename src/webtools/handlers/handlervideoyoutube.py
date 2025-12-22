@@ -81,7 +81,8 @@ class YouTubeVideoHandlerJson(YouTubeVideoHandler):
         """
         description = super().get_description()
         if description is None:
-            return self.yt_ob.get_description()
+            if self.yt_ob:
+                return self.yt_ob.get_description()
         return description
 
     def get_date_published(self):

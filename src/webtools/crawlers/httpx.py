@@ -84,6 +84,8 @@ class HttpxCrawler(CrawlerInterface):
     def build_requests(self):
         import httpx
 
+        self.update_request()
+
         proxy=None
         if self.request.http_proxy:
             proxy = self.request.http_proxy
@@ -93,9 +95,9 @@ class HttpxCrawler(CrawlerInterface):
         try:
             answer = httpx.get(
                 self.request.url,
-                timeout=self.get_timeout_s(),
+                timeout=self.request.timeout_s,
                 verify=self.request.ssl_verify,
-                headers=self.get_request_headers(),
+                headers=self.request.request_headers,
                 proxy=proxy,
                 cookies=self.request.cookies,
                 follow_redirects=True,
@@ -110,6 +112,10 @@ class HttpxCrawler(CrawlerInterface):
                 request_url=self.request.url,
             )
             self.response.add_error("Url:{} Cannot create request".format(str(E)))
+
+    def update_request(self):
+        self.request.timeout_s = self.get_timeout_s()
+        self.request.request_headers = self.get_request_headers()
 
     def is_valid(self) -> bool:
         """
