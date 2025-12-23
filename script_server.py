@@ -159,7 +159,10 @@ def index():
     operational_links.append({"link" : "/rssifyr", "name":"RSSifyr", "description":"RSSfication response"})
     operational_links.append({"link" : "/ping", "name":"Ping", "description":"form for getting ping information"})
     operational_links.append({"link" : "/pingj", "name":"Ping JSON", "description":"JSON ping response"})
-    operational_links.append({"link" : "/scanlinksj", "name":"Scan links", "description":"JSON for scannign links"})
+    operational_links.append({"link" : "/scanlinks", "name":"Scan links", "description":"form for links scan"})
+    operational_links.append({"link" : "/scanlinksj", "name":"Scan links JSON", "description":"JSON for scannign links"})
+    operational_links.append({"link" : "/scandomains", "name":"Scan domains", "description":"form for domains links scan"})
+    operational_links.append({"link" : "/scandomainsj", "name":"Scan domains JSON", "description":"JSON for scannign domains"})
 
     mgmt_links = []
     mgmt_links.append({"link" : "/history", "name":"History", "description":"crawl history"})
@@ -599,6 +602,17 @@ def contentsr():
     return Response(contents, status=status_code, mimetype=content_type)
 
 
+@app.route("/scanlinks", methods=["GET"])
+def scanlinks():
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    form_text = get_crawling_form("Scan for links", "/scanlinksj", id)
+
+    return get_html(id=id, body=form_text, title="Get")
+
+
 @app.route("/scanlinksj", methods=["GET"])
 def scanlinksj():
     id = request.args.get("id")
@@ -615,9 +629,7 @@ def scanlinksj():
     if not all_properties:
         return jsonify({"success": False, "error": "No properties found"}), 400
 
-    page_url = RemoteUrl(url)
-    page_url.all_properties = all_properties
-    page_url.responses = {"Default" : RemoteServer.get_response(page_url.all_properties)}
+    page_url = RemoteUrl(url=url, all_properties=all_properties)
 
     response = page_url.get_response()
 
@@ -626,6 +638,17 @@ def scanlinksj():
 
         return jsonify({"success": True, "links": list(parser.get_links())})
     return jsonify({"success": False, "error": "No response for link"}), 400
+
+
+@app.route("/scandomains", methods=["GET"])
+def scandomains():
+    id = request.args.get("id")
+    if not configuration.is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    form_text = get_crawling_form("Scan for domains", "/scandomainsj", id)
+
+    return get_html(id=id, body=form_text, title="Get")
 
 
 @app.route("/scandomainsj", methods=["GET"])
@@ -644,9 +667,7 @@ def scandomainsj():
     if not all_properties:
         return jsonify({"success": False, "error": "No properties found"}), 400
 
-    page_url = RemoteUrl(url)
-    page_url.all_properties = all_properties
-    page_url.responses = {"Default" : RemoteServer.get_response(page_url.all_properties)}
+    page_url = RemoteUrl(url=url, all_properties=all_properties)
 
     response = page_url.get_response()
 
