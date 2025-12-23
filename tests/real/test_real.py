@@ -202,7 +202,7 @@ class TestUrl(unittest.TestCase):
         self.assertEqual(handler.get_title(), "Linus Tech Tips")
         self.assertEqual(len(handler.get_streams()), 2)
         self.assertEqual(len(handler.get_feeds()), 1)
-        self.assertEqual(len(handler.get_entries()), 0)
+        self.assertTrue(len(handler.get_entries()) > 0)
 
         self.assertTrue(response.is_valid())
 

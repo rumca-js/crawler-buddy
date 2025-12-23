@@ -2064,13 +2064,13 @@ test = ["pretend", "pytest (>=3.0.1)", "pytest-rerunfailures"]
 
 [[package]]
 name = "pyparsing"
-version = "3.3.0"
+version = "3.3.1"
 description = "pyparsing - Classes and methods to define and execute parsing grammars"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pyparsing-3.3.0-py3-none-any.whl", hash = "sha256:d15038408e0097d3a01e7e0846731f7f2450c5b6e4a75a52baabd6bbf24585be"},
-    {file = "pyparsing-3.3.0.tar.gz", hash = "sha256:0de16f2661afbab11fe6645d9472c3b96968d2fffea5b0cc9da88f5be286f039"},
+    {file = "pyparsing-3.3.1-py3-none-any.whl", hash = "sha256:023b5e7e5520ad96642e2c6db4cb683d3970bd640cdf7115049a6e9c3682df82"},
+    {file = "pyparsing-3.3.1.tar.gz", hash = "sha256:47fad0f17ac1e2cad3de3b458570fbc9b03560aa029ed5e16ee5554da9a2251c"},
 ]
 
 [package.extras]
@@ -2708,13 +2708,13 @@ files = [
 
 [[package]]
 name = "webtoolkit"
-version = "0.0.172"
+version = "0.0.175"
 description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "webtoolkit-0.0.172-py3-none-any.whl", hash = "sha256:54c16765402b5c6874c71c320778d6ca0545691fb96af34f8feb492e11d915d2"},
-    {file = "webtoolkit-0.0.172.tar.gz", hash = "sha256:7b57715c7064028e685f8e9d5a180862f66af0092d58796bd71954f24a0a954f"},
+    {file = "webtoolkit-0.0.175-py3-none-any.whl", hash = "sha256:cbdc0f5f5584305f5c42ff0ed402fdbf0e74f9311b3ab43c3a489562737b9290"},
+    {file = "webtoolkit-0.0.175.tar.gz", hash = "sha256:50905abfe108ed1ff17c0136fa93d87289d9b18eb8d3f87810d99da34894e62d"},
 ]
 
 [package.dependencies]
@@ -3084,4 +3084,4 @@ cffi = ["cffi (>=1.17,<2.0)", "cffi (>=2.0.0b)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d09bb4eab849193a14a297d075a213f337f4cca644a3ec954dac3773b47509d5"
+content-hash = "647827358925fb0136f05719c2685e248ab604cfad04d8c01497b33551cee8b8"
