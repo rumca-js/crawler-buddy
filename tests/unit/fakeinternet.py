@@ -17,6 +17,7 @@ from src.webtools import (
 )
 
 from webtoolkit import (
+    PageRequestObject,
     PageResponseObject,
     CrawlerInterface,
     YouTubeChannelHandler,
@@ -41,6 +42,9 @@ class FakeInternetTestCase(unittest.TestCase):
         WebConfig.get_default_crawler = FakeInternetTestCase.get_default_crawler
         WebConfig.get_crawler_from_string = FakeInternetTestCase.get_crawler_from_string
 
+        Url.get_request_for_url = FakeInternetTestCase.get_request_for_url
+        Url.get_request_for_request = FakeInternetTestCase.get_request_for_request
+
     def get_response(self):
         if self.request.crawler_name == "YtdlpCrawler":
             self.request.crawler_type = YtdlpCrawlerMock(request=self.request)
@@ -53,6 +57,21 @@ class FakeInternetTestCase(unittest.TestCase):
         data["settings"] = {"timeout_s" : 20}
 
         return data
+
+    def get_request_for_url(self, url):
+        request = PageRequestObject(url)
+        request.crawler_name = "MockCrawler"
+        request.crawler_type = MockCrawler(url)
+        return request
+
+    def get_request_for_request(self, request):
+        if self.request.crawler_name == "YtdlpCrawler":
+            self.request.crawler_type = YtdlpCrawlerMock(request=self.request)
+        else:
+            self.request.crawler_name == "MockCrawler"
+            self.request.crawler_type = MockCrawler(request=self.request)
+
+        return request
 
     def get_crawler_from_string(crawler_string):
         if not crawler_string:
