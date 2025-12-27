@@ -52,7 +52,8 @@ class FakeInternetTestCase(unittest.TestCase):
 
     def get_default_crawler(url):
         data = {}
-        data["name"] = "MockCrawler"
+        data["crawler_name"] = "MockCrawler"
+        data["crawler_class_name"] = "MockCrawler"
         data["crawler"] = MockCrawler(url = url)
         data["settings"] = {"timeout_s" : 20}
 

@@ -61,9 +61,10 @@ class EntryRules(object):
 
         return result
 
-    def get_browser(self, url):
+    def get_browser(self, url) -> str | None:
         """
         Returns browser specified by rules for URL.
+        Returns unique name of crawler_name
         """
         if not self.entry_rules:
             return

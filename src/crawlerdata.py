@@ -154,14 +154,14 @@ class CrawlerData(object):
         crawler_name = self.entry_rules.get_browser(url)
         new_mapping = self.configuration.get_crawler(name=crawler_name)
         if new_mapping:
-            return new_mapping["name"]
+            return new_mapping["crawler_name"]
 
         default_crawler = self.configuration.get("default_crawler")
         if default_crawler:
             new_mapping = self.configuration.get_crawler(name=default_crawler)
             if new_mapping:
-                return new_mapping["name"]
+                return new_mapping["crawler_name"]
 
         new_mapping = WebConfig.get_default_crawler(url)
         if new_mapping:
-            return new_mapping["name"]
+            return new_mapping["crawler_name"]

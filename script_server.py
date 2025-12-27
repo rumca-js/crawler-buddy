@@ -62,7 +62,7 @@ def get_crawlers():
 
     config = configuration.get_crawler_config()
     for item in config:
-        name = item["name"]
+        name = item["crawler_name"]
         result.append(name)
 
     return result

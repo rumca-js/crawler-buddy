@@ -35,7 +35,7 @@ class WebConfigTest(FakeInternetTestCase):
     def test_get_default_crawler(self):
         config = WebConfig.get_default_crawler("https://test.com")
 
-        self.assertIn("name", config)
+        self.assertIn("crawler_name", config)
         self.assertIn("settings", config)
 
     def test_get_bytes_limits(self):

@@ -1,62 +1,72 @@
 [
   {
-    "name": "CurlCffiCrawler",
+    "crawler_name": "CurlCffiCrawler",
+    "crawler_class_name": "CurlCffiCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
-    "name": "RequestsCrawler",
+    "crawler_name": "RequestsCrawler",
+    "crawler_class_name": "RequestsCrawler",
     "settings": {
       "timeout_s": 20
     }
   },
   {
-    "name": "StealthRequestsCrawler",
+    "crawler_name": "StealthRequestsCrawler",
+    "crawler_class_name": "StealthRequestsCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
-    "name": "HttpMorphCrawler",
+    "crawler_name": "HttpMorphCrawler",
+    "crawler_class_name": "HttpMorphCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
-    "name": "HttpxCrawler",
+    "crawler_name": "HttpxCrawler",
+    "crawler_class_name": "HttpxCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
-    "name": "HttpMorphCrawler",
+    "crawler_name": "HttpMorphCrawler",
+    "crawler_class_name": "HttpMorphCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
-    "name": "YtdlpCrawler",
+    "crawler_name": "YtdlpCrawler",
+    "crawler_class_name": "YtdlpCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
-    "name": "SeleniumUndetected",
+    "crawler_name": "SeleniumUndetected",
+    "crawler_class_name": "SeleniumUndetected",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
       "timeout_s": 60
     }
   },
   {
-    "name": "SeleniumChromeHeadless",
+    "crawler_name": "SeleniumChromeHeadless",
+    "crawler_class_name": "SeleniumChromeHeadless",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
       "timeout_s": 60
     }
   },
   {
-    "name": "SeleniumChromeFull",
+    "crawler_name": "SeleniumChromeFull",
+    "crawler_class_name": "SeleniumChromeFull",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
       "timeout_s": 60,
@@ -64,28 +74,32 @@
     }
   },
   {
-    "name": "CrawleeBeautifulScript",
+    "crawler_name": "CrawleeBeautifulScript",
+    "crawler_class_name": "CrawleeBeautifulScript",
     "settings": {
       "script": "poetry run python crawleebeautifulsoup.py",
       "timeout_s": 50
     }
   },
   {
-    "name": "CrawleePlaywrightScript",
+    "crawler_name": "CrawleePlaywrightScript",
+    "crawler_class_name": "CrawleePlaywrightScript",
     "settings": {
       "script": "poetry run python crawleeplaywright.py",
       "timeout_s": 50
     }
   },
   {
-    "name": "ScrapyCrawler",
+    "crawler_name": "ScrapyCrawler",
+    "crawler_class_name": "ScrapyCrawler",
     "settings": {
       "script": "poetry run python crawlerscrapy.py",
       "timeout_s": 50
     }
   },
   {
-    "name": "SeleniumWireFull",
+    "crawler_name": "SeleniumWireFull",
+    "crawler_class_name": "SeleniumWireFull",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
       "timeout_s": 60,
@@ -93,7 +107,8 @@
     }
   },
   {
-    "name": "SeleniumBase",
+    "crawler_name": "SeleniumBase",
+    "crawler_class_name": "SeleniumBase",
     "settings": {
       "timeout_s": 60,
       "delay_s": 10
