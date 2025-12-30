@@ -140,8 +140,8 @@ class WebConfig(object):
         if "crawler" in mapping_data and mapping_data["crawler"]:
             crawler_class = mapping_data["crawler"]
 
-        if "name" in mapping_data and mapping_data["name"]:
-            crawler_class = WebConfig.get_crawler_from_string(mapping_data["name"])
+        if "crawler_name" in mapping_data and mapping_data["crawler_name"]:
+            crawler_class = WebConfig.get_crawler_from_string(mapping_data["crawler_name"])
 
         if crawler_class is None and request:
             crawler_class = WebConfig.get_crawler_from_string(request.crawler_type)
@@ -169,14 +169,14 @@ class WebConfig(object):
     def get_default_crawler(url):
         configured_crawlers = WebConfig.get_init_crawler_config()
         for crawler_data in configured_crawlers:
-            if crawler_data["name"] == WebConfig.get_default_crawler_name():
+            if crawler_data["crawler_name"] == WebConfig.get_default_crawler_name():
                 return crawler_data
 
     def get_default_request(url):
         crawler_data = WebConfig.get_default_crawler(url)
         if crawler_data:
             request = PageRequestObject(url)
-            request.crawler_name = crawler_data["name"]
+            request.crawler_name = crawler_data["crawler_name"]
             crawler_class = WebConfig.get_crawler_from_string(request.crawler_name)
             request.crawler_type = crawler_class(url=url)
             return request
@@ -273,13 +273,13 @@ class WebConfig(object):
 
     def get_default_browser_setup(browser, timeout_s=30):
         return {
-            "name": browser.__name__,
+            "crawler_name": browser.__name__,
             "settings": {"timeout_s": timeout_s},
         }
 
     def get_requests():
         return {
-            "name": "RequestsCrawler",
+            "crawler_name": "RequestsCrawler",
             "settings": {"timeout_s": 40},
         }
 
@@ -288,7 +288,7 @@ class WebConfig(object):
 
         if chromedriver_path.exists():
             return {
-                "name": "SeleniumChromeHeadless",
+                "crawler_name": "SeleniumChromeHeadless",
                 "settings": {
                     "driver_executable": str(chromedriver_path),
                     "timeout_s": 60,
@@ -296,7 +296,7 @@ class WebConfig(object):
             }
         else:
             return {
-                "name": "SeleniumChromeHeadless",
+                "crawler_name": "SeleniumChromeHeadless",
                 "settings": {"driver_executable": None, "timeout_s": 60},
             }
 
@@ -305,7 +305,7 @@ class WebConfig(object):
 
         if chromedriver_path.exists():
             return {
-                "name": "SeleniumChromeFull",
+                "crawler_name": "SeleniumChromeFull",
                 "settings": {
                     "driver_executable": str(chromedriver_path),
                     "timeout_s": 40,
@@ -313,7 +313,7 @@ class WebConfig(object):
             }
         else:
             return {
-                "name": "SeleniumChromeFull",
+                "crawler_name": "SeleniumChromeFull",
                 "settings": {"driver_executable": None, "timeout_s": 60},
             }
 
@@ -322,7 +322,7 @@ class WebConfig(object):
 
         if chromedriver_path.exists():
             return {
-                "name": "SeleniumUndetected",
+                "crawler_name": "SeleniumUndetected",
                 "settings": {
                     "driver_executable": str(chromedriver_path),
                     "timeout_s": 60,
@@ -330,13 +330,13 @@ class WebConfig(object):
             }
         else:
             return {
-                "name": "SeleniumUndetected",
+                "crawler_name": "SeleniumUndetected",
                 "settings": {"driver_executable": None, "timeout_s": 60},
             }
 
     def get_seleniumbase():
         return {
-            "name": "SeleniumBase",
+            "crawler_name": "SeleniumBase",
             "settings": {},
         }
 

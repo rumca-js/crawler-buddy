@@ -108,6 +108,9 @@ class CrawlerContainer(object):
         return False
 
     def add(self, crawl_type, url, data):
+        """
+        Adds crawl type data for url
+        """
         self.crawl_index += 1
 
         item = CrawlItem(
@@ -121,6 +124,33 @@ class CrawlerContainer(object):
 
         self.expire_old()
         self.trim_size()
+
+    def remove(self, crawl_id):
+        """
+        Removes crawl at index
+        @returns index
+
+        #TODO should it release memory from request / response?
+        """
+        last_found = False
+
+        result = []
+
+        for crawl_data in self.container:
+            if crawl_data.crawl_id != crawl_id:
+                result.append(crawl_data)
+            else:
+                last_found = True
+
+        self.container = result
+
+        return last_found
+
+    def clear(self):
+        """
+        Clears entire container
+        """
+        self.container = []
 
     def get(self, crawl_id=None, crawl_type=None, crawler_name=None, url=None, request=None) -> CrawlItem | None:
         """Get crawl item by ID if not expired."""
@@ -204,24 +234,6 @@ class CrawlerContainer(object):
             return True
 
         return False
-
-    def remove(self, crawl_id):
-        """
-        return index
-        """
-        last_found = False
-
-        result = []
-
-        for crawl_data in self.container:
-            if crawl_data.crawl_id != crawl_id:
-                result.append(crawl_data)
-            else:
-                last_found = True
-
-        self.container = result
-
-        return last_found
 
     def get_all_items(self):
         return self.container

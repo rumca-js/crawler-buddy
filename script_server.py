@@ -170,7 +170,6 @@ def index():
     mgmt_links.append({"link" : "/find", "name":"Find", "description":"form for finding response"})
     mgmt_links.append({"link" : "/historyj", "name":"History JSON", "description":"shows history JSON"})
     mgmt_links.append({"link" : "/findj", "name":"Find JSON", "description":"returns information about history entry JSON"})
-    mgmt_links.append({"link" : "/removej", "name":"Remove history", "description":"Removes history entry"})
     mgmt_links.append({"link" : "/debug", "name":"Debug", "description":"shows debug information"})
 
     # fmt: on
@@ -274,6 +273,10 @@ def history():
     if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
+    clear_all = request.args.get("clear")
+    if clear_all:
+        crawler_main.container.clear()
+
     text = ""
 
     text += "<h1>History</h1>\n"
@@ -283,6 +286,7 @@ def history():
     if len(history_items) == 0:
         text += "<div>No history yet!</div>"
     else:
+        text += '<h2><a href="/history?clear=1">Clear all</a></h2>'
         text += display_history(history_items)
     return get_html(id=id, body=text, title="History")
 
