@@ -48,6 +48,7 @@ Operation Endpoints:
 
  - GET /queue - Displays information about the current queue.
  - GET /removej - removes history entry
+ - GET /clearj - clears history, removes all history entries
  - GET /find - form for findj Endpoint.
  - GET /findj - Retrieves the last crawl information for a specified URL.
     - Query parameter: url (string).
