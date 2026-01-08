@@ -28,6 +28,13 @@
     }
   },
   {
+    "crawler_name": "HttpCloakCrawler",
+    "crawler_class_name": "HttpCloakCrawler",
+    "settings": {
+      "timeout_s": 40
+    }
+  },
+  {
     "crawler_name": "HttpxCrawler",
     "crawler_class_name": "HttpxCrawler",
     "settings": {
