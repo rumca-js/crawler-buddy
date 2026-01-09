@@ -79,7 +79,7 @@ class Configuration(object):
             if not crawler:
                 print(f"Could not find crawler {name}")
                 continue
-            if crawler("https://").is_valid():
+            if crawler(url="https://").is_valid():
                 self.crawler_config.append(item)
 
         return self.crawler_config

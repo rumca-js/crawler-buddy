@@ -79,6 +79,10 @@ class SeleniumDriver(CrawlerInterface):
             url=url,
         )
 
+        if self.request and self.request.settings and len(self.request.settings) > 0:
+            if "driver_executable" in self.request.settings:
+                self.driver_executable = self.request.settings["driver_executable"]
+
     def set_settings(self, settings):
         from ..webconfig import WebConfig
 
@@ -167,7 +171,7 @@ class SeleniumDriver(CrawlerInterface):
 
         self.driver = self.get_driver()
         if not self.driver:
-            return
+            return self.response
 
         SeleniumDriver.counter += 1
 
@@ -430,8 +434,9 @@ class SeleniumChromeHeadless(SeleniumDriver):
             driver = webdriver.Chrome(service=service, options=options)
             return driver
         except Exception as E:
-            WebLogger.error(f"Failed to initialize WebDriver: {E} Driver location:{self.driver_executable}")
-            self.response.add_error(str(E))
+            text = f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}"
+            WebLogger.error(text)
+            self.response.add_error(text)
             return None
 
     def is_valid(self) -> bool:
@@ -554,7 +559,9 @@ class SeleniumChromeFull(SeleniumDriver):
                     request_url=self.request.url,
                 )
 
-            WebLogger.error(f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}")
+            text = f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}"
+            WebLogger.error(text)
+            self.response.add_error(text)
             return None
 
     def is_valid(self) -> bool:
@@ -706,8 +713,9 @@ class SeleniumWireFull(SeleniumDriver):
             )
             return driver
         except Exception as e:
-            WebLogger.error(f"Failed to initialize WebDriver: {e}")
-            print(f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}")
+            text = f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}"
+            WebLogger.error(text)
+            self.response.add_error(text)
             return None
 
     def process_response(self):
@@ -750,7 +758,8 @@ class SeleniumBase(CrawlerInterface):
 
     def __init__(
         self,
-        request,
+        request=None,
+        url=None,
         driver_executable=None,
         settings=None,
     ):

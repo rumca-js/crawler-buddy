@@ -123,6 +123,8 @@ class CrawlerData(object):
         set_property_if_none(page_request, 'bytes_limit', settings, 'bytes_limit')
         set_property_if_none(page_request, 'accept_types', settings, 'accepte_types')
 
+        page_request.settings = settings
+
         return page_request
 
     def get_crawler(self, url, page_request):

@@ -52,7 +52,7 @@ class CrawlerTypeGet(object):
         url = self.crawl_item.get_url()
         request = self.crawl_item.request_real
 
-        page_url = webtools.Url(url, request=request)
+        page_url = webtools.Url(url=url, request=request)
 
         all_properties = None
         try:

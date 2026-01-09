@@ -95,7 +95,7 @@ class Url(BaseUrl):
         """
         if request.crawler_name and request.crawler_type is None:
             crawler = WebConfig.get_crawler_from_string(self.request.crawler_name)
-            self.request.crawler_type = crawler(request.url)
+            self.request.crawler_type = crawler(url=request.url, request=request)
         if request.crawler_name is None and request.crawler_type is None:
             default_request = WebConfig.get_default_request(request.url)
             request.crawler_name = default_request.crawler_name
