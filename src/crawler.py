@@ -20,6 +20,22 @@ from src import CrawlerContainer
 from src import CrawlerData
 
 
+def get_all_properties__too_many_requests(error_text):
+    all_properties = [{"name": "Response", "data": {
+        "status_code" : HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+        "errors" :  [error_text],
+    }}]
+    return all_properties
+
+
+def get_all_properties__error(E, error_text):
+    all_properties = [{"name": "Response", "data": {
+        "status_code" : HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+        "errors" :  [str(E) + " " + error_text],
+    }}]
+    return all_properties
+
+
 class CrawlerTypeGet(object):
     def __init__(self, container, crawl_item):
         self.container = container
@@ -37,10 +53,7 @@ class CrawlerTypeGet(object):
                 E,
                 info_text="Exception when calling getj {} {}".format(url, request),
             )
-            all_properties = [{"name": "Response", "data": {
-                "status_code" : HTTP_STATUS_CODE_EXCEPTION,
-                "errors" :  [str(E)],
-            }}]
+            all_properties = get_all_properties__error(E, "Cannot obtain GET information")
 
         if webtools.SeleniumDriver.counter == 0 and webtools.WebConfig.count_chrom_processes() > 10:
             webtools.WebConfig.kill_chrom_processes()
@@ -64,10 +77,7 @@ class CrawlerTypeGet(object):
             WebLogger.exc(
                 E, info_text="Exception when calling getj {}".format(url)
             )
-            all_properties = [{"name": "Response", "data": {
-                "status_code" : HTTP_STATUS_CODE_EXCEPTION,
-                "errors" :  [str(E)],
-            }}]
+            all_properties = get_all_properties__error(E, "Cannot obtain GET information")
 
         self.container.update(crawl_id=self.crawl_item.crawl_id, data=all_properties)
 
@@ -86,29 +96,27 @@ class CrawlerTypeSocialData(object):
         url = self.crawl_item.get_url()
         request = self.crawl_item.request
 
-        properties = None
+        all_properties = None
         try:
             page_url = webtools.Url(url)
-            properties = page_url.get_social_properties()
+            all_properties = page_url.get_social_properties()
 
             # TODO how to handle it?
 
-            if properties is None:
-                properties = [{"name": "Response", "data": {
-                    "status_code" : HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
-                    "errors" :  ["Cannot obtain social data"],
-                }}]
+            if all_properties is None:
+                all_properties = get_all_properties__too_many_requests("Cannot obtain social data")
         except Exception as E:
             WebLogger.exc(
                 E, info_text="Exception when calling socialj {}".format(url)
             )
-            properties = [{"name": "Response", "data": {
+            all_properties = [{"name": "Response", "data": {
                 "status_code" : HTTP_STATUS_CODE_EXCEPTION,
                 "errors" :  [str(E)],
             }}]
+            all_properties = get_all_properties__error(E, "Cannot obtain social data")
 
-        self.container.update(crawl_id=self.crawl_item.crawl_id, data=properties)
-        return properties
+        self.container.update(crawl_id=self.crawl_item.crawl_id, data=all_properties)
+        return all_properties
 
 
 def crawler_builder(container, crawl_item):
@@ -172,19 +180,22 @@ class Crawler(object):
             WebLogger.error(
                 info_text=f"{url} Cannot crawl".format(url)
             )
-            properties = [{"name": "Response", "data": {
-                "status_code" : HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
-                "errors" :  ["Too many crawler calls"],
-            }}]
+            all_properties = get_all_properties__too_many_requests("Crawl method")
+            return all_properties
 
         if self.multi_process:
             data = self.wait_for_response(crawl_id)
-            return data
+            if data:
+                return data
+            all_properties = get_all_properties__too_many_requests("Crawl method - data not ready")
         else:
             crawl_item = self.container.get(crawl_id)
             crawl = crawler_builder(self.container, crawl_item)
             data = crawl.run()
-            return data
+            if data:
+                return data
+            all_properties = get_all_properties__too_many_requests("Crawl method - data not ready")
+        return all_properties
 
     def get_social_properties(self, server_request, url):
         url = server_request.args.get("url")
