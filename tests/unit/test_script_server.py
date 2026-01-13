@@ -3,7 +3,7 @@ from webtoolkit import RemoteServer
 from src.webtools import (
     Url,
 )
-from script_server import set_response_impl
+from src.server_views import set_response_impl
 
 from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter
 from webtoolkit.tests.fakeresponse import FlaskRequest
