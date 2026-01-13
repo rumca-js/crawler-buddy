@@ -207,6 +207,9 @@ class CrawlerContainer(object):
         if not item:
             return False
 
+        if item.crawl_type != crawl_type:
+            return False
+
         if crawler_name and item.crawler_name != crawler_name:
             return False
         if url and item.url != url:
