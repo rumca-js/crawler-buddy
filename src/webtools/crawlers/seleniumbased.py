@@ -83,23 +83,6 @@ class SeleniumDriver(CrawlerInterface):
             if "driver_executable" in self.request.settings:
                 self.driver_executable = self.request.settings["driver_executable"]
 
-    def set_settings(self, settings):
-        from ..webconfig import WebConfig
-
-        super().set_settings(settings)
-        self.driver_executable = None
-
-        if (
-            settings
-            and "settings" in settings
-            and "driver_executable" in settings["settings"]
-            and settings["settings"]["driver_executable"]
-        ):
-            self.driver_executable = settings["settings"]["driver_executable"]
-
-        if self.driver_executable is None:
-            self.driver_executable = WebConfig.default_chromedriver_path
-
     def get_driver(self):
         """
         Returns driver
