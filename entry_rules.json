@@ -12,8 +12,8 @@
         {
             "id": 2,
             "enabled": true,
-            "rule_url": "reddit.com, https://x.com, https://twitter.com, politico.com, geekwire.com, securityweek.com, phys.org, wsj.com",
-            "rule_name": "reddit",
+            "rule_url": "https://x.com, https://twitter.com, politico.com, geekwire.com, securityweek.com, phys.org, wsj.com",
+            "rule_name": "media",
             "block": false,
             "auto_tag": "",
             "browser": "CurlCffiCrawler"
@@ -21,8 +21,17 @@
         {
             "id": 3,
             "enabled": true,
-            "rule_url": "youtube.com",
+            "rule_url": "reddit.com",
             "rule_name": "reddit",
+            "block": false,
+            "auto_tag": "",
+            "browser": "HttpMorphCrawler"
+        },
+        {
+            "id": 4,
+            "enabled": true,
+            "rule_url": "youtube.com",
+            "rule_name": "youtube",
             "block": false,
             "auto_tag": "",
             "browser": "RequestsCrawler"

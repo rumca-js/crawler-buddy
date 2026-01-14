@@ -149,8 +149,8 @@ def index():
     mgmt_links.append({"link" : "/find", "name":"Find", "description":"form for finding response"})
     mgmt_links.append({"link" : "/historyj", "name":"History JSON", "description":"shows history JSON"})
     mgmt_links.append({"link" : "/findj", "name":"Find JSON", "description":"returns information about history entry JSON"})
-    mgmt_links.append({"link" : "/removej", "name":"Remove history", "description":"Removes history entry"})
-    mgmt_links.append({"link" : "/clearj", "name":"Remove history", "description":"Removes all history entries"})
+    mgmt_links.append({"link" : "/removej", "name":"Remove history JSON", "description":"Removes history entry"})
+    mgmt_links.append({"link" : "/clearj", "name":"Clear history", "description":"Removes all history entries"})
     mgmt_links.append({"link" : "/debug", "name":"Debug", "description":"shows debug information"})
 
     # fmt: on

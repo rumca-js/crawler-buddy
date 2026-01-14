@@ -24,13 +24,13 @@ webtoolkit="^0.0.184"
 
 # Enable and crawlers as needed
 
-curl-cffi="0.13.0"
+curl-cffi="^0.13.0"
 
 # [Requests]
 requests = "^2.32.5"
 
 # [Selenium]
-selenium="4.38.0"
+selenium="^4.38.0"
 selenium-wire="*"
 # chardet = "^5.2.0" # does not work with some RSS sources
 # psycopg2 = "*"
@@ -38,16 +38,16 @@ pyvirtualdisplay = "^3.0"
 undetected-chromedriver = "^3.5.5"
 
 # [Crawlee]
-crawlee="1.0.4"
-playwright="1.55.0"
+crawlee="^1.0.4"
+playwright="^1.55.0"
 
 # [Stealth requests]
 stealth-requests = "^2.0.4"
 
 # [Httpx]
-httpx = "0.28.1"
+httpx = "^0.28.1"
 
-# httpmorph="0.2.5"
+httpmorph="^0.2.5"
 # httpcloak="*"
 # botasaurus = "*"
 #
