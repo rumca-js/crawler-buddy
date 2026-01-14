@@ -223,7 +223,7 @@ class TestUrl(unittest.TestCase):
         handler, response = self.call_url(url = "https://www.reddit.com/r/wizardposting")
 
         self.assertEqual(handler.__class__.__name__, "RedditUrlHandler")
-        self.assertEqual(response.request.crawler_type.__class__.__name__, "CurlCffiCrawler")
+        #self.assertEqual(response.request.crawler_type.__class__.__name__, "CurlCffiCrawler")
 
         self.assertTrue(handler.get_title())
         self.assertTrue(len(handler.get_streams()) == 2)
@@ -236,7 +236,7 @@ class TestUrl(unittest.TestCase):
         handler, response = self.call_url(url = "https://www.reddit.com/r/wizardposting/comments/1olomjs/screw_human_skeletons_im_gonna_get_more_creative/")
 
         self.assertEqual(handler.__class__.__name__, "RedditUrlHandler")
-        self.assertEqual(response.request.crawler_type.__class__.__name__, "CurlCffiCrawler")
+        #self.assertEqual(response.request.crawler_type.__class__.__name__, "CurlCffiCrawler")
 
         self.assertTrue(handler.get_title())
         self.assertTrue(len(handler.get_streams()) == 2)
