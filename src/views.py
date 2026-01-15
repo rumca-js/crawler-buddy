@@ -101,22 +101,29 @@ def get_html(id, body, title="", index=False):
     return html
 
 
-def get_entry_html(id, index, url, timestamp, all_properties):
+def get_entry_html(id, crawl_data):
     text = ""
+
+    crawl_type = crawl_data.crawl_type
+    url = crawl_data.url
+    timestamp = crawl_data.timestamp
+    crawl_id = crawl_data.crawl_id
+    crawl_data = crawl_data.data
 
     if not id:
         id = ""
-    find_link = "/findj?id={}&index={}".format(id, str(index))
-    remove_link = "/removej?id={}&index={}".format(id, str(index))
+    find_link = "/findj?id={}&index={}".format(id, str(crawl_id))
+    remove_link = "/removej?id={}&index={}".format(id, str(crawl_id))
 
     timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
-    text += """<a href="{}"><h2 style="margin-bottom:0px">[{}] {}</h2></a> <a href="{}">Remove</a>\n""".format(
-        find_link, timestamp_str, url, remove_link
-    )
+    text += f"""<a href="{find_link}"><h2 style="margin-bottom:0px">[{timestamp_str}] {url}</h2>
+    </a>
+       <a href="{remove_link}">Remove</a>\n
+       """
 
-    response_json = RemoteServer.read_properties_section("Response", all_properties)
-    request_json = RemoteServer.read_properties_section("Request", all_properties)
+    response_json = RemoteServer.read_properties_section("Response", crawl_data)
+    request_json = RemoteServer.read_properties_section("Request", crawl_data)
     response = json_to_response(response_json)
     request = json_to_request(request_json)
 
@@ -149,6 +156,7 @@ def get_entry_html(id, index, url, timestamp, all_properties):
         print(str(E))
 
     text += "<div>"
+    text += f"<span>Crawl Type:{crawl_type} Crawl ID:{crawl_id}</span>"
     text += f'<span style="color:{color}">Status code:{status_code_text}</span> '
     text += f"charset:{charset} "
     text += f"Content-Type:{content_type} "
@@ -179,7 +187,11 @@ def get_crawl_data(id, crawl_data):
 </a>
 <a href="{remove_link}">Remove</a>
     """
-    text += f"<div><pre>{crawl_data}</pre></div>"
+
+    text += "<div>"
+    text += f"<span>Crawl Type:{crawl_type} Crawl ID:{crawl_id}</span>"
+    text += f"<pre>{crawl_data}</pre>"
+    text += "</div>"
 
     return text
 

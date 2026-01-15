@@ -2,6 +2,7 @@ from datetime import datetime
 
 from src.views import get_entry_html
 from src.webtools import Url
+from src.crawlercontainer import CrawlerContainer, CrawlItem
 
 from webtoolkit.tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
 from webtoolkit.tests.fakeresponse import FlaskRequest
@@ -18,7 +19,8 @@ class ViewsTest(FakeInternetTestCase):
         url.get_response()
         all_properties = url.get_all_properties()
 
-        stamp = datetime.now()
+        crawl_data = CrawlItem(crawl_id=0, crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://example.com")
+        crawl_data.data = all_properties
 
-        html = get_entry_html("", 0, "https://example.com", stamp, all_properties)
+        html = get_entry_html("", crawl_data)
         self.assertTrue(html)

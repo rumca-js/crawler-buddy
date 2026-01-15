@@ -63,7 +63,7 @@ def get_crawler_text():
     for item in config:
         name = item["crawler_name"]
         settings = item["settings"]
-        text += "<div>Name:{} Settings:{}</div>\\n".format(
+        text += "<div>Name:{} Settings:{}</div>\n".format(
             name, settings
         )
 
@@ -260,7 +260,7 @@ def history():
 
     text = ""
 
-    text += "<h1>History</h1>\\n"
+    text += "<h1>History</h1>\n"
 
     history_items = current_app.config['crawler_main'].container.get_ready_items()
 
@@ -325,13 +325,13 @@ def debug():
 
         color = level2color(level)
 
-        text += '<div style="margin-bottom: 1em;">\\n'
-        text += f'<div>[{timestamp}] <span style="background-color:{color}">Level:{level}</span> info:{info_text}</div>\\n'
+        text += '<div style="margin-bottom: 1em;">\n'
+        text += f'<div>[{timestamp}] <span style="background-color:{color}">Level:{level}</span> info:{info_text}</div>\n'
 
         if detail_text:
             detail_text = html.escape(detail_text)
-            text += "<pre>{}</pre>\\n".format(detail_text)
-        text += "</div>\\n"
+            text += "<pre>{}</pre>\n".format(detail_text)
+        text += "</div>\n"
 
     return get_html(id=id, body=text, title="Debug")
 
@@ -420,7 +420,7 @@ def find():
         timestamp = crawler_data.timestamp 
         all_properties = crawler_data.data 
 
-        entry_text = get_entry_html(id, index, url, timestamp, all_properties)
+        entry_text = get_entry_html(id, crawl_data)
 
         return get_html(id=id, body=entry_text, title=url)
 
@@ -931,7 +931,7 @@ def display_queue(queue_items):
 
         timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
-        text += f'<div style="margin-bottom:1em;">[{timestamp_str}] {crawl_id} {crawl_type} {url} {request} {running_text}</div>\\n'
+        text += f'<div style="margin-bottom:1em;">[{timestamp_str}] {crawl_id} {crawl_type} {url} {request} {running_text}</div>\n'
 
     return text
 
@@ -939,14 +939,10 @@ def display_queue(queue_items):
 def display_history(history_items):
     text = ""
     for crawl_data in reversed(history_items):
-        crawl_type = crawl_data.crawl_type
-        url = crawl_data.url
-        timestamp = crawl_data.timestamp
-        crawl_id = crawl_data.crawl_id
 
         if crawl_type == CrawlerContainer.CRAWL_TYPE_GET:
             all_properties = crawl_data.data
-            entry_text = get_entry_html(id, crawl_id, url, timestamp, all_properties)
+            entry_text = get_entry_html(id, crawl_data)
             text += entry_text
         else:
             text += get_crawl_data(id, crawl_data)
@@ -964,7 +960,7 @@ def queue():
 
     text = ""
 
-    text += "<h1>Queue</h1>\\n"
+    text += "<h1>Queue</h1>\n"
 
     items = current_app.config['crawler_main'].container.get_queued_items()
 
@@ -991,25 +987,25 @@ def dict_to_html(data, indent=0):
         if isinstance(value, dict):
             html += (
                 "  " * indent
-                + f"<h{min(indent+2, 6)}>{key.capitalize()}</h{min(indent+2, 6)}>\\n"
+                + f"<h{min(indent+2, 6)}>{key.capitalize()}</h{min(indent+2, 6)}>\n"
             )
             html += dict_to_html(value, indent + 1)
         elif isinstance(value, list):
             html += (
                 "  " * indent
-                + f"<h{min(indent+2, 6)}>{key.capitalize()}</h{min(indent+2, 6)}>\\n"
+                + f"<h{min(indent+2, 6)}>{key.capitalize()}</h{min(indent+2, 6)}>\n"
             )
-            html += "  " * indent + "<ul>\\n"
+            html += "  " * indent + "<ul>\n"
             for item in value:
                 if isinstance(item, dict):
-                    html += "  " * (indent + 1) + "<li>\\n"
+                    html += "  " * (indent + 1) + "<li>\n"
                     html += dict_flat_to_html(item)
-                    html += "  " * (indent + 1) + "</li>\\n"
+                    html += "  " * (indent + 1) + "</li>\n"
                 else:
-                    html += "  " * (indent + 1) + f"<li>{item}</li>\\n"
-            html += "  " * indent + "</ul>\\n"
+                    html += "  " * (indent + 1) + f"<li>{item}</li>\n"
+            html += "  " * indent + "</ul>\n"
         else:
-            html += "  " * indent + f"<p><strong>{key}:</strong> {value}</p>\\n"
+            html += "  " * indent + f"<p><strong>{key}:</strong> {value}</p>\n"
     return html
 
 
@@ -1022,7 +1018,7 @@ def system():
     if not current_app.config['configuration'].is_set("debug"):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-    text = "<h1>System monitoring</h1>\\n"
+    text = "<h1>System monitoring</h1>\n"
 
     # Assuming get_hardware_info and get_process_info are moved or imported correctly
     # For now, let's assume they are available in the context

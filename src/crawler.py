@@ -216,7 +216,15 @@ class Crawler(object):
 
     def wait_for_response(self, crawl_id):
         start_time = time.time()
-        while(time.time() - start_time < 100):
+        crawl_item = self.container.get(crawl_id=crawl_id)
+
+        time_wait_s = 100
+        if crawl_item.request:
+            request_time_s = crawl_item.request.timeout_s + crawl_item.request.delay_s + 5
+            if request_time_s > 0:
+                time_wait_s = request_time_s
+
+        while(time.time() - start_time < time_wait_s):
             crawl_item = self.container.get(crawl_id=crawl_id)
             if crawl_item.data is not None:
                 return crawl_item.data
