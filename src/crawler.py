@@ -219,8 +219,13 @@ class Crawler(object):
         crawl_item = self.container.get(crawl_id=crawl_id)
 
         time_wait_s = 100
-        if crawl_item.request:
-            request_time_s = crawl_item.request.timeout_s + crawl_item.request.delay_s + 5
+        if crawl_item.request_real:
+            request_time_s = 0
+            if crawl_item.request_real.timeout_s:
+                request_time_s += crawl_item.request_real.timeout_s
+            if crawl_item.request_real.delay_s:
+                request_time_s += crawl_item.request_real.delay_s
+
             if request_time_s > 0:
                 time_wait_s = request_time_s
 

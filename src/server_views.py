@@ -939,7 +939,7 @@ def display_queue(queue_items):
 def display_history(history_items):
     text = ""
     for crawl_data in reversed(history_items):
-
+        crawl_type = crawl_data.crawl_type
         if crawl_type == CrawlerContainer.CRAWL_TYPE_GET:
             all_properties = crawl_data.data
             entry_text = get_entry_html(id, crawl_data)
