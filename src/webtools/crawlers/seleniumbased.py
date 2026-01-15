@@ -227,7 +227,7 @@ class SeleniumDriver(CrawlerInterface):
                     status_code=HTTP_STATUS_CODE_EXCEPTION,
                     request_url=self.request.url,
                 )
-                self.response.add_error("Url:{} exception".format(self.request.url))
+                self.response.add_error(f"Url:{self.request.url} exception {str_exc}")
 
         return self.response
 
