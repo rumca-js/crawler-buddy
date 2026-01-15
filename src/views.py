@@ -156,7 +156,7 @@ def get_entry_html(id, crawl_data):
         print(str(E))
 
     text += "<div>"
-    text += f"<span>Crawl Type:{crawl_type} Crawl ID:{crawl_id}</span>"
+    text += f"<div>Crawl Type:{crawl_type} Crawl ID:{crawl_id}</div>"
     text += f'<span style="color:{color}">Status code:{status_code_text}</span> '
     text += f"charset:{charset} "
     text += f"Content-Type:{content_type} "
@@ -183,7 +183,6 @@ def get_crawl_data(id, crawl_data):
     text += f"""
 <a href="{find_link}">
    <h2 style="margin-bottom:0px">[{timestamp}] {url}</h2>
-   <div>Crawl Type:{crawl_type} Crawl ID:{crawl_id}</div>
 </a>
 <a href="{remove_link}">Remove</a>
     """
