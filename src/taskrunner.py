@@ -4,6 +4,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from webtoolkit import UrlLocation
+from webtoolkit import WebLogger
 
 from .crawler import crawler_builder
 from .crawlercontainer import CrawlerContainer
@@ -36,10 +37,13 @@ class TaskRunner(object):
         if self.verbose:
             print(f"[RUN]  {item.url}")
 
-        crawl = crawler_builder(container=self.container, crawl_item=item)
+        try:
+            crawl = crawler_builder(container=self.container, crawl_item=item)
 
-        if crawl:
-            crawl.run()
+            if crawl:
+                crawl.run()
+        except Exception as E:
+            WebLogger.exc(E, "Error in task runner")
 
         if self.verbose:
             print(f"[DONE] {item.url}")
