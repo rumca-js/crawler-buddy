@@ -18,6 +18,7 @@ from webtoolkit import (
     PageRequestObject,
     PageResponseObject,
     ContentLinkParser,
+    DomainCache,
     HTTP_STATUS_CODE_CONNECTION_ERROR,
 )
 from src import webtools
@@ -208,6 +209,18 @@ def info():
     text += "<div>{}:{}</div>".format("Time cache [m]", time_span)
 
     text += "<h2>System</h2>"
+    domain_length = 0
+    domain_max_length = 0
+    if DomainCache.object:
+        domain_length = DomainCache.object.get_length()
+    if DomainCache.object:
+        domain_max_length = DomainCache.object.get_max_length()
+    text += f"<div>Domain_length {domain_length}/{domain_max_length}</div>"
+
+    runner = current_app.config["task_runner"]
+    running_ids_len = len(runner.running_ids)
+    text += f"<div>Running IDS: {running_ids_len}</div>"
+
     process_count = webtools.WebConfig.count_chrom_processes()
     text += "<div>{}:{}</div>".format("Chrome processes", process_count)
     text += "<div>{}:{}</div>".format("Selenium count", webtools.SeleniumDriver.counter)
@@ -913,25 +926,18 @@ def archivesj():
 def display_queue(queue_items):
     text = ""
     for crawl_data in queue_items:
-        url = crawl_data.get_url()
-        crawl_id = crawl_data.crawl_id
-        crawl_type = crawl_data.crawl_type
-        timestamp = crawl_data.timestamp
-        crawler_data = crawl_data.data
-        request = crawl_data.request_real
+        html_data = get_entry_html("",  crawl_data)
+        text += html_data
 
-        running_text = ""
+        crawl_id = crawl_data.crawl_id
+
+        running_text = "No"
         task_runner = current_app.config.get('task_runner')
         if task_runner:
-            running_text = "running:"
             if task_runner.is_running(crawl_id):
-                running_text += "Yes"
-            else:
-                running_text += "No"
+                running_text = "Yes"
 
-        timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
-
-        text += f'<div style="margin-bottom:1em;">[{timestamp_str}] {crawl_id} {crawl_type} {url} {request} {running_text}</div>\n'
+        text += f'<div>Running: {running_text}</div>\n'
 
     return text
 
@@ -942,10 +948,10 @@ def display_history(history_items):
         crawl_type = crawl_data.crawl_type
         if crawl_type == CrawlerContainer.CRAWL_TYPE_GET:
             all_properties = crawl_data.data
-            entry_text = get_entry_html(id, crawl_data)
+            entry_text = get_entry_html("", crawl_data)
             text += entry_text
         else:
-            text += get_crawl_data(id, crawl_data)
+            text += get_crawl_data("", crawl_data)
 
     return text
 

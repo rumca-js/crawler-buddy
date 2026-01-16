@@ -19,10 +19,65 @@ class EntryRuleseTest(FakeInternetTestCase):
     def setUp(self):
         self.disable_web_pages()
 
-    def test_get_request_data__by_entry_rule(self):
+    def test_is_url_hit__wildcards(self):
         rules = EntryRules()
         self.assertEqual(rules.entry_rules["entryrules"][0]["browser"], "SeleniumChromeFull")
-        rules.entry_rules["entryrules"][0]["rule_url"] = "https://x.com"
+        rules.entry_rules["entryrules"][0]["rule_url"] = ".*x.com.*"
+
+        rule = rules.entry_rules["entryrules"][0]
+
+        # call tested function
+        self.assertTrue(rules.is_url_hit(rule, "http://x.com"))
+        # call tested function
+        self.assertTrue(rules.is_url_hit(rule, "https://x.com"))
+        # call tested function
+        self.assertTrue(rules.is_url_hit(rule, "https://xacom"))
+        # call tested function
+        self.assertTrue(rules.is_url_hit(rule, "smb://x.com"))
+
+        # call tested function
+        self.assertFalse(rules.is_url_hit(rule, "http://b.com"))
+
+    def test_is_url_hit__wildcards_protocol(self):
+        rules = EntryRules()
+        self.assertEqual(rules.entry_rules["entryrules"][0]["browser"], "SeleniumChromeFull")
+        rules.entry_rules["entryrules"][0]["rule_url"] = ".*://x.com.*"
+
+        rule = rules.entry_rules["entryrules"][0]
+
+        # call tested function
+        self.assertTrue(rules.is_url_hit(rule, "http://x.com"))
+        # call tested function
+        self.assertTrue(rules.is_url_hit(rule, "https://x.com"))
+        # call tested function
+        self.assertTrue(rules.is_url_hit(rule, "smb://x.com"))
+
+        # call tested function
+        self.assertFalse(rules.is_url_hit(rule, "http://b.com"))
+
+    def test_is_url_hit__wildcards_dot_com(self):
+        rules = EntryRules()
+        self.assertEqual(rules.entry_rules["entryrules"][0]["browser"], "SeleniumChromeFull")
+        rules.entry_rules["entryrules"][0]["rule_url"] = ".*x\.com.*"
+
+        rule = rules.entry_rules["entryrules"][0]
+
+        # call tested function
+        self.assertTrue(rules.is_url_hit(rule, "http://x.com"))
+        # call tested function
+        self.assertTrue(rules.is_url_hit(rule, "https://x.com"))
+        # call tested function
+        self.assertTrue(rules.is_url_hit(rule, "smb://x.com"))
+
+        # call tested function
+        self.assertFalse(rules.is_url_hit(rule, "http://b.com"))
+        # call tested function
+        self.assertFalse(rules.is_url_hit(rule, "https://xacom"))
+
+    def test_get_request_data__by_entry_rule_wildcards(self):
+        rules = EntryRules()
+        self.assertEqual(rules.entry_rules["entryrules"][0]["browser"], "SeleniumChromeFull")
+        rules.entry_rules["entryrules"][0]["rule_url"] = ".*x.com.*"
 
         test_url = "https://x.com"
 

@@ -73,25 +73,25 @@ class TaskRunner(object):
 
         selenium_limit = True
 
-        queued_urls = set()
+        running_urls = set()
         queued_items = self.container.get_queued_items()
         for queued_item in queued_items:
             if queued_item.crawl_id in self.running_ids:
-                queued_urls.add(queued_item.get_url())
+                running_urls.add(queued_item.get_url())
 
                 if selenium_limit:
                     if self.is_selenium_both(item, queued_item):
                         return False
 
-        queued_domains = set()
-        for queued_url in queued_urls:
+        running_domains = set()
+        for queued_url in running_urls:
             location = UrlLocation(queued_url)
-            queued_domains.add(location.get_domain_only(no_www=True))
+            running_domains.add(location.get_domain_only(no_www=True))
 
         location = UrlLocation(item.get_url())
         this_domain = location.get_domain_only(no_www=True)
 
-        if this_domain and this_domain in queued_domains:
+        if this_domain and this_domain in running_domains:
             return False
 
         return True
@@ -108,14 +108,17 @@ class TaskRunner(object):
 
     def _on_done(self, future):
         """Cleanup when tasks finish."""
+
+        crawl_id = None
         try:
             crawl_id = future.result()
         except Exception as E:
             print("Error in worker:", E)
             return
 
-        with self.lock:
-            self.running_ids.discard(crawl_id)
+        if crawl_id:
+            with self.lock:
+                self.running_ids.discard(crawl_id)
 
     def start(self):
         """

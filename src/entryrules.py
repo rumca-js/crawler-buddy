@@ -4,6 +4,7 @@ Provide mechanism for URL rules:
   - we may want to block certain domains
 """
 from pathlib import Path
+import re
 import json
 
 
@@ -44,8 +45,8 @@ class EntryRules(object):
 
         rule_urls = self.get_rule_urls(url_string)
 
-        for rule_url_string in rule_urls:
-            if url.find(rule_url_string) >= 0:
+        for rule_url_pattern in rule_urls:
+            if re.search(rule_url_pattern, url):
                 return True
 
     def get_rule_urls(self, rule_url):

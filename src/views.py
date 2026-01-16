@@ -118,15 +118,12 @@ def get_entry_html(id, crawl_data):
     timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
     text += f"""<a href="{find_link}"><h2 style="margin-bottom:0px">[{timestamp_str}] {url}</h2>
-    </a>
-       <a href="{remove_link}">Remove</a>\n
-       """
+      </a>
+      <a href="{remove_link}">Remove</a>\n
+      """
 
-    response_json = RemoteServer.read_properties_section("Response", crawl_data)
-    request_json = RemoteServer.read_properties_section("Request", crawl_data)
-    response = json_to_response(response_json)
-    request = json_to_request(request_json)
-
+    request = None
+    response = None
     status_code = ""
     status_code_text = ""
     charset = ""
@@ -134,6 +131,12 @@ def get_entry_html(id, crawl_data):
     content_type = ""
     crawler_name = ""
     handler_name = ""
+
+    if crawl_data:
+        response_json = RemoteServer.read_properties_section("Response", crawl_data)
+        request_json = RemoteServer.read_properties_section("Request", crawl_data)
+        response = json_to_response(response_json)
+        request = json_to_request(request_json)
 
     if response:
         status_code = response.get_status_code()

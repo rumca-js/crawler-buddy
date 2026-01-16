@@ -3,7 +3,7 @@
         {
             "id": 1,
             "enabled": true,
-            "rule_url": "barrons.com, reuters.com, techcrunch.com, .yahoo.com, engadget.com, open.spotify.com/show, washingtontimes.com, feedpress.me, axios.com, nytimes.com, reutersagency.com, geekwire.com, 4chan.org, facebook.com, meta.com",
+            "rule_url": ".*barrons\\.com.*, .*reuters\\.com.*, .*techcrunch\\.com.*, .*.yahoo\\.com.*, engadget\\.com.*, .*open\\.spotify\\.com/show.*, .*washingtontimes\\.com.*, .*feedpress\\.me.*, .*axios\\.com.*, .*nytimes\\.com.*, .*reutersagency\\.com.*, .*4chan\\.org.*, .*facebook\\.com.*, .*meta\\.com.*",
             "rule_name": "Selenium full",
             "block": false,
             "auto_tag": "",
@@ -12,7 +12,7 @@
         {
             "id": 2,
             "enabled": true,
-            "rule_url": "https://x.com, https://twitter.com, politico.com, geekwire.com, securityweek.com, phys.org, wsj.com",
+            "rule_url": ".*://x\\.com.*, .*://twitter\\.com.*, .*politico\\.com.*, .*geekwire\\.com.*, securityweek\\.com.*, .*phys\\.org.*, .*wsj\\.com.*",
             "rule_name": "media",
             "block": false,
             "auto_tag": "",
@@ -21,7 +21,7 @@
         {
             "id": 3,
             "enabled": true,
-            "rule_url": "reddit.com",
+            "rule_url": ".*reddit\\.com.*",
             "rule_name": "reddit",
             "block": false,
             "auto_tag": "",
@@ -30,7 +30,7 @@
         {
             "id": 4,
             "enabled": true,
-            "rule_url": "youtube.com",
+            "rule_url": ".*youtube\\.com.*",
             "rule_name": "youtube",
             "block": false,
             "auto_tag": "",
