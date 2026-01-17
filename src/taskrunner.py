@@ -1,4 +1,5 @@
 import time
+import copy
 from datetime import datetime
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -142,9 +143,13 @@ class TaskRunner(object):
                             if item.crawl_id and self.attempt_submit(item):
                                 submitted_any = True
 
+                    # fix for leftovers
+                    self.fix_leftovers()
+
                 # Sleep a bit if no new work appeared
                 if not submitted_any:
                     time.sleep(self.poll_interval)
+
         except Exception as E:
             print("Exception in TaskRunner: " + str(E))
 
@@ -152,9 +157,25 @@ class TaskRunner(object):
         self.executor.shutdown(wait=True)
         print("[TaskRunner] Stopped.")
 
+    def fix_leftovers(self):
+        if len(self.running_ids) > 0:
+            running_copy = copy.copy(self.running_ids)
+            for running_id in running_copy:
+                running_item = self.container.get(crawl_id = running_id)
+                if running_item:
+                    if running_item.is_response():
+                        self.running_ids.discard(running_id)
+                        WebLogger.warning(f"Cleaning up running ids {running_id}")
+                if not running_item:
+                    self.running_ids.discard(running_id)
+                    WebLogger.warning(f"Cleaning up running ids {running_id}")
+
     def stop(self):
         """Graceful stop signal."""
         self.shutdown_flag = True
+
+    def close(self):
+        self.executor.shutdown(wait=True, cancel_futures=True)
 
 
 def start_runner_thread(container, max_workers=5):

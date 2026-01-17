@@ -32,6 +32,9 @@ class CrawlItem(object):
         if self.request_real and self.request_real.url:
             return self.request_real.url
 
+    def is_response(self):
+        return self.data is not None
+
 
 class CrawlerContainer(object):
     """
