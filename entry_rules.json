@@ -30,6 +30,15 @@
         {
             "id": 4,
             "enabled": true,
+            "rule_url": ".*reddit\\.com.*.rss.*",
+            "rule_name": "reddit",
+            "block": false,
+            "auto_tag": "",
+            "browser": "HttpMorphCrawler"
+        },
+        {
+            "id": 5,
+            "enabled": true,
             "rule_url": ".*youtube\\.com.*",
             "rule_name": "youtube",
             "block": false,
