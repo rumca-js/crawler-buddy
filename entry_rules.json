@@ -21,7 +21,7 @@
         {
             "id": 3,
             "enabled": true,
-            "rule_url": ".*reddit\\.com.*",
+            "rule_url": ".*reddit\\.com.*.json.*",
             "rule_name": "reddit",
             "block": false,
             "auto_tag": "",
