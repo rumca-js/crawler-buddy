@@ -172,8 +172,10 @@ class Crawler(object):
         if not force:
             things = self.container.get(crawl_type=crawl_type, url=url, request=request)
             if things:
-                all_properties = things.data
-                return all_properties
+                if things.data is None:
+                    return get_all_properties__too_many_requests("Not yet ready")
+
+                return things.data
 
         crawl_id = self.container.crawl(crawl_type=crawl_type, url=url, request=request)
         if crawl_id is None:

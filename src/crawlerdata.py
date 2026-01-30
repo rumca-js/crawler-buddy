@@ -65,12 +65,13 @@ class CrawlerData(object):
          - second what is specified by browser config (json file)
          - third what is specified in configuration
         """
-        crawler_name = self.entry_rules.get_browser(url)
-        new_mapping = self.configuration.get_crawler(name=crawler_name)
-        if new_mapping:
-            crawler_name = new_mapping.get("name")
-            if not page_request.crawler_name and crawler_name and page_request.crawler_name != crawler_name:
-                page_request.crawler_name = crawler_name
+        if page_request.crawler_name is None:
+            crawler_name = self.entry_rules.get_browser(url)
+            new_mapping = self.configuration.get_crawler(name=crawler_name)
+            if new_mapping:
+                crawler_name = new_mapping.get("name")
+                if not page_request.crawler_name and crawler_name and page_request.crawler_name != crawler_name:
+                    page_request.crawler_name = crawler_name
 
         new_mapping = self.configuration.get_crawler(name=page_request.crawler_name)
         if new_mapping:
@@ -121,7 +122,8 @@ class CrawlerData(object):
         set_property_if_none(page_request, 'ssl_verify', settings, 'ssl_verify')
         set_property_if_none(page_request, 'respect_robots', settings, 'respect_robots_txt')
         set_property_if_none(page_request, 'bytes_limit', settings, 'bytes_limit')
-        set_property_if_none(page_request, 'accept_types', settings, 'accepte_types')
+        set_property_if_none(page_request, 'accept_types', settings, 'accept_types')
+        set_property_if_none(page_request, 'driver_executable', settings, 'driver_executable')
 
         page_request.settings = settings
 

@@ -518,7 +518,7 @@ def getj():
             jsonify(
                 {
                     "success": False,
-                    "error": "Cannot convert to JSON: {}".format(str(all_properties)),
+                    "error": "Cannot obtain properties for request {}".format(str(request)),
                 }
             ),
             400,
