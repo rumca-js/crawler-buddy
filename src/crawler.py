@@ -221,8 +221,9 @@ class Crawler(object):
 
     def wait_for_response(self, crawl_id):
         """
-        Waits for the response
-        The client can disconnect if he wants ib
+        Waits for the response.
+        data is "all properties".
+        The client can disconnect if he wants to
         """
 
         """
