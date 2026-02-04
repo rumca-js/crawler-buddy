@@ -173,6 +173,9 @@ class Crawler(object):
             things = self.container.get(crawl_type=crawl_type, url=url, request=request)
             if things:
                 if things.data is None:
+                    data = self.wait_for_response(crawl_id)
+                    if data:
+                        return data
                     return get_all_properties__too_many_requests("Not yet ready")
 
                 return things.data
@@ -217,6 +220,12 @@ class Crawler(object):
         return result
 
     def wait_for_response(self, crawl_id):
+        """
+        Waits for the response
+        The client can disconnect if he wants ib
+        """
+
+        """
         start_time = time.time()
         crawl_item = self.container.get(crawl_id=crawl_id)
 
@@ -232,6 +241,13 @@ class Crawler(object):
                 time_wait_s = request_time_s
 
         while(time.time() - start_time < time_wait_s):
+            crawl_item = self.container.get(crawl_id=crawl_id)
+            if crawl_item.data is not None:
+                return crawl_item.data
+            time.sleep(0.1)
+        """
+
+        while True:
             crawl_item = self.container.get(crawl_id=crawl_id)
             if crawl_item.data is not None:
                 return crawl_item.data
