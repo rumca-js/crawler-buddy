@@ -173,7 +173,7 @@ class Crawler(object):
             things = self.container.get(crawl_type=crawl_type, url=url, request=request)
             if things:
                 if things.data is None:
-                    data = self.wait_for_response(crawl_id)
+                    data = self.wait_for_response(things.crawl_id)
                     if data:
                         return data
                     return get_all_properties__too_many_requests("Not yet ready")
