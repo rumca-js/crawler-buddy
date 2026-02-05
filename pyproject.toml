@@ -20,7 +20,7 @@ pytz = "^2024.2"
 psutil="*"
 flask="*"
 url-cleaner="*"
-webtoolkit="^0.0.191"
+webtoolkit="^0.0.193"
 
 # Enable and crawlers as needed
 
