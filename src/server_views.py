@@ -218,8 +218,11 @@ def info():
     text += f"<div>Domain_length {domain_length}/{domain_max_length}</div>"
 
     runner = current_app.config["task_runner"]
+    threads_size = runner.get_size()
     running_ids_len = len(runner.running_ids)
+    text += f"<div>Processing Thread: {runner.is_thread_ok()}</div>"
     text += f"<div>Running IDS: {running_ids_len}</div>"
+    text += f"<div>Running futures: {runner.get_size()}</div>"
 
     process_count = webtools.WebConfig.count_chrom_processes()
     text += "<div>{}:{}</div>".format("Chrome processes", process_count)

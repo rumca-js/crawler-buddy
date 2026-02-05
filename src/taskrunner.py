@@ -1,6 +1,6 @@
 import time
 import copy
-from datetime import datetime
+from datetime import datetime, timedelta
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -35,25 +35,33 @@ class TaskRunner(object):
         self.poll_interval = poll_interval
         self.shutdown_flag = False
         self.verbose = verbose
+        self.health_date = None
+
+        self.set_thread_ok()
+
+    def set_thread_ok(self):
+        self.health_date = datetime.now()
+
+    def get_size(self):
+        return len(self.futures)
 
     def run_item(self, item):
         """Actual crawl logic here."""
-        if self.verbose:
-            print(f"[RUN]  {item.url}")
-
         try:
+            if self.verbose:
+                print(f"[RUN]  {item.url}")
+
             crawl = crawler_builder(container=self.container, crawl_item=item)
 
             if crawl:
                 crawl.run()
+
+            if self.verbose:
+                print(f"[DONE] {item.url}")
+
+            return item.crawl_id
         except Exception as E:
             WebLogger.exc(E, "Error in task runner")
-            item.data = get_all_properties__error("Error in task runner")
-
-        if self.verbose:
-            print(f"[DONE] {item.url}")
-
-        return item.crawl_id
 
     def attempt_submit(self, item):
         """
@@ -146,6 +154,8 @@ class TaskRunner(object):
 
         try:
             while not self.shutdown_flag:
+                self.set_thread_ok()
+
                 submitted_any = False
 
                 with self.container_lock:
@@ -189,6 +199,11 @@ class TaskRunner(object):
             if len(self.futures) == 0 and len(self.running_ids) > 0:
                 WebLogger.error("Cleaned up Running IDS")
                 self.running_ids = []
+
+    def is_thread_ok(self):
+        if self.health_date:
+            return datetime.now() - self.health_date < timedelta(minutes=5)
+        return False
 
     def stop(self):
         """Graceful stop signal."""
