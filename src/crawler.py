@@ -30,7 +30,7 @@ def get_all_properties__too_many_requests(error_text):
 
 def get_all_properties__error(E, error_text):
     all_properties = [{"name": "Response", "data": {
-        "status_code" : HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+        "status_code" : HTTP_STATUS_CODE_EXCEPTION,
         "errors" :  [str(E) + " " + error_text],
     }}]
     return all_properties
@@ -221,38 +221,29 @@ class Crawler(object):
 
     def wait_for_response(self, crawl_id):
         """
-        Waits for the response.
-        data is "all properties".
-        The client can disconnect if he wants to
+        Waits until response is obtained.
+        crawl_item.data is "all properties".
+        The client can disconnect if he wants to in the meantime.
+        
+        @note Flask server could keep that request forever.
+              if the crawling request was removed we need to bail out.
+              we do not need to wait for that any more.
         """
-
-        """
-        start_time = time.time()
-        crawl_item = self.container.get(crawl_id=crawl_id)
-
-        time_wait_s = 100
-        if crawl_item.request_real:
-            request_time_s = 0
-            if crawl_item.request_real.timeout_s:
-                request_time_s += crawl_item.request_real.timeout_s
-            if crawl_item.request_real.delay_s:
-                request_time_s += crawl_item.request_real.delay_s
-
-            if request_time_s > 0:
-                time_wait_s = request_time_s
-
-        while(time.time() - start_time < time_wait_s):
-            crawl_item = self.container.get(crawl_id=crawl_id)
-            if crawl_item.data is not None:
-                return crawl_item.data
-            time.sleep(0.1)
-        """
+        crawl_url = None
 
         while True:
             crawl_item = self.container.get(crawl_id=crawl_id)
+            if crawl_item is None:
+                # request could have become obsolete, might be removed by third party
+                # if it was - then we do not need to wait any more
+                WebLogger.error(f"Request was removed, and this thread is still working URL:{crawl_url}")
+                return
+
+            crawl_url = crawl_item.get_url()
+
             if crawl_item.data is not None:
                 return crawl_item.data
-            time.sleep(0.1)
+            time.sleep(1)
 
     def set_multi_process(self):
         self.multi_process = True

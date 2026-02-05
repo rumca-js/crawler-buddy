@@ -70,6 +70,52 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(crawl_id2 is not None)
         self.assertTrue(crawl_id1 != crawl_id2)
 
+    def test_crawl__trim(self):
+        history = CrawlerContainer(records_size = 3)
+
+        self.assertEqual(history.get_size(), 0)
+
+        # call tested function
+        crawl_id1 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/1")
+        self.assertEqual(history.get_size(), 1)
+        self.assertTrue(crawl_id1)
+
+        crawl_id2 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/2")
+        self.assertEqual(history.get_size(), 2)
+        self.assertTrue(crawl_id2)
+
+        crawl_id3 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/3")
+        self.assertEqual(history.get_size(), 3)
+        self.assertTrue(crawl_id3)
+
+        crawl_id4 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/4")
+        self.assertEqual(history.get_size(), 3)
+        self.assertFalse(crawl_id4)
+
+        crawl_id5 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/5")
+        self.assertEqual(history.get_size(), 3)
+        self.assertFalse(crawl_id5)
+
+    def test_crawl__removes_history_adds_to_queue(self):
+        history = CrawlerContainer(records_size = 2)
+
+        self.assertEqual(history.get_size(), 0)
+
+        # call tested function
+        crawl_id1 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/1")
+        history.update(crawl_id=crawl_id1, data=[])
+
+        # call tested function
+        crawl_id2 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/2")
+        history.update(crawl_id=crawl_id2, data=[])
+
+        # we have full history, with data
+
+        crawl_id3 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/3")
+
+        self.assertEqual(history.get_size(), 2)
+        self.assertTrue(crawl_id3)
+
     def test_update__true(self):
         history = CrawlerContainer()
 
@@ -221,33 +267,39 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(crawl_item)
         self.assertFalse(crawl_item.data)
 
-    def test_expire(self):
+    def test_expire_old__with_data(self):
         history = CrawlerContainer()
 
         self.assertEqual(history.get_size(), 0)
 
-        # call tested function
         crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
 
         self.assertEqual(history.get_size(), 1)
 
         for item in history.container:
             item.timestamp = datetime.now() - timedelta(minutes=10000)
+            item.data = []  # we have the data
 
+        # call tested function
         history.expire_old()
 
         self.assertEqual(history.get_size(), 0)
 
-    def test_trim(self):
-        history = CrawlerContainer(records_size = 3)
+    def test_expire_old__not_without_data(self):
+        history = CrawlerContainer()
 
         self.assertEqual(history.get_size(), 0)
 
-        # call tested function
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/1")
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/2")
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/3")
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/4")
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/5")
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
 
-        self.assertEqual(history.get_size(), 3)
+        self.assertEqual(history.get_size(), 1)
+
+        for item in history.container:
+            item.timestamp = datetime.now() - timedelta(minutes=10000)
+            item.data = None  # we don't have the data
+
+        # call tested function
+        history.expire_old()
+
+        self.assertEqual(history.get_size(), 1)
+

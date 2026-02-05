@@ -4,12 +4,14 @@ from datetime import datetime
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from webtoolkit import UrlLocation
-from webtoolkit import WebLogger
+from webtoolkit import (
+  UrlLocation,
+  WebLogger,
+  HTTP_STATUS_CODE_EXCEPTION,
+)
 
-from .crawler import crawler_builder
+from .crawler import crawler_builder, get_all_properties__error
 from .crawlercontainer import CrawlerContainer
-
 
 
 class TaskRunner(object):
@@ -26,6 +28,7 @@ class TaskRunner(object):
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
 
         self.running_ids = set()
+        self.futures = []
         self.lock = threading.Lock()           # protects running_ids
         self.container_lock = threading.Lock() # protects container
 
@@ -45,6 +48,7 @@ class TaskRunner(object):
                 crawl.run()
         except Exception as E:
             WebLogger.exc(E, "Error in task runner")
+            item.data = get_all_properties__error("Error in task runner")
 
         if self.verbose:
             print(f"[DONE] {item.url}")
@@ -63,6 +67,7 @@ class TaskRunner(object):
 
         future = self.executor.submit(self.run_item, item)
         future.add_done_callback(self._on_done)
+        self.futures.append(future)
         return True
 
     def is_running(self, crawl_id):
@@ -109,7 +114,7 @@ class TaskRunner(object):
         return False
 
     def is_empty(self):
-        return len(self.running_ids) == 0
+        return len(self.futures) == 0
 
     def _on_done(self, future):
         """Cleanup when tasks finish."""
@@ -118,12 +123,18 @@ class TaskRunner(object):
         try:
             crawl_id = future.result()
         except Exception as E:
-            print("Error in worker:", E)
+            WebLogger.exc(E, "Error in worker:")
             return
+
+        with self.lock:
+            if future in self.futures:
+                self.futures.remove(future)
 
         if crawl_id:
             with self.lock:
                 self.running_ids.discard(crawl_id)
+        else:
+            WebLogger.error("I do not know which crawl_id to remove")
 
     def start(self):
         """
@@ -143,7 +154,6 @@ class TaskRunner(object):
                             if item.crawl_id and self.attempt_submit(item):
                                 submitted_any = True
 
-                    # fix for leftovers
                     self.fix_leftovers()
 
                 # Sleep a bit if no new work appeared
@@ -151,7 +161,7 @@ class TaskRunner(object):
                     time.sleep(self.poll_interval)
 
         except Exception as E:
-            print("Exception in TaskRunner: " + str(E))
+            WebLogger.exc(E, "Exception in TaskRunner")
 
         print("[TaskRunner] Stopping… waiting for tasks to finish.")
         self.executor.shutdown(wait=True)
@@ -163,12 +173,22 @@ class TaskRunner(object):
             for running_id in running_copy:
                 running_item = self.container.get(crawl_id = running_id)
                 if running_item:
+                    # if has already response - remove it from running
                     if running_item.is_response():
-                        self.running_ids.discard(running_id)
-                        WebLogger.warning(f"Cleaning up running ids {running_id}")
+                        with self.lock:
+                            self.running_ids.discard(running_id)
+                        WebLogger.error(f"Cleaning up running ids {running_id}")
                 if not running_item:
-                    self.running_ids.discard(running_id)
-                    WebLogger.warning(f"Cleaning up running ids {running_id}")
+                    # if not in queue, then something is wrong
+                    with self.lock:
+                        self.running_ids.discard(running_id)
+                    WebLogger.error(f"Cleaning up running ids {running_id}")
+
+        with self.lock:
+            self.futures = [f for f in self.futures if not f.done()]
+            if len(self.futures) == 0 and len(self.running_ids) > 0:
+                WebLogger.error("Cleaned up Running IDS")
+                self.running_ids = []
 
     def stop(self):
         """Graceful stop signal."""

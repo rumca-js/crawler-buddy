@@ -60,6 +60,15 @@ class CrawlerContainer(object):
         Either finds crawl with parameters, or adds new crawl.
         Returns ID of request or None.
         """
+        self.expire_old()
+        self.trim_size()
+
+        if self.get_size() >= self.records_size:
+            self.remove_one_history()
+
+        if self.get_size() >= self.records_size:
+            return
+
         # Try to find existing
         found = self.find(crawl_type, crawler_name=crawler_name, url=url, request=request)
         if found is not None:
@@ -188,23 +197,52 @@ class CrawlerContainer(object):
     # ------------------------------
 
     def expire_old(self):
-        """Remove entries older than the time_cache window."""
+        """
+        Remove entries older than the time_cache window.
+        Do not remove things that are in queue
+        """
         cutoff = datetime.now() - timedelta(seconds=self.time_cache_m * 60)
         previous_length = len(self.container)
 
-        self.container = [c for c in self.container if c.timestamp >= cutoff]
+        result = []
+        for crawl_item in self.container:
+            if crawl_item.timestamp > cutoff or not crawl_item.is_response():
+                result.append(crawl_item)
+        self.container = result
 
-        now_length = len(self.container)
+        now_length = self.get_size()
         if previous_length != now_length:
             WebLogger.debug("Container: Some entries expired!!!")
 
     def trim_size(self):
-        """Enforce the records_size limit."""
-        if len(self.container) > self.records_size:
-            # drop oldest entries
-            overflow = len(self.container) - self.records_size
-            self.container = self.container[overflow:]
-            WebLogger.debug("Container: trimmed")
+        """
+        Enforce the records_size limit.
+        Do not remove things that are in queue
+        """
+        if self.get_size() > self.records_size:
+            result = []
+            index = 0
+            for crawl_item in self.container:
+                if not crawl_item.is_response():
+                    result.append(crawl_item)
+                elif len(result) < self.records_size:
+                    result.append(crawl_item)
+            self.container = result
+
+    def remove_one_history(self):
+        """
+        Remove entries older than the time_cache window.
+        Do not remove things that are in queue
+        """
+        one_found = False
+        result = []
+        for crawl_item in self.container:
+            if crawl_item.is_response():
+                if not one_found:
+                    one_found = True
+                    continue
+            result.append(crawl_item)
+        self.container = result
 
     def _match(self, item, crawl_type, crawler_name=None, url=None, request=None):
         if not item:
