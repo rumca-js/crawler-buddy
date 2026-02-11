@@ -1,0 +1,71 @@
+[
+    {
+        "domain": ".youtube.com",
+        "expiry": 1804965030,
+        "httpOnly": true,
+        "name": "__Secure-YEC",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": true,
+        "value": "Cgs3RUhuWmJpYUFObyiqqLPMBjInCgJQTBIhEh0SGwsMDg8QERITFBUWFxgZGhscHR4fICEiIyQlJiAX"
+    },
+    {
+        "domain": ".youtube.com",
+        "expiry": 1804965034,
+        "httpOnly": false,
+        "name": "SOCS",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": true,
+        "value": "CAESEwgDEgk4NjczNDcwNDEaAmVuIAEaBgiAja_MBg"
+    },
+    {
+        "domain": ".youtube.com",
+        "expiry": 1804965035,
+        "httpOnly": true,
+        "name": "VISITOR_PRIVACY_METADATA",
+        "path": "/",
+        "sameSite": "None",
+        "secure": true,
+        "value": "CgJQTBIhEh0SGwsMDg8QERITFBUWFxgZGhscHR4fICEiIyQlJiAX"
+    },
+    {
+        "domain": ".youtube.com",
+        "expiry": 1786389031,
+        "httpOnly": true,
+        "name": "__Secure-ROLLOUT_TOKEN",
+        "path": "/",
+        "sameSite": "None",
+        "secure": true,
+        "value": "CL2On5fZpqbgtgEQgLa-gZLSkgMYgLa-gZLSkgM%3D"
+    },
+    {
+        "domain": ".youtube.com",
+        "expiry": 1805397033,
+        "httpOnly": false,
+        "name": "PREF",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": true,
+        "value": "tz=Europe.Warsaw"
+    },
+    {
+        "domain": ".youtube.com",
+        "httpOnly": true,
+        "name": "YSC",
+        "path": "/",
+        "sameSite": "None",
+        "secure": true,
+        "value": "Eb69KuMYQe4"
+    },
+    {
+        "domain": ".youtube.com",
+        "expiry": 1804965029,
+        "httpOnly": true,
+        "name": "__Secure-YENID",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": true,
+        "value": "13.YTE=tehZY7jP1de1aHcgWQOtJLpaAPtdyW3aojXSpttpP4n8ztSZcmSirIomY2EBfr7wNH3kZfLXfnJ_Rw6wvYT2ov_Hisc2tzVf27MRMLwZ5JkRFjuxN8u_aSAGLMOgvz0nmfp32OyWNhvpYQLQMSkRjb8n2P1l8wN1CH-HW47SSALGRmW4Wv5Kc7K-9nwywpdz-NQiclDYsp6JgRhtMDCZMNRZ0w9-46AAogh8tu9q1Q5oVWW8xvfR7hSCZH4Q1sZYrENLbJMgi80aT13SOgni4BGUl2DkZ5DqRT5PCmp7q51Nqjbs6J_VGCXNv_g8m72DhZvt15ooDA-ZY0c9lsUYXQ"
+    }
+]
