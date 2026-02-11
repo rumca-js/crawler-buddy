@@ -9,6 +9,7 @@ Most cases:
 
 import json
 import argparse
+import time
 from pathlib import Path
 
 from webtoolkit import UrlLocation, PageRequestObject
@@ -28,21 +29,10 @@ def parse():
     parser.add_argument("--ssl-verify", default=False, help="SSL verify")
 
     parser.add_argument("--wait", default=False, action="store_true", help="Waits for user 'close' command")
-    parser.add_argument("--load-cookies", default=False, action="store_true", help="Tries to apply cookies")
-    parser.add_argument("--save-cookies", default=False, action="store_true", help="Tries to apply cookies")
+    parser.add_argument("--load-cookies", default=False, action="store_true", help="Tries to load cookies")
+    parser.add_argument("--save-cookies", default=False, action="store_true", help="Tries to save cookies")
 
     return parser.parse_args()
-
-
-def save_cookies(domain, cookies):
-    print(f"URL:{domain} Saving cookies")
-    data_dir = Path("data")
-    data_dir.mkdir(exist_ok=True)
-
-    file_path = data_dir / f"{domain}.json"
-
-    with file_path.open("w", encoding="utf-8") as fh:
-        json.dump(cookies, fh, indent=4)
 
 
 def save_page_source(domain, page_source):
@@ -56,15 +46,28 @@ def save_page_source(domain, page_source):
         fh.write(page_source)
 
 
+def write_cookies(domain, cookies):
+    print(f"URL:{domain} Saving cookies")
+    data_dir = Path("data")
+    data_dir.mkdir(exist_ok=True)
+
+    file_path = data_dir / f"{domain}.json"
+
+    with file_path.open("w", encoding="utf-8") as fh:
+        json.dump(cookies, fh, indent=4)
+
+
 def read_cookies(domain):
     print(f"URL:{domain} Reading cookies")
 
     data_dir = Path("data")
     if not data_dir.exists():
+        print("Directory does not exist")
         return []
 
     file_path = data_dir / f"{domain}.json"
     if not file_path.exists():
+        print("File does not exist")
         return []
 
     with file_path.open("r", encoding="utf-8") as fh:
@@ -85,6 +88,31 @@ def apply_cookies(domain, selenium_driver, cookies):
             print(f"Skipping cookie {cookie.get('name')}: {E}")
 
 
+def goto_page(selenium_driver, url):
+    print(f"URL:{url} Navigating")
+    selenium_driver.get(url)
+
+
+def load_cookies(selenium_driver, url):
+    location = UrlLocation(url)
+    domain_only = location.get_domain_only()
+    domain = location.get_domain()
+
+    cookies = read_cookies(domain_only)
+    if cookies and len(cookies) > 0:
+        goto_page(selenium_driver, domain)
+        apply_cookies(domain_only, selenium_driver, cookies)
+        selenium_driver.refresh()
+    else:
+        print("No cookies")
+
+def save_cookies(selenium_driver, url):
+    location = UrlLocation(url)
+    domain_only = location.get_domain_only()
+
+    cookies = selenium_driver.get_cookies()
+    save_cookies(domain_only, cookies)
+
 
 def main():
     WebConfig.init()
@@ -95,7 +123,8 @@ def main():
     link = args.url
 
     location = UrlLocation(link)
-    domain = location.get_domain_only()
+    domain_only = location.get_domain_only()
+    domain = location.get_domain()
 
     request = PageRequestObject(link)
 
@@ -115,14 +144,11 @@ def main():
     if not args.wait:
         selenium_driver.set_page_load_timeout(40)
 
-    selenium_driver.get(link)
-
     cookies = []
     if args.load_cookies:
-        cookies = read_cookies(domain)
-        apply_cookies(domain, selenium_driver, cookies)
+        load_cookies(selenium_driver, link)
 
-    selenium_driver.refresh()
+    goto_page(selenium_driver, link)
 
     if args.wait:
         while True:
@@ -131,11 +157,10 @@ def main():
                 break
 
     if args.save_cookies:
-        cookies = selenium_driver.get_cookies()
-        save_cookies(domain, cookies)
+        save_cookies(selenium_driver, link)
 
     page_source = selenium_driver.page_source
-    save_page_source(domain, page_source)
+    save_page_source(domain_only, page_source)
 
     selenium_driver.close()
 
