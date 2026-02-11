@@ -1,0 +1,71 @@
+[
+    {
+        "domain": ".youtube.com",
+        "expiry": 1804971258,
+        "httpOnly": true,
+        "name": "__Secure-YEC",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": true,
+        "value": "Cgt4d0lXWmI3U1ZESSj82LPMBjInCgJQTBIhEh0SGwsMDg8QERITFBUWFxgZGhscHR4fICEiIyQlJiBoYuACCt0CMTMuWVRFPXJQNEtHQzhxU3NXTV9RMmh4d0ZTcU9CLVhOZWRBWFFvRnVTWGp1RTl6QzNKenVSTGpNbnZxMlZXckp0QnFLVEJHR3pfQlU2eW42T2M1ZEdGLVppLVBUNTFVVzVHMTFFV3FNUm9zUTRrZktfQV9yZGtjWEdwYm85b3ZRSktuaHRfWUtGR3ViVDgtWmxXQ0wteFBELUZZSlV0aWIzUHJCazRSZnlwa2p1QVVDRktsYVVodm5YLVRXVTdEYWR1TDFwNUZmTnd1US16R2tFOW1uUmxNblRVQnp3dkQ0ZVMtV3pJVTE2Z3gwVTRnMFFEeHJTeTFvdV9qWER0cHNLc3dlb2FjdkRnYlZqa24wWXZvcjY5TzJ0YnE1QnpBU1hCc1VHdFpEaGVFOS1aUFV6YnNkNVFiS295ODF2LXZ1cHVPczBkTDJKYTgxNVFjZHV4Rzl4Nm5wNE1XQQ%3D%3D"
+    },
+    {
+        "domain": ".youtube.com",
+        "expiry": 1804971259,
+        "httpOnly": true,
+        "name": "__Secure-YENID",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": true,
+        "value": "13.YTE=rP4KGC8qSsWM_Q2hxwFSqOB-XNedAXQoFuSXjuE9zC3JzuRLjMnvq2VWrJtBqKTBGGz_BU6yn6Oc5dGF-Zi-PT51UW5G11EWqMRosQ4kfK_A_rdkcXGpbo9ovQJKnht_YKFGubT8-ZlWCL-xPD-FYJUtib3PrBk4RfypkjuAUCFKlaUhvnX-TWU7DaduL1p5FfNwuQ-zGkE9mnRlMnTUBzwvD4eS-WzIU16gx0U4g0QDxrSy1ou_jXDtpsKsweoacvDgbVjkn0Yvor69O2tbq5BzASXBsUGtZDheE9-ZPUzbsd5QbKoy81v-vupuOs0dL2Ja815QcduxG9x6np4MWA"
+    },
+    {
+        "domain": ".youtube.com",
+        "expiry": 1804971260,
+        "httpOnly": true,
+        "name": "VISITOR_PRIVACY_METADATA",
+        "path": "/",
+        "sameSite": "None",
+        "secure": true,
+        "value": "CgJQTBIhEh0SGwsMDg8QERITFBUWFxgZGhscHR4fICEiIyQlJiBo"
+    },
+    {
+        "domain": ".youtube.com",
+        "expiry": 1804971259,
+        "httpOnly": false,
+        "name": "SOCS",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": true,
+        "value": "CAESEwgDEgk4NjczNDcwNDEaAmVuIAEaBgiAja_MBg"
+    },
+    {
+        "domain": ".youtube.com",
+        "expiry": 1786395258,
+        "httpOnly": true,
+        "name": "__Secure-ROLLOUT_TOKEN",
+        "path": "/",
+        "sameSite": "None",
+        "secure": true,
+        "value": "CIWSgcuVu4bpNBCX5_SaqdKSAxiX5_SaqdKSAw%3D%3D"
+    },
+    {
+        "domain": ".youtube.com",
+        "expiry": 1805403262,
+        "httpOnly": false,
+        "name": "PREF",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": true,
+        "value": "tz=Europe.Warsaw"
+    },
+    {
+        "domain": ".youtube.com",
+        "httpOnly": true,
+        "name": "YSC",
+        "path": "/",
+        "sameSite": "None",
+        "secure": true,
+        "value": "BXxSZB42q74"
+    }
+]
