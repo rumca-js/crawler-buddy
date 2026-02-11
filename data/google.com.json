@@ -1,0 +1,32 @@
+[
+    {
+        "domain": ".google.com",
+        "expiry": 1804993293,
+        "httpOnly": true,
+        "name": "__Secure-ENID",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": true,
+        "value": "31.SE=oanYy6ZsbDNBjPhOtSEOhVILNXCptAg-96QG25OI21Gk9N6q5oqT4ZaiqFCHhhHKshqAjqujOjVHeF7h2lMlC6uKMBby--prK34ae54P7xYXRwYJ613GqFY5sX4Szl5wcR3nUslzDUyFeHsg_HSKVVkjDppeBok7sZGmm5ssiLujuQREr2YlKUFyQ5AzGdn-yrOyQxfQaKRUKCt63w_RRasBPp-x5lrERl2ePc5dDkCbyWrRzJAooSi5veWos6v1BwggUBfVaHHn7NhPpQ"
+    },
+    {
+        "domain": ".google.com",
+        "expiry": 1786358595,
+        "httpOnly": true,
+        "name": "__Secure-BUCKET",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": true,
+        "value": "CIcH"
+    },
+    {
+        "domain": ".google.com",
+        "expiry": 1786358595,
+        "httpOnly": true,
+        "name": "AEC",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": true,
+        "value": "AaJma5tUIT-GkW5Rr4L2zAvII_n9SRmE96AaP6ExXXtzfwKgwlAfiK2wB8M"
+    }
+]

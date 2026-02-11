@@ -29,11 +29,16 @@ class Configuration(object):
 
         self.read_configuration()
         self.read_crawler_config()
+        self.read_version()
 
-        # increment major version digit for releases, or link name changes
-        # increment minor version digit for JSON data changes
-        # increment last digit for small changes
-        self.__version__ = "6.0.98"
+    def read_version(self):
+        self.__version__ = "0.0.0"
+        path = Path("pyproject.toml")
+        text = path.read_text()
+        for line in text.split("\n"):
+            wh = line.find("version")
+            if wh >= 0:
+                self.__version__ = line[11:-1]
 
     def is_set(self, name) -> bool:
         """

@@ -154,7 +154,7 @@ class WebConfig(object):
 
         settings = mapping_data["settings"]
 
-        c = crawler(request=request, settings=settings)
+        c = crawler_class(request=request, settings=settings)
         if c.is_valid():
             return c
 
