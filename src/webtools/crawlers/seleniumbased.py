@@ -31,6 +31,7 @@ from webtoolkit import (
     HtmlPage,
     PageResponseObject,
     WebLogger,
+    UrlLocation,
     CrawlerInterface,
     WebToolsTimeoutException,
     HTTP_STATUS_UNKNOWN,
@@ -164,6 +165,7 @@ class SeleniumDriver(CrawlerInterface):
 
             self.driver.set_page_load_timeout(selenium_timeout)
 
+            """
             if self.request.url.find("youtube.com") >= 0:
                 self.drvier.execute_cdp_cmd("Network.enable", {})
 
@@ -176,10 +178,13 @@ class SeleniumDriver(CrawlerInterface):
                     "httpOnly": False,
                     "sameSite": "Lax",
                 })
+            """
+
+            self.load_cookies(self.request.url)
 
             self.driver.get(self.request.url)
 
-            self.after_load()
+            #self.after_load()
 
             self.process_response()
 
@@ -297,6 +302,81 @@ class SeleniumDriver(CrawlerInterface):
         response = self.get_response_logs(logs)
         if response:
             return response["headers"]
+
+    def save_page_source(self, domain_only):
+        print(f"URL:{domain_only} Saving page source")
+
+        page_source = self.driver.page_source
+
+        data_dir = Path("data")
+        data_dir.mkdir(exist_ok=True)
+
+        file_path = data_dir / f"{domain_only}.html"
+        with file_path.open("w", encoding="utf-8") as fh:
+            fh.write(page_source)
+
+    def write_cookies(self, domain_only, cookies):
+        print(f"URL:{domain_only} Saving cookies")
+        data_dir = Path("data")
+        data_dir.mkdir(exist_ok=True)
+
+        file_path = data_dir / f"{domain_only}.json"
+
+        with file_path.open("w", encoding="utf-8") as fh:
+            json.dump(cookies, fh, indent=4)
+
+    def read_cookies(self, domain):
+        print(f"URL:{domain} Reading cookies")
+
+        data_dir = Path("data")
+        if not data_dir.exists():
+            print("Directory does not exist")
+            return []
+
+        file_path = data_dir / f"{domain}.json"
+        if not file_path.exists():
+            print("File does not exist")
+            return []
+
+        with file_path.open("r", encoding="utf-8") as fh:
+            cookies = json.load(fh)
+
+        return cookies
+
+    def apply_cookies(self, domain, cookies):
+        print(f"URL:{domain} Applying cookies")
+
+        for cookie in cookies:
+            if "expiry" in cookie:
+                cookie["expiry"] = int(cookie["expiry"])
+            try:
+                self.driver.add_cookie(cookie)
+            except Exception as E:
+                print(f"Skipping cookie {cookie.get('name')}: {E}")
+
+    def goto_page(self, url):
+        print(f"URL:{url} Navigating")
+        self.driver.get(url)
+
+    def load_cookies(self, url):
+        location = UrlLocation(url)
+        domain_only = location.get_domain_only()
+        domain = location.get_domain()
+
+        cookies = self.read_cookies(domain_only)
+        if cookies and len(cookies) > 0:
+            self.goto_page(domain)
+            self.apply_cookies(domain_only, cookies)
+            self.driver.refresh()
+        else:
+            print("No cookies")
+
+    def save_cookies(self, url):
+        location = UrlLocation(url)
+        domain_only = location.get_domain_only()
+
+        cookies = self.driver.get_cookies()
+        self.save_cookies(domain_only, cookies)
 
     def close(self):
         from ..webconfig import WebConfig
@@ -538,7 +618,7 @@ class SeleniumChromeFull(SeleniumDriver):
                 self.response = PageResponseObject(
                     self.request.url,
                     text=None,
-                    status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
+                    status_code=HTTP_STATUS_CODE_SERVER_ERROR,
                     request_url=self.request.url,
                 )
 

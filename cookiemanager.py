@@ -35,85 +35,6 @@ def parse():
     return parser.parse_args()
 
 
-def save_page_source(domain, page_source):
-    print(f"URL:{domain} Saving page source")
-
-    data_dir = Path("data")
-    data_dir.mkdir(exist_ok=True)
-
-    file_path = data_dir / f"{domain}.html"
-    with file_path.open("w", encoding="utf-8") as fh:
-        fh.write(page_source)
-
-
-def write_cookies(domain, cookies):
-    print(f"URL:{domain} Saving cookies")
-    data_dir = Path("data")
-    data_dir.mkdir(exist_ok=True)
-
-    file_path = data_dir / f"{domain}.json"
-
-    with file_path.open("w", encoding="utf-8") as fh:
-        json.dump(cookies, fh, indent=4)
-
-
-def read_cookies(domain):
-    print(f"URL:{domain} Reading cookies")
-
-    data_dir = Path("data")
-    if not data_dir.exists():
-        print("Directory does not exist")
-        return []
-
-    file_path = data_dir / f"{domain}.json"
-    if not file_path.exists():
-        print("File does not exist")
-        return []
-
-    with file_path.open("r", encoding="utf-8") as fh:
-        cookies = json.load(fh)
-
-    return cookies
-
-
-def apply_cookies(domain, selenium_driver, cookies):
-    print(f"URL:{domain} Applying cookies")
-
-    for cookie in cookies:
-        if "expiry" in cookie:
-            cookie["expiry"] = int(cookie["expiry"])
-        try:
-            selenium_driver.add_cookie(cookie)
-        except Exception as E:
-            print(f"Skipping cookie {cookie.get('name')}: {E}")
-
-
-def goto_page(selenium_driver, url):
-    print(f"URL:{url} Navigating")
-    selenium_driver.get(url)
-
-
-def load_cookies(selenium_driver, url):
-    location = UrlLocation(url)
-    domain_only = location.get_domain_only()
-    domain = location.get_domain()
-
-    cookies = read_cookies(domain_only)
-    if cookies and len(cookies) > 0:
-        goto_page(selenium_driver, domain)
-        apply_cookies(domain_only, selenium_driver, cookies)
-        selenium_driver.refresh()
-    else:
-        print("No cookies")
-
-def save_cookies(selenium_driver, url):
-    location = UrlLocation(url)
-    domain_only = location.get_domain_only()
-
-    cookies = selenium_driver.get_cookies()
-    save_cookies(domain_only, cookies)
-
-
 def main():
     WebConfig.init()
     WebConfig.use_print_logging()
@@ -136,19 +57,19 @@ def main():
 
     driver.driver_executable = "/usr/bin/chromedriver"
 
-    selenium_driver = driver.get_driver()
-    if not selenium_driver:
+    driver.driver = driver.get_driver()
+    if not driver.driver:
         print("Selenium driver is NONE")
         return
 
     if not args.wait:
-        selenium_driver.set_page_load_timeout(40)
+        driver.driver.set_page_load_timeout(40)
 
     cookies = []
     if args.load_cookies:
-        load_cookies(selenium_driver, link)
+        driver.load_cookies(link)
 
-    goto_page(selenium_driver, link)
+    driver.goto_page(link)
 
     if args.wait:
         while True:
@@ -157,12 +78,13 @@ def main():
                 break
 
     if args.save_cookies:
-        save_cookies(selenium_driver, link)
+        if link != domain:
+            print("Error: Cannot save cookies for url different than domain")
+        else:
+            driver.save_cookies(link)
+            driver.save_page_source(domain_only)
 
-    page_source = selenium_driver.page_source
-    save_page_source(domain_only, page_source)
-
-    selenium_driver.close()
+    driver.close()
 
 
 main()
