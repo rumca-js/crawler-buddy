@@ -120,65 +120,87 @@ def index():
 
     command_links = []
     command_links.append({"link" : "/info", "name":"Info", "description":"shows configuration"})
-    command_links.append({"link" : "/infoj", "name":"Info JSON", "description":"configuration JSON information"})
     command_links.append({"link" : "/system", "name":"System monitoring", "description":"system monitoring"})
+    command_links.append({"link" : "/about", "name":"About", "description":"About"})
 
     operational_links = []
-    operational_links.append({"link" : "/get", "name":"Get", "description":"form for getting web page crawl JSON information"})
-    operational_links.append({"link" : "/getj", "name":"Get JSON", "description":"JSON crawling response"})
-    operational_links.append({"link" : "/contents", "name":"Contents form", "description":"Form for getting web page contents"})
-    operational_links.append({"link" : "/contentsr", "name":"Contents response", "description":"returns page contents, as if read by a browser"})
-    operational_links.append({"link" : "/feeds", "name":"Feeds", "description":"form for finding feeds"})
-    operational_links.append({"link" : "/feedsj", "name":"Feeds JSON", "description":"feeds information JSON"})
-    operational_links.append({"link" : "/social", "name":"Social data", "description":"Social data form"})
-    operational_links.append({"link" : "/socialj", "name":"Social data JSON", "description":"Social data JSON, likes"})
-    operational_links.append({"link" : "/link", "name":"Link", "description":"form for obtaining links, canonical, etc."})
-    operational_links.append({"link" : "/linkj", "name":"Link JSON", "description":"link information JSON"})
-    operational_links.append({"link" : "/archivesj", "name":"Archive links JSON", "description":"JSON with links to archives, digital libraries"})
-    operational_links.append({"link" : "/rssify", "name":"RSSify", "description":"form for RSSfication. RSSfication returns RSS contents for input link"})
-    operational_links.append({"link" : "/rssifyr", "name":"RSSifyr", "description":"RSSfication response"})
-    operational_links.append({"link" : "/ping", "name":"Ping", "description":"form for getting ping information"})
-    operational_links.append({"link" : "/pingj", "name":"Ping JSON", "description":"JSON ping response"})
-    operational_links.append({"link" : "/scanlinks", "name":"Scan links", "description":"form for links scan"})
-    operational_links.append({"link" : "/scanlinksj", "name":"Scan links JSON", "description":"JSON for scannign links"})
-    operational_links.append({"link" : "/scandomains", "name":"Scan domains", "description":"form for domains links scan"})
-    operational_links.append({"link" : "/scandomainsj", "name":"Scan domains JSON", "description":"JSON for scannign domains"})
+    operational_links.append({"link" : "/get", "name":"Get", "description":"get web page crawl information"})
+    operational_links.append({"link" : "/ping", "name":"Ping", "description":"get ping result"})
+    operational_links.append({"link" : "/link", "name":"Link", "description":"get link formats, canonical, etc."})
+    operational_links.append({"link" : "/feeds", "name":"Feeds", "description":"get link feeds"})
+    operational_links.append({"link" : "/scanlinks", "name":"Scan links", "description":"scan for links"})
+    operational_links.append({"link" : "/scandomains", "name":"Scan domains", "description":"scan for domains"})
+    operational_links.append({"link" : "/social", "name":"Social data", "description":"get social data"})
+    operational_links.append({"link" : "/contents", "name":"Contents form", "description":"get web page contents"})
+    operational_links.append({"link" : "/rssify", "name":"RSSify", "description":"get RSS for link"})
 
     mgmt_links = []
     mgmt_links.append({"link" : "/history", "name":"History", "description":"crawl history"})
-    mgmt_links.append({"link" : "/queue", "name":"Queue", "description":"shows current queue"})
-    mgmt_links.append({"link" : "/find", "name":"Find", "description":"form for finding response"})
-    mgmt_links.append({"link" : "/historyj", "name":"History JSON", "description":"shows history JSON"})
-    mgmt_links.append({"link" : "/findj", "name":"Find JSON", "description":"returns information about history entry JSON"})
-    mgmt_links.append({"link" : "/removej", "name":"Remove history JSON", "description":"Removes history entry"})
-    mgmt_links.append({"link" : "/clearj", "name":"Clear history", "description":"Removes all history entries"})
-    mgmt_links.append({"link" : "/debug", "name":"Debug", "description":"shows debug information"})
+    mgmt_links.append({"link" : "/queue", "name":"Queue", "description":"queue"})
+    mgmt_links.append({"link" : "/find", "name":"Find", "description":"find response"})
+    mgmt_links.append({"link" : "/debug", "name":"Debug", "description":"debug information"})
+
+    api_links = []
+    api_links.append({"link" : "/getj", "name":"Get", "description":"Crawl data: page text, status"})
+    api_links.append({"link" : "/socialj", "name":"Social data", "description":"Social data, likes, dislikes"})
+    api_links.append({"link" : "/linkj", "name":"Links", "description":"link information"})
+    api_links.append({"link" : "/archivesj", "name":"Archive links", "description":"links to archives, digital libraries"})
+    api_links.append({"link" : "/feedsj", "name":"Feeds", "description":"feeds information"})
+    api_links.append({"link" : "/pingj", "name":"Ping", "description":"Ping response"})
+    api_links.append({"link" : "/scanlinksj", "name":"Scan links", "description":"links scan"})
+    api_links.append({"link" : "/scandomainsj", "name":"Scan domains", "description":"Links domain scan"})
+    api_links.append({"link" : "/contentsr", "name":"Contents response", "description":"returns page contents, as if read by a browser"})
+    api_links.append({"link" : "/rssifyr", "name":"RSSifyr", "description":"returns information, readable by feed clients"})
+    api_links.append({"link" : "/findj", "name":"Find in history", "description":"returns information about history entry"})
+    api_links.append({"link" : "/historyj", "name":"History", "description":"History"})
+    api_links.append({"link" : "/clearj", "name":"Clear history", "description":"remove all history entries"})
+    api_links.append({"link" : "/removej", "name":"Remove history", "description":"remove one history entry"})
+    api_links.append({"link" : "/infoj", "name":"Info", "description":"Crawling capabilities information"})
 
     # fmt: on
 
-    text = """<h1>Commands</h1>"""
+    text = ""
+
+    text += """<h1>System</h1>"""
 
     for link_data in command_links:
-        text += """<div><a href="{}?id={}">{}</a> - {}</div>""".format(
-            link_data["link"], id, link_data["name"], link_data["description"]
-        )
+        link = link_data["link"]
+        name = link_data["name"]
+        description = link_data["description"]
 
-    text += "<h2>Operational</h2>"
-
-    for link_data in operational_links:
-        text += """<div><a href="{}?id={}">{}</a> - {}</div>""".format(
-            link_data["link"], id, link_data["name"], link_data["description"]
-        )
+        text += f"""<div><a href="{link}?id={id}">{name}</a> - {description}</div>"""
 
     text += "<h2>Management</h2>"
 
     for link_data in mgmt_links:
-        text += """<div><a href="{}?id={}">{}</a> - {}</div>""".format(
-            link_data["link"], id, link_data["name"], link_data["description"]
-        )
+        link = link_data["link"]
+        name = link_data["name"]
+        description = link_data["description"]
+
+        text += f"""<div><a href="{link}?id={id}">{name}</a> - {description}</div>"""
+
+    text += "<h2>Forms</h2>"
+
+    for link_data in operational_links:
+        link = link_data["link"]
+        name = link_data["name"]
+        description = link_data["description"]
+
+        text += f"""<div><a href="{link}?id={id}">{name}</a> - {description}</div>"""
+
+    text += "<h2>API</h2>"
+
+    for link_data in api_links:
+        link = link_data["link"]
+        name = link_data["name"]
+        description = link_data["description"]
+
+        text += f"""<div><a href="{link}?id={id}">{name}</a> - {description}</div>"""
+
+    version = current_app.config['configuration'].__version__)
 
     text += """<p>"""
-    text += """Version:{}""".format(current_app.config['configuration'].__version__)
+    text += f"""Version:{version}"""
     text += """</p>"""
 
     return get_html(id=id, body=text, title="Crawler Buddy", index=True)
@@ -977,6 +999,32 @@ def queue():
         text += "<div>Nothing in queue yet!</div>"
     else:
         text += display_queue(items)
+
+    return get_html(id=id, body=text, title="Queue")
+
+
+@views.route("/about", methods=["GET"])
+def about():
+    id = request.args.get("id")
+    if not current_app.config['configuration'].is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    text = """
+    <h2>About</h2>
+    <div>
+    Crawler buddy is a program that allows to obtain Internet pages contents,
+    </div>
+
+    <ul>
+      <li>Allows to automate the process.</li>
+      <li>Provides multiple ways how the internet pages are obtained</li>
+      <li>To automate API endpoints need to be used</li>
+    </ul>
+
+    <div>
+    For details please see <a href="https://github.com/rumca-js/crawler-buddy">GitHub readme</a>
+    </div>
+    """
 
     return get_html(id=id, body=text, title="Queue")
 
