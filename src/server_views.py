@@ -197,7 +197,7 @@ def index():
 
         text += f"""<div><a href="{link}?id={id}">{name}</a> - {description}</div>"""
 
-    version = current_app.config['configuration'].__version__)
+    version = current_app.config['configuration'].__version__
 
     text += """<p>"""
     text += f"""Version:{version}"""
