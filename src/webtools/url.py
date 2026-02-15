@@ -45,7 +45,7 @@ class UrlRules(object):
     def get_default_request(url):
         default_request = WebConfig.get_default_request(url)
 
-        browser = EntryRules().get_browser(url)
+        browser = EntryRules.get_object().get_browser(url)
         if browser:
             default_request.crawler_name = browser
             default_request.crawler_type = None

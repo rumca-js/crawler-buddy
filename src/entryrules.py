@@ -9,6 +9,8 @@ import json
 
 
 class EntryRules(object):
+    singleton = None
+
     """
     Entry rules
     """
@@ -20,6 +22,11 @@ class EntryRules(object):
         if path.exists():
             with path.open("r") as file:
                 self.entry_rules = json.load(file)
+
+    def get_object():
+        if EntryRules.singleton is None:
+            EntryRules.singleton = EntryRules()
+        return EntryRules.singleton
 
     def is_blocked_by_rules(self, url) -> bool:
         """

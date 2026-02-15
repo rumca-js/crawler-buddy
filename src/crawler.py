@@ -159,8 +159,8 @@ class Crawler(object):
 
     def get_crawl_with_method(self, crawl_type, url=None, request=None, force=False):
         if not url:
-            if self.request:
-                url = self.request.url
+            if request:
+                url = request.url
 
         if not url:
             all_properties = [{"name": "Response", "data": {
