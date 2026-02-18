@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 
+from utils.memorychecker import MemoryChecker
 from src import CrawlerContainer
+
 from tests.unit.fakeinternet import FakeInternetTestCase
 
 
@@ -33,6 +35,13 @@ get_data = [
 class CrawlerContainerTest(FakeInternetTestCase):
     def setUp(self):
         self.disable_web_pages()
+        self.memory_checker = MemoryChecker()
+        self.memory_checker.get_memory_increase()
+
+    def tearDown(self):
+        memory_increase = self.memory_checker.get_memory_increase()
+        self.assertEqual(memory_increase, 0)
+        print(f"Memory increase: {memory_increase}")
 
     def test_crawl__get(self):
         history = CrawlerContainer()

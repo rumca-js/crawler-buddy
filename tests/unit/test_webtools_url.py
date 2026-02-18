@@ -6,7 +6,6 @@ from webtoolkit import (
     RedditUrlHandler,
     RemoteServer,
 )
-from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter
 
 from src.webtools import (
     Url,
@@ -14,10 +13,25 @@ from src.webtools import (
     YouTubeChannelHandlerJson,
 )
 
+from utils.memorychecker import MemoryChecker
+from src.entryrules import EntryRules
+from src.configuration import Configuration
+
+from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter
+
 
 class UrlTest(FakeInternetTestCase):
     def setUp(self):
         self.disable_web_pages()
+        rules = EntryRules()
+        configuration = Configuration()
+
+        self.memory_checker = MemoryChecker()
+        self.memory_checker.get_memory_increase()
+
+    def tearDown(self):
+        memory_increase = self.memory_checker.get_memory_increase()
+        # TODO self.assertEqual(memory_increase, 0)
 
     def test_get_cleaned_link(self):
         MockRequestCounter.mock_page_requests = 0

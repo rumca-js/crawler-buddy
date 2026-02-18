@@ -5,19 +5,31 @@ from webtoolkit import  (
     PageResponseObject,
     HttpPageHandler,
 )
+from webtoolkit.tests.fakeresponse import FlaskRequest
+
 from src.webtools import (
     Url,
 )
 from src.crawler import Crawler
 from src.entryrules import EntryRules
+from utils.memorychecker import MemoryChecker
 
 from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter
-from webtoolkit.tests.fakeresponse import FlaskRequest
 
 
 class EntryRuleseTest(FakeInternetTestCase):
     def setUp(self):
         self.disable_web_pages()
+
+        rules = EntryRules()
+
+        self.memory_checker = MemoryChecker()
+        self.memory_checker.get_memory_increase()
+
+    def tearDown(self):
+        memory_increase = self.memory_checker.get_memory_increase()
+        self.assertEqual(memory_increase, 0)
+        print(f"Memory increase: {memory_increase}")
 
     def test_is_url_hit__wildcards(self):
         rules = EntryRules()

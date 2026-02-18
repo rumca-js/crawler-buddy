@@ -10,6 +10,8 @@ from src.webtools import (
 )
 from src.crawler import Crawler
 from src.entryrules import EntryRules
+from src.configuration import Configuration
+from utils.memorychecker import MemoryChecker
 
 from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter
 from webtoolkit.tests.fakeresponse import FlaskRequest
@@ -18,6 +20,17 @@ from webtoolkit.tests.fakeresponse import FlaskRequest
 class CrawlerTest(FakeInternetTestCase):
     def setUp(self):
         self.disable_web_pages()
+
+        Configuration()
+        EntryRules()
+
+        self.memory_checker = MemoryChecker()
+        self.memory_checker.get_memory_increase()
+
+    def tearDown(self):
+        memory_increase = self.memory_checker.get_memory_increase()
+        # TODO self.assertEqual(memory_increase, 0)
+        print(f"Memory increase: {memory_increase}")
 
     def test_get_request_data__by_name(self):
         crawler = Crawler()

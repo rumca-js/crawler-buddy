@@ -4,11 +4,15 @@ from webtoolkit import (
 
 from utils.dateutils import DateUtils
 
+from src.entryrules import EntryRules
+from src.configuration import Configuration
 from src.webtools import (
    YouTubeVideoHandlerJson,
    YouTubeChannelHandlerJson,
    Url,
 )
+
+from utils.memorychecker import MemoryChecker
 
 from tests.unit.fakeinternet import (
    FakeInternetTestCase, MockRequestCounter
@@ -18,6 +22,16 @@ from tests.unit.fakeinternet import (
 class YouTubeVideoHandlerJsonTest(FakeInternetTestCase):
     def setUp(self):
         self.disable_web_pages()
+
+        rules = EntryRules()
+        configuration = Configuration()
+
+        self.memory_checker = MemoryChecker()
+        self.memory_checker.get_memory_increase()
+
+    def tearDown(self):
+        memory_increase = self.memory_checker.get_memory_increase()
+        # TODO self.assertEqual(memory_increase, 0)
 
     def test_constructor(self):
         MockRequestCounter.mock_page_requests = 0

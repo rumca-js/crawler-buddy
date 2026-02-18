@@ -7,6 +7,8 @@ from src.webtools import (
     Url,
 )
 from src.configuration import Configuration
+from utils.memorychecker import MemoryChecker
+
 
 from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter
 
@@ -14,6 +16,16 @@ from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter
 class ScriptServerTest(FakeInternetTestCase):
     def setUp(self):
         self.disable_web_pages()
+        c = Configuration()
+
+        self.memory_checker = MemoryChecker()
+        memory_increase = self.memory_checker.get_memory_increase()
+        #print(f"Memory increase {memory_increase} setup")
+
+    def tearDown(self):
+        memory_increase = self.memory_checker.get_memory_increase()
+        self.assertEqual(memory_increase, 0)
+        print(f"Memory increase {memory_increase}")
 
     def test_get_crawler(self):
         # call tested function
