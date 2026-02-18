@@ -73,6 +73,7 @@ class CrawlerTypeGet(object):
 
             response = page_url.get_response()
             all_properties = page_url.get_all_properties(include_social=False)
+            page_url.close()
         except Exception as E:
             WebLogger.exc(
                 E, info_text="Exception when calling getj {}".format(url)
@@ -105,6 +106,8 @@ class CrawlerTypeSocialData(object):
 
             if all_properties is None:
                 all_properties = get_all_properties__too_many_requests("Cannot obtain social data")
+
+            page_url.close()
         except Exception as E:
             WebLogger.exc(
                 E, info_text="Exception when calling socialj {}".format(url)
