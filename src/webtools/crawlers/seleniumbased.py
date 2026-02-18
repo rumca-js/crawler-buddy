@@ -388,35 +388,33 @@ class SeleniumDriver(CrawlerInterface):
 
         try:
             if self.driver:
-                closed = True
                 self.driver.close()
+                closed = True
         except Exception as E:
             WebLogger.error(str(E))  # TODO
             WebLogger.debug(str(E))
-
-        if not closed:
-            return
 
         if SeleniumDriver.counter > 0:
             SeleniumDriver.counter -= 1
 
         WebLogger.debug("Selenium drivers count:{} ".format(SeleniumDriver.counter))
-        time.sleep(1)
+        time.sleep(1)  # give selenium time to close
 
         if SeleniumDriver.counter == 0:
-            if WebConfig.count_chrom_processes() == 0:
-                return
+            if WebConfig.count_chrom_processes() != 0:
+                # WebLogger.warning("Chrome processes are still active")
+                try:
+                    if self.driver:
+                        WebLogger.warning("Selenium driver quit")
+                        self.driver.quit()
+                except Exception as E:
+                    WebLogger.error(str(E))  # TODO
+                    WebLogger.debug(str(E))
 
-            try:
-                if self.driver:
-                    self.driver.quit()
-            except Exception as E:
-                WebLogger.error(str(E))  # TODO
-                WebLogger.debug(str(E))
+                time.sleep(1)
 
-            time.sleep(1)
-            WebConfig.kill_chrom_processes()
-            WebConfig.kill_xvfb_processes()
+                WebConfig.kill_chrom_processes()
+                WebConfig.kill_xvfb_processes()
 
         if self.user_dir:
             try:
@@ -425,7 +423,10 @@ class SeleniumDriver(CrawlerInterface):
                 WebLogger.error(str(E))  # TODO
                 WebLogger.debug(str(E))
 
-            self.user_dir = None
+        self.user_dir = None
+        self.driver = None
+
+        super().close()
 
 
 class SeleniumChromeHeadless(SeleniumDriver):

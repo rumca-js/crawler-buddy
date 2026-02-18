@@ -273,18 +273,19 @@ files = [
 
 [[package]]
 name = "brutefeedparser"
-version = "0.10.5"
+version = "0.10.8"
 description = "Brute Feed Parser"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "brutefeedparser-0.10.5-py3-none-any.whl", hash = "sha256:910af96bc973ab35bf48efcab03dc3ac4d2379a30ee2f8817e6d541fcb807f3b"},
-    {file = "brutefeedparser-0.10.5.tar.gz", hash = "sha256:d8f51d3a8f71a02f69bf7b6213da57acc7674cc3149e3198e1413ae8bbfab56a"},
+    {file = "brutefeedparser-0.10.8-py3-none-any.whl", hash = "sha256:174cdbf448014a32445cc278c9988256267b14603abeb7135b1404180bb3392b"},
+    {file = "brutefeedparser-0.10.8.tar.gz", hash = "sha256:cfd3606c2d20cab4cf53035b6ea6c8006f5c1c8034cfc4212400684ac6f2c12b"},
 ]
 
 [package.dependencies]
 beautifulsoup4 = ">=4.13.3,<5.0.0"
 lxml = ">=5.3.0,<6.0.0"
+psutil = "*"
 
 [[package]]
 name = "cachetools"
@@ -564,13 +565,13 @@ files = [
 
 [[package]]
 name = "crawlee"
-version = "1.3.2"
+version = "1.4.0"
 description = "Crawlee for Python"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "crawlee-1.3.2-py3-none-any.whl", hash = "sha256:c2d734568c6d7f1d349b50a6eefdc0cd5ea1980a918303692ee9fb5dcf4b8aff"},
-    {file = "crawlee-1.3.2.tar.gz", hash = "sha256:ecb8f891631e85e50fcba41a93b27901ef12d52cb17b30e2be76607d9483f9d4"},
+    {file = "crawlee-1.4.0-py3-none-any.whl", hash = "sha256:ee9526a65b83522eafb6794c951312f90ca1307509ef59d25ba48b7aa985ec50"},
+    {file = "crawlee-1.4.0.tar.gz", hash = "sha256:f3070048574d4ba87d5eeefa1f5fae2e07e2dfc39aa5e1d1e2a66374ece81119"},
 ]
 
 [package.dependencies]
@@ -599,6 +600,7 @@ otel = ["opentelemetry-api (>=1.34.1)", "opentelemetry-distro[otlp] (>=0.54)", "
 parsel = ["parsel (>=1.10.0)"]
 playwright = ["apify-fingerprint-datapoints (>=0.0.2)", "browserforge (>=1.2.3)", "playwright (>=1.27.0)"]
 redis = ["redis[hiredis] (>=7.0.0)"]
+sql-mysql = ["aiomysql (>=0.3.2)", "cryptography (>=46.0.5)", "sqlalchemy[asyncio] (>=2.0.0,<3.0.0)"]
 sql-postgres = ["asyncpg (>=0.24.0)", "sqlalchemy[asyncio] (>=2.0.0,<3.0.0)"]
 sql-sqlite = ["aiosqlite (>=0.21.0)", "sqlalchemy[asyncio] (>=2.0.0,<3.0.0)"]
 
@@ -744,13 +746,13 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "filelock"
-version = "3.24.0"
+version = "3.24.2"
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "filelock-3.24.0-py3-none-any.whl", hash = "sha256:eebebb403d78363ef7be8e236b63cc6760b0004c7464dceaba3fd0afbd637ced"},
-    {file = "filelock-3.24.0.tar.gz", hash = "sha256:aeeab479339ddf463a1cdd1f15a6e6894db976071e5883efc94d22ed5139044b"},
+    {file = "filelock-3.24.2-py3-none-any.whl", hash = "sha256:667d7dc0b7d1e1064dd5f8f8e80bdac157a6482e8d2e02cd16fd3b6b33bd6556"},
+    {file = "filelock-3.24.2.tar.gz", hash = "sha256:c22803117490f156e59fafce621f0550a7a853e2bbf4f87f112b11d469b6c81b"},
 ]
 
 [[package]]
@@ -1669,13 +1671,13 @@ tests = ["pytest (>=9)", "typing-extensions (>=4.15)"]
 
 [[package]]
 name = "platformdirs"
-version = "4.9.1"
+version = "4.9.2"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "platformdirs-4.9.1-py3-none-any.whl", hash = "sha256:61d8b967d34791c162d30d60737369cbbd77debad5b981c4bfda1842e71e0d66"},
-    {file = "platformdirs-4.9.1.tar.gz", hash = "sha256:f310f16e89c4e29117805d8328f7c10876eeff36c94eac879532812110f7d39f"},
+    {file = "platformdirs-4.9.2-py3-none-any.whl", hash = "sha256:9170634f126f8efdae22fb58ae8a0eaa86f38365bc57897a6c4f781d1f5875bd"},
+    {file = "platformdirs-4.9.2.tar.gz", hash = "sha256:9a33809944b9db043ad67ca0db94b14bf452cc6aeaac46a88ea55b26e2e9d291"},
 ]
 
 [[package]]
@@ -2883,13 +2885,13 @@ files = [
 
 [[package]]
 name = "webtoolkit"
-version = "0.0.193"
+version = "0.0.200"
 description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "webtoolkit-0.0.193-py3-none-any.whl", hash = "sha256:7ded5ff2d8a693b7045f0f76ecbbb12742eb8b165780ec2f6ecc3577dfba93fb"},
-    {file = "webtoolkit-0.0.193.tar.gz", hash = "sha256:086bd46a39ed053872e665579c84dfebdc9963d7cd31caed7905dc651fcfdb79"},
+    {file = "webtoolkit-0.0.200-py3-none-any.whl", hash = "sha256:3c9590c19af76dfc4171d65dc619ef51cb90391a9861b2a3afc21f856f575fa7"},
+    {file = "webtoolkit-0.0.200.tar.gz", hash = "sha256:e215cfd8740dcfa8629464e20004ed41dc4783d0809a270e4cdada6f7f6e33e7"},
 ]
 
 [package.dependencies]
@@ -3278,4 +3280,4 @@ cffi = ["cffi (>=1.17,<2.0)", "cffi (>=2.0.0b)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "cb5b102fc86d18b4162d80023430d41ab620d53fb005cc6e93294f38e01ae07d"
+content-hash = "02a7f5888d7bb468a7714d1ac537b0ecc00fef75fb951442b9c279e5f47dac92"

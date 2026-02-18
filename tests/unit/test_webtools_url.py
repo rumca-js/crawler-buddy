@@ -1,8 +1,11 @@
+import gc
+
 from webtoolkit import (
     HttpPageHandler,
     HtmlPage,
     RssPage,
     PageResponseObject,
+    PageRequestObject,
     RedditUrlHandler,
     RemoteServer,
 )
@@ -31,7 +34,7 @@ class UrlTest(FakeInternetTestCase):
 
     def tearDown(self):
         memory_increase = self.memory_checker.get_memory_increase()
-        # TODO self.assertEqual(memory_increase, 0)
+        self.assertEqual(memory_increase < 20)
 
     def test_get_cleaned_link(self):
         MockRequestCounter.mock_page_requests = 0
@@ -1091,3 +1094,84 @@ class UrlTest(FakeInternetTestCase):
         data = url.response_to_data(response)
         self.assertTrue(data)
         self.assertIn("is_valid", data)
+
+
+class UrlMemoryTest(FakeInternetTestCase):
+    def setUp(self):
+        self.disable_web_pages()
+        self.ignore_memory = False
+
+        rules = EntryRules()
+        configuration = Configuration()
+
+        self.memory_checker = MemoryChecker()
+        self.memory_checker.get_memory_increase()
+
+        self.iteration_count = 1500
+
+    def tearDown(self):
+        memory_increase = self.memory_checker.get_memory_increase()
+        self.assertTrue(memory_increase < 40)
+
+    def tearDown(self):
+        MockRequestCounter.reset()
+        gc.collect()
+
+        if not self.ignore_memory:
+            memory_increase = self.memory_checker.get_memory_increase()
+            self.assertEqual(memory_increase, 0)
+
+    def test_get_response__html(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        for i in range(1, self.iteration_count):
+            test_link ="https://linkedin.com"
+            url = Url(test_link)
+            response = url.get_response()
+            url.close()
+
+        print("OK")
+
+    def test_get_response__rss(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        for i in range(1, self.iteration_count):
+            test_link = "https://www.codeproject.com/WebServices/NewsRSS.aspx"
+            url = Url(test_link)
+            response = url.get_response()
+            url.close()
+
+        print("OK")
+
+    def test_get_response__reddit(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        for i in range(1, self.iteration_count):
+            test_link = "https://www.reddit.com/r/searchengines/.rss"
+            url = Url(test_link)
+            response = url.get_response()
+            url.close()
+
+        print("OK")
+
+    def test_get_response__youtube_channel(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        for i in range(1, self.iteration_count):
+            test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
+            url = Url(test_link)
+            response = url.get_response()
+            url.close()
+
+        print("OK")
+
+    def test_get_response__youtube_video(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        for i in range(1, self.iteration_count):
+            test_link = "https://www.youtube.com/watch?v=1234"
+            url = Url(test_link)
+            response = url.get_response()
+            url.close()
+
+        print("OK")

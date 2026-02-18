@@ -29,8 +29,13 @@ class CrawlerTest(FakeInternetTestCase):
 
     def tearDown(self):
         memory_increase = self.memory_checker.get_memory_increase()
-        # TODO self.assertEqual(memory_increase, 0)
+        self.assertTrue(memory_increase < 20) # TODO should be 0?
         print(f"Memory increase: {memory_increase}")
+
+    def close_request(self, request):
+        if request:
+            request.crawler_type = None
+            request.handler_type = None
 
     def test_get_request_data__by_name(self):
         crawler = Crawler()
@@ -43,6 +48,7 @@ class CrawlerTest(FakeInternetTestCase):
         page_request = crawler.get_request_data(request)
 
         self.assertEqual(page_request.crawler_name, "RequestsCrawler")
+        self.close_request(page_request)
 
     def test_get_request_data__crawler_data(self):
         crawler = Crawler()
@@ -61,6 +67,8 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertTrue(page_request)
         self.assertEqual(page_request.crawler_name, "RequestsCrawler")
         self.assertEqual(type(page_request.crawler_type).__name__, "RequestsCrawler")
+
+        self.close_request(page_request)
 
     def test_get_request_data__invalid(self):
         crawler = Crawler()
@@ -81,6 +89,8 @@ class CrawlerTest(FakeInternetTestCase):
         # call tested function
         page_request = crawler.get_request_data(request)
         self.assertFalse(page_request)
+
+        self.close_request(page_request)
 
     def test_get_request_data__by_none(self):
         crawler = Crawler()
@@ -103,6 +113,8 @@ class CrawlerTest(FakeInternetTestCase):
 
         self.assertEqual(type(page_request.crawler_type).__name__, "MockCrawler")
         self.assertEqual(page_request.timeout_s, 20)
+
+        self.close_request(page_request)
 
     def test_get_request_data__by_entry_rule(self):
         crawler = Crawler()
@@ -134,6 +146,8 @@ class CrawlerTest(FakeInternetTestCase):
 
         self.assertEqual(type(page_request.crawler_type).__name__, "SeleniumChromeFull")
 
+        self.close_request(page_request)
+
     def test_get_request_data__crawler_data__ssl_verify_True(self):
         crawler = Crawler()
 
@@ -157,6 +171,8 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertEqual(page_request.ssl_verify, True)
         self.assertEqual(page_request.respect_robots, True)
         self.assertEqual(page_request.timeout_s, None)
+
+        self.close_request(page_request)
 
     def test_get_request_data__crawler_data__ssl_verify_False(self):
         crawler = Crawler()
@@ -185,6 +201,8 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertEqual(page_request.timeout_s, 60)
         self.assertEqual(page_request.delay_s, 10)
 
+        self.close_request(page_request)
+
     def test_get_request_data__default_bytes_limit(self):
         crawler = Crawler()
 
@@ -204,6 +222,8 @@ class CrawlerTest(FakeInternetTestCase):
 
         self.assertTrue(page_request)
         self.assertTrue(page_request.bytes_limit)
+
+        self.close_request(page_request)
 
     def test_get_request_data__accept_types(self):
         crawler = Crawler()
@@ -225,6 +245,8 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertTrue(page_request)
         self.assertTrue(page_request.accept_types)
 
+        self.close_request(page_request)
+
     def test_get_page_url__by_name(self):
         crawler = Crawler()
 
@@ -242,6 +264,8 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertTrue(page_url.request)
         self.assertTrue(page_url.request.crawler_name)
         self.assertEqual(page_url.request.crawler_name, "RequestsCrawler")
+
+        page_url.close()
 
     def test_get_all_properties(self):
         crawler = Crawler()

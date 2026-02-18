@@ -208,11 +208,17 @@ class CrawlerContainer(object):
         for crawl_item in self.container:
             if crawl_item.timestamp > cutoff or not crawl_item.is_response():
                 result.append(crawl_item)
+            else:
+                self.close_item(crawl_item)
         self.container = result
 
         now_length = self.get_size()
         if previous_length != now_length:
             WebLogger.debug("Container: Some entries expired!!!")
+
+    def close_item(self, crawl_item):
+        response = crawl_item.data
+        self.close_response(response)
 
     def trim_size(self):
         """
@@ -227,6 +233,8 @@ class CrawlerContainer(object):
                     result.append(crawl_item)
                 elif len(result) < self.records_size:
                     result.append(crawl_item)
+                else:
+                    self.close_item(crawl_item)
             self.container = result
 
     def remove_one_history(self):
@@ -239,10 +247,18 @@ class CrawlerContainer(object):
         for crawl_item in self.container:
             if crawl_item.is_response():
                 if not one_found:
+                    self.close_item(crawl_item)
                     one_found = True
                     continue
             result.append(crawl_item)
         self.container = result
+
+    def close_response(self, response):
+        if response:
+            if response.request:
+                response.request.crawl_type = None
+                response.request.handler_type = None
+                response.request = None
 
     def _match(self, item, crawl_type, crawler_name=None, url=None, request=None):
         if not item:

@@ -326,6 +326,8 @@ class ScriptCrawler(CrawlerInterface):
             if response_file_location.exists():
                 response_file_location.unlink()
 
+        super().close()
+
     def is_valid(self):
         if not self.script:
             return False
