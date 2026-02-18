@@ -216,10 +216,6 @@ class CrawlerContainer(object):
         if previous_length != now_length:
             WebLogger.debug("Container: Some entries expired!!!")
 
-    def close_item(self, crawl_item):
-        response = crawl_item.data
-        self.close_response(response)
-
     def trim_size(self):
         """
         Enforce the records_size limit.
@@ -253,12 +249,11 @@ class CrawlerContainer(object):
             result.append(crawl_item)
         self.container = result
 
-    def close_response(self, response):
-        if response:
-            if response.request:
-                response.request.crawl_type = None
-                response.request.handler_type = None
-                response.request = None
+    def close_item(self, crawl_item):
+        # request_real does not have crawler_type nor name
+        # request is JSON
+        # nothing really to close, but maybe some day
+        pass
 
     def _match(self, item, crawl_type, crawler_name=None, url=None, request=None):
         if not item:
