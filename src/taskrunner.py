@@ -50,7 +50,7 @@ class TaskRunner(object):
         """Actual crawl logic here."""
         try:
             if self.verbose:
-                print(f"[RUN]  {item.url}")
+                WebLogger.debug(f"[RUN]  {item.url}")
 
             crawl = crawler_builder(container=self.container, crawl_item=item)
 
@@ -58,7 +58,7 @@ class TaskRunner(object):
                 crawl.run()
 
             if self.verbose:
-                print(f"[DONE] {item.url}")
+                WebLogger.debug(f"[DONE] {item.url}")
 
             return item.crawl_id
         except Exception as E:
@@ -149,7 +149,7 @@ class TaskRunner(object):
         Continuously checks container for new items.
         """
 
-        print("[TaskRunner] Started (indefinite mode)")
+        WebLogger.debug("[TaskRunner] Started (indefinite mode)")
 
         try:
             while not self.shutdown_flag:
@@ -163,7 +163,7 @@ class TaskRunner(object):
                             if item.crawl_id and self.attempt_submit(item):
                                 submitted_any = True
 
-                    self.fix_leftovers()
+                    # self.fix_leftovers()
 
                 # Sleep a bit if no new work appeared
                 if not submitted_any:
