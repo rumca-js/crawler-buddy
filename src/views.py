@@ -164,8 +164,10 @@ def get_entry_html(id, crawl_data):
     text += f"charset:{charset} "
     text += f"Content-Type:{content_type} "
     text += f"Content-Length:{content_length} "
-    text += f"Handler name:{handler_name} "
-    text += f"Crawler name:{crawler_name} "
+    if handler_name:
+        text += f"Handler name:{handler_name} "
+    if crawler_name:
+        text += f"Crawler name:{crawler_name} "
     text += "</div>\n"
 
     return text

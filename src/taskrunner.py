@@ -71,11 +71,11 @@ class TaskRunner(object):
         with self.lock:
             if not self.is_item_crawl_ok(item):
                 return False
-            self.running_ids.add(item.crawl_id)
 
-        future = self.executor.submit(self.run_item, item)
-        future.add_done_callback(self._on_done)
-        self.futures.append(future)
+            self.running_ids.add(item.crawl_id)
+            future = self.executor.submit(self.run_item, item)
+            future.add_done_callback(self._on_done)
+            self.futures.append(future)
         return True
 
     def is_running(self, crawl_id):
@@ -132,17 +132,15 @@ class TaskRunner(object):
             crawl_id = future.result()
         except Exception as E:
             WebLogger.exc(E, "Error in worker:")
-            return
 
         with self.lock:
             if future in self.futures:
                 self.futures.remove(future)
 
-        if crawl_id:
-            with self.lock:
+            if crawl_id is not None:
                 self.running_ids.discard(crawl_id)
-        else:
-            WebLogger.error("I do not know which crawl_id to remove")
+            else:
+                WebLogger.error("I do not know which crawl_id to remove")
 
     def start(self):
         """
