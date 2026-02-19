@@ -233,6 +233,7 @@ class Crawler(object):
               we do not need to wait for that any more.
         """
         crawl_url = None
+        index = 0
 
         while True:
             crawl_item = self.container.get(crawl_id=crawl_id)
@@ -247,6 +248,11 @@ class Crawler(object):
             if crawl_item.data is not None:
                 return crawl_item.data
             time.sleep(1)
+            index += 1
+
+            if index > 60*5:
+                WebLogger.error(f"Memory/thread error when waiting for response:{crawl_url}")
+                return
 
     def set_multi_process(self):
         self.multi_process = True
