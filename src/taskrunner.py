@@ -77,7 +77,7 @@ class TaskRunner(object):
             if self.no_executor:
                 self.run_item(crawl_item)
             else:
-                self.running_ids.add(item.crawl_id)
+                self.running_ids.add(crawl_item.crawl_id)
                 future = self.executor.submit(self.run_item, crawl_item)
                 future.add_done_callback(self._on_done)
                 self.futures.append(future)

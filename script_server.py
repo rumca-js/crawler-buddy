@@ -39,7 +39,7 @@ if __name__ == "__main__":
     webtools.WebConfig.start_display()
 
     if p.args.multi_process:
-        thread, task_runner = start_runner_thread(container=app.config['crawler_main'].container, max_workers=app.config['configuration'].get_max_workers(), no_executor=True)
+        thread, task_runner = start_runner_thread(container=app.config['crawler_main'].container, max_workers=app.config['configuration'].get_max_workers(), no_executor=False)
         app.config['crawler_main'].set_multi_process()
         app.config['task_runner'] = task_runner
 
