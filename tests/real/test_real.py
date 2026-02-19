@@ -308,3 +308,10 @@ class TestMemoryUrl(unittest.TestCase):
             if response and not response.is_valid():
                 print("Response is invalid")
             url.close()
+
+    def test_social_data__youtube_channel_id(self):
+        for i in range(1, self.num_iterations):
+            test_url = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
+            url = Url(url = test_url)
+            social = url.get_social_properties()
+            url.close()

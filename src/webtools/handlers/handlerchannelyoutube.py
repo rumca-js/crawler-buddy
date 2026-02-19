@@ -30,6 +30,7 @@ class YouTubeChannelHandlerJson(YouTubeChannelHandler):
             u = self.build_default_url(entry["link"])
             handler = u.get_handler()
             json = handler.get_response_yt_json()
+            u.close()
             if json:
                 self.social_data["followers_count"] = json.get_followers_count()
             return self.social_data

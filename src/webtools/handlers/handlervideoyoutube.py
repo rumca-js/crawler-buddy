@@ -482,3 +482,15 @@ class YouTubeVideoHandlerJson(YouTubeVideoHandler):
         """
         if self.social_data:
             return self.social_data.get("rating")
+
+    def close(self):
+        super().close()
+
+        #url = self.get_rd_json_url()
+        #url = self.get_yt_json_url()
+
+        if self.return_url:
+            self.return_url.close()
+
+        if self.json_url:
+            self.json_url.close()
