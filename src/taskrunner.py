@@ -9,6 +9,7 @@ from webtoolkit import (
   WebLogger,
   HTTP_STATUS_CODE_EXCEPTION,
 )
+from utils.systemmonitoring import get_memory_info
 
 from .crawler import crawler_builder, get_all_properties__error
 from .crawlercontainer import CrawlerContainer
@@ -168,12 +169,17 @@ class TaskRunner(object):
                 if not submitted_any:
                     time.sleep(self.poll_interval)
 
+                memory_info = get_memory_info()
+                if memory_info["memory_percentage"] > 95.0:
+                    WebLogger.error("[TaskRunner] Stopping… virtual memory eaten.")
+                    break
+
         except Exception as E:
             WebLogger.exc(E, "Exception in TaskRunner")
 
-        print("[TaskRunner] Stopping… waiting for tasks to finish.")
+        WebLogger.debug("[TaskRunner] Stopping… waiting for tasks to finish.")
         self.executor.shutdown(wait=True)
-        print("[TaskRunner] Stopped.")
+        WebLogger.debug("[TaskRunner] Stopped.")
 
     def fix_leftovers(self):
         if len(self.running_ids) > 0:
