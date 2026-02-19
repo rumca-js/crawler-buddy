@@ -51,6 +51,7 @@ class StealthRequestsCrawler(CrawlerInterface):
             )
 
             if not self.is_response_valid():
+                answer.close()
                 return self.response
 
         elif answer and text:
@@ -73,7 +74,7 @@ class StealthRequestsCrawler(CrawlerInterface):
                 headers=answer.headers,
             )
 
-            return self.response
+        answer.close()
 
         if self.response:
             return self.response

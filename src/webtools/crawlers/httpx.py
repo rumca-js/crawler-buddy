@@ -42,6 +42,7 @@ class HttpxCrawler(CrawlerInterface):
                 headers=answer.headers,
             )
             if not self.is_response_valid():
+                answer.close()
                 return self.response
 
         content = getattr(answer, "content", None)
@@ -55,8 +56,6 @@ class HttpxCrawler(CrawlerInterface):
                 request_url=self.request.url,
                 headers=answer.headers,
             )
-
-            return self.response
 
         elif text:
             self.response = PageResponseObject(
@@ -77,6 +76,8 @@ class HttpxCrawler(CrawlerInterface):
                 request_url=self.request.url,
                 headers=answer.headers,
             )
+
+        answer.close()
 
         if self.response:
             return self.response
