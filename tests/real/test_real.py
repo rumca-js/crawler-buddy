@@ -14,15 +14,16 @@ In my setup it was around:
 # TODO check if status code is valid for all
 """
 
+import gc
 import time
 import subprocess
 import unittest
-import importlib
 from pathlib import Path
+
+from webtoolkit.utils.memorychecker import MemoryChecker
 
 from webtoolkit import file_to_response
 import webtoolkit
-import src.webtools.crawlers
 from src.webtools import Url
 from src.webtools.webconfig import WebConfig
 
@@ -223,7 +224,7 @@ class TestUrl(unittest.TestCase):
         handler, response = self.call_url(url = "https://www.reddit.com/r/wizardposting")
 
         self.assertEqual(handler.__class__.__name__, "RedditUrlHandler")
-        #self.assertEqual(response.request.crawler_type.__class__.__name__, "CurlCffiCrawler")
+        self.assertEqual(response.request.crawler_type.__class__.__name__, "CurlCffiCrawler")
 
         self.assertTrue(handler.get_title())
         self.assertTrue(len(handler.get_streams()) == 2)
@@ -236,7 +237,7 @@ class TestUrl(unittest.TestCase):
         handler, response = self.call_url(url = "https://www.reddit.com/r/wizardposting/comments/1olomjs/screw_human_skeletons_im_gonna_get_more_creative/")
 
         self.assertEqual(handler.__class__.__name__, "RedditUrlHandler")
-        #self.assertEqual(response.request.crawler_type.__class__.__name__, "CurlCffiCrawler")
+        self.assertEqual(response.request.crawler_type.__class__.__name__, "CurlCffiCrawler")
 
         self.assertTrue(handler.get_title())
         self.assertTrue(len(handler.get_streams()) == 2)
@@ -244,3 +245,66 @@ class TestUrl(unittest.TestCase):
         self.assertTrue(len(handler.get_entries()) == 0)
 
         self.assertTrue(response.is_valid())
+
+
+class TestMemoryUrl(unittest.TestCase):
+    def setUp(self):
+        WebConfig.use_print_logging()
+
+        self.memory_checker = MemoryChecker()
+        memory_increase = self.memory_checker.get_memory_increase()
+        self.ignore_memory = False
+        self.num_iterations = 100
+
+    def tearDown(self):
+        gc.collect()
+
+        if not self.ignore_memory:
+            memory_increase = self.memory_checker.get_memory_increase()
+            self.assertTrue(memory_increase < 40)
+
+    def call_url(self, url):
+        start_time = time.time()
+
+        url = Url(url = url)
+
+        handler = url.get_handler()
+        response = url.get_response()
+
+        return response, handler, url
+
+    def test_vanilla_google(self):
+        for i in range(1, self.num_iterations):
+            test_url = "https://www.google.com"
+            response, handler, url = self.call_url(test_url)
+            if response and not response.is_valid():
+                print("Response is invalid")
+            url.close()
+
+    def test_reddit__channel(self):
+        """
+        """
+        for i in range(1, self.num_iterations):
+            test_url = "https://www.reddit.com/r/wizardposting"
+            response, handler, url = self.call_url(test_url)
+            if response and not response.is_valid():
+                print("Response is invalid")
+            url.close()
+
+    def test_github(self):
+        """
+        """
+        for i in range(1, self.num_iterations):
+            test_url = "https://github.com/rumca-js/crawler-buddy"
+            response, handler, url = self.call_url(test_url)
+            if response and not response.is_valid():
+                print("Response is invalid")
+            url.close()
+
+    def test_youtube_channel_by_id(self):
+        for i in range(1, self.num_iterations):
+            test_url = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
+            response, handler, url = self.call_url(test_url)
+            if response and not response.is_valid():
+                print("Response is invalid")
+            url.close()
