@@ -180,7 +180,13 @@ class CrawlerContainer(object):
 
     def leave(self, crawl_id):
         """Remove crawl explicitly."""
-        self.container = [c for c in self.container if c.crawl_id != crawl_id]
+        result = []
+        for crawl_item in self.container:
+            if crawl_item.crawl_id != crawl_id:
+                result.append(crawl_item)
+            else:
+                self.close_item(crawl_item)
+        self.container = result
 
     def set_time_cache(self, time_cache_m):
         self.time_cache_m = time_cache_m
