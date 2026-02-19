@@ -32,6 +32,7 @@ from src.views import (
 )
 from src import CrawlerContainer
 from src.webtools import Url
+from utils.systemmonitoring import get_hardware_info, get_process_info, get_memory_info
 
 
 views = Blueprint('views', __name__)
@@ -230,7 +231,6 @@ def info():
     text += "<div>{}:{}</div>".format("Records size", records_size)
     text += "<div>{}:{}</div>".format("Time cache [m]", time_span)
 
-    text += "<h2>System</h2>"
     domain_length = 0
     domain_max_length = 0
     if DomainCache.object:
@@ -255,6 +255,11 @@ def info():
         text += "<div>Chromedriver at {} exists".format(chromedriver_path)
     else:
         text += "<div>Chromedriver at {} does not exist".format(chromedriver_path)
+
+    text += "<h2>Memory</h2>"
+    memory = get_memory_info()
+    for key, value in memory.items():
+        text += f"<div>{key} {value}</div>"
 
     return get_html(id=id, body=text, title="Configuration")
 
@@ -1077,9 +1082,6 @@ def system():
 
     text = "<h1>System monitoring</h1>\n"
 
-    # Assuming get_hardware_info and get_process_info are moved or imported correctly
-    # For now, let's assume they are available in the context
-    from utils.systemmonitoring import get_hardware_info, get_process_info
     info = get_hardware_info()
     info["processes"] = get_process_info()
 
