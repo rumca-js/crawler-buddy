@@ -17,12 +17,13 @@ from .crawlercontainer import CrawlerContainer
 
 class TaskRunner(object):
 
-    def __init__(self, container, max_workers=5, poll_interval=0.1, verbose=True):
+    def __init__(self, container, max_workers=5, poll_interval=0.1, no_executor=False, verbose=True):
         """
         container: shared list of CrawlItem (updated externally)
         poll_interval: how often to poll container for new items (seconds)
         """
         self.container = container
+        self.no_executor = no_executor
 
         if max_workers is None:
             max_workers = 5
@@ -64,19 +65,22 @@ class TaskRunner(object):
         except Exception as E:
             WebLogger.exc(E, "Error in task runner")
 
-    def attempt_submit(self, item):
+    def attempt_submit(self, crawl_item):
         """
         Attempts to submit a task if URL is not running already.
         Returns True if submitted.
         """
         with self.lock:
-            if not self.is_item_crawl_ok(item):
+            if not self.is_item_crawl_ok(crawl_item):
                 return False
 
-            self.running_ids.add(item.crawl_id)
-            future = self.executor.submit(self.run_item, item)
-            future.add_done_callback(self._on_done)
-            self.futures.append(future)
+            if self.no_executor:
+                self.run_item(crawl_item)
+            else:
+                self.running_ids.add(item.crawl_id)
+                future = self.executor.submit(self.run_item, crawl_item)
+                future.add_done_callback(self._on_done)
+                self.futures.append(future)
         return True
 
     def is_running(self, crawl_id):
@@ -217,13 +221,13 @@ class TaskRunner(object):
         self.executor.shutdown(wait=True, cancel_futures=True)
 
 
-def start_runner_thread(container, max_workers=5):
+def start_runner_thread(container, max_workers=5, no_executor=False):
     """
     Creates and starts a daemon thread that runs a Runner instance.
     Returns the thread object.
     """
 
-    runner = TaskRunner(container, max_workers=max_workers)
+    runner = TaskRunner(container, max_workers=max_workers, no_executor=no_executor)
 
     thread = threading.Thread(
         target=runner.start,
