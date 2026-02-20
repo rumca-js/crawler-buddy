@@ -188,21 +188,21 @@ class Crawler(object):
             WebLogger.error(
                 info_text=f"{url} Cannot crawl".format(url)
             )
-            all_properties = get_all_properties__too_many_requests("Crawl method")
+            all_properties = get_all_properties__too_many_requests("Cannot crawl")
             return all_properties
 
         if self.multi_process:
             data = self.wait_for_response(crawl_id)
             if data:
                 return data
-            all_properties = get_all_properties__too_many_requests("Crawl method - data not ready")
+            all_properties = get_all_properties__too_many_requests("Data are not yet ready. Waiting for crawl response")
         else:
             crawl_item = self.container.get(crawl_id)
             crawl = crawler_builder(self.container, crawl_item)
             data = crawl.run()
             if data:
                 return data
-            all_properties = get_all_properties__too_many_requests("Crawl method - data not ready")
+            all_properties = get_all_properties__too_many_requests("Data are not yet ready. Waiting for crawl response")
         return all_properties
 
     def get_social_properties(self, server_request, url):
