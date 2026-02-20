@@ -55,6 +55,17 @@ class CrawlerContainer(object):
         self.time_cache_m = time_cache_m
         self.crawl_index = 0
 
+    def crawl_type_to_str(crawl_type):
+        if crawl_type == CrawlerContainer.CRAWL_TYPE_PING:
+            return "Ping"
+        if crawl_type == CrawlerContainer.CRAWL_TYPE_HEAD:
+            return "Head"
+        if crawl_type == CrawlerContainer.CRAWL_TYPE_SOCIALDATA:
+            return "Social data"
+        if crawl_type == CrawlerContainer.CRAWL_TYPE_GET:
+            return "GET"
+        return ""
+
     def crawl(self, crawl_type, crawler_name=None, url=None, request=None) -> int | None:
         """
         Either finds crawl with parameters, or adds new crawl.

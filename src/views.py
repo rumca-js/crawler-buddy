@@ -7,6 +7,7 @@ from webtoolkit import (
    json_to_response,
    RemoteServer,
 )
+from src import CrawlerContainer
 
 
 def level2color(level):
@@ -131,6 +132,7 @@ def get_entry_html(id, crawl_data):
     content_type = ""
     crawler_name = ""
     handler_name = ""
+    crawl_type = CrawlerContainer.crawl_type_to_str(crawl_type)
 
     if all_properties:
         response_json = RemoteServer.read_properties_section("Response", all_properties)
@@ -189,6 +191,7 @@ def get_crawl_data(id, crawl_data):
     find_link = "/findj?id={}&index={}".format(id, str(crawl_id))
     remove_link = "/removej?id={}&index={}".format(id, str(crawl_id))
 
+    crawl_type = CrawlerContainer.crawl_type_to_str(crawl_type)
     crawler_name = ""
     handler_name = ""
     if request:
