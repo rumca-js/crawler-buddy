@@ -148,9 +148,9 @@ def get_entry_html(id, crawl_data):
         content_length = response.get_content_length()
         content_type = response.get_content_type()
 
-        if request:
-            crawler_name = request.crawler_name
-            handler_name = request.handler_name
+    if request:
+        crawler_name = request.crawler_name
+        handler_name = request.handler_name
 
     color = ""
     try:
@@ -183,10 +183,17 @@ def get_crawl_data(id, crawl_data):
     url = crawl_data.url
     timestamp = crawl_data.timestamp
     crawl_id = crawl_data.crawl_id
-    crawl_data = crawl_data.data
+
+    request = crawl_data.request_real
 
     find_link = "/findj?id={}&index={}".format(id, str(crawl_id))
     remove_link = "/removej?id={}&index={}".format(id, str(crawl_id))
+
+    crawler_name = ""
+    handler_name = ""
+    if request:
+        crawler_name = request.crawler_name
+        handler_name = request.handler_name
 
     text += f"""
 <a href="{find_link}">
@@ -197,7 +204,10 @@ def get_crawl_data(id, crawl_data):
 
     text += "<div>"
     text += f"<span>Crawl Type:{crawl_type} Crawl ID:{crawl_id}</span>"
-    text += f"<pre>{crawl_data}</pre>"
+    if handler_name:
+        text += f"Handler name:{handler_name} "
+    if crawler_name:
+        text += f"Crawler name:{crawler_name} "
     text += "</div>"
 
     return text
