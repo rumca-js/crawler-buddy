@@ -108,7 +108,7 @@ def get_entry_html(id, crawl_data):
     url = crawl_data.url
     timestamp = crawl_data.timestamp
     crawl_id = crawl_data.crawl_id
-    crawl_data = crawl_data.data
+    all_properties = crawl_data.data
 
     if not id:
         id = ""
@@ -132,11 +132,12 @@ def get_entry_html(id, crawl_data):
     crawler_name = ""
     handler_name = ""
 
-    if crawl_data:
-        response_json = RemoteServer.read_properties_section("Response", crawl_data)
-        request_json = RemoteServer.read_properties_section("Request", crawl_data)
+    if all_properties:
+        response_json = RemoteServer.read_properties_section("Response", all_properties)
+        #request_json = RemoteServer.read_properties_section("Request", all_properties)
         response = json_to_response(response_json)
-        request = json_to_request(request_json)
+
+        request = crawl_data.request_real
 
     if response:
         status_code = response.get_status_code()
@@ -162,8 +163,10 @@ def get_entry_html(id, crawl_data):
     text += f"<div>Crawl Type:{crawl_type} Crawl ID:{crawl_id}</div>"
     text += f'<span style="color:{color}">Status code:{status_code_text}</span> '
     text += f"charset:{charset} "
-    text += f"Content-Type:{content_type} "
-    text += f"Content-Length:{content_length} "
+    if content_type:
+        text += f"Content-Type:{content_type} "
+    if content_length:
+        text += f"Content-Length:{content_length} "
     if handler_name:
         text += f"Handler name:{handler_name} "
     if crawler_name:
