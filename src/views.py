@@ -132,7 +132,7 @@ def get_entry_html(id, crawl_data):
     content_type = ""
     crawler_name = ""
     handler_name = ""
-    crawl_type = CrawlerContainer.crawl_type_to_str(crawl_type)
+    crawl_type_str = CrawlerContainer.crawl_type_to_str(crawl_type)
 
     if all_properties:
         response_json = RemoteServer.read_properties_section("Response", all_properties)
@@ -161,18 +161,22 @@ def get_entry_html(id, crawl_data):
         print(str(E))
 
     text += "<div>"
-    text += f"<div>Crawl Type:{crawl_type} Crawl ID:{crawl_id}</div>"
+    text += f"<div>Crawl Type:{crawl_type_str} Crawl ID:{crawl_id}</div>"
     text += f'<span style="color:{color}">Status code:{status_code_text}</span> '
-    if charset:
-        text += f"charset:{charset} "
-    if content_type:
-        text += f"Content-Type:{content_type} "
-    if content_length:
-        text += f"Content-Length:{content_length} "
-    if handler_name:
-        text += f"Handler name:{handler_name} "
-    if crawler_name:
-        text += f"Crawler name:{crawler_name} "
+
+    if crawl_type == CrawlerContainer.CRAWL_TYPE_GET:
+        if charset:
+            text += f"charset:{charset} "
+        if content_type:
+            text += f"Content-Type:{content_type} "
+        if content_length:
+            text += f"Content-Length:{content_length} "
+        if handler_name:
+            text += f"Handler name:{handler_name} "
+        if crawler_name:
+            text += f"Crawler name:{crawler_name} "
+    else:
+        text += f"<div>{all_properties} </div>"
     text += "</div>\n"
 
     return text
