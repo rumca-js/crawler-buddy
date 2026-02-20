@@ -125,7 +125,7 @@ def get_entry_html(id, crawl_data):
 
     request = None
     response = None
-    status_code = ""
+    status_code = 0
     status_code_text = "No status"
     charset = ""
     content_length = ""
@@ -158,7 +158,6 @@ def get_entry_html(id, crawl_data):
         color = status2color(status_code)
     except Exception as E:
         color = "Status is string"
-        print(str(E))
 
     text += "<div>"
     text += f"<div>Crawl Type:{crawl_type_str} Crawl ID:{crawl_id}</div>"
