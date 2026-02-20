@@ -175,6 +175,8 @@ def get_entry_html(id, crawl_data):
             text += f"Handler name:{handler_name} "
         if crawler_name:
             text += f"Crawler name:{crawler_name} "
+        if request is None:
+            text += f"Request is not defined "
     else:
         text += f"<div>{all_properties} </div>"
     text += "</div>\n"
