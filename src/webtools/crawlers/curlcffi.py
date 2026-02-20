@@ -12,6 +12,7 @@ from webtoolkit import (
     HTTP_STATUS_CODE_EXCEPTION,
     HTTP_STATUS_CODE_CONNECTION_ERROR,
     HTTP_STATUS_CODE_SERVER_ERROR,
+    HTTP_STATUS_CODE_TIMEOUT,
 )
 
 class CurlCffiCrawler(CrawlerInterface):
@@ -87,7 +88,7 @@ class CurlCffiCrawler(CrawlerInterface):
     def build_requests(self):
         import curl_cffi
         from curl_cffi import requests
-        from curl_cffi.requests.exceptions import ConnectionError
+        from curl_cffi.requests.exceptions import ConnectionError, Timeout
 
         headers = self.get_request_headers()
         self.update_request()
@@ -95,6 +96,7 @@ class CurlCffiCrawler(CrawlerInterface):
 
         try:
             proxies = self.request.get_proxies_map()
+            print(self.request)
 
             answer = curl_cffi.get(
                 self.request.url,
@@ -113,6 +115,14 @@ class CurlCffiCrawler(CrawlerInterface):
                 self.request.url,
                 text=None,
                 status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
+                request_url=self.request.url,
+            )
+            self.response.add_error("Url:{} Cannot create request".format(str(E)))
+        except Timeout as E:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_TIMEOUT,
                 request_url=self.request.url,
             )
             self.response.add_error("Url:{} Cannot create request".format(str(E)))
