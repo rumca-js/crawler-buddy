@@ -10,6 +10,7 @@ import time
 from webtoolkit import (
   WebLogger,
   RemoteServer,
+  UrlLocation,
   HTTP_STATUS_CODE_EXCEPTION,
   HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
 )
@@ -28,7 +29,15 @@ def get_all_properties__too_many_requests(error_text):
     return all_properties
 
 
-def get_all_properties__error(E, error_text):
+def get_all_properties__error(error_text):
+    all_properties = [{"name": "Response", "data": {
+        "status_code" : HTTP_STATUS_CODE_EXCEPTION,
+        "errors" :  [error_text],
+    }}]
+    return all_properties
+
+
+def get_all_properties__exc(E, error_text):
     all_properties = [{"name": "Response", "data": {
         "status_code" : HTTP_STATUS_CODE_EXCEPTION,
         "errors" :  [str(E) + " " + error_text],
@@ -53,7 +62,7 @@ class CrawlerTypeGet(object):
                 E,
                 info_text="Exception when calling getj {} {}".format(url, request),
             )
-            all_properties = get_all_properties__error(E, "Cannot obtain GET information")
+            all_properties = get_all_properties__exc(E, "Cannot obtain GET information")
 
         if webtools.SeleniumDriver.counter == 0 and webtools.WebConfig.count_chrom_processes() > 10:
             webtools.WebConfig.kill_chrom_processes()
@@ -78,7 +87,7 @@ class CrawlerTypeGet(object):
             WebLogger.exc(
                 E, info_text="Exception when calling getj {}".format(url)
             )
-            all_properties = get_all_properties__error(E, "Cannot obtain GET information")
+            all_properties = get_all_properties__exc(E, "Cannot obtain GET information")
 
         self.container.update(crawl_id=self.crawl_item.crawl_id, data=all_properties)
 
@@ -116,7 +125,7 @@ class CrawlerTypeSocialData(object):
                 "status_code" : HTTP_STATUS_CODE_EXCEPTION,
                 "errors" :  [str(E)],
             }}]
-            all_properties = get_all_properties__error(E, "Cannot obtain social data")
+            all_properties = get_all_properties__exc(E, "Cannot obtain social data")
 
         self.container.update(crawl_id=self.crawl_item.crawl_id, data=all_properties)
         return all_properties
@@ -183,12 +192,19 @@ class Crawler(object):
 
                 return things.data
 
+        if not self.is_supported(url):
+            WebLogger.error(
+                info_text=f"{url} Unsupported url".format(url)
+            )
+            all_properties = get_all_properties__error(f"URL:{url}: Unsupported url")
+            return all_properties
+
         crawl_id = self.container.crawl(crawl_type=crawl_type, url=url, request=request)
         if crawl_id is None:
             WebLogger.error(
                 info_text=f"{url} Cannot crawl".format(url)
             )
-            all_properties = get_all_properties__too_many_requests("Cannot crawl")
+            all_properties = get_all_properties__too_many_requests(f"URL:{url}: Cannot crawl")
             return all_properties
 
         if self.multi_process:
@@ -204,6 +220,10 @@ class Crawler(object):
                 return data
             all_properties = get_all_properties__too_many_requests("Data are not yet ready. Waiting for crawl response")
         return all_properties
+
+    def is_supported(self, url):
+        location = UrlLocation(url)
+        return location.is_protocolled_link()
 
     def get_social_properties(self, server_request, url):
         url = server_request.args.get("url")
