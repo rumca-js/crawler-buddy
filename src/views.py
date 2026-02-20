@@ -123,7 +123,7 @@ def get_entry_html(id, crawl_data):
       <a href="{remove_link}">Remove</a>\n
       """
 
-    request = None
+    request = crawl_data.request_real
     response = None
     status_code = 0
     status_code_text = "No status"
@@ -138,7 +138,6 @@ def get_entry_html(id, crawl_data):
         response_json = RemoteServer.read_properties_section("Response", all_properties)
         response = json_to_response(response_json)
 
-        request = crawl_data.request_real
 
     if response:
         status_code = response.get_status_code()
