@@ -115,7 +115,7 @@ class CrawlerContainer(object):
         for item in self.container:
             if item.crawl_id == crawl_id:
                 item.data = data
-                item.timestamp = datetime.now()
+                # item.timestamp = datetime.now() # TODO we do not want to change 'start date'
                 return True
         return False
 

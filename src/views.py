@@ -125,7 +125,7 @@ def get_entry_html(id, crawl_data):
     request = None
     response = None
     status_code = ""
-    status_code_text = ""
+    status_code_text = "No status"
     charset = ""
     content_length = ""
     content_type = ""
@@ -134,7 +134,6 @@ def get_entry_html(id, crawl_data):
 
     if all_properties:
         response_json = RemoteServer.read_properties_section("Response", all_properties)
-        #request_json = RemoteServer.read_properties_section("Request", all_properties)
         response = json_to_response(response_json)
 
         request = crawl_data.request_real
@@ -162,7 +161,8 @@ def get_entry_html(id, crawl_data):
     text += "<div>"
     text += f"<div>Crawl Type:{crawl_type} Crawl ID:{crawl_id}</div>"
     text += f'<span style="color:{color}">Status code:{status_code_text}</span> '
-    text += f"charset:{charset} "
+    if charset:
+        text += f"charset:{charset} "
     if content_type:
         text += f"Content-Type:{content_type} "
     if content_length:
