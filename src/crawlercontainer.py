@@ -71,6 +71,10 @@ class CrawlerContainer(object):
         Either finds crawl with parameters, or adds new crawl.
         Returns ID of request or None.
         """
+        if url is None and request is None:
+            WebLogger.error("Cannot crawl if url and request is None")
+            return
+
         self.expire_old()
         self.trim_size()
 
