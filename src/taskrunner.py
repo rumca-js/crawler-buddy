@@ -64,6 +64,10 @@ class TaskRunner(object):
             return item.crawl_id
         except Exception as E:
             WebLogger.exc(E, "Error in task runner")
+            try:
+                return item.crawl_id
+            except Exception as E:
+                WebLogger.exc(E, "Error in task runner2")
 
     def attempt_submit(self, crawl_item):
         """
@@ -142,10 +146,13 @@ class TaskRunner(object):
             if future in self.futures:
                 self.futures.remove(future)
 
-            if crawl_id is not None:
-                self.running_ids.discard(crawl_id)
-            else:
-                WebLogger.error("I do not know which crawl_id to remove")
+            self.dispose(crawl_id)
+
+    def dispose(self, crawl_id):
+        if crawl_id is not None:
+            self.running_ids.discard(crawl_id)
+        else:
+            WebLogger.error("I do not know which crawl_id to remove")
 
     def start(self):
         """
@@ -209,9 +216,10 @@ class TaskRunner(object):
                     result.append(future)
                 else:
                     WebLogger.error("Cleaning up futures")
+                    crawl_id = future.result()
+                    self.dispose(crawl_id)
             self.futures = result
 
-            #self.futures = [f for f in self.futures if not f.done()]
             if len(self.futures) == 0 and len(self.running_ids) > 0:
                 WebLogger.error("Cleaning up running IDS")
                 self.running_ids = []

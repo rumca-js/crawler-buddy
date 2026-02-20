@@ -138,7 +138,6 @@ def get_entry_html(id, crawl_data):
         response_json = RemoteServer.read_properties_section("Response", all_properties)
         response = json_to_response(response_json)
 
-
     if response:
         status_code = response.get_status_code()
         # TODO maybe create a better API
@@ -175,6 +174,7 @@ def get_entry_html(id, crawl_data):
             text += f"Crawler name:{crawler_name} "
         if request is None:
             text += f"Request is not defined "
+        text += f"Timeout:{request.timeout_s} "
     else:
         text += f"<div>{all_properties} </div>"
     text += "</div>\n"
