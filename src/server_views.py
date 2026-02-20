@@ -824,8 +824,13 @@ def pingj():
     response = RemoteServer.read_properties_section("Response", all_properties)
 
     if response:
-        status_code = response["status_code"]
-        is_valid = response["is_valid"]
+        status_code = 0
+        if "status_code" in response:
+            status_code = response["status_code"]
+
+        is_valid = False
+        if "is_valid" in response:
+            is_valid = response["is_valid"]
         return jsonify({"status": is_valid})
 
     return jsonify({"status": False})

@@ -2999,14 +2999,14 @@ files = [
 
 [[package]]
 name = "webtoolkit"
-version = "0.0.204"
+version = "0.0.205"
 description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "webtoolkit-0.0.204-py3-none-any.whl", hash = "sha256:14ed8cd0e397605caafb924ebdef37f0fad1262626e582d3d88bf661b110090c"},
-    {file = "webtoolkit-0.0.204.tar.gz", hash = "sha256:799ee8c26ad5b73624b11180ea94b08ed1095fe6a571eee3ffbb84a2a07639a7"},
+    {file = "webtoolkit-0.0.205-py3-none-any.whl", hash = "sha256:d1c27184a9dda952de415dad70b4f5fa75ada84ef2af07ce9b68cfaa7d8618ad"},
+    {file = "webtoolkit-0.0.205.tar.gz", hash = "sha256:9ab4dc07cb476544fd62b9f2430cddf32130e941c677217fdcf2933b02d7fc65"},
 ]
 
 [package.dependencies]
@@ -3023,14 +3023,14 @@ url-cleaner = "*"
 
 [[package]]
 name = "werkzeug"
-version = "3.1.5"
+version = "3.1.6"
 description = "The comprehensive WSGI web application library."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "werkzeug-3.1.5-py3-none-any.whl", hash = "sha256:5111e36e91086ece91f93268bb39b4a35c1e6f1feac762c9c822ded0a4e322dc"},
-    {file = "werkzeug-3.1.5.tar.gz", hash = "sha256:6a548b0e88955dd07ccb25539d7d0cc97417ee9e179677d22c7041c8f078ce67"},
+    {file = "werkzeug-3.1.6-py3-none-any.whl", hash = "sha256:7ddf3357bb9564e407607f988f683d72038551200c704012bb9a4c523d42f131"},
+    {file = "werkzeug-3.1.6.tar.gz", hash = "sha256:210c6bede5a420a913956b4791a7f4d6843a43b6fcee4dfa08a65e93007d0d25"},
 ]
 
 [package.dependencies]
@@ -3402,4 +3402,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "ff6b290b3fdc5e18cce536ba73202d7b09192139123d164e9049d1439116df88"
+content-hash = "85c2fdbc9fb4624735f9b187b78e7bfef74674460567e303a7fbaef2c62f6021"

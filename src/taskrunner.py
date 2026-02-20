@@ -167,7 +167,7 @@ class TaskRunner(object):
                             if item.crawl_id and self.attempt_submit(item):
                                 submitted_any = True
 
-                    # self.fix_leftovers()
+                    self.fix_leftovers()
 
                 # Sleep a bit if no new work appeared
                 if not submitted_any:
@@ -186,26 +186,34 @@ class TaskRunner(object):
         WebLogger.debug("[TaskRunner] Stopped.")
 
     def fix_leftovers(self):
-        if len(self.running_ids) > 0:
-            running_copy = copy.copy(self.running_ids)
-            for running_id in running_copy:
-                running_item = self.container.get(crawl_id = running_id)
-                if running_item:
-                    # if has already response - remove it from running
-                    if running_item.is_response():
-                        with self.lock:
-                            self.running_ids.discard(running_id)
-                        WebLogger.error(f"Cleaning up running ids {running_id}")
-                if not running_item:
-                    # if not in queue, then something is wrong
-                    with self.lock:
-                        self.running_ids.discard(running_id)
-                    WebLogger.error(f"Cleaning up running ids {running_id}")
+        #if len(self.running_ids) > 0:
+        #    running_copy = copy.copy(self.running_ids)
+        #    for running_id in running_copy:
+        #        running_item = self.container.get(crawl_id = running_id)
+        #        if running_item:
+        #            # if has already response - remove it from running
+        #            if running_item.is_response():
+        #                with self.lock:
+        #                    self.running_ids.discard(running_id)
+        #                WebLogger.error(f"Cleaning up running ids {running_id}")
+        #        if not running_item:
+        #            # if not in queue, then something is wrong
+        #            with self.lock:
+        #                self.running_ids.discard(running_id)
+        #            WebLogger.error(f"Cleaning up running ids {running_id}")
 
         with self.lock:
-            self.futures = [f for f in self.futures if not f.done()]
+            result = []
+            for future in self.futures:
+                if not future.done():
+                    result.append(future)
+                else:
+                    WebLogger.error("Cleaning up futures")
+            self.futures = result
+
+            #self.futures = [f for f in self.futures if not f.done()]
             if len(self.futures) == 0 and len(self.running_ids) > 0:
-                WebLogger.error("Cleaned up Running IDS")
+                WebLogger.error("Cleaning up running IDS")
                 self.running_ids = []
 
     def is_thread_ok(self):
