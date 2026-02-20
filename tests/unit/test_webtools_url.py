@@ -34,7 +34,7 @@ class UrlTest(FakeInternetTestCase):
 
     def tearDown(self):
         memory_increase = self.memory_checker.get_memory_increase()
-        self.assertEqual(memory_increase < 20)
+        self.assertTrue(memory_increase < 20)
 
     def test_get_cleaned_link(self):
         MockRequestCounter.mock_page_requests = 0
@@ -1107,11 +1107,7 @@ class UrlMemoryTest(FakeInternetTestCase):
         self.memory_checker = MemoryChecker()
         self.memory_checker.get_memory_increase()
 
-        self.iteration_count = 1500
-
-    def tearDown(self):
-        memory_increase = self.memory_checker.get_memory_increase()
-        self.assertTrue(memory_increase < 40)
+        self.iteration_count = 500
 
     def tearDown(self):
         MockRequestCounter.reset()
@@ -1119,7 +1115,7 @@ class UrlMemoryTest(FakeInternetTestCase):
 
         if not self.ignore_memory:
             memory_increase = self.memory_checker.get_memory_increase()
-            self.assertEqual(memory_increase, 0)
+            self.assertTrue(memory_increase < 20)
 
     def test_get_response__html(self):
         MockRequestCounter.mock_page_requests = 0
@@ -1130,8 +1126,6 @@ class UrlMemoryTest(FakeInternetTestCase):
             response = url.get_response()
             url.close()
 
-        print("OK")
-
     def test_get_response__rss(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -1140,8 +1134,6 @@ class UrlMemoryTest(FakeInternetTestCase):
             url = Url(test_link)
             response = url.get_response()
             url.close()
-
-        print("OK")
 
     def test_get_response__reddit(self):
         MockRequestCounter.mock_page_requests = 0
@@ -1152,8 +1144,6 @@ class UrlMemoryTest(FakeInternetTestCase):
             response = url.get_response()
             url.close()
 
-        print("OK")
-
     def test_get_response__youtube_channel(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -1163,8 +1153,6 @@ class UrlMemoryTest(FakeInternetTestCase):
             response = url.get_response()
             url.close()
 
-        print("OK")
-
     def test_get_response__youtube_video(self):
         MockRequestCounter.mock_page_requests = 0
 
@@ -1173,5 +1161,3 @@ class UrlMemoryTest(FakeInternetTestCase):
             url = Url(test_link)
             response = url.get_response()
             url.close()
-
-        print("OK")

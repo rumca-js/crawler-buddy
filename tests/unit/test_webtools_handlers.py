@@ -31,7 +31,7 @@ class RedditUrlHandlerTest(FakeInternetTestCase):
 
     def tearDown(self):
         memory_increase = self.memory_checker.get_memory_increase()
-        # TODO self.assertEqual(memory_increase, 0)
+        self.assertTrue(memory_increase < 50)
 
     def test_constructor(self):
         test_link = "https://www.reddit.com/r/redditdev/comments/1hw8p3j/i_used_the_reddit_api_to_save_myself_time_with_my/"
