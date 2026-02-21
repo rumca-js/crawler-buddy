@@ -4,7 +4,7 @@ Main crawler
 import subprocess
 import psutil
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
 from webtoolkit import (
@@ -253,7 +253,7 @@ class Crawler(object):
               we do not need to wait for that any more.
         """
         crawl_url = None
-        index = 0
+        start_time = datetime.now()
 
         while True:
             crawl_item = self.container.get(crawl_id=crawl_id)
@@ -267,12 +267,15 @@ class Crawler(object):
 
             if crawl_item.data is not None:
                 return crawl_item.data
-            time.sleep(1)
-            index += 1
 
-            if index > 60*5:
-                WebLogger.error(f"Memory/thread error when waiting for response:{crawl_url}")
+            time.sleep(1)
+
+            if datetime.now() - start_time > self.get_timeout_timedelta():
+                WebLogger.error(f"URL:{crawl_url}: Timeout on waiting for response")
                 return
 
     def set_multi_process(self):
         self.multi_process = True
+
+    def get_timeout_timedelta(self):
+        return timedelta(minutes=5)

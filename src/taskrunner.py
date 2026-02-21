@@ -29,8 +29,7 @@ class TaskRunner(object):
             max_workers = 5
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
 
-        self.running_ids = set()
-        self.futures = []
+        self.running_ids = {}
         self.lock = threading.Lock()           # protects running_ids
         self.container_lock = threading.Lock() # protects container
 
@@ -45,7 +44,7 @@ class TaskRunner(object):
         self.health_date = datetime.now()
 
     def get_size(self):
-        return len(self.futures)
+        return len(self.running_ids)
 
     def run_item(self, item):
         """Actual crawl logic here."""
@@ -74,28 +73,27 @@ class TaskRunner(object):
         Attempts to submit a task if URL is not running already.
         Returns True if submitted.
         """
-        with self.lock:
-            if not self.is_item_crawl_ok(crawl_item):
-                return False
+        if not self.is_item_crawl_ok(crawl_item):
+            return False
 
-            if self.no_executor:
-                self.run_item(crawl_item)
-            else:
-                self.running_ids.add(crawl_item.crawl_id)
+        if self.no_executor:
+            self.run_item(crawl_item)
+        else:
+            with self.lock:
                 future = self.executor.submit(self.run_item, crawl_item)
                 future.add_done_callback(self._on_done)
-                self.futures.append(future)
+                self.running_ids[crawl_item.crawl_id] = future
         return True
 
     def is_running(self, crawl_id):
         return crawl_id in self.running_ids
 
-    def is_item_crawl_ok(self, item):
+    def is_item_crawl_ok(self, crawl_item):
         """
         If new thing to run has the same domain as the running one,
         then do not add
         """
-        if item.crawl_id in self.running_ids:
+        if crawl_item.crawl_id in self.running_ids:
             return False
 
         selenium_limit = True
@@ -107,7 +105,7 @@ class TaskRunner(object):
                 running_urls.add(queued_item.get_url())
 
                 if selenium_limit:
-                    if self.is_selenium_both(item, queued_item):
+                    if self.is_selenium_both(crawl_item, queued_item):
                         return False
 
         running_domains = set()
@@ -115,7 +113,7 @@ class TaskRunner(object):
             location = UrlLocation(queued_url)
             running_domains.add(location.get_domain_only(no_www=True))
 
-        location = UrlLocation(item.get_url())
+        location = UrlLocation(crawl_item.get_url())
         this_domain = location.get_domain_only(no_www=True)
 
         if this_domain and this_domain in running_domains:
@@ -131,7 +129,7 @@ class TaskRunner(object):
         return False
 
     def is_empty(self):
-        return len(self.futures) == 0
+        return len(self.running_ids) == 0
 
     def _on_done(self, future):
         """Cleanup when tasks finish."""
@@ -139,20 +137,24 @@ class TaskRunner(object):
         crawl_id = None
         try:
             crawl_id = future.result()
+
+            if crawl_id is None:
+                for runnning_crawl_id, running_future in self.running_ids.items():
+                    if future == running_future:
+                        crawl_id = runnning_crawl_id
+
         except Exception as E:
             WebLogger.exc(E, "Error in worker:")
 
         with self.lock:
-            if future in self.futures:
-                self.futures.remove(future)
-
-            self.dispose(crawl_id)
+            if crawl_id in self.running_ids:
+                del self.running_ids[crawl_id]
 
     def dispose(self, crawl_id):
-        if crawl_id is not None:
-            self.running_ids.discard(crawl_id)
+        if crawl_id in self.running_ids:
+            del self.running_ids[crawl_id]
         else:
-            WebLogger.error("I do not know which crawl_id to remove")
+            WebLogger.error(f"Cannot remove crawl id {crawl_id}")
 
     def start(self):
         """
@@ -193,36 +195,15 @@ class TaskRunner(object):
         WebLogger.debug("[TaskRunner] Stopped.")
 
     def fix_leftovers(self):
-        #if len(self.running_ids) > 0:
-        #    running_copy = copy.copy(self.running_ids)
-        #    for running_id in running_copy:
-        #        running_item = self.container.get(crawl_id = running_id)
-        #        if running_item:
-        #            # if has already response - remove it from running
-        #            if running_item.is_response():
-        #                with self.lock:
-        #                    self.running_ids.discard(running_id)
-        #                WebLogger.error(f"Cleaning up running ids {running_id}")
-        #        if not running_item:
-        #            # if not in queue, then something is wrong
-        #            with self.lock:
-        #                self.running_ids.discard(running_id)
-        #            WebLogger.error(f"Cleaning up running ids {running_id}")
+        result = []
+        to_delete = []
+        for crawl_id, future in self.running_ids.items():
+            if future.done():
+                to_delete.append(crawl_id)
 
         with self.lock:
-            result = []
-            for future in self.futures:
-                if not future.done():
-                    result.append(future)
-                else:
-                    WebLogger.error("Cleaning up futures")
-                    crawl_id = future.result()
-                    self.dispose(crawl_id)
-            self.futures = result
-
-            if len(self.futures) == 0 and len(self.running_ids) > 0:
-                WebLogger.error("Cleaning up running IDS")
-                self.running_ids = []
+            for crawl_id in to_delete:
+                del self.running_ids[crawl_id]
 
     def is_thread_ok(self):
         if self.health_date:
