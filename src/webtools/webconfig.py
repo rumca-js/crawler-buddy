@@ -115,6 +115,9 @@ class WebConfig(object):
 
         return mapping
 
+    def get_default_timeout_s():
+        return 300
+
     def get_crawler_names():
         """
         Returns string representation

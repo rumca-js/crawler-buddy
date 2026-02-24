@@ -170,7 +170,7 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertEqual(type(page_request.crawler_type).__name__, "RequestsCrawler")
         self.assertEqual(page_request.ssl_verify, True)
         self.assertEqual(page_request.respect_robots, True)
-        self.assertEqual(page_request.timeout_s, None)
+        self.assertEqual(page_request.timeout_s, 300) # default configured timeout 0 is dangerous
 
         self.close_request(page_request)
 

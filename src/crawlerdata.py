@@ -32,6 +32,10 @@ class CrawlerData(object):
         page_request = self.fill_crawler_data(url, page_request)
         page_request = self.get_crawler(url, page_request)
 
+        # TODO one place to keep defaults
+        if page_request and page_request.timeout_s is None:
+            page_request.timeout_s = WebConfig.get_default_timeout_s()
+
         if not page_request:
             WebLogger.error(
                 "Url:{} Cannot run request without crawler".format(url)

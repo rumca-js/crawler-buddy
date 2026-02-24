@@ -51,7 +51,7 @@ class UrlRules(object):
             default_request.crawler_type = None
 
         if default_request.timeout_s is None or default_request.timeout_s == 0:
-            default_request.timeout_s = 60 * 5
+            default_request.timeout_s = WebConfig.get_default_timeout_s()
 
         return default_request
 
@@ -105,7 +105,7 @@ class Url(BaseUrl):
             request.crawler_type = default_request.crawler_type
 
         if request.timeout_s is None or request.timeout_s == 0:
-            request.timeout_s = 60 * 5
+            request.timeout_s = WebConfig.get_default_timeout_s()
 
         return request
 
