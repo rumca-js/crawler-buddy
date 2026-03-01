@@ -35,81 +35,52 @@ class CurlCffiCrawler(CrawlerInterface):
             self.response.add_error("Crawler is not valid")
             return self.response
 
-        answer = self.build_requests()
-
-        if answer:
-            self.response = PageResponseObject(
-                self.request.url,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-            if not self.is_response_valid():
-                answer.close()
-                return self.response
-
-        content = getattr(answer, "content", None)
-        text = getattr(answer, "text", None)
-
-        if answer and content:
-            self.response = PageResponseObject(
-                self.request.url,
-                binary=content,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-
-        elif text:
-            self.response = PageResponseObject(
-                self.request.url,
-                binary=None,
-                text=text,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-
-        elif answer:
-            self.response = PageResponseObject(
-                self.request.url,
-                binary=None,
-                text=None,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-
-        answer.close()
-
-        if self.response:
-            return self.response
-
-    def build_requests(self):
-        import curl_cffi
-        from curl_cffi import requests
-        from curl_cffi.requests.exceptions import ConnectionError, Timeout
-
-        headers = self.get_request_headers()
-        self.update_request()
-        impersonate = self.get_impersonate()
-
         try:
-            proxies = self.request.get_proxies_map()
-            print(self.request)
+            answer = self.build_requests()
 
-            answer = curl_cffi.get(
-                self.request.url,
-                timeout=self.request.timeout_s,
-                verify=self.request.ssl_verify,
-                cookies=self.request.cookies,
-                headers=self.request.request_headers,
-                proxy=proxies,
-                impersonate=impersonate,
+            if answer:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+                if not self.is_response_valid():
+                    answer.close()
+                    return self.response
 
-                # stream=True, # TODO
-            )
-            return answer
+            content = getattr(answer, "content", None)
+            text = getattr(answer, "text", None)
+
+            if answer and content:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    binary=content,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+
+            elif text:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    binary=None,
+                    text=text,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+
+            elif answer:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    binary=None,
+                    text=None,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+
         except ConnectionError as E:
             self.response = PageResponseObject(
                 self.request.url,
@@ -134,6 +105,36 @@ class CurlCffiCrawler(CrawlerInterface):
                 request_url=self.request.url,
             )
             self.response.add_error("Url:{} Cannot create request".format(str(E)))
+
+        try:
+            if answer:
+                answer.close()
+        except Exception as E:
+            pass
+
+        return self.response
+
+    def crawl_with_thread_implementation(self, request):
+        import curl_cffi
+        from curl_cffi import requests
+        from curl_cffi.requests.exceptions import ConnectionError, Timeout
+
+        headers = self.get_request_headers()
+        impersonate = self.get_impersonate()
+
+        proxies = self.request.get_proxies_map()
+
+        answer = curl_cffi.get(
+           self.request.url,
+           timeout=self.request.timeout_s,
+           verify=self.request.ssl_verify,
+           cookies=self.request.cookies,
+           headers=self.request.request_headers,
+           proxy=proxies,
+           impersonate=impersonate,
+           # stream=True, # TODO
+        )
+        return answer
 
     def update_request(self):
         self.request.timeout_s = self.get_timeout_s()
