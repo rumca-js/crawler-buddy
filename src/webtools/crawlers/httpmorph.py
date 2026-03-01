@@ -34,69 +34,50 @@ class HttpMorphCrawler(CrawlerInterface):
             request_url=self.request.url,
         )
 
-        answer = self.build_requests()
-
-        if answer:
-            self.response = PageResponseObject(
-                self.request.url,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-            if not self.is_response_valid():
-                return self.response
-
-        content = getattr(answer, "content", None)
-        text = getattr(answer, "text", None)
-
-        if answer and content:
-            self.response = PageResponseObject(
-                self.request.url,
-                binary=content,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-
-        elif text:
-            self.response = PageResponseObject(
-                self.request.url,
-                binary=None,
-                text=text,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-
-        elif answer:
-            self.response = PageResponseObject(
-                self.request.url,
-                binary=None,
-                text=None,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-
-        if self.response:
-            return self.response
-
-    def build_requests(self):
-        import httpmorph
-
-        self.update_request()
-
         try:
-            answer = httpmorph.get(
-                url=self.request.url,
-                timeout=self.request.timeout_s,
-                verify=self.request.ssl_verify,
-                cookies=self.request.cookies,
-                #impersonate="chrome",
-                #headers=headers,
-                # stream=True, # TODO
-            )
-            return answer
+            answer = self.build_requests()
+
+            if answer:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+                if not self.is_response_valid():
+                    return self.response
+
+            content = getattr(answer, "content", None)
+            text = getattr(answer, "text", None)
+
+            if answer and content:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    binary=content,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+
+            elif text:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    binary=None,
+                    text=text,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+
+            elif answer:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    binary=None,
+                    text=None,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
 
         except httpmorph.ConnectionError as E:
             self.response = PageResponseObject(
@@ -124,6 +105,28 @@ class HttpMorphCrawler(CrawlerInterface):
                 request_url=self.request.url,
             )
             self.response.add_error("Url:{} Cannot create request".format(str(E)))
+
+        try:
+            if answer:
+                answer.close()
+        except Exception as E:
+            pass
+
+        return self.response
+
+    def crawl_with_thread_implementation(self):
+        import httpmorph
+
+        answer = httpmorph.get(
+            url=self.request.url,
+            timeout=self.request.timeout_s,
+            verify=self.request.ssl_verify,
+            cookies=self.request.cookies,
+            #impersonate="chrome",
+            #headers=headers,
+            # stream=True, # TODO
+        )
+        return answer
 
     def update_request(self):
         self.request.timeout_s = self.get_timeout_s()

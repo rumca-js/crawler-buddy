@@ -32,68 +32,49 @@ class StealthRequestsCrawler(CrawlerInterface):
             request_url=self.request.url,
         )
 
-        answer = self.build_requests()
-
-        content = None
-        text = None
-
-        if answer:
-            content = answer.content
-            text = answer.text
-
-        if answer and content:
-            self.response = PageResponseObject(
-                self.request.url,
-                binary=content,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-
-            if not self.is_response_valid():
-                answer.close()
-                return self.response
-
-        elif answer and text:
-            self.response = PageResponseObject(
-                self.request.url,
-                binary=None,
-                text=text,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-
-        elif answer:
-            self.response = PageResponseObject(
-                self.request.url,
-                binary=None,
-                text=None,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-
-        answer.close()
-
-        if self.response:
-            return self.response
-
-    def build_requests(self):
-        import stealth_requests as requests
-
         try:
-            self.update_request()
-            proxies = self.request.get_proxies_map()
+            answer = self.build_requests()
 
-            answer = requests.get(
-                self.request.url,
-                timeout=self.request.timeout_s,
-                verify=self.request.ssl_verify,
-                proxies=proxies,
-                # stream=True,   # TODO does not work with it
-            )
-            return answer
+            content = None
+            text = None
+
+            if answer:
+                content = answer.content
+                text = answer.text
+
+            if answer and content:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    binary=content,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+
+                if not self.is_response_valid():
+                    answer.close()
+                    return self.response
+
+            elif answer and text:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    binary=None,
+                    text=text,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+
+            elif answer:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    binary=None,
+                    text=None,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+
         except Exception as E:
             self.response = PageResponseObject(
                 self.request.url,
@@ -102,6 +83,28 @@ class StealthRequestsCrawler(CrawlerInterface):
                 request_url=self.request.url,
             )
             self.response.add_error("Url:{} Connection error".format(self.request.url))
+
+        try:
+            if answer:
+                answer.close()
+        except Exception as E:
+            pass
+
+        return self.response
+
+    def crawl_with_thread_implementation(self, request):
+        import stealth_requests as requests
+
+        proxies = self.request.get_proxies_map()
+
+        answer = requests.get(
+            self.request.url,
+            timeout=self.request.timeout_s,
+            verify=self.request.ssl_verify,
+            proxies=proxies,
+            # stream=True,   # TODO does not work with it
+        )
+        return answer
 
     def update_request(self):
         self.request.timeout_s = self.get_timeout_s()

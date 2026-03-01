@@ -258,9 +258,7 @@ class Crawler(object):
         while True:
             crawl_item = self.container.get(crawl_id=crawl_id)
             if crawl_item is None:
-                # request could have become obsolete, might be removed by third party
-                # if it was - then we do not need to wait any more
-                WebLogger.error(f"Request was removed, and this thread is still working URL:{crawl_url}")
+                WebLogger.debug(f"Request was removed ID:{crawl_id}")
                 return
 
             crawl_url = crawl_item.get_url()

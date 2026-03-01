@@ -32,60 +32,71 @@ class HttpxCrawler(CrawlerInterface):
             request_url=self.request.url,
         )
 
-        answer = self.build_requests()
+        try:
+            answer = self.build_requests()
 
-        if answer:
+            if answer:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+                if not self.is_response_valid():
+                    answer.close()
+                    return self.response
+
+            content = getattr(answer, "content", None)
+            text = getattr(answer, "text", None)
+
+            if answer and content:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    binary=content,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+
+            elif text:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    binary=None,
+                    text=text,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+
+            elif answer:
+                self.response = PageResponseObject(
+                    self.request.url,
+                    binary=None,
+                    text=None,
+                    status_code=answer.status_code,
+                    request_url=self.request.url,
+                    headers=answer.headers,
+                )
+
+        except Exception as E:
             self.response = PageResponseObject(
                 self.request.url,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-            if not self.is_response_valid():
-                answer.close()
-                return self.response
-
-        content = getattr(answer, "content", None)
-        text = getattr(answer, "text", None)
-
-        if answer and content:
-            self.response = PageResponseObject(
-                self.request.url,
-                binary=content,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-
-        elif text:
-            self.response = PageResponseObject(
-                self.request.url,
-                binary=None,
-                text=text,
-                status_code=answer.status_code,
-                request_url=self.request.url,
-                headers=answer.headers,
-            )
-
-        elif answer:
-            self.response = PageResponseObject(
-                self.request.url,
-                binary=None,
                 text=None,
-                status_code=answer.status_code,
+                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
                 request_url=self.request.url,
-                headers=answer.headers,
             )
+            self.response.add_error("Url:{} Cannot create request".format(str(E)))
 
-        answer.close()
+        try:
+            if answer:
+                answer.close()
+        except Exception as E:
+            pass
 
-        if self.response:
-            return self.response
+        return self.response
 
-    def build_requests(self):
+    def crawl_with_thread_implementation(self, request):
         import httpx
-
-        self.update_request()
 
         proxy=None
         if self.request.http_proxy:
@@ -93,7 +104,6 @@ class HttpxCrawler(CrawlerInterface):
         if self.request.https_proxy:
             proxy = self.request.https_proxy
 
-        try:
             answer = httpx.get(
                 self.request.url,
                 timeout=self.request.timeout_s,
@@ -105,14 +115,6 @@ class HttpxCrawler(CrawlerInterface):
                 # stream=True, # TODO
             )
             return answer
-        except Exception as E:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Cannot create request".format(str(E)))
 
     def update_request(self):
         self.request.timeout_s = self.get_timeout_s()
