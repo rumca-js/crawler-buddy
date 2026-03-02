@@ -25,7 +25,7 @@ def main():
 
     request = parser.get_request()
 
-    driver = webtools.RequestsCrawler(request=request)
+    driver = webtools.CurlCffiCrawler(request=request)
 
     if parser.args.verbose:
         print("Running request:{} with RequestsCrawler".format(request))
@@ -40,7 +40,7 @@ def main():
         print(response.get_text())
 
     print(response)
-    response_to_file(response, parser.args.output_file)
+    #response_to_file(response, parser.args.output_file)
     driver.close()
 
 

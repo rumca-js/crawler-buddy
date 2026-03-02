@@ -9,6 +9,7 @@ import urllib.parse
 from webtoolkit import (
     PageResponseObject,
     CrawlerInterface,
+    WebToolsTimeoutException,
     HTTP_STATUS_CODE_EXCEPTION,
     HTTP_STATUS_CODE_CONNECTION_ERROR,
     HTTP_STATUS_CODE_SERVER_ERROR,
@@ -26,6 +27,8 @@ class HttpMorphCrawler(CrawlerInterface):
         """
         if not self.is_valid():
             return
+
+        import httpmorph
 
         self.response = PageResponseObject(
             self.request.url,
@@ -86,8 +89,7 @@ class HttpMorphCrawler(CrawlerInterface):
                 status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
                 request_url=self.request.url,
             )
-            self.response.add_error("Url:{} Cannot create request".format(str(E)))
-
+            self.response.add_error("Url:{} Connection error".format(self.request.url))
         except httpmorph.Timeout as E:
             self.response = PageResponseObject(
                 self.request.url,
@@ -95,8 +97,15 @@ class HttpMorphCrawler(CrawlerInterface):
                 status_code=HTTP_STATUS_CODE_TIMEOUT,
                 request_url=self.request.url,
             )
-            self.response.add_error("Url:{} Timeout".format(str(E)))
-
+            self.response.add_error("Url:{} Timeout".format(self.request.url))
+        except WebToolsTimeoutException as E:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_TIMEOUT,
+                request_url=self.request.url,
+            )
+            self.response.add_error("Url:{} Timeout".format(self.request.url))
         except Exception as E:
             self.response = PageResponseObject(
                 self.request.url,
@@ -104,7 +113,7 @@ class HttpMorphCrawler(CrawlerInterface):
                 status_code=HTTP_STATUS_CODE_EXCEPTION,
                 request_url=self.request.url,
             )
-            self.response.add_error("Url:{} Cannot create request".format(str(E)))
+            self.response.add_error("Url:{} code exception:{}".format(self.request.url, str(E)))
 
         try:
             if answer:
@@ -114,14 +123,14 @@ class HttpMorphCrawler(CrawlerInterface):
 
         return self.response
 
-    def crawl_with_thread_implementation(self):
+    def crawl_with_thread_implementation(self, request):
         import httpmorph
 
         answer = httpmorph.get(
             url=self.request.url,
             timeout=self.request.timeout_s,
             verify=self.request.ssl_verify,
-            cookies=self.request.cookies,
+            #cookies=self.request.cookies,
             #impersonate="chrome",
             #headers=headers,
             # stream=True, # TODO

@@ -9,10 +9,12 @@ import urllib.parse
 from webtoolkit import (
     PageResponseObject,
     CrawlerInterface,
+    WebToolsTimeoutException,
     HTTP_STATUS_CODE_EXCEPTION,
     HTTP_STATUS_CODE_CONNECTION_ERROR,
     HTTP_STATUS_CODE_SERVER_ERROR,
     HTTP_STATUS_CODE_TIMEOUT,
+    WebLogger,
 )
 
 class CurlCffiCrawler(CrawlerInterface):
@@ -34,6 +36,8 @@ class CurlCffiCrawler(CrawlerInterface):
         if not self.is_valid():
             self.response.add_error("Crawler is not valid")
             return self.response
+
+        from curl_cffi.requests.exceptions import ConnectionError, Timeout
 
         try:
             answer = self.build_requests()
@@ -88,7 +92,7 @@ class CurlCffiCrawler(CrawlerInterface):
                 status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
                 request_url=self.request.url,
             )
-            self.response.add_error("Url:{} Cannot create request".format(str(E)))
+            self.response.add_error("Url:{} Connection error".format(self.request.url))
         except Timeout as E:
             self.response = PageResponseObject(
                 self.request.url,
@@ -96,7 +100,15 @@ class CurlCffiCrawler(CrawlerInterface):
                 status_code=HTTP_STATUS_CODE_TIMEOUT,
                 request_url=self.request.url,
             )
-            self.response.add_error("Url:{} Cannot create request".format(str(E)))
+            self.response.add_error("Url:{} Timeout".format(self.request.url))
+        except WebToolsTimeoutException as E:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_TIMEOUT,
+                request_url=self.request.url,
+            )
+            self.response.add_error("Url:{} Timeout".format(self.request.url))
         except Exception as E:
             self.response = PageResponseObject(
                 self.request.url,
@@ -104,7 +116,7 @@ class CurlCffiCrawler(CrawlerInterface):
                 status_code=HTTP_STATUS_CODE_EXCEPTION,
                 request_url=self.request.url,
             )
-            self.response.add_error("Url:{} Cannot create request".format(str(E)))
+            self.response.add_error("Url:{} Server error {}".format(self.request.url, str(E)))
 
         try:
             if answer:
@@ -123,6 +135,7 @@ class CurlCffiCrawler(CrawlerInterface):
         impersonate = self.get_impersonate()
 
         proxies = self.request.get_proxies_map()
+        WebLogger.warning("CurlCffiCrawler: {}".format(str(self.request)))
 
         answer = curl_cffi.get(
            self.request.url,

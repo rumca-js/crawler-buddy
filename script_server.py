@@ -48,7 +48,7 @@ if __name__ == "__main__":
         context = (p.args.cert_file, p.args.cert_key)
 
         app.run(
-            debug=True,
+            debug=p.args.debug,
             host=host,
             port=port,
             threaded=True,

@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from datetime import datetime
 from collections import OrderedDict
 from webtoolkit import WebLogger, request_to_json, copy_request
+from src.webtools import WebConfig
 
 
 class CrawlItem(object):
@@ -34,6 +35,14 @@ class CrawlItem(object):
 
     def is_response(self):
         return self.data is not None
+
+    def is_expired(self):
+        timeout_s = WebConfig.get_default_timeout_s()
+        if self.request_real:
+            timeout_s = self.request_real.timeout_s
+
+        if timeout_s > 0:
+            return datetime.now() > self.timestamp + timedelta(seconds=timeout_s)
 
 
 class CrawlerContainer(object):
@@ -236,6 +245,11 @@ class CrawlerContainer(object):
         now_length = self.get_size()
         if previous_length != now_length:
             WebLogger.debug("Container: Some entries expired!!!")
+
+    def is_expired(self, crawl_item):
+        timeout_s = crawl_item.request_real.timeout_s
+        if timeout_s > 0:
+            return datetime.now() > crawl_item.timestamp + timedelta(seconds=timeout_s)
 
     def trim_size(self):
         """

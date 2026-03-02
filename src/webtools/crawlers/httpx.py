@@ -9,8 +9,10 @@ import urllib.parse
 from webtoolkit import (
     PageResponseObject,
     CrawlerInterface,
+    WebToolsTimeoutException,
     HTTP_STATUS_CODE_CONNECTION_ERROR,
     HTTP_STATUS_CODE_SERVER_ERROR,
+    HTTP_STATUS_CODE_EXCEPTION,
 )
 
 class HttpxCrawler(CrawlerInterface):
@@ -77,15 +79,23 @@ class HttpxCrawler(CrawlerInterface):
                     request_url=self.request.url,
                     headers=answer.headers,
                 )
+        except WebToolsTimeoutException as E:
+            self.response = PageResponseObject(
+                self.request.url,
+                text=None,
+                status_code=HTTP_STATUS_CODE_TIMEOUT,
+                request_url=self.request.url,
+            )
+            self.response.add_error("Url:{} Timeout".format(self.request.url))
 
         except Exception as E:
             self.response = PageResponseObject(
                 self.request.url,
                 text=None,
-                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
+                status_code=HTTP_STATUS_CODE_EXCEPTION,
                 request_url=self.request.url,
             )
-            self.response.add_error("Url:{} Cannot create request".format(str(E)))
+            self.response.add_error("Url:{} Server error {}".format(self.request.url, str(E)))
 
         try:
             if answer:

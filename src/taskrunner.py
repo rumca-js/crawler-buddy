@@ -73,6 +73,15 @@ class TaskRunner(object):
         Attempts to submit a task if URL is not running already.
         Returns True if submitted.
         """
+        if self.is_running(crawl_item.crawl_id):
+            return False
+
+        if crawl_item.is_expired():
+            return False
+
+        if crawl_item.is_response():
+            return False
+
         if not self.is_item_crawl_ok(crawl_item):
             return False
 
@@ -80,6 +89,11 @@ class TaskRunner(object):
             self.run_item(crawl_item)
         else:
             with self.lock:
+                if crawl_item.request_real:
+                    WebLogger.info("Running: {}".format(crawl_item.request_real.url))
+                else:
+                    WebLogger.info("Running: {}".format(crawl_item.url))
+
                 future = self.executor.submit(self.run_item, crawl_item)
                 future.add_done_callback(self._on_done)
                 self.running_ids[crawl_item.crawl_id] = future
@@ -93,9 +107,6 @@ class TaskRunner(object):
         If new thing to run has the same domain as the running one,
         then do not add
         """
-        if crawl_item.crawl_id in self.running_ids:
-            return False
-
         selenium_limit = True
 
         running_urls = set()
@@ -146,15 +157,20 @@ class TaskRunner(object):
         except Exception as E:
             WebLogger.exc(E, "Error in worker:")
 
-        with self.lock:
-            if crawl_id in self.running_ids:
-                del self.running_ids[crawl_id]
+        self.dispose(crawl_id)
 
     def dispose(self, crawl_id):
-        if crawl_id in self.running_ids:
-            del self.running_ids[crawl_id]
-        else:
-            WebLogger.error(f"Cannot remove crawl id {crawl_id}")
+        if crawl_id is None:
+            return
+
+        with self.lock:
+            if crawl_id in self.running_ids:
+                try:
+                    del self.running_ids[crawl_id]
+                except Exception as E:
+                    pass
+            else:
+                WebLogger.error(f"Cannot remove crawl id {crawl_id}")
 
     def start(self):
         """
@@ -171,9 +187,9 @@ class TaskRunner(object):
                 submitted_any = False
 
                 with self.container_lock:
-                    for item in list(self.container.get_queued_items()):
-                        if item.data is None:
-                            if item.crawl_id and self.attempt_submit(item):
+                    for crawl_item in list(self.container.get_queued_items()):
+                        if crawl_item.data is None:
+                            if crawl_item.crawl_id and self.attempt_submit(crawl_item):
                                 submitted_any = True
 
                     self.fix_leftovers()
@@ -201,9 +217,13 @@ class TaskRunner(object):
             if future.done():
                 to_delete.append(crawl_id)
 
+        for crawl_id in to_delete:
+            self.dispose(crawl_id)
+
         with self.lock:
-            for crawl_id in to_delete:
-                del self.running_ids[crawl_id]
+            for crawl_item in list(self.container.get_queued_items()):
+                if not self.is_running(crawl_item.crawl_id) and crawl_item.is_expired():
+                    self.container.remove(crawl_item.crawl_id)
 
     def is_thread_ok(self):
         if self.health_date:

@@ -40,6 +40,14 @@ class CommandLineParser(object):
             action="store_true",
         )
 
+        self.parser.add_argument(
+            "-d",
+            "--debug",
+            default=False,
+            help="Debug indication",
+            action="store_true",
+        )
+
         self.parser.add_argument("--cert-file", help="Host")
         self.parser.add_argument("--cert-key", help="Host")
 
