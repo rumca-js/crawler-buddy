@@ -157,7 +157,7 @@ class ScriptCrawler(CrawlerInterface):
             self.response.add_error("Return code invalid: {}".format(p.returncode))
 
         import requests
-        from ..remoteserver import RemoteServer
+        from ..remoteserver import RemoteUrl
 
         url = f"{remote_server}/findj?url={self.request.url}"
         response = requests.get(url)
@@ -166,8 +166,8 @@ class ScriptCrawler(CrawlerInterface):
             try:
                 data = response.json()
 
-                server = RemoteServer("")
-                self.response = server.get_response(data)
+                url = RemoteUrl(all_properties = data)
+                self.response = url.get_response()
 
                 return self.response
 

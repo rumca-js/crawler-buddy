@@ -1,7 +1,13 @@
 import argparse
+import requests
 import json
 
-from webtoolkit import PageRequestObject, CrawlerInterface
+from webtoolkit import (
+  PageRequestObject,
+  CrawlerInterface,
+  response_to_json,
+  RemoteUrl,
+)
 
 
 class ScriptCrawlerParser(object):
@@ -15,18 +21,28 @@ class ScriptCrawlerParser(object):
         self.parser.add_argument(
             "--timeout", default=10, type=int, help="Timeout expressed in seconds"
         )
-        self.parser.add_argument("--ping", default=False, help="Ping only")
-        self.parser.add_argument("--headers", default=False, help="Fetch headers only")
-        self.parser.add_argument("--remote-server", help="Remote server")
-        self.parser.add_argument("--proxy-address", help="Proxy address")
         self.parser.add_argument("--ssl-verify", default=False, help="SSL verify")
+        self.parser.add_argument("--accept-types", help="Accept types")
+        self.parser.add_argument("--respect-robots", default=False, help="Respect robots.txt")
+        self.parser.add_argument("--bytes-limit", help="Bytes limit")
 
-        # TODO implement
-        self.parser.add_argument("--input-data", help="Input request file")
-        self.parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
+        self.parser.add_argument("--user-agent", help="Bytes limit")
 
-        self.parser.add_argument("-i", "--input", help="Requests binary file")
+        self.parser.add_argument("--settings", help="Settings map")
+        self.parser.add_argument("--cookies", help="Cookies map")
+        self.parser.add_argument("--request-headers", help="Fetch headers only")
+
+        self.parser.add_argument("--ping", default=False, help="Ping only")
+
+        self.parser.add_argument("--http-proxy", help="Proxy address")
+        self.parser.add_argument("--https-proxy", help="Proxy address")
+
+        self.parser.add_argument("--request-file", help="Input request file")
+        self.parser.add_argument("--remote-server", help="Remote server")
+        self.parser.add_argument("--crawl-id", help="Crawl id")
         self.parser.add_argument("-o", "--output-file", help="Response binary file")
+
+        self.parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 
         self.args = self.parser.parse_args()
 
@@ -47,8 +63,37 @@ class ScriptCrawlerParser(object):
 
     def get_request(self):
         r = PageRequestObject(self.args.url)
+
         r.timeout_s = self.args.timeout
+        r.ssl_verify = self.args.ssl_verify
+        r.respect_robots = self.args.respect_robots
+        r.accept_types = self.args.accept_types
+        r.bytes_limit = self.args.bytes_limit
+
+        r.http_proxy = self.args.http_proxy
+        r.https_proxy = self.args.https_proxy
+
+        r.user_agent = self.args.user_agent
         r.ping = self.args.ping
-        r.headers = self.args.headers
+        r.request_headers = self.args.request_headers
+        r.settings = self.args.settings
+
+        if not r.settings:
+            r.settings = {}
+        if not r.cookies:
+            r.cookies = {}
 
         return r
+
+    def save(self, response):
+        if response:
+            if self.args.remote_server:
+                remote_server = self.args.remote_server
+                response_json = response_to_json(response)
+
+                crawl_id = ""
+                if self.args.crawl_id:
+                    crawl_id = self.args.crawl_id
+
+                url = f"{remote_server}/set?crawl_id={crawl_id}"
+                response = requests.post(url, json=response_json)

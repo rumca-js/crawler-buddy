@@ -117,6 +117,7 @@ class CurlCffiCrawler(CrawlerInterface):
                 request_url=self.request.url,
             )
             self.response.add_error("Url:{} Server error {}".format(self.request.url, str(E)))
+            WebLogger.exc(E)
 
         try:
             if answer:
@@ -153,9 +154,10 @@ class CurlCffiCrawler(CrawlerInterface):
         self.request.timeout_s = self.get_timeout_s()
 
     def get_impersonate(self):
-        impersonate = self.request.settings.get("impersonate")
-        if impersonate:
-            return impersonate
+        if self.request.settings:
+            impersonate = self.request.settings.get("impersonate")
+            if impersonate:
+                return impersonate
 
         return "chrome"
 

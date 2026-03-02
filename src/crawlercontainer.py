@@ -143,20 +143,26 @@ class CrawlerContainer(object):
                 return True
         return False
 
-    def add(self, crawl_type, url, data):
+    def add(self, crawl_type, url, data, crawl_id=None):
         """
         Adds crawl type data for url
         """
-        self.crawl_index += 1
+        if crawl_id:
+            crawl_item = self.find(crawl_id)
+            if crawl_item:
+                self.update(crawl_id, data)
+        else:
+            self.crawl_index += 1
+            crawl_id = self.crawl_index
 
-        item = CrawlItem(
-            crawl_id=crawl_id,
-            crawl_type=crawl_type,
-            url=url,
-            data=data,
-        )
+            item = CrawlItem(
+                crawl_id=crawl_id,
+                crawl_type=crawl_type,
+                url=url,
+                data=data,
+            )
 
-        self.container.append(item)
+            self.container.append(item)
 
         self.expire_old()
         self.trim_size()

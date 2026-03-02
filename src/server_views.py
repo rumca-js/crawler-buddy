@@ -20,6 +20,7 @@ from webtoolkit import (
     ContentLinkParser,
     DomainCache,
     HTTP_STATUS_CODE_CONNECTION_ERROR,
+    json_to_response,
 )
 from src import webtools
 from src.views import (
@@ -382,18 +383,22 @@ def debug():
 @views.route("/set", methods=["POST"])
 def set_response():
     data = request.json
-    if not data or "Contents" not in data:
+    if not data:
         return jsonify({"success": False, "error": "Missing 'Contents'"}), 400
+
+    crawl_id = request.args.get("crawl_id")
+    if crawl_id:
+        crawl_id = int(crawl_id)
 
     u = set_response_impl(request)
 
     p = u.handler.get_page_handler()
 
-    all_properties = u.get_properties(full=True)
+    all_properties = u.get_all_properties()
 
-    current_app.config['crawler_main'].container.add(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url=url, data=all_properties)
+    current_app.config['crawler_main'].container.add(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url=u.url, data=all_properties, crawl_id=crawl_id)
 
-    return jsonify({"success": True, "received": contents})
+    return jsonify(all_properties)
 
 
 def set_response_impl(request):
@@ -401,34 +406,15 @@ def set_response_impl(request):
     # if not current_app.config['configuration'].is_allowed(id):
     #    return get_html(id=id, body="Cannot access this view", title="Error")
 
-    data = request.json
-    if not data or "Contents" not in data:
+    response_data = request.json
+    if not response_data:
         return None
 
-    # url = data['url']
-    url = data["request_url"]
-    contents = data["Contents"]
-    headers = data["Headers"]
-    status_code = data["status_code"]
-    crawler_data = data["crawler_data"]
-    crawler = crawler_data.get("crawler", None)
-    if crawler and crawler == "ScriptCrawler":
-        crawler_data["crawler"] = webtools.ScriptCrawler(url=url)
+    response = json_to_response(response_data)
 
-    content_bytes = base64.b64decode(contents)
+    url = response.request.url
 
-    print("Server set_response:{}".format(url))
-
-    response = PageResponseObject(
-        url=url,
-        headers=headers,
-        binary=content_bytes,
-        status_code=status_code,
-        request_url=url,
-    )
-
-    u = webtools.Url(url, settings=crawler_data)
-    u.settings = crawler_data
+    u = webtools.Url(url)
     u.handler = HttpPageHandler(url)
     u.handler.response = response
 
