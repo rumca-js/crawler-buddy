@@ -9,7 +9,7 @@ import time
 import argparse
 import sys
 
-from webtoolkit import response_to_file
+from webtoolkit import response_to_file, RequestsCrawler
 from src import webtools
 
 
@@ -25,12 +25,14 @@ def main():
 
     request = parser.get_request()
 
-    driver = webtools.RequestsCrawler(request=request)
+    driver = RequestsCrawler(request=request)
 
     if parser.args.verbose:
         print("Running request:{} with RequestsCrawler".format(request))
 
     response = driver.run()
+    if response:
+        response.request = request
     if not response:
         print("No response")
         sys.exit(1)
@@ -40,7 +42,7 @@ def main():
         print(response.get_text())
 
     print(response)
-    response_to_file(response, parser.args.output_file)
+    parser.save(response)
     driver.close()
 
 

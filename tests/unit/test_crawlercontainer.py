@@ -276,6 +276,21 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(crawl_item)
         self.assertFalse(crawl_item.data)
 
+    def test_add(self):
+        history = CrawlerContainer()
+
+        self.assertEqual(history.get_size(), 0)
+
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+
+        data = {"test_data" : "OK"}
+
+        history.add(crawl_id=crawl_id, data=data)
+
+        crawl_item = history.get(crawl_id=crawl_id)
+        self.assertTrue(crawl_item.data)
+        self.assertIn("test_data", crawl_item.data)
+
     def test_expire_old__with_data(self):
         history = CrawlerContainer()
 

@@ -1,7 +1,7 @@
 import os
 import json
 from webtoolkit import WebLogger, json_to_request
-from src.webtools import WebConfig
+from src.webtools import WebConfig, ScriptCrawler
 
 from src.entryrules import EntryRules
 
@@ -158,9 +158,21 @@ class CrawlerData(object):
             WebLogger.error(f"Could not find crawler {name}")
             return
 
+        script = "crawlercurlcffi.py"
+        if name == "CurlCffiCrawler":
+            script = "crawlercurlcffi.py"
+        if name == "RequestsCrawler":
+            script = "crawlerrequests.py"
+        if name == "HttpMorphCrawler":
+            script = "crawlerhttpmorph.py"
+        if name == "StealthCrawler":
+            script = "crawlerstealth.py"
+
         if page_request.crawler_name != name:
             page_request.crawler_name = name
-        page_request.crawler_type = crawler(url=url)
+        page_request.crawler_type = crawler(url=url, script=script)
+        page_request.settings["script"] = script
+        page_request.settings["remote_server"] = "http://127.0.0.1:3000"
 
         return page_request
 

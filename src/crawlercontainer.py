@@ -148,7 +148,7 @@ class CrawlerContainer(object):
         Adds crawl type data for url
         """
         if crawl_id:
-            crawl_item = self.find(crawl_id)
+            crawl_item = self.get(crawl_id=crawl_id)
             if crawl_item:
                 self.update(crawl_id, data)
         else:

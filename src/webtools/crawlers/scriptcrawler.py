@@ -14,6 +14,7 @@ import subprocess
 import threading
 import urllib.parse
 import tempfile
+import requests
 
 from utils.basictypes import fix_path_for_os
 
@@ -21,6 +22,7 @@ from webtoolkit import (
     RssPage,
     HtmlPage,
     PageResponseObject,
+    RemoteUrl,
     CrawlerInterface,
     WebToolsTimeoutException,
     WebLogger,
@@ -83,6 +85,10 @@ class ScriptCrawler(CrawlerInterface):
         return full_path.parents[3]
 
     def run(self):
+        if self.script is None:
+            self.script = self.request.settings.get('script')
+            self.script = "poetry run python " + self.script
+
         if not self.is_valid():
             return
 
@@ -100,10 +106,11 @@ class ScriptCrawler(CrawlerInterface):
             status_code=HTTP_STATUS_CODE_SERVER_ERROR,
             request_url=self.request.url,
         )
+        url = self.request.url
+        crawl_id = self.request.settings.get("crawl_id")
+        timeout_s = self.get_timeout_s()
 
-        script = self.script + ' --url "{}" --remote-server="{}" --timeout={}'.format(
-            self.request.url, remote_server, self.get_timeout_s()
-        )
+        script = self.script + f' --url "{url}" --remote-server="{remote_server}" --timeout={timeout_s} --crawl-id={crawl_id}'
 
         # WebLogger.error("Response:{}".format(self.response_file))
         # WebLogger.error("CWD:{}".format(self.cwd))
@@ -122,6 +129,11 @@ class ScriptCrawler(CrawlerInterface):
             )
         except subprocess.TimeoutExpired as E:
             WebLogger.debug(E, "Timeout on running script")
+
+            try:
+                p.kill()
+            except Exception as E:
+                WebLogger.exc(E, "Could not kill process")
 
             self.response = PageResponseObject(
                 self.request.url,
@@ -156,10 +168,7 @@ class ScriptCrawler(CrawlerInterface):
             )
             self.response.add_error("Return code invalid: {}".format(p.returncode))
 
-        import requests
-        from ..remoteserver import RemoteUrl
-
-        url = f"{remote_server}/findj?url={self.request.url}"
+        url = f"{remote_server}/findj?index={crawl_id}"
         response = requests.get(url)
 
         if response.status_code == 200:

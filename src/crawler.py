@@ -73,6 +73,8 @@ class CrawlerTypeGet(object):
     def run_internal(self, url, request=None):
         url = self.crawl_item.get_url()
         request = self.crawl_item.request_real
+        if request:
+            request.settings["crawl_id"] = self.crawl_item.crawl_id
 
         page_url = webtools.Url(url=url, request=request)
 

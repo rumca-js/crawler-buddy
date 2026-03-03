@@ -32,6 +32,8 @@ def main():
         print("Running request:{} with Stealth".format(request))
 
     response = driver.run()
+    if response:
+        response.request = request
     if not response:
         print("No response")
         sys.exit(1)
@@ -41,7 +43,7 @@ def main():
         print(response.get_text())
 
     print(response)
-    driver.save_response()
+    parser.save(response)
     driver.close()
 
 

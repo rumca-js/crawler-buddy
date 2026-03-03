@@ -135,10 +135,14 @@ class WebConfig(object):
         if not crawler_string:
             return
 
+        """ TODO
         crawlers = WebConfig.get_crawlers_raw()
         for crawler in crawlers:
             if crawler.__name__ == crawler_string:
                 return crawler
+        """
+        crawler = ScriptCrawler
+        return crawler
 
     def get_crawler_from_mapping(request, mapping_data):
         crawler_class = None
@@ -179,12 +183,29 @@ class WebConfig(object):
                 return crawler_data
 
     def get_default_request(url):
+
         crawler_data = WebConfig.get_default_crawler(url)
         if crawler_data:
             request = PageRequestObject(url)
-            request.crawler_name = crawler_data["crawler_name"]
-            crawler_class = WebConfig.get_crawler_from_string(request.crawler_name)
-            request.crawler_type = crawler_class(url=url)
+
+            name = crawler_data["crawler_name"]
+            script = "crawlercurlcffi.py"
+            if name == "CurlCffiCrawler":
+                script = "crawlercurlcffi.py"
+            if name == "RequestsCrawler":
+                script = "crawlerrequests.py"
+            if name == "HttpMorphCrawler":
+                script = "crawlerhttpmorph.py"
+            if name == "StealthCrawler":
+                script = "crawlerstealth.py"
+
+            request.crawler_name = name
+            #request.crawler_name = "ScriptCrawler"
+            #crawler_class = WebConfig.get_crawler_from_string(request.crawler_name)
+            crawler_class = ScriptCrawler
+            request.crawler_type = crawler_class(url=url, script=script)
+            request.settings["script"] = script
+            request.settings["remote_server"] = "http://127.0.0.1:3000"
             return request
 
     def use_logger(Logger):
