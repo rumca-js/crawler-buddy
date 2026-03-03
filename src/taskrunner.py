@@ -182,26 +182,29 @@ class TaskRunner(object):
 
         try:
             while not self.shutdown_flag:
-                self.set_thread_ok()
+                try:
+                    self.set_thread_ok()
 
-                submitted_any = False
+                    submitted_any = False
 
-                with self.container_lock:
-                    for crawl_item in list(self.container.get_queued_items()):
-                        if crawl_item.data is None:
-                            if crawl_item.crawl_id and self.attempt_submit(crawl_item):
-                                submitted_any = True
+                    with self.container_lock:
+                        for crawl_item in list(self.container.get_queued_items()):
+                            if crawl_item.data is None:
+                                if crawl_item.crawl_id and self.attempt_submit(crawl_item):
+                                    submitted_any = True
 
-                    self.fix_leftovers()
+                        self.fix_leftovers()
 
-                # Sleep a bit if no new work appeared
-                if not submitted_any:
-                    time.sleep(self.poll_interval)
+                    # Sleep a bit if no new work appeared
+                    if not submitted_any:
+                        time.sleep(self.poll_interval)
 
-                memory_info = get_memory_info()
-                if memory_info["memory_percentage"] > 95.0:
-                    WebLogger.error("[TaskRunner] Stopping… virtual memory eaten.")
-                    break
+                    memory_info = get_memory_info()
+                    if memory_info["memory_percentage"] > 95.0:
+                        WebLogger.error("[TaskRunner] Stopping… virtual memory eaten.")
+                        break
+                except Exception as E:
+                    WebLogger.exc(E, "Exception in TaskRunner")
 
         except Exception as E:
             WebLogger.exc(E, "Exception in TaskRunner")
