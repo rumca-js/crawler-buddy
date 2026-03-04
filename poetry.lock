@@ -2913,14 +2913,14 @@ files = [
 
 [[package]]
 name = "webtoolkit"
-version = "0.1.13"
+version = "0.1.16"
 description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "webtoolkit-0.1.13-py3-none-any.whl", hash = "sha256:dfab3eb3d47ee9b5fb84535ade06e424a53817edcba47cbd0a570e23eb98df3e"},
-    {file = "webtoolkit-0.1.13.tar.gz", hash = "sha256:524b5210dd1c75df6b17ee69ac81b95b5d46e4cd8f2d1081ec006f0f4f089039"},
+    {file = "webtoolkit-0.1.16-py3-none-any.whl", hash = "sha256:38530975041a4288d96335c60b357d5f357dfdd28487423139bc587eb14b0360"},
+    {file = "webtoolkit-0.1.16.tar.gz", hash = "sha256:dd4abdc249ce226e40610c7f3e10dd46a785202b7c99b4f79c9fd19c29d3804c"},
 ]
 
 [package.dependencies]

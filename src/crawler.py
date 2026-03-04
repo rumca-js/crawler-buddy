@@ -55,7 +55,8 @@ class CrawlerTypeGet(object):
         request = self.crawl_item.request
 
         try:
-            webtools.WebConfig.start_display()
+            # TODO
+            #webtools.WebConfig.start_display()
             all_properties = self.run_internal(url, request)
         except Exception as E:
             WebLogger.exc(
@@ -64,9 +65,10 @@ class CrawlerTypeGet(object):
             )
             all_properties = get_all_properties__exc(E, "Cannot obtain GET information")
 
-        if webtools.SeleniumDriver.counter == 0 and webtools.WebConfig.count_chrom_processes() > 10:
-            webtools.WebConfig.kill_chrom_processes()
-            webtools.WebConfig.kill_xvfb_processes()
+        # TODO
+        #if webtools.SeleniumDriver.counter == 0 and webtools.WebConfig.count_chrom_processes() > 10:
+        #    webtools.WebConfig.kill_chrom_processes()
+        #    webtools.WebConfig.kill_xvfb_processes()
 
         return all_properties
 
