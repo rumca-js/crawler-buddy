@@ -84,7 +84,7 @@ class ScriptCrawler(CrawlerInterface):
         full_path = Path(file_path)
         return full_path.parents[3]
 
-    def run(self):
+    def run_internal(self):
         if self.script is None:
             self.script = self.request.settings.get('script')
             self.script = "poetry run python " + self.script
@@ -111,6 +111,8 @@ class ScriptCrawler(CrawlerInterface):
         timeout_s = self.get_timeout_s()
 
         script = self.script + f' --url "{url}" --remote-server="{remote_server}" --timeout={timeout_s} --crawl-id={crawl_id}'
+
+        # TODO pass headers and cookies
 
         # WebLogger.error("Response:{}".format(self.response_file))
         # WebLogger.error("CWD:{}".format(self.cwd))
@@ -168,7 +170,8 @@ class ScriptCrawler(CrawlerInterface):
             )
             self.response.add_error("Return code invalid: {}".format(p.returncode))
 
-        url = f"{remote_server}/findj?index={crawl_id}"
+        crawler_name = self.request.crawler_name
+        url = f"{remote_server}/findj?index={crawl_id}&crawler_name={crawler_name}"
         response = requests.get(url)
 
         if response.status_code == 200:
@@ -338,9 +341,6 @@ class ScriptCrawler(CrawlerInterface):
         super().close()
 
     def is_valid(self):
-        if not self.script:
-            return False
-
         return True
 
 

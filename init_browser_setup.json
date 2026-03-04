@@ -1,49 +1,49 @@
 [
   {
     "crawler_name": "CurlCffiCrawler",
-    "crawler_class_name": "CurlCffiCrawler",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
     "crawler_name": "RequestsCrawler",
-    "crawler_class_name": "RequestsCrawler",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "timeout_s": 20
     }
   },
   {
     "crawler_name": "StealthRequestsCrawler",
-    "crawler_class_name": "StealthRequestsCrawler",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
     "crawler_name": "HttpMorphCrawler",
-    "crawler_class_name": "HttpMorphCrawler",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
     "crawler_name": "HttpCloakCrawler",
-    "crawler_class_name": "HttpCloakCrawler",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
     "crawler_name": "HttpxCrawler",
-    "crawler_class_name": "HttpxCrawler",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
     "crawler_name": "HttpMorphCrawler",
-    "crawler_class_name": "HttpMorphCrawler",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "timeout_s": 40
     }

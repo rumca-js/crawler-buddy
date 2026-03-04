@@ -25,16 +25,16 @@ def main():
         return
 
     request = parser.get_request()
+    request.settings["driver_executable"] = WebConfig.get_default_chromedriver_path()
 
     selenium_config = WebConfig.get_seleniumfull()
     driver = WebConfig.get_crawler_from_mapping(request, selenium_config)
-
-    driver.response_file = parser.args.output_file
 
     if parser.args.verbose:
         print("Running request:{} with SeleniumChromeFull".format(request))
 
     response = driver.run()
+
     if not response:
         print("No response")
         sys.exit(1)
@@ -44,8 +44,9 @@ def main():
         print(response.get_text())
 
     print(response)
-    response_to_file(response, parser.args.output_file)
     driver.close()
+
+    parser.save(response)
 
 
 main()

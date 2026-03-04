@@ -20,7 +20,7 @@ class BotasaurusCrawler(CrawlerInterface):
     Web crawler using Botasaurus
     """
 
-    def run(self):
+    def run_internal(self):
         """
         Runs crawler.
         """

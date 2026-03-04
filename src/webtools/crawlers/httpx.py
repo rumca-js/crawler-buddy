@@ -20,7 +20,7 @@ class HttpxCrawler(CrawlerInterface):
     Python httpx crawler
     """
 
-    def run(self):
+    def run_internal(self):
         """
         Runs crawler
         """

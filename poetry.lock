@@ -2913,14 +2913,14 @@ files = [
 
 [[package]]
 name = "webtoolkit"
-version = "0.1.10"
+version = "0.1.13"
 description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "webtoolkit-0.1.10-py3-none-any.whl", hash = "sha256:96b3572ffdc995875f901753dc93cb8fb45bda9869d8bae8d1b472f7e98d90e7"},
-    {file = "webtoolkit-0.1.10.tar.gz", hash = "sha256:60d143d280516e2248e5adfa4fbd92b36d962f956ef831387e25991af70b196b"},
+    {file = "webtoolkit-0.1.13-py3-none-any.whl", hash = "sha256:dfab3eb3d47ee9b5fb84535ade06e424a53817edcba47cbd0a570e23eb98df3e"},
+    {file = "webtoolkit-0.1.13.tar.gz", hash = "sha256:524b5210dd1c75df6b17ee69ac81b95b5d46e4cd8f2d1081ec006f0f4f089039"},
 ]
 
 [package.dependencies]
@@ -3294,4 +3294,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "5eb31a24828d52366e88a888c99f6866517aa98495553ce5a5c6550683fae196"
+content-hash = "40d6d888c23b2522b745512c635589910d6172574e727cedf27fffee63b7abae"

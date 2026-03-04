@@ -158,15 +158,7 @@ class CrawlerData(object):
             WebLogger.error(f"Could not find crawler {name}")
             return
 
-        script = "crawlercurlcffi.py"
-        if name == "CurlCffiCrawler":
-            script = "crawlercurlcffi.py"
-        if name == "RequestsCrawler":
-            script = "crawlerrequests.py"
-        if name == "HttpMorphCrawler":
-            script = "crawlerhttpmorph.py"
-        if name == "StealthCrawler":
-            script = "crawlerstealth.py"
+        script = WebConfig.get_script_from_name(name)
 
         if page_request.crawler_name != name:
             page_request.crawler_name = name

@@ -31,8 +31,6 @@ def main():
         print("Running request:{} with RequestsCrawler".format(request))
 
     response = driver.run()
-    if response:
-        response.request = request
 
     if not response:
         print("No response")
@@ -42,6 +40,7 @@ def main():
         print("Contents")
         print(response.get_text())
 
+    print(response)
     parser.save(response)
     #response_to_file(response, parser.args.output_file)
     driver.close()

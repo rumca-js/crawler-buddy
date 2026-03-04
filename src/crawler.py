@@ -257,15 +257,19 @@ class Crawler(object):
         start_time = datetime.now()
 
         while True:
-            crawl_item = self.container.get(crawl_id=crawl_id)
-            if crawl_item is None:
-                WebLogger.debug(f"Request was removed ID:{crawl_id}")
-                return
+            try:
+                crawl_item = self.container.get(crawl_id=crawl_id)
+                if crawl_item is None:
+                    WebLogger.debug(f"Request was removed ID:{crawl_id}")
+                    return
 
-            crawl_url = crawl_item.get_url()
+                crawl_url = crawl_item.get_url()
 
-            if crawl_item.data is not None:
-                return crawl_item.data
+                if crawl_item.data is not None:
+                    return crawl_item.data
+
+            except Exception as E:
+                WebLogger.exc(E)
 
             time.sleep(1)
 

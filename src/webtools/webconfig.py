@@ -66,7 +66,13 @@ class WebConfig(object):
     def init():
         pass
 
+    def get_default_crawler_name():
+        return "CurlCffiCrawler"
+
     def get_crawlers_raw():
+        """
+        Returns crawler classes
+        """
         crawlers = [
             RequestsCrawler,
             SeleniumChromeHeadless,  # requires driver location
@@ -87,18 +93,18 @@ class WebConfig(object):
 
         return crawlers
 
-    def get_init_crawler_config(headless_script=None, full_script=None, port=None):
+    def get_init_crawler_config():
         """
-        Caller may provide scripts
+        Return crawlers configuration
         """
         mapping = []
 
+        """
         mapping.append(WebConfig.get_default_browser_setup(RequestsCrawler))
 
         mapping.append(WebConfig.get_default_browser_setup(StealthRequestsCrawler))
         mapping.append(WebConfig.get_default_browser_setup(CurlCffiCrawler))
         mapping.append(WebConfig.get_default_browser_setup(HttpxCrawler))
-        mapping.append(WebConfig.get_default_browser_setup(YtdlpCrawler))
         mapping.append(WebConfig.get_default_browser_setup(HttpMorphCrawler))
         mapping.append(WebConfig.get_default_browser_setup(HttpCloakCrawler))
 
@@ -112,19 +118,33 @@ class WebConfig(object):
         mapping.append(WebConfig.get_default_browser_setup(ScrapyScript))
 
         mapping.append(WebConfig.get_default_browser_setup(SeleniumWireFull, timeout_s=50))
+        """
+        mapping.append(WebConfig.get_scriped_crawler("RequestsCrawler"))
+        mapping.append(WebConfig.get_scriped_crawler("CurlCffiCrawler"))
+        mapping.append(WebConfig.get_scriped_crawler("HttpMorphCrawler"))
+        mapping.append(WebConfig.get_scriped_crawler("SeleniumChromeFull"))
+        mapping.append(WebConfig.get_default_browser_setup(YtdlpCrawler))
 
         return mapping
 
     def get_default_timeout_s():
         return 300
 
+    def get_scriped_crawler(name):
+        return {
+            "crawler_name": name,
+            "crawler_class" : ScriptCrawler,
+            "settings": {
+            },
+        }
+
     def get_crawler_names():
         """
         Returns string representation
         """
         str_crawlers = []
-        for crawler in WebConfig.get_crawlers_raw():
-            str_crawlers.append(crawler.__name__)
+        for mapping_data in WebConfig.get_init_crawler_config():
+            str_crawlers.append(mapping_data["crawler_name"])
 
         return str_crawlers
 
@@ -135,14 +155,10 @@ class WebConfig(object):
         if not crawler_string:
             return
 
-        """ TODO
-        crawlers = WebConfig.get_crawlers_raw()
-        for crawler in crawlers:
-            if crawler.__name__ == crawler_string:
-                return crawler
-        """
-        crawler = ScriptCrawler
-        return crawler
+        init_mapping_data = WebConfig.get_init_crawler_config()
+        for mapping_data in init_mapping_data:
+            if mapping_data["crawler_name"] == crawler_string:
+                return mapping_data["crawler_class"]
 
     def get_crawler_from_mapping(request, mapping_data):
         crawler_class = None
@@ -152,6 +168,9 @@ class WebConfig(object):
 
         if "crawler_name" in mapping_data and mapping_data["crawler_name"]:
             crawler_class = WebConfig.get_crawler_from_string(mapping_data["crawler_name"])
+
+        if "crawler_class" in mapping_data and mapping_data["crawler_class"]:
+            crawler_class = mapping_data["crawler_class"]
 
         if crawler_class is None and request:
             crawler_class = WebConfig.get_crawler_from_string(request.crawler_type)
@@ -173,14 +192,26 @@ class WebConfig(object):
 
         return result
 
-    def get_default_crawler_name():
-        return "CurlCffiCrawler"
-
     def get_default_crawler(url):
         configured_crawlers = WebConfig.get_init_crawler_config()
         for crawler_data in configured_crawlers:
             if crawler_data["crawler_name"] == WebConfig.get_default_crawler_name():
                 return crawler_data
+
+    def get_script_from_name(name):
+        script = "crawlercurlcffi.py"
+        if name == "CurlCffiCrawler":
+            script = "crawlercurlcffi.py"
+        if name == "RequestsCrawler":
+            script = "crawlerrequests.py"
+        if name == "HttpMorphCrawler":
+            script = "crawlerhttpmorph.py"
+        if name == "StealthRequestsCrawler":
+            script = "crawlerstealth.py"
+        if name == "SeleniumChromeFull":
+            script = "crawlerseleniumfull.py"
+
+        return script
 
     def get_default_request(url):
 
@@ -189,19 +220,10 @@ class WebConfig(object):
             request = PageRequestObject(url)
 
             name = crawler_data["crawler_name"]
-            script = "crawlercurlcffi.py"
-            if name == "CurlCffiCrawler":
-                script = "crawlercurlcffi.py"
-            if name == "RequestsCrawler":
-                script = "crawlerrequests.py"
-            if name == "HttpMorphCrawler":
-                script = "crawlerhttpmorph.py"
-            if name == "StealthCrawler":
-                script = "crawlerstealth.py"
+            script = WebConfig.get_script_from_name(name)
 
             request.crawler_name = name
-            #request.crawler_name = "ScriptCrawler"
-            #crawler_class = WebConfig.get_crawler_from_string(request.crawler_name)
+            crawler_class = WebConfig.get_crawler_from_string(request.crawler_name)
             crawler_class = ScriptCrawler
             request.crawler_type = crawler_class(url=url, script=script)
             request.settings["script"] = script
@@ -301,6 +323,7 @@ class WebConfig(object):
     def get_default_browser_setup(browser, timeout_s=30):
         return {
             "crawler_name": browser.__name__,
+            "crawler_class": browser,
             "settings": {"timeout_s": timeout_s},
         }
 
@@ -310,12 +333,16 @@ class WebConfig(object):
             "settings": {"timeout_s": 40},
         }
 
+    def get_default_chromedriver_path():
+        return Path("/usr/bin/chromedriver")
+
     def get_seleniumheadless():
-        chromedriver_path = Path("/usr/bin/chromedriver")
+        chromedriver_path = WebConfig.get_default_chromedriver_path()
 
         if chromedriver_path.exists():
             return {
                 "crawler_name": "SeleniumChromeHeadless",
+                "crawler_class" : SeleniumChromeHeadless,
                 "settings": {
                     "driver_executable": str(chromedriver_path),
                     "timeout_s": 60,
@@ -324,15 +351,17 @@ class WebConfig(object):
         else:
             return {
                 "crawler_name": "SeleniumChromeHeadless",
+                "crawler_class" : SeleniumChromeHeadless,
                 "settings": {"driver_executable": None, "timeout_s": 60},
             }
 
     def get_seleniumfull():
-        chromedriver_path = Path("/usr/bin/chromedriver")
+        chromedriver_path = WebConfig.get_default_chromedriver_path()
 
         if chromedriver_path.exists():
             return {
                 "crawler_name": "SeleniumChromeFull",
+                "crawler_class" : SeleniumChromeFull,
                 "settings": {
                     "driver_executable": str(chromedriver_path),
                     "timeout_s": 40,
@@ -345,11 +374,12 @@ class WebConfig(object):
             }
 
     def get_seleniumundetected():
-        chromedriver_path = Path("/usr/bin/chromedriver")
+        chromedriver_path = WebConfig.get_default_chromedriver_path()
 
         if chromedriver_path.exists():
             return {
                 "crawler_name": "SeleniumUndetected",
+                "crawler_class" : SeleniumChromeFull,
                 "settings": {
                     "driver_executable": str(chromedriver_path),
                     "timeout_s": 60,
@@ -364,6 +394,7 @@ class WebConfig(object):
     def get_seleniumbase():
         return {
             "crawler_name": "SeleniumBase",
+            "crawler_class" : SeleniumBase,
             "settings": {},
         }
 

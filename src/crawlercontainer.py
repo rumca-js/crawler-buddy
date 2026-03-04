@@ -143,15 +143,23 @@ class CrawlerContainer(object):
                 return True
         return False
 
-    def add(self, crawl_type, url, data, crawl_id=None):
+    def add(self, crawl_type, url, data, crawl_id=None, crawler_name=None):
         """
         Adds crawl type data for url
         """
+        item_updated = False
         if crawl_id:
             crawl_item = self.get(crawl_id=crawl_id)
             if crawl_item:
                 self.update(crawl_id, data)
-        else:
+                item_updated = True
+
+        crawl_item = self.get(url=url, crawl_type=crawl_type, crawler_name=crawler_name)
+        if crawl_item:
+            self.update(crawl_item.crawl_id, data)
+            item_updated = True
+
+        if not item_updated:
             self.crawl_index += 1
             crawl_id = self.crawl_index
 

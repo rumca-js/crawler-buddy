@@ -20,7 +20,7 @@ class HttpCloakCrawler(CrawlerInterface):
     Python httpcloak requests
     """
 
-    def run(self):
+    def run_internal(self):
         """
         Runs crawler
         """

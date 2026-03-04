@@ -31,8 +31,6 @@ def main():
         print("Running request:{} with RequestsCrawler".format(request))
 
     response = driver.run()
-    if response:
-        response.request = request
 
     if not response:
         print("No response")

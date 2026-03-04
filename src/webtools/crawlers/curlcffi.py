@@ -22,7 +22,7 @@ class CurlCffiCrawler(CrawlerInterface):
     Python curl_cffi requests
     """
 
-    def run(self):
+    def run_internal(self):
         """
         Run crawler
         """

@@ -21,7 +21,7 @@ class HttpMorphCrawler(CrawlerInterface):
     Python httpmorph requests
     """
 
-    def run(self):
+    def run_internal(self):
         """
         Runs crawler
         """

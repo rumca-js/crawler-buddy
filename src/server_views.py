@@ -388,15 +388,27 @@ def set_response():
 
     crawl_id = request.args.get("crawl_id")
     if crawl_id:
-        crawl_id = int(crawl_id)
+        try:
+            crawl_id = int(crawl_id)
+        except Exception as E:
+            pass
+    if crawl_id is "None":
+        crawl_id = None
+    if crawl_id is "":
+        crawl_id = None
+
+    crawler_name = request.args.get("crawler_name")
 
     u = set_response_impl(request)
 
     p = u.handler.get_page_handler()
 
+    u.request.crawler_name = crawler_name
     all_properties = u.get_all_properties()
 
-    current_app.config['crawler_main'].container.add(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url=u.url, data=all_properties, crawl_id=crawl_id)
+    crawler_name = u.request.crawler_name
+
+    current_app.config['crawler_main'].container.add(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url=u.url, data=all_properties, crawl_id=crawl_id, crawler_name=crawler_name)
 
     return jsonify(all_properties)
 
@@ -465,7 +477,14 @@ def findj():
     index = request.args.get("index")
 
     if index:
-        index = int(index)
+        try:
+            index = int(index)
+        except Exception as E:
+            pass
+    if index is "None":
+        index = None
+    if index is "":
+        index = None
 
     crawler_data = current_app.config['crawler_main'].container.get(
         crawl_id=index, url=url, crawler_name=name,

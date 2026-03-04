@@ -7,6 +7,7 @@ from webtoolkit import (
   CrawlerInterface,
   response_to_json,
   RemoteUrl,
+  WebLogger,
 )
 
 
@@ -96,4 +97,7 @@ class ScriptCrawlerParser(object):
                     crawl_id = self.args.crawl_id
 
                 url = f"{remote_server}/set?crawl_id={crawl_id}"
-                response = requests.post(url, json=response_json)
+                try:
+                    response = requests.post(url, json=response_json)
+                except Exception as E:
+                    WebLogger.exc(E, str(response_json))

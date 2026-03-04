@@ -25,7 +25,7 @@ class YtdlpCrawler(CrawlerInterface):
     yt-dlp crawler implementation
     """
 
-    def run(self):
+    def run_internal(self):
         """
         Run crawler
         """

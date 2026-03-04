@@ -182,10 +182,11 @@ class TaskRunner(object):
 
         try:
             while not self.shutdown_flag:
+                submitted_any = False
+
                 try:
                     self.set_thread_ok()
 
-                    submitted_any = False
 
                     with self.container_lock:
                         for crawl_item in list(self.container.get_queued_items()):
@@ -195,9 +196,6 @@ class TaskRunner(object):
 
                         self.fix_leftovers()
 
-                    # Sleep a bit if no new work appeared
-                    if not submitted_any:
-                        time.sleep(self.poll_interval)
 
                     memory_info = get_memory_info()
                     if memory_info["memory_percentage"] > 95.0:
@@ -205,6 +203,10 @@ class TaskRunner(object):
                         break
                 except Exception as E:
                     WebLogger.exc(E, "Exception in TaskRunner")
+
+                # Sleep a bit if no new work appeared
+                if not submitted_any:
+                    time.sleep(self.poll_interval)
 
         except Exception as E:
             WebLogger.exc(E, "Exception in TaskRunner")

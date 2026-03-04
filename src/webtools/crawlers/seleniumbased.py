@@ -44,6 +44,7 @@ from webtoolkit import (
     HTTP_STATUS_CODE_FILE_TOO_BIG,
     HTTP_STATUS_CODE_PAGE_UNSUPPORTED,
     HTTP_STATUS_CODE_SERVER_ERROR,
+    HTTP_STATUS_SSL_CERTIFICATE_ERROR,
 )
 
 
@@ -130,7 +131,7 @@ class SeleniumDriver(CrawlerInterface):
                 except Exception:
                     continue
 
-    def run(self):
+    def run_internal(self):
         """
         Runs crawler.
 
@@ -224,6 +225,16 @@ class SeleniumDriver(CrawlerInterface):
                     request_url=self.request.url,
                 )
                 self.response.add_error("Url:{} ssl certificate error".format(self.request.url))
+            elif str_exc.find("[Errno 111] Connection refused") >= 0:
+                # there is a page, but is refusing us (looking at you konami.com)
+                WebLogger.exc(E, "Url:{}".format(self.request.url))
+                self.response = PageResponseObject(
+                    self.request.url,
+                    text=None,
+                    status_code=HTTP_STATUS_SSL_CERTIFICATE_ERROR,
+                    request_url=self.request.url,
+                )
+                self.response.add_error(f"Url:{self.request.url} exception {str_exc}")
             else:
                 WebLogger.exc(E, "Url:{}".format(self.request.url))
                 self.response = PageResponseObject(
@@ -832,7 +843,7 @@ class SeleniumBase(CrawlerInterface):
             request=request,
         )
 
-    def run(self):
+    def run_internal(self):
         """
         Runs crawler
         """
