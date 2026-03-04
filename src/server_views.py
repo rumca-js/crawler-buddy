@@ -23,6 +23,7 @@ from webtoolkit import (
     json_to_response,
 )
 from src import webtools
+from src.webtools import WebConfig
 from src.views import (
     get_select_widget,
     get_entry_html,
@@ -33,7 +34,7 @@ from src.views import (
 )
 from src import CrawlerContainer
 from src.webtools import Url
-from utils.systemmonitoring import get_hardware_info, get_process_info, get_memory_info
+from utils.systemmonitoring import get_hardware_info, get_memory_info
 
 
 views = Blueprint('views', __name__)
@@ -1093,7 +1094,10 @@ def system():
     text = "<h1>System monitoring</h1>\n"
 
     info = get_hardware_info()
-    info["processes"] = get_process_info()
+    info["Processes"] = {
+        "Chrome processes" : WebConfig.count_chrom_processes(),
+        "XVFB processes" : WebConfig.count_xvfb_processes(),
+    }
 
     text = dict_to_html(info)
 
