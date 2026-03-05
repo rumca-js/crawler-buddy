@@ -60,6 +60,34 @@ def get_handlers():
     return handlers
 
 
+def get_requests(server_request):
+    url = server_request.args.get("url")
+    crawler_name = server_request.args.get("crawler_name")
+    if crawler_name == "None":
+        crawler_name = None
+    if crawler_name == "":
+        crawler_name = None
+    handler_name = server_request.args.get("handler_name")
+    if handler_name == "None":
+        handler_name = None
+    if handler_name == "":
+        handler_name = None
+    crawl_id = server_request.args.get("crawl_id")
+    if crawl_id == "None":
+        crawl_id = None
+    if crawl_id == "":
+        crawl_id = None
+
+    request = PageRequestObject(url)
+    request.crawler_name = crawler_name
+    request.handler_name = handler_name
+
+    if crawl_id:
+        request.settings["crawl_id"] = crawl_id
+
+    return request
+
+
 def get_crawler_text():
     text = ""
 
@@ -387,18 +415,10 @@ def set_response():
     if not data:
         return jsonify({"success": False, "error": "Missing 'Contents'"}), 400
 
-    crawl_id = request.args.get("crawl_id")
-    if crawl_id:
-        try:
-            crawl_id = int(crawl_id)
-        except Exception as E:
-            pass
-    if crawl_id is "None":
-        crawl_id = None
-    if crawl_id is "":
-        crawl_id = None
-
+    url = request.args.get("url")
     crawler_name = request.args.get("crawler_name")
+
+    page_request = get_requests(request)
 
     u = set_response_impl(request)
 
@@ -407,9 +427,7 @@ def set_response():
     u.request.crawler_name = crawler_name
     all_properties = u.get_all_properties()
 
-    crawler_name = u.request.crawler_name
-
-    current_app.config['crawler_main'].container.add(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url=u.url, data=all_properties, crawl_id=crawl_id, crawler_name=crawler_name)
+    current_app.config['crawler_main'].container.add(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, data=all_properties, request=page_request)
 
     return jsonify(all_properties)
 
@@ -444,13 +462,15 @@ def find():
     crawler_name = request.args.get("crawler_name")
     handler_name = request.args.get("handler_name")
 
-    if not url and not crawler_name:
+    page_request = get_requests(request)
+
+    if not page_request:
         form_html = get_crawling_form("Find", "/findj", id)
 
         return get_html(id=id, body=form_html, title="Find")
     else:
         crawler_data = current_app.config['crawler_main'].container.get(
-            url=url, crawler_name=name,
+            url=url, request=page_request
         )
 
         if not crawler_data:
@@ -473,22 +493,21 @@ def findj():
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-    url = request.args.get("url")
-    name = request.args.get("crawler_name")
-    index = request.args.get("index")
+    page_request = get_requests(request)
+    crawl_id = request.args.get("index")
+    if crawl_id == "None":
+        crawl_id = None
+    if crawl_id == "":
+        crawl_id = None
 
-    if index:
+    if crawl_id:
         try:
-            index = int(index)
+            crawl_id = int(crawl_id)
         except Exception as E:
             pass
-    if index is "None":
-        index = None
-    if index is "":
-        index = None
 
     crawler_data = current_app.config['crawler_main'].container.get(
-        crawl_id=index, url=url, crawler_name=name,
+        crawl_id=crawl_id, request=page_request,
     )
 
     if not crawler_data:

@@ -6,6 +6,7 @@ Some crawlers / scrapers cannot be easily called from a thread, etc, because of 
 
 import json
 import traceback
+import hashlib
 import time
 from pathlib import Path
 import shutil
@@ -27,6 +28,7 @@ from webtoolkit import (
     WebToolsTimeoutException,
     WebLogger,
     file_to_response,
+    request_to_file,
     HTTP_STATUS_UNKNOWN,
     HTTP_STATUS_OK,
     HTTP_STATUS_USER_AGENT,
@@ -66,18 +68,34 @@ class ScriptCrawler(CrawlerInterface):
         )
 
     def get_response_file(self):
-        response_file = super().get_response_file()
+        from ..webconfig import WebConfig
 
-        if not response_file:
-            from ..webconfig import WebConfig
+        if WebConfig.script_responses_directory is not None:
+            response_dir = Path(WebConfig.script_responses_directory)
+        else:
+            response_dir = Path("storage")
 
-            if WebConfig.script_responses_directory is not None:
-                response_dir = Path(WebConfig.script_responses_directory)
-            else:
-                response_dir = Path("storage")
+        file_path = self.get_main_path() / response_dir / self.get_response_file_name()
+        return file_path
 
-            response_file = self.get_main_path() / response_dir / self.get_response_file_name()
-            return response_file
+    def get_request_file(self):
+        response_dir = Path("storage")
+
+        file_path = self.get_main_path() / response_dir / self.get_request_file_name()
+        return file_path
+
+    def makedirs(self):
+        response_dir = Path("storage")
+        path = self.get_main_path() / response_dir
+        path.mkdir(parents=True, exist_ok=True)
+
+        """
+        if len(response_file_location.parents) > 1:
+            response_dir = response_file_location.parents[0]
+            WebLogger.debug(str(response_dir))
+            if not response_dir.exists():
+                response_dir.mkdir(parents=True, exist_ok=True)
+        """
 
     def get_main_path(self):
         file_path = os.path.realpath(__file__)
@@ -110,7 +128,14 @@ class ScriptCrawler(CrawlerInterface):
         crawl_id = self.request.settings.get("crawl_id")
         timeout_s = self.get_timeout_s()
 
-        script = self.script + f' --url "{url}" --remote-server="{remote_server}" --timeout={timeout_s} --crawl-id={crawl_id}'
+        self.makedirs()
+        request_file = self.get_request_file()
+        if request_file.exists():
+            request_file.unlink()
+
+        request_to_file(self.request, request_file)
+
+        script = self.script + f' --url "{url}" --remote-server="{remote_server}" --timeout={timeout_s} --request-file={request_file}'
 
         # TODO pass headers and cookies
 
@@ -170,8 +195,11 @@ class ScriptCrawler(CrawlerInterface):
             )
             self.response.add_error("Return code invalid: {}".format(p.returncode))
 
+        url = self.request.url
         crawler_name = self.request.crawler_name
-        url = f"{remote_server}/findj?index={crawl_id}&crawler_name={crawler_name}"
+        handler_name = self.request.handler_name
+
+        url = f"{remote_server}/findj?&url={url}&crawler_name={crawler_name}&handler_name={handler_name}"
         response = requests.get(url)
 
         if response.status_code == 200:
@@ -209,18 +237,16 @@ class ScriptCrawler(CrawlerInterface):
         response_file_location = Path(self.get_response_file())
         WebLogger.debug("Running via file {}".format(response_file_location))
 
-        if len(response_file_location.parents) > 1:
-            response_dir = response_file_location.parents[0]
-            WebLogger.debug(str(response_dir))
-            if not response_dir.exists():
-                response_dir.mkdir(parents=True, exist_ok=True)
+        self.makedirs()
 
         if response_file_location.exists():
             response_file_location.unlink()
 
-        script = self.script + ' --url "{}" --output-file="{}" --timeout={}'.format(
-            self.request.url, self.get_response_file(), self.get_timeout_s()
-        )
+        url = self.request.url
+        timeout_s = self.get_timeout_s()
+        output_file = response_file_location
+
+        script = self.script + f' --url "{url}" --output-file="{output_file}" --timeout={timeout_s} --request-file={request_file}'
 
         # WebLogger.error("Response:{}".format(self.response_file))
         # WebLogger.error("CWD:{}".format(self.cwd))
@@ -304,13 +330,25 @@ class ScriptCrawler(CrawlerInterface):
 
         self.operating_path = self.get_operating_dir()
 
-    def get_response_file_name(self):
-        file_name_url_part = fix_path_for_os(self.request.url)
-        file_name_url_part = file_name_url_part.replace("\\", "")
-        file_name_url_part = file_name_url_part.replace("/", "")
-        file_name_url_part = file_name_url_part.replace("@", "")
+    def get_request_hash(self):
+        crawl_id = str(self.request.settings.get("crawl_id"))
+        crawler_name = str(self.request.crawler_name)
+        handler_name = str(self.request.handler_name)
+        text = crawl_id + crawler_name + handler_name
 
-        response_file = "response_{}.txt".format(file_name_url_part)
+        string = hashlib.md5(text.encode("utf-8")).hexdigest()
+        return string
+
+    def get_response_file_name(self):
+        hash = self.get_request_hash()
+
+        response_file = f"response_{hash}.txt"
+        return response_file
+
+    def get_request_file_name(self):
+        hash = self.get_request_hash()
+
+        response_file = f"request_{hash}.txt"
         return response_file
 
     def get_operating_dir(self):
@@ -332,11 +370,12 @@ class ScriptCrawler(CrawlerInterface):
         return operating_path
 
     def close(self):
+        request_file = self.get_request_file()
+        if request_file.exists():
+            request_file.unlink()
         response_file = self.get_response_file()
-        if response_file:
-            response_file_location = Path(response_file)
-            if response_file_location.exists():
-                response_file_location.unlink()
+        if response_file.exists():
+            response_file.unlink()
 
         super().close()
 

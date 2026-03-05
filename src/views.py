@@ -106,7 +106,7 @@ def get_entry_html(id, crawl_data):
     text = ""
 
     crawl_type = crawl_data.crawl_type
-    url = crawl_data.url
+    url = crawl_data.request_real.url
     timestamp = crawl_data.timestamp
     crawl_id = crawl_data.crawl_id
     all_properties = crawl_data.data
@@ -187,7 +187,7 @@ def get_crawl_data(id, crawl_data):
     text = ""
 
     crawl_type = crawl_data.crawl_type
-    url = crawl_data.url
+    url = crawl_data.request_real.url
     timestamp = crawl_data.timestamp
     crawl_id = crawl_data.crawl_id
 

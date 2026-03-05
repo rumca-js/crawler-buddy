@@ -8,18 +8,14 @@ from src.webtools import WebConfig
 
 
 class CrawlItem(object):
-    def __init__(self, crawl_id, crawl_type, data=None, crawler_name=None, url=None, request=None):
+    def __init__(self, crawl_id, crawl_type, request, data=None):
         self.crawl_id = crawl_id
         self.crawl_type = crawl_type
         self.timestamp = datetime.now()
         self.data = data
-        self.crawler_name = crawler_name
-        self.url = url
         self.request = request_to_json(request)
-        if request:
-            self.request_real = copy_request(request)
-        else:
-            self.request_real = None
+
+        self.request_real = copy_request(request)
 
     def __str__(self):
         data = "No"
@@ -28,10 +24,7 @@ class CrawlItem(object):
         return f"{self.crawl_id} {self.crawl_type} {self.timestamp} {self.crawler_name} {self.url} Data:{data}"
 
     def get_url(self):
-        if self.url:
-            return self.url
-        if self.request_real and self.request_real.url:
-            return self.request_real.url
+        return self.request_real.url
 
     def is_response(self):
         return self.data is not None
@@ -75,13 +68,13 @@ class CrawlerContainer(object):
             return "GET"
         return ""
 
-    def crawl(self, crawl_type, crawler_name=None, url=None, request=None) -> int | None:
+    def crawl(self, crawl_type, request=None) -> int | None:
         """
         Either finds crawl with parameters, or adds new crawl.
         Returns ID of request or None.
         """
-        if url is None and request is None:
-            WebLogger.error("Cannot crawl if url and request is None")
+        if request is None:
+            WebLogger.error("Cannot crawl if request is None")
             return
 
         self.expire_old()
@@ -94,7 +87,7 @@ class CrawlerContainer(object):
             return
 
         # Try to find existing
-        found = self.find(crawl_type, crawler_name=crawler_name, url=url, request=request)
+        found = self.find(crawl_type, request=request)
         if found is not None:
             return found
 
@@ -105,8 +98,6 @@ class CrawlerContainer(object):
         item = CrawlItem(
             crawl_id=crawl_id,
             crawl_type=crawl_type,
-            crawler_name=crawler_name,
-            url=url,
             request=request,
         )
         self.container.append(item)
@@ -116,13 +107,13 @@ class CrawlerContainer(object):
 
         return crawl_id
 
-    def find(self, crawl_type=None, crawler_name=None, url=None, request=None) -> int | None:
+    def find(self, crawl_type=None, request=None) -> int | None:
         """
         Finds crawl with parameters. Returns ID or None.
         """
 
         for item in self.container:
-            if self._match(item, crawl_type, crawler_name=crawler_name, url=url, request=request):
+            if self._match(item, crawl_type, request=request):
                 return item.crawl_id
         return None
 
@@ -143,7 +134,7 @@ class CrawlerContainer(object):
                 return True
         return False
 
-    def add(self, crawl_type, url, data, crawl_id=None, crawler_name=None):
+    def add(self, crawl_type, request, data=None, crawl_id=None):
         """
         Adds crawl type data for url
         """
@@ -154,7 +145,7 @@ class CrawlerContainer(object):
                 self.update(crawl_id, data)
                 item_updated = True
 
-        crawl_item = self.get(url=url, crawl_type=crawl_type, crawler_name=crawler_name)
+        crawl_item = self.get(request=request)
         if crawl_item:
             self.update(crawl_item.crawl_id, data)
             item_updated = True
@@ -166,7 +157,7 @@ class CrawlerContainer(object):
             item = CrawlItem(
                 crawl_id=crawl_id,
                 crawl_type=crawl_type,
-                url=url,
+                request=request,
                 data=data,
             )
 
@@ -202,13 +193,10 @@ class CrawlerContainer(object):
         """
         self.container = []
 
-    def get(self, crawl_id=None, crawl_type=None, crawler_name=None, url=None, request=None) -> CrawlItem | None:
+    def get(self, crawl_id=None, crawl_type=None, request=None) -> CrawlItem | None:
         """Get crawl item by ID if not expired."""
-        if not crawl_id:
-            crawl_id = self.find(crawl_type=crawl_type,
-                      crawler_name=crawler_name,
-                      url=url,
-                      request=request,)
+        if not crawl_id and request:
+            crawl_id = self.find(crawl_type=crawl_type, request=request)
 
         if crawl_id:
             for item in self.container:
@@ -304,16 +292,11 @@ class CrawlerContainer(object):
         # nothing really to close, but maybe some day
         pass
 
-    def _match(self, item, crawl_type, crawler_name=None, url=None, request=None):
+    def _match(self, item, crawl_type=None, request=None):
         if not item:
             return False
 
-        if item.crawl_type != crawl_type:
-            return False
-
-        if crawler_name and item.crawler_name != crawler_name:
-            return False
-        if url and item.url != url:
+        if crawl_type and item.crawl_type != crawl_type:
             return False
 
         input_json_request = request_to_json(request)

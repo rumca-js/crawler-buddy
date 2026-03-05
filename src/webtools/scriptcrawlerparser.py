@@ -6,6 +6,7 @@ from webtoolkit import (
   PageRequestObject,
   CrawlerInterface,
   response_to_json,
+  file_to_request,
   RemoteUrl,
   WebLogger,
 )
@@ -48,21 +49,22 @@ class ScriptCrawlerParser(object):
         self.args = self.parser.parse_args()
 
     def is_valid(self):
-        if "url" not in self.args:
-            print("Url file not in args")
-            return False
-
         if "output_file" not in self.args:
             print("Output file not in args")
             return False
 
-        if self.args.url is None:
+        if self.args.request_file is None and self.args.url is None:
             print("Url file not in args")
             return False
 
         return True
 
     def get_request(self):
+        if self.args.request_file:
+            r = file_to_request(self.args.request_file)
+            if r:
+                return r
+
         r = PageRequestObject(self.args.url)
 
         r.timeout_s = self.args.timeout
@@ -89,15 +91,24 @@ class ScriptCrawlerParser(object):
     def save(self, response):
         if response:
             if self.args.remote_server:
-                remote_server = self.args.remote_server
-                response_json = response_to_json(response)
-
-                crawl_id = ""
+                crawl_id = None
                 if self.args.crawl_id:
                     crawl_id = self.args.crawl_id
 
-                url = f"{remote_server}/set?crawl_id={crawl_id}"
-                try:
-                    response = requests.post(url, json=response_json)
-                except Exception as E:
-                    WebLogger.exc(E, str(response_json))
+                    self.post(response, "crawl_id={crawl_id}")
+                elif response and response.request:
+                    url = response.request.url
+                    crawler_name = response.request.crawler_name
+                    handler_name = response.request.handler_name
+                    self.post(response, f"url={url}&crawler_name={crawler_name}&handler_name={handler_name}")
+
+    def post(self, response, args):
+        response_json = response_to_json(response)
+
+        remote_server = self.args.remote_server
+
+        url = f"{remote_server}/set?{args}"
+        try:
+            response = requests.post(url, json=response_json)
+        except Exception as E:
+            WebLogger.exc(E, str(response_json))

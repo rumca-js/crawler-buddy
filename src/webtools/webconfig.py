@@ -422,4 +422,3 @@ class WebConfig(object):
         script_relative = poetry_path + "poetry run python {}".format(script_relative)
 
         return script_relative
-

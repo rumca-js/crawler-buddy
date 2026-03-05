@@ -50,7 +50,7 @@ class TaskRunner(object):
         """Actual crawl logic here."""
         try:
             if self.verbose:
-                WebLogger.debug(f"[RUN]  {item.url}")
+                WebLogger.debug(f"[RUN]  {item.request_real.url}")
 
             crawl = crawler_builder(container=self.container, crawl_item=item)
 
@@ -58,7 +58,7 @@ class TaskRunner(object):
                 crawl.run()
 
             if self.verbose:
-                WebLogger.debug(f"[DONE] {item.url}")
+                WebLogger.debug(f"[DONE] {item.request_real.url}")
 
             return item.crawl_id
         except Exception as E:
@@ -89,10 +89,7 @@ class TaskRunner(object):
             self.run_item(crawl_item)
         else:
             with self.lock:
-                if crawl_item.request_real:
-                    WebLogger.info("Running: {}".format(crawl_item.request_real.url))
-                else:
-                    WebLogger.info("Running: {}".format(crawl_item.url))
+                WebLogger.info("Running: {}".format(crawl_item.request_real.url))
 
                 future = self.executor.submit(self.run_item, crawl_item)
                 future.add_done_callback(self._on_done)

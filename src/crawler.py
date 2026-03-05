@@ -51,7 +51,7 @@ class CrawlerTypeGet(object):
         self.crawl_item = crawl_item
 
     def run(self):
-        url = self.crawl_item.url
+        url = self.crawl_item.request_real.url
         request = self.crawl_item.request
 
         try:
@@ -172,10 +172,8 @@ class Crawler(object):
         page_url = webtools.Url(url, request=request)
         return page_url
 
-    def get_crawl_with_method(self, crawl_type, url=None, request=None, force=False):
-        if not url:
-            if request:
-                url = request.url
+    def get_crawl_with_method(self, crawl_type, request, force=False):
+        url = request.url
 
         if not url:
             all_properties = [{"name": "Response", "data": {
@@ -184,8 +182,15 @@ class Crawler(object):
             }}]
             return all_properties
 
+        if not self.is_supported(url):
+            WebLogger.error(
+                info_text=f"{url} Unsupported url".format(url)
+            )
+            all_properties = get_all_properties__error(f"URL:{url}: Unsupported url")
+            return all_properties
+
         if not force:
-            things = self.container.get(crawl_type=crawl_type, url=url, request=request)
+            things = self.container.get(crawl_type=crawl_type, request=request)
             if things:
                 if things.data is None:
                     data = self.wait_for_response(things.crawl_id)
@@ -195,20 +200,16 @@ class Crawler(object):
 
                 return things.data
 
-        if not self.is_supported(url):
-            WebLogger.error(
-                info_text=f"{url} Unsupported url".format(url)
-            )
-            all_properties = get_all_properties__error(f"URL:{url}: Unsupported url")
-            return all_properties
-
-        crawl_id = self.container.crawl(crawl_type=crawl_type, url=url, request=request)
+        crawl_id = self.container.crawl(crawl_type=crawl_type, request=request)
         if crawl_id is None:
             WebLogger.error(
                 info_text=f"{url} Cannot crawl".format(url)
             )
             all_properties = get_all_properties__too_many_requests(f"URL:{url}: Cannot crawl")
             return all_properties
+
+        request.settings["crawl_id"] = crawl_id
+        print("setting request")
 
         if self.multi_process:
             data = self.wait_for_response(crawl_id)
@@ -229,20 +230,22 @@ class Crawler(object):
         return location.is_protocolled_link()
 
     def get_social_properties(self, server_request, url):
-        url = server_request.args.get("url")
-        force = server_request.args.get("force")
-
-        result = self.get_crawl_with_method(url=url, crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, force=force)
-
-        return result
-
-    def get_all_properties(self, server_request, headers=False, ping=False):
-        url = server_request.args.get("url")
+        #url = server_request.args.get("url")
         force = server_request.args.get("force")
 
         request = self.get_request_data(server_request)
 
-        result = self.get_crawl_with_method(request=request, url=url, crawl_type=CrawlerContainer.CRAWL_TYPE_GET, force=force)
+        result = self.get_crawl_with_method(request=request, crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, force=force)
+
+        return result
+
+    def get_all_properties(self, server_request, headers=False, ping=False):
+        #url = server_request.args.get("url")
+        force = server_request.args.get("force")
+
+        request = self.get_request_data(server_request)
+
+        result = self.get_crawl_with_method(request=request, crawl_type=CrawlerContainer.CRAWL_TYPE_GET, force=force)
         return result
 
     def wait_for_response(self, crawl_id):

@@ -9,11 +9,7 @@ url.get_title()
 """
 
 from urllib.parse import unquote, urlparse, parse_qs
-from collections import OrderedDict
-import urllib.robotparser
-import asyncio
-import base64
-from flask import current_app
+import traceback
 
 from webtoolkit import (
     WebLogger,
@@ -100,19 +96,6 @@ class Url(BaseUrl):
 
         if request.timeout_s is None or request.timeout_s == 0:
             request.timeout_s = WebConfig.get_default_timeout_s()
-
-        return request
-
-    def setup_crawl_id(self, request):
-        if not request:
-            return
-
-        crawl_id = request.settings.get("crawl_id")
-        if crawl_id is None:
-            crawler = current_app.config['crawler_main']
-            crawl_id = crawler.container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
-            if crawl_id:
-                request.settings["crawl_id"] = crawl_id
 
         return request
 
