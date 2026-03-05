@@ -288,6 +288,17 @@ class WebConfig(object):
                 continue  # Skip processes we can't access
         return count
 
+    def count_xvfb_processes():
+        """Count the number of running processes whose names start with 'chrom'."""
+        count = 0
+        for proc in psutil.process_iter(["pid", "name"]):
+            try:
+                if proc.info["name"] and proc.info["name"].lower().startswith("xvfb"):
+                    count += 1
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                continue  # Skip processes we can't access
+        return count
+
     def start_display():
         try:
             from pyvirtualdisplay import Display
