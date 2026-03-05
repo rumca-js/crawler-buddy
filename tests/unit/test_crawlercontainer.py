@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from webtoolkit import PageRequestObject
 from utils.memorychecker import MemoryChecker
 from src import CrawlerContainer
 
@@ -48,8 +49,10 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
+        request = PageRequestObject("https://youtube.com")
+
         # call tested function
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
 
         self.assertEqual(history.get_size(), 1)
         self.assertTrue(crawl_id is not None)
@@ -58,9 +61,10 @@ class CrawlerContainerTest(FakeInternetTestCase):
         history = CrawlerContainer()
 
         self.assertEqual(history.get_size(), 0)
+        request = PageRequestObject("https://youtube.com")
 
         # call tested function
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url="https://youtube.com")
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, request=request)
 
         self.assertEqual(history.get_size(), 1)
         self.assertTrue(crawl_id is not None)
@@ -70,9 +74,12 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
+        request1 = PageRequestObject("https://youtube.com")
+        request2 = PageRequestObject("https://github.com")
+
         # call tested function
-        crawl_id1 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
-        crawl_id2 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url="https://github.com")
+        crawl_id1 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request1)
+        crawl_id2 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, request=request2)
 
         self.assertEqual(history.get_size(), 2)
         self.assertTrue(crawl_id1 is not None)
@@ -84,24 +91,30 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
+        request1 = PageRequestObject("https://youtube.com/1")
+        request2 = PageRequestObject("https://youtube.com/2")
+        request3 = PageRequestObject("https://youtube.com/3")
+        request4 = PageRequestObject("https://youtube.com/4")
+        request5 = PageRequestObject("https://youtube.com/5")
+
         # call tested function
-        crawl_id1 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/1")
+        crawl_id1 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request1)
         self.assertEqual(history.get_size(), 1)
         self.assertTrue(crawl_id1)
 
-        crawl_id2 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/2")
+        crawl_id2 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request2)
         self.assertEqual(history.get_size(), 2)
         self.assertTrue(crawl_id2)
 
-        crawl_id3 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/3")
+        crawl_id3 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request3)
         self.assertEqual(history.get_size(), 3)
         self.assertTrue(crawl_id3)
 
-        crawl_id4 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/4")
+        crawl_id4 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request4)
         self.assertEqual(history.get_size(), 3)
         self.assertFalse(crawl_id4)
 
-        crawl_id5 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/5")
+        crawl_id5 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request5)
         self.assertEqual(history.get_size(), 3)
         self.assertFalse(crawl_id5)
 
@@ -110,17 +123,21 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
+        request1 = PageRequestObject("https://youtube.com/1")
+        request2 = PageRequestObject("https://youtube.com/2")
+        request3 = PageRequestObject("https://youtube.com/3")
+
         # call tested function
-        crawl_id1 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/1")
+        crawl_id1 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request1)
         history.update(crawl_id=crawl_id1, data=[])
 
         # call tested function
-        crawl_id2 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/2")
+        crawl_id2 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request2)
         history.update(crawl_id=crawl_id2, data=[])
 
         # we have full history, with data
 
-        crawl_id3 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/3")
+        crawl_id3 = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request3)
 
         self.assertEqual(history.get_size(), 2)
         self.assertTrue(crawl_id3)
@@ -130,7 +147,9 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+        request = PageRequestObject("https://youtube.com")
+
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
 
         self.assertEqual(history.get_size(), 1)
         self.assertTrue(crawl_id is not None)
@@ -145,7 +164,9 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+        request = PageRequestObject("https://youtube.com")
+
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
 
         self.assertEqual(history.get_size(), 1)
         self.assertTrue(crawl_id is not None)
@@ -160,8 +181,11 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
-        crawl_id_get = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
-        crawl_id_social = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url="https://github.com")
+        request1 = PageRequestObject("https://youtube.com")
+        request2 = PageRequestObject("https://github.com")
+
+        crawl_id_get = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request1)
+        crawl_id_social = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, request=request2)
 
         self.assertEqual(history.get_size(), 2)
         self.assertTrue(crawl_id_get is not None)
@@ -184,14 +208,15 @@ class CrawlerContainerTest(FakeInternetTestCase):
         history = CrawlerContainer()
 
         self.assertEqual(history.get_size(), 0)
+        request = PageRequestObject("https://youtube.com")
 
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
 
         self.assertEqual(history.get_size(), 1)
         self.assertTrue(crawl_id is not None)
 
         # call tested function
-        find_crawl_id = history.find(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+        find_crawl_id = history.find(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
         self.assertTrue(find_crawl_id is not None)
 
     def test_find__false__not_link(self):
@@ -199,13 +224,37 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+        request = PageRequestObject("https://youtube.com")
+
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
 
         self.assertEqual(history.get_size(), 1)
         self.assertTrue(crawl_id is not None)
 
+        request = PageRequestObject("https://youtube.com/1")
+
         # call tested function
-        find_crawl_id = history.find(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com/1")
+        find_crawl_id = history.find(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
+        self.assertTrue(find_crawl_id is None)
+
+    def test_find__false__crawler_name(self):
+        history = CrawlerContainer()
+
+        self.assertEqual(history.get_size(), 0)
+
+        request = PageRequestObject("https://youtube.com")
+        request.crawler_name = "test"
+
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
+
+        self.assertEqual(history.get_size(), 1)
+        self.assertTrue(crawl_id is not None)
+
+        request = PageRequestObject("https://youtube.com")
+        request.crawler_name = "not test"
+
+        # call tested function
+        find_crawl_id = history.find(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
         self.assertTrue(find_crawl_id is None)
 
     def test_find__false__invalid_type(self):
@@ -213,13 +262,15 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+        request = PageRequestObject("https://youtube.com")
+
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
 
         self.assertEqual(history.get_size(), 1)
         self.assertTrue(crawl_id is not None)
 
         # call tested function
-        find_crawl_id = history.find(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url="https://youtube.com")
+        find_crawl_id = history.find(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, request=request)
         self.assertTrue(find_crawl_id is None)
 
     def test_get__by_id_true(self):
@@ -227,7 +278,9 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+        request = PageRequestObject("https://youtube.com")
+
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
 
         self.assertEqual(history.get_size(), 1)
         self.assertTrue(crawl_id is not None)
@@ -241,7 +294,9 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+        request = PageRequestObject("https://youtube.com")
+
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
 
         self.assertEqual(history.get_size(), 1)
         self.assertTrue(crawl_id is not None)
@@ -255,8 +310,11 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
-        crawl_id_get = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
-        crawl_id_social = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, url="https://github.com")
+        request1 = PageRequestObject("https://youtube.com")
+        request2 = PageRequestObject("https://github.com")
+
+        crawl_id_get = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request1)
+        crawl_id_social = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, request=request2)
 
         self.assertEqual(history.get_size(), 2)
         self.assertTrue(crawl_id_get is not None)
@@ -281,7 +339,9 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+        request = PageRequestObject("https://youtube.com")
+
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
 
         data = {"test_data" : "OK"}
 
@@ -291,16 +351,17 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(crawl_item.data)
         self.assertIn("test_data", crawl_item.data)
 
-    def test_add__url(self):
+    def test_add__request(self):
         history = CrawlerContainer()
 
         self.assertEqual(history.get_size(), 0)
 
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+        request = PageRequestObject("https://youtube.com")
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
 
         data = {"test_data" : "OK"}
 
-        history.add(url="https://youtube.com", data=data)
+        history.add(request=request, data=data)
 
         crawl_item = history.get(crawl_id=crawl_id)
         self.assertTrue(crawl_item.data)
@@ -311,7 +372,8 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+        request = PageRequestObject("https://youtube.com")
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
 
         self.assertEqual(history.get_size(), 1)
 
@@ -329,7 +391,8 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         self.assertEqual(history.get_size(), 0)
 
-        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://youtube.com")
+        request = PageRequestObject("https://youtube.com")
+        crawl_id = history.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
 
         self.assertEqual(history.get_size(), 1)
 

@@ -239,6 +239,11 @@ class ScriptCrawler(CrawlerInterface):
 
         self.makedirs()
 
+        request_file = self.get_request_file()
+        if request_file.exists():
+            request_file.unlink()
+        request_to_file(self.request, request_file)
+
         if response_file_location.exists():
             response_file_location.unlink()
 

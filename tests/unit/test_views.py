@@ -1,11 +1,12 @@
 from datetime import datetime
 
+from webtoolkit import PageRequestObject
+from webtoolkit.tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
+from webtoolkit.tests.fakeresponse import FlaskRequest
+
 from src.views import get_entry_html
 from src.webtools import Url
 from src.crawlercontainer import CrawlerContainer, CrawlItem
-
-from webtoolkit.tests.fakeinternet import FakeInternetTestCase, MockRequestCounter
-from webtoolkit.tests.fakeresponse import FlaskRequest
 
 
 class ViewsTest(FakeInternetTestCase):
@@ -19,7 +20,9 @@ class ViewsTest(FakeInternetTestCase):
         url.get_response()
         all_properties = url.get_all_properties()
 
-        crawl_data = CrawlItem(crawl_id=0, crawl_type=CrawlerContainer.CRAWL_TYPE_GET, url="https://example.com")
+        request = PageRequestObject("https://youtube.com")
+
+        crawl_data = CrawlItem(crawl_id=0, crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
         crawl_data.data = all_properties
 
         html = get_entry_html("", crawl_data)

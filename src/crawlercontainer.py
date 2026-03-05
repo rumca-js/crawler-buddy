@@ -134,7 +134,7 @@ class CrawlerContainer(object):
                 return True
         return False
 
-    def add(self, crawl_type, request, data=None, crawl_id=None):
+    def add(self, crawl_type=None, request=None, data=None, crawl_id=None):
         """
         Adds crawl type data for url
         """
