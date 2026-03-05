@@ -13,6 +13,7 @@ from collections import OrderedDict
 import urllib.robotparser
 import asyncio
 import base64
+from flask import current_app
 
 from webtoolkit import (
     WebLogger,
@@ -82,14 +83,7 @@ class Url(BaseUrl):
         """
         Returns request for URL
         """
-        return UrlRules.get_default_request(url)
-
-    def get_init_request(self):
-        """
-        Returns initial request. TODO seems redundant
-        """
-        request =  UrlRules.get_default_request(url)(self.url)
-        request = self.get_request_for_request(request) 
+        request = UrlRules.get_default_request(url)
         return request
 
     def get_request_for_request(self, request):
@@ -106,6 +100,19 @@ class Url(BaseUrl):
 
         if request.timeout_s is None or request.timeout_s == 0:
             request.timeout_s = WebConfig.get_default_timeout_s()
+
+        return request
+
+    def setup_crawl_id(self, request):
+        if not request:
+            return
+
+        crawl_id = request.settings.get("crawl_id")
+        if crawl_id is None:
+            crawler = current_app.config['crawler_main']
+            crawl_id = crawler.container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
+            if crawl_id:
+                request.settings["crawl_id"] = crawl_id
 
         return request
 
