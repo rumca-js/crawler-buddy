@@ -5,6 +5,8 @@ Access through:
     ip:port/getj?url=.... etc.
 """
 import socket
+import shutil
+import os
 from src import webtools
 from src.server_init import create_app
 from src.taskrunner import start_runner_thread
@@ -25,6 +27,11 @@ if __name__ == "__main__":
 
     port = app.config['configuration'].get("port")
     host = app.config['configuration'].get("host")
+
+    # TODO
+    path = "storage"
+    if os.path.exists(path):
+        shutil.rmtree(path)
 
     # TODO?
     socket.setdefaulttimeout(100)
