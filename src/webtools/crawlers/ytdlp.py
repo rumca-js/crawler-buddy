@@ -31,13 +31,6 @@ class YtdlpCrawler(CrawlerInterface):
         """
         from utils.programwrappers import ytdlp
 
-        self.response = PageResponseObject(
-            self.request.url,
-            text=None,
-            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-            request_url=self.request.url,
-        )
-
         yt = ytdlp.YTDLP(self.request.url)
         text = yt.download_data()
 

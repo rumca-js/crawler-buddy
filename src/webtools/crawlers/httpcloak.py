@@ -108,7 +108,7 @@ class HttpCloakCrawler(CrawlerInterface):
                     status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
                     request_url=self.request.url,
                 )
-                self.response.add_error("Url:{} Cannot create request".format(str(E)))
+                self.add_error("Url:{} Cannot create request".format(str(E)))
 
             except httpcloak.Timeout as E:
                 self.response = PageResponseObject(
@@ -117,7 +117,7 @@ class HttpCloakCrawler(CrawlerInterface):
                     status_code=HTTP_STATUS_CODE_TIMEOUT,
                     request_url=self.request.url,
                 )
-                self.response.add_error("Url:{} Timeout".format(str(E)))
+                self.add_error("Url:{} Timeout".format(str(E)))
             """
 
         except Exception as E:
@@ -127,7 +127,7 @@ class HttpCloakCrawler(CrawlerInterface):
                 status_code=HTTP_STATUS_CODE_EXCEPTION,
                 request_url=self.request.url,
             )
-            self.response.add_error("Url:{} Cannot create request".format(str(E)))
+            self.add_error("Url:{} Cannot create request".format(str(E)))
 
     def update_request(self):
         self.request.timeout_s = self.get_timeout_s()

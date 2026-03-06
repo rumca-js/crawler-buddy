@@ -140,17 +140,10 @@ class SeleniumDriver(CrawlerInterface):
         if not self.is_valid():
             return
 
-        self.response = PageResponseObject(
-            self.request.url,
-            text=None,
-            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-            request_url=self.request.url,
-        )
-
         try:
             from selenium.common.exceptions import TimeoutException
         except Exception as E:
-            self.response.add_error(str(E))
+            self.add_error(str(E))
             print(str(E))
             selenium_feataure_enabled = False
 
@@ -190,32 +183,12 @@ class SeleniumDriver(CrawlerInterface):
             self.process_response()
 
         except TimeoutException:
-            error_text = traceback.format_exc()
-            WebLogger.debug(
-                info_text="Page timeout:{}".format(self.request.url),
-                detail_text=error_text,
-            )
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_TIMEOUT,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Page timeout".format(self.request.url))
+            self.set_timeout_response()
 
         except Exception as E:
             str_exc = str(E)
             if str_exc.find("net::ERR_NAME_NOT_RESOLVED") >= 0:
-                WebLogger.debug("Url:{} connection error".format(self.request.url))
-                self.response = PageResponseObject(
-                    self.request.url,
-                    text=None,
-                    status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
-                    request_url=self.request.url,
-                )
-                self.response.add_error(
-                    "Url:{} Connection error".format(self.request.url)
-                )
+                self.set_connection_error_response()
             elif str_exc.find("net::ERR_SSL_VERSION_OR_CIPHER_MISMATCH") >= 0:
                 WebLogger.exc(E, "Url:{}".format(self.request.url))
                 self.response = PageResponseObject(
@@ -224,7 +197,7 @@ class SeleniumDriver(CrawlerInterface):
                     status_code=HTTP_STATUS_SSL_CERTIFICATE_ERROR,
                     request_url=self.request.url,
                 )
-                self.response.add_error("Url:{} ssl certificate error".format(self.request.url))
+                self.add_error("Url:{} ssl certificate error".format(self.request.url))
             elif str_exc.find("[Errno 111] Connection refused") >= 0:
                 # there is a page, but is refusing us (looking at you konami.com)
                 WebLogger.exc(E, "Url:{}".format(self.request.url))
@@ -234,16 +207,9 @@ class SeleniumDriver(CrawlerInterface):
                     status_code=HTTP_STATUS_SSL_CERTIFICATE_ERROR,
                     request_url=self.request.url,
                 )
-                self.response.add_error(f"Url:{self.request.url} exception {str_exc}")
+                self.add_error(f"Url:{self.request.url} exception {str_exc}")
             else:
-                WebLogger.exc(E, "Url:{}".format(self.request.url))
-                self.response = PageResponseObject(
-                    self.request.url,
-                    text=None,
-                    status_code=HTTP_STATUS_CODE_EXCEPTION,
-                    request_url=self.request.url,
-                )
-                self.response.add_error(f"Url:{self.request.url} exception {str_exc}")
+                self.set_exception_response(E)
 
         return self.response
 
@@ -274,7 +240,7 @@ class SeleniumDriver(CrawlerInterface):
         )
 
         if len(info) == 0:
-            self.response.add_error("Cannot read driver logs")
+            self.add_error("Cannot read driver logs")
 
     def read_logs(self, logs):
         info = {}
@@ -480,7 +446,7 @@ class SeleniumChromeHeadless(SeleniumDriver):
                 WebLogger.error(
                     f"Chromedriver executable not found at: {self.driver_executable}"
                 )
-                self.response.add_error(f"Chromedriver executable not found at: {self.driver_executable}")
+                self.add_error(f"Chromedriver executable not found at: {self.driver_executable}")
 
                 return None
             service = Service(executable_path=self.driver_executable)
@@ -511,7 +477,7 @@ class SeleniumChromeHeadless(SeleniumDriver):
         except Exception as E:
             text = f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}"
             WebLogger.error(text)
-            self.response.add_error(text)
+            self.add_error(text)
             return None
 
     def is_valid(self) -> bool:
@@ -575,7 +541,7 @@ class SeleniumChromeFull(SeleniumDriver):
                 WebLogger.error(
                     f"Chromedriver executable not found at: {self.driver_executable}"
                 )
-                self.response.add_error(f"Chromedriver executable not found at: {self.driver_executable}")
+                self.add_error(f"Chromedriver executable not found at: {self.driver_executable}")
                 return None
             service = Service(executable_path=self.driver_executable)
         else:
@@ -636,7 +602,7 @@ class SeleniumChromeFull(SeleniumDriver):
 
             text = f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}"
             WebLogger.error(text)
-            self.response.add_error(text)
+            self.add_error(text)
             return None
 
     def is_valid(self) -> bool:
@@ -790,7 +756,7 @@ class SeleniumWireFull(SeleniumDriver):
         except Exception as e:
             text = f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}"
             WebLogger.error(text)
-            self.response.add_error(text)
+            self.add_error(text)
             return None
 
     def process_response(self):
@@ -849,13 +815,6 @@ class SeleniumBase(CrawlerInterface):
         """
         if not self.is_valid():
             return
-
-        self.response = PageResponseObject(
-            self.request.url,
-            text=None,
-            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-            request_url=self.request.url,
-        )
 
         try:
             from seleniumbase import SB

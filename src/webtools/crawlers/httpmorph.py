@@ -30,13 +30,6 @@ class HttpMorphCrawler(CrawlerInterface):
 
         import httpmorph
 
-        self.response = PageResponseObject(
-            self.request.url,
-            text=None,
-            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-            request_url=self.request.url,
-        )
-
         try:
             answer = self.build_requests()
 
@@ -83,37 +76,13 @@ class HttpMorphCrawler(CrawlerInterface):
                 )
 
         except httpmorph.ConnectionError as E:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Connection error".format(self.request.url))
+            self.set_connection_error_response()
         except httpmorph.Timeout as E:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_TIMEOUT,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Timeout".format(self.request.url))
+            self.set_timeout_response()
         except WebToolsTimeoutException as E:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_TIMEOUT,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Timeout".format(self.request.url))
+            self.set_timeout_response()
         except Exception as E:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_EXCEPTION,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} code exception:{}".format(self.request.url, str(E)))
+            self.set_exception_response(E)
 
         try:
             if answer:

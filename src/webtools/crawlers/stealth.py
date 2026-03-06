@@ -77,21 +77,9 @@ class StealthRequestsCrawler(CrawlerInterface):
                 )
 
         except WebToolsTimeoutException as E:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_TIMEOUT,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Timeout".format(self.request.url))
+            self.set_timeout_response()
         except Exception as E:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_EXCEPTION,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Server error {}".format(self.request.url, str(E)))
+            self.set_exception_response(E)
 
         try:
             if answer:

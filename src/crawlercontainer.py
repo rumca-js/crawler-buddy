@@ -293,34 +293,60 @@ class CrawlerContainer(object):
         pass
 
     def _match(self, item, crawl_type=None, request=None):
-        if not item:
+        if item is None:
             return False
 
-        if crawl_type and item.crawl_type != crawl_type:
+        if crawl_type is not None and item.crawl_type != crawl_type:
             return False
 
         input_json_request = request_to_json(request)
-        if request and not self.match_requests(item.request, input_json_request):
+        if request is not None and not self.match_requests(item.request, input_json_request):
             return False
 
         return True
 
-    def match_requests(self, one_request,  two_request):
+    def match_requests(self, one_request,  input_request):
         if one_request and "crawler_type" in one_request:
             one_request["crawler_type"]=None
-        if two_request and "crawler_type" in two_request:
-            two_request["crawler_type"]=None
+        if input_request and "crawler_type" in input_request:
+            input_request["crawler_type"]=None
         if one_request and "handler_type" in one_request:
             one_request["handler_type"]=None
-        if two_request and "handler_type" in two_request:
-            two_request["handler_type"]=None
-        if one_request and two_request and one_request == two_request:
+        if input_request and "handler_type" in input_request:
+            input_request["handler_type"]=None
+
+        if one_request and "crawler_name" not in one_request:
+            one_request["crawler_name"]=None
+        if input_request and "crawler_name" not in input_request:
+            input_request["crawler_name"]=None
+        if one_request and "handler_name" not in one_request:
+            one_request["handler_name"]=None
+        if input_request and "handler_name" not in input_request:
+            input_request["handler_name"]=None
+
+        """
+        TODO
+        if input_request["crawler_name"] and one_request["crawler_name"] != input_request["crawler_name"]:
+            return False
+        if input_request["handler_name"] and one_request["handler_name"] != input_request["handler_name"]:
+            return False
+        """
+        if one_request["crawler_name"] != input_request["crawler_name"]:
+            return False
+        if one_request["handler_name"] != input_request["handler_name"]:
+            return False
+        if one_request["url"] != input_request["url"]:
+            return False
+
+        """
+        if one_request and input_request and one_request == input_request:
+            return True
+        """
+
+        if one_request is None and input_request is None:
             return True
 
-        if one_request is None and two_request is None:
-            return True
-
-        return False
+        return True
 
     def get_all_items(self):
         return self.container

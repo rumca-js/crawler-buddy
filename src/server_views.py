@@ -415,19 +415,28 @@ def set_response():
     if not data:
         return jsonify({"success": False, "error": "Missing 'Contents'"}), 400
 
-    url = request.args.get("url")
-    crawler_name = request.args.get("crawler_name")
+    try:
+        url = request.args.get("url")
+        crawler_name = request.args.get("crawler_name")
 
-    page_request = get_requests(request)
+        page_request = get_requests(request)
+        if not page_request:
+            return
 
-    u = set_response_impl(request)
+        u = set_response_impl(request)
 
-    p = u.handler.get_page_handler()
+        p = u.handler.get_page_handler()
 
-    u.request.crawler_name = crawler_name
-    all_properties = u.get_all_properties()
+        u.request.crawler_name = crawler_name
+        all_properties = u.get_all_properties()
 
-    current_app.config['crawler_main'].container.add(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, data=all_properties, request=page_request)
+        if all_properties:
+            current_app.config['crawler_main'].container.add(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, data=all_properties, request=page_request)
+        else:
+            return
+
+    except Exception as E:
+        WebLogger.exc(E, "Cannot set data")
 
     return jsonify(all_properties)
 
@@ -511,7 +520,7 @@ def findj():
     )
 
     if not crawler_data:
-        return jsonify({"success": False, "error": "No properties found"}), 400
+        return jsonify({"success": False, "error": f"No properties found {crawl_id} {page_request}"}), 400
 
     index = crawler_data.crawl_id
     timestamp = crawler_data.timestamp

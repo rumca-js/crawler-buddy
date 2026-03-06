@@ -27,13 +27,6 @@ class HttpxCrawler(CrawlerInterface):
         if not self.is_valid():
             return
 
-        self.response = PageResponseObject(
-            self.request.url,
-            text=None,
-            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-            request_url=self.request.url,
-        )
-
         try:
             answer = self.build_requests()
 
@@ -79,23 +72,12 @@ class HttpxCrawler(CrawlerInterface):
                     request_url=self.request.url,
                     headers=answer.headers,
                 )
+
         except WebToolsTimeoutException as E:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_TIMEOUT,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Timeout".format(self.request.url))
+            self.set_timeout_response()
 
         except Exception as E:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_EXCEPTION,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Server error {}".format(self.request.url, str(E)))
+            self.set_exception_response(E)
 
         try:
             if answer:

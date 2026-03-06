@@ -30,7 +30,12 @@ def main():
     if parser.args.verbose:
         print("Running request:{} with RequestsCrawler".format(request))
 
-    response = driver.run()
+    response = None
+    try:
+        response = driver.run()
+    except Exception as E:
+        driver.add_error(str(E))
+
     if not response:
         print("No response")
         sys.exit(1)
@@ -39,9 +44,20 @@ def main():
         print("Contents")
         print(response.get_text())
 
-    print(response)
-    parser.save(response)
-    driver.close()
+    try:
+        driver.close()
+    except Exception as E:
+        driver.add_error(str(E))
+
+    if not response:
+        response = driver.response
+
+    if response:
+        print(response)
+        parser.save(response)
+    else:
+        print("No response")
+        sys.exit(1)
 
 
 main()

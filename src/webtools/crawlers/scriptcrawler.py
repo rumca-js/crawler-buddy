@@ -61,6 +61,7 @@ class ScriptCrawler(CrawlerInterface):
     ):
         self.cwd = cwd
         self.script = script
+        self.hash = None
 
         super().__init__(
             request=request,
@@ -107,6 +108,8 @@ class ScriptCrawler(CrawlerInterface):
             self.script = self.request.settings.get('script')
             self.script = "poetry run python " + self.script
 
+        self.hash = self.get_request_hash()
+
         if not self.is_valid():
             return
 
@@ -118,12 +121,6 @@ class ScriptCrawler(CrawlerInterface):
             return self.run_via_file()
 
     def run_via_server(self, remote_server):
-        self.response = PageResponseObject(
-            self.request.url,
-            text=None,
-            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-            request_url=self.request.url,
-        )
         url = self.request.url
         crawl_id = self.request.settings.get("crawl_id")
         timeout_s = self.get_timeout_s()
@@ -162,16 +159,12 @@ class ScriptCrawler(CrawlerInterface):
             except Exception as E:
                 WebLogger.exc(E, "Could not kill process")
 
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_TIMEOUT,
-                request_url=self.request.url,
-            )
+            self.set_timeout_response()
             return self.response
+
         except ValueError as E:
+            self.set_exception_response(E)
             WebLogger.exc(E, "Incorrect script call {}".format(script))
-            self.response.add_error("Incorrect script call: {}".format(str(E)))
             return self.response
 
         if p.returncode != 0:
@@ -193,7 +186,7 @@ class ScriptCrawler(CrawlerInterface):
                     self.cwd,
                 )
             )
-            self.response.add_error("Return code invalid: {}".format(p.returncode))
+            self.add_error("Return code invalid: {}".format(p.returncode))
 
         url = self.request.url
         crawler_name = self.request.crawler_name
@@ -214,26 +207,12 @@ class ScriptCrawler(CrawlerInterface):
             except ValueError as E:
                 print("Response content is not valid JSON. {}".format(E))
         else:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-                request_url=self.request.url,
-            )
-
             WebLogger.error(
-                f"Url:{self.request.url}: Failed to fetch data. Status code: {response.status_code}"
-            )
-            self.response.add_error("Failed to fetch data")
+                f"Url:{self.request.url}: Failed to fetch data. Status code: {response.status_code}")
+            
+            self.add_error("Failed to fetch data")
 
     def run_via_file(self):
-        self.response = PageResponseObject(
-            self.request.url,
-            text=None,
-            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-            request_url=self.request.url,
-        )
-
         response_file_location = Path(self.get_response_file())
         WebLogger.debug("Running via file {}".format(response_file_location))
 
@@ -243,6 +222,10 @@ class ScriptCrawler(CrawlerInterface):
         if request_file.exists():
             request_file.unlink()
         request_to_file(self.request, request_file)
+
+        if not request_file.exists():
+            WebLogger.error("File does not exist")
+            time.sleep(1)
 
         if response_file_location.exists():
             response_file_location.unlink()
@@ -270,15 +253,12 @@ class ScriptCrawler(CrawlerInterface):
         except subprocess.TimeoutExpired as E:
             WebLogger.debug(E, "Timeout on running script")
 
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_TIMEOUT,
-                request_url=self.request.url,
-            )
+            self.set_timeout_response()
             return self.response
         except ValueError as E:
             WebLogger.exc(E, "Incorrect script call {}".format(script))
+            self.set_exception_response(E)
+
             return self.response
 
         if p.returncode != 0:
@@ -290,7 +270,7 @@ class ScriptCrawler(CrawlerInterface):
                     self.cwd,
                 )
             )
-            self.response.add_error("Return code invalid: {}".format(p.returncode))
+            self.add_error("Return code invalid: {}".format(p.returncode))
 
             if p.stdout:
                 stdout_str = p.stdout.decode()
@@ -316,13 +296,6 @@ class ScriptCrawler(CrawlerInterface):
                 )
             )
 
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-                request_url=self.request.url,
-            )
-
         return self.response
 
     def process_input(self):
@@ -339,21 +312,17 @@ class ScriptCrawler(CrawlerInterface):
         crawl_id = str(self.request.settings.get("crawl_id"))
         crawler_name = str(self.request.crawler_name)
         handler_name = str(self.request.handler_name)
-        text = crawl_id + crawler_name + handler_name
+        text = self.request.url + crawl_id + crawler_name + handler_name
 
         string = hashlib.md5(text.encode("utf-8")).hexdigest()
         return string
 
     def get_response_file_name(self):
-        hash = self.get_request_hash()
-
-        response_file = f"response_{hash}.txt"
+        response_file = f"response_{self.hash}.txt"
         return response_file
 
     def get_request_file_name(self):
-        hash = self.get_request_hash()
-
-        response_file = f"request_{hash}.txt"
+        response_file = f"request_{self.hash}.txt"
         return response_file
 
     def get_operating_dir(self):
@@ -369,18 +338,21 @@ class ScriptCrawler(CrawlerInterface):
 
         if not operating_path.exists():
             WebLogger.error("Operating path does not exist: {}".format(operating_path))
-            self.response.add_error("Operating path does not exist: {}".format(operating_path))
+            self.add_error("Operating path does not exist: {}".format(operating_path))
             return
 
         return operating_path
 
     def close(self):
-        request_file = self.get_request_file()
-        if request_file.exists():
-            request_file.unlink()
-        response_file = self.get_response_file()
-        if response_file.exists():
-            response_file.unlink()
+        try:
+            request_file = self.get_request_file()
+            if request_file.exists():
+                request_file.unlink()
+            response_file = self.get_response_file()
+            if response_file.exists():
+                response_file.unlink()
+        except Exception as E:
+            self.add_error("Could not clean up files")
 
         super().close()
 

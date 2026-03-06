@@ -96,11 +96,13 @@ class ScriptCrawlerParser(object):
                     crawl_id = self.args.crawl_id
 
                     self.post(response, "crawl_id={crawl_id}")
-                elif response and response.request:
+                elif response is not None and response.request is not None:
                     url = response.request.url
                     crawler_name = response.request.crawler_name
                     handler_name = response.request.handler_name
                     self.post(response, f"url={url}&crawler_name={crawler_name}&handler_name={handler_name}")
+                else:
+                    print("Could not send response")
 
     def post(self, response, args):
         response_json = response_to_json(response)

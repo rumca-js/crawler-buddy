@@ -1,7 +1,7 @@
 import os
 import json
 from webtoolkit import WebLogger, json_to_request
-from src.webtools import WebConfig, ScriptCrawler
+from src.webtools import WebConfig, ScriptCrawler, Url
 
 from src.entryrules import EntryRules
 
@@ -36,6 +36,13 @@ class CrawlerData(object):
         if page_request and page_request.timeout_s is None:
             page_request.timeout_s = WebConfig.get_default_timeout_s()
 
+        # TODO fill precise information
+        if page_request.handler_name is None:
+            url = Url(request=page_request)
+            handler = url.get_handler()
+            if handler is not None:
+                page_request.handler_name = handler.__class__.__name__
+
         if not page_request:
             WebLogger.error(
                 "Url:{} Cannot run request without crawler".format(url)
@@ -52,6 +59,11 @@ class CrawlerData(object):
             page_request = json_to_request(data_json)
         else:
             page_request = json_to_request(self.request.args)
+
+        if page_request.crawler_name == "":
+            page_request.crawler_name = None
+        if page_request.handler_name == "":
+            page_request.handler_name = None
 
         return page_request
 

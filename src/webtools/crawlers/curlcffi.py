@@ -26,15 +26,8 @@ class CurlCffiCrawler(CrawlerInterface):
         """
         Run crawler
         """
-        self.response = PageResponseObject(
-            self.request.url,
-            text=None,
-            status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-            request_url=self.request.url,
-        )
-
         if not self.is_valid():
-            self.response.add_error("Crawler is not valid")
+            self.add_error("Crawler is not valid")
             return self.response
 
         from curl_cffi.requests.exceptions import ConnectionError, Timeout
@@ -86,37 +79,20 @@ class CurlCffiCrawler(CrawlerInterface):
                 )
 
         except ConnectionError as E:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Connection error".format(self.request.url))
+            self.set_connection_error_response()
         except Timeout as E:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_TIMEOUT,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Timeout".format(self.request.url))
+            self.set_timeout_response()
         except WebToolsTimeoutException as E:
+            self.set_timeout_response()
             self.response = PageResponseObject(
                 self.request.url,
                 text=None,
                 status_code=HTTP_STATUS_CODE_TIMEOUT,
                 request_url=self.request.url,
             )
-            self.response.add_error("Url:{} Timeout".format(self.request.url))
+            self.add_error("Url:{} Timeout".format(self.request.url))
         except Exception as E:
-            self.response = PageResponseObject(
-                self.request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_EXCEPTION,
-                request_url=self.request.url,
-            )
-            self.response.add_error("Url:{} Server error {}".format(self.request.url, str(E)))
+            self.set_exception_response(E)
             WebLogger.exc(E)
 
         try:
@@ -170,7 +146,6 @@ class CurlCffiCrawler(CrawlerInterface):
 
             return True
         except Exception as E:
-            if self.response:
-                self.response.add_error(str(E))
+            self.add_error(str(E))
             print(str(E))
             return False
