@@ -76,8 +76,8 @@ class TaskRunner(object):
         if self.is_running(crawl_item.crawl_id):
             return False
 
-        if crawl_item.is_expired():
-            return False
+        #if crawl_item.is_expired():
+        #    return False
 
         if crawl_item.is_response():
             return False
@@ -184,7 +184,6 @@ class TaskRunner(object):
                 try:
                     self.set_thread_ok()
 
-
                     with self.container_lock:
                         for crawl_item in list(self.container.get_queued_items()):
                             if crawl_item.data is None:
@@ -222,10 +221,10 @@ class TaskRunner(object):
         for crawl_id in to_delete:
             self.dispose(crawl_id)
 
-        with self.lock:
-            for crawl_item in list(self.container.get_queued_items()):
-                if not self.is_running(crawl_item.crawl_id) and crawl_item.is_expired():
-                    self.container.remove(crawl_item.crawl_id)
+        #with self.lock:
+        #    for crawl_item in list(self.container.get_queued_items()):
+        #        if not self.is_running(crawl_item.crawl_id) and crawl_item.is_expired():
+        #            self.container.remove(crawl_item.crawl_id)
 
     def is_thread_ok(self):
         if self.health_date:

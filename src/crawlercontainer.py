@@ -1,5 +1,5 @@
-import copy
 from datetime import datetime, timedelta
+import threading
 
 from datetime import datetime
 from collections import OrderedDict
@@ -30,12 +30,21 @@ class CrawlItem(object):
         return self.data is not None
 
     def is_expired(self):
+        """
+        Elements with data, that are in queue are not expired
+        """
+        """
+        if not self.is_response():
+            return False
+
         timeout_s = WebConfig.get_default_timeout_s()
         if self.request_real:
             timeout_s = self.request_real.timeout_s
 
         if timeout_s > 0:
             return datetime.now() > self.timestamp + timedelta(seconds=timeout_s)
+        """
+        return False
 
 
 class CrawlerContainer(object):
@@ -56,6 +65,7 @@ class CrawlerContainer(object):
         self.records_size = records_size
         self.time_cache_m = time_cache_m
         self.crawl_index = 0
+        self.lock = threading.Lock()           # protects running_ids
 
     def crawl_type_to_str(crawl_type):
         if crawl_type == CrawlerContainer.CRAWL_TYPE_PING:
@@ -92,15 +102,16 @@ class CrawlerContainer(object):
             return found
 
         # Create new request
-        self.crawl_index += 1
-        crawl_id = self.crawl_index
+        with self.lock:
+            self.crawl_index += 1
+            crawl_id = self.crawl_index
 
-        item = CrawlItem(
-            crawl_id=crawl_id,
-            crawl_type=crawl_type,
-            request=request,
-        )
-        self.container.append(item)
+            item = CrawlItem(
+                crawl_id=crawl_id,
+                crawl_type=crawl_type,
+                request=request,
+            )
+            self.container.append(item)
 
         self.expire_old()
         self.trim_size()
@@ -112,7 +123,7 @@ class CrawlerContainer(object):
         Finds crawl with parameters. Returns ID or None.
         """
 
-        for item in self.container:
+        for item in reversed(self.container):
             if self._match(item, crawl_type, request=request):
                 return item.crawl_id
         return None
@@ -127,7 +138,7 @@ class CrawlerContainer(object):
         if data is None:
             return
 
-        for item in self.container:
+        for item in reversed(self.container):
             if item.crawl_id == crawl_id:
                 item.data = data
                 # item.timestamp = datetime.now() # TODO we do not want to change 'start date'
@@ -151,20 +162,24 @@ class CrawlerContainer(object):
             item_updated = True
 
         if not item_updated:
-            self.crawl_index += 1
-            crawl_id = self.crawl_index
+            with self.lock:
+                self.crawl_index += 1
+                crawl_id = self.crawl_index
 
-            item = CrawlItem(
-                crawl_id=crawl_id,
-                crawl_type=crawl_type,
-                request=request,
-                data=data,
-            )
+                crawl_item = CrawlItem(
+                    crawl_id=crawl_id,
+                    crawl_type=crawl_type,
+                    request=request,
+                    data=data,
+                )
 
-            self.container.append(item)
+                self.container.append(crawl_item)
 
         self.expire_old()
         self.trim_size()
+
+        if crawl_item:
+            return crawl_item.crawl_id
 
     def remove(self, crawl_id):
         """
@@ -199,7 +214,7 @@ class CrawlerContainer(object):
             crawl_id = self.find(crawl_type=crawl_type, request=request)
 
         if crawl_id:
-            for item in self.container:
+            for item in reversed(self.container):
                 if item.crawl_id == crawl_id:
                     return item
         return None
@@ -237,11 +252,13 @@ class CrawlerContainer(object):
         previous_length = len(self.container)
 
         result = []
-        for crawl_item in self.container:
+        for crawl_item in reversed(self.container):
             if crawl_item.timestamp > cutoff or not crawl_item.is_response():
                 result.append(crawl_item)
             else:
                 self.close_item(crawl_item)
+
+        result.reverse()
         self.container = result
 
         now_length = self.get_size()
@@ -249,9 +266,7 @@ class CrawlerContainer(object):
             WebLogger.debug("Container: Some entries expired!!!")
 
     def is_expired(self, crawl_item):
-        timeout_s = crawl_item.request_real.timeout_s
-        if timeout_s > 0:
-            return datetime.now() > crawl_item.timestamp + timedelta(seconds=timeout_s)
+        return crawl_item.is_expired()
 
     def trim_size(self):
         """
@@ -261,13 +276,14 @@ class CrawlerContainer(object):
         if self.get_size() > self.records_size:
             result = []
             index = 0
-            for crawl_item in self.container:
+            for crawl_item in reversed(self.container):
                 if not crawl_item.is_response():
                     result.append(crawl_item)
                 elif len(result) < self.records_size:
                     result.append(crawl_item)
                 else:
                     self.close_item(crawl_item)
+            result.reverse()
             self.container = result
 
     def remove_one_history(self):
@@ -277,13 +293,14 @@ class CrawlerContainer(object):
         """
         one_found = False
         result = []
-        for crawl_item in self.container:
+        for crawl_item in reversed(self.container):
             if crawl_item.is_response():
                 if not one_found:
                     self.close_item(crawl_item)
                     one_found = True
                     continue
             result.append(crawl_item)
+        result.reverse()
         self.container = result
 
     def close_item(self, crawl_item):

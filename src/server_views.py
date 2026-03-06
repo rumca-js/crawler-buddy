@@ -415,13 +415,15 @@ def set_response():
     if not data:
         return jsonify({"success": False, "error": "Missing 'Contents'"}), 400
 
+    all_properties = None
+
     try:
         url = request.args.get("url")
         crawler_name = request.args.get("crawler_name")
 
         page_request = get_requests(request)
         if not page_request:
-            return
+            return jsonify({"success": False, "error": "No page request'"}), 400
 
         u = set_response_impl(request)
 
@@ -431,14 +433,20 @@ def set_response():
         all_properties = u.get_all_properties()
 
         if all_properties:
-            current_app.config['crawler_main'].container.add(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, data=all_properties, request=page_request)
+            crawl_id = current_app.config['crawler_main'].container.add(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, data=all_properties, request=page_request)
+
+            WebLogger.debug(f"Added crawl_id {crawl_id}")
         else:
-            return
+            return jsonify({"success": False, "error": "No properties'"}), 400
 
     except Exception as E:
         WebLogger.exc(E, "Cannot set data")
+        return jsonify({"success": False, "error": "Cannot set data'"}), 400
 
-    return jsonify(all_properties)
+    if all_properties:
+        return jsonify(all_properties)
+    else:
+        return jsonify({"success": False, "error": "Cannot set data'"}), 400
 
 
 def set_response_impl(request):
@@ -479,7 +487,7 @@ def find():
         return get_html(id=id, body=form_html, title="Find")
     else:
         crawler_data = current_app.config['crawler_main'].container.get(
-            url=url, request=page_request
+            request=page_request
         )
 
         if not crawler_data:
