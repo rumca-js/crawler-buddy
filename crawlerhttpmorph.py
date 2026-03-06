@@ -9,7 +9,10 @@ import time
 import argparse
 import sys
 
-from webtoolkit import response_to_file
+from webtoolkit import (
+   RequestsCrawler,
+   PageResponseObject,
+)
 from src import webtools
 
 
@@ -25,30 +28,33 @@ def main():
 
     request = parser.get_request()
 
-    driver = webtools.HttpMorphCrawler(request=request)
-
-    if parser.args.verbose:
-        print("Running request:{} with RequestsCrawler".format(request))
-
-    response = None
     try:
-        response = driver.run()
+        driver = webtools.HttpMorphCrawler(request=request)
+
+        if parser.args.verbose:
+            print("Running request:{} with RequestsCrawler".format(request))
+
+        response = None
+        try:
+            response = driver.run()
+        except Exception as E:
+            driver.add_error(str(E))
+
+        try:
+            driver.close()
+        except Exception as E:
+            driver.add_error(str(E))
+
+        if not response:
+            response = driver.response
+
+        if response:
+            print(response)
+            parser.save(response)
+            return
     except Exception as E:
-        driver.add_error(str(E))
-
-    try:
-        driver.close()
-    except Exception as E:
-        driver.add_error(str(E))
-
-    if not response:
-        response = driver.response
-
-    if response:
+        resonse = get_response(str(E))
         print(response)
         parser.save(response)
-    else:
-        print("No response")
-        sys.exit(1)
 
 main()

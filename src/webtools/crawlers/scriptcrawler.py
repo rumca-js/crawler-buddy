@@ -132,6 +132,11 @@ class ScriptCrawler(CrawlerInterface):
 
         request_to_file(self.request, request_file)
 
+        if not request_file.exists():
+            WebLogger.error("Request file does not exist")
+            self.add_error("Request file does not exist")
+            time.sleep(1)
+
         script = self.script + f' --url "{url}" --remote-server="{remote_server}" --timeout={timeout_s} --request-file={request_file}'
 
         # TODO pass headers and cookies

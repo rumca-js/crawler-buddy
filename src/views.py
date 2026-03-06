@@ -6,6 +6,7 @@ from webtoolkit import (
    json_to_request,
    json_to_response,
    RemoteServer,
+   RemoteUrl,
 )
 from src import CrawlerContainer
 
@@ -221,9 +222,11 @@ def get_crawl_data(id, crawl_data):
     return text
 
 
-def rssify(all_properties):
-    properties = CrawlerHistory.read_properties_section("Properties", all_properties)
-    entries = CrawlerHistory.read_properties_section("Entries", all_properties)
+def rssify(url, all_properties):
+    page_url = RemoteUrl(url, all_properties=all_properties)
+
+    properties = page_url.get_properties()
+    entries = page_url.get_entries()
 
     rss_template = """<?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:dc="http://purl.org/dc/elements/1.1/" 

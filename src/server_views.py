@@ -399,7 +399,7 @@ def debug():
         color = level2color(level)
 
         text += '<div style="margin-bottom: 1em;">\n'
-        text += f'<div>[{timestamp}] <span style="background-color:{color}">Level:{level}</span> info:{info_text}</div>\n'
+        text += f'<div>[{timestamp}] <span style="background-color:{color}">Level:{level}</span> {info_text}</div>\n'
 
         if detail_text:
             detail_text = html.escape(detail_text)
@@ -615,10 +615,13 @@ def rssifyr():
 
     all_properties = current_app.config['crawler_main'].get_all_properties(request)
     if all_properties:
-        properties = CrawlerHistory.read_properties_section(
-            "Properties", all_properties
-        )
-        entries = CrawlerHistory.read_properties_section("Entries", all_properties)
+        page_url = RemoteUrl(url, all_properties=all_properties)
+        properties = page_url.get_properties()
+        entries = page_url.get_entries()
+
+        """
+        TODO - if no entries are here, then use 'feeds from link'
+        create request
 
         if not entries or len(entries) == 0:
             if "feeds" in properties:
@@ -628,8 +631,9 @@ def rssifyr():
                     )
                     if all_properties:
                         break
+        """
 
-    return Response(rssify(all_properties), mimetype="application/rss+xml")
+    return Response(rssify(url, all_properties), mimetype="application/rss+xml")
 
 
 @views.route("/contents", methods=["GET"])
@@ -659,8 +663,7 @@ def contentsr():
     if not all_properties:
         return jsonify({"success": False, "error": "No properties found"}), 400
 
-    page_url = RemoteUrl(url)
-    page_url.all_properties = all_properties
+    page_url = RemoteUrl(url, all_properties=all_properties)
     page_url.responses = {"Default" : RemoteServer.get_response(page_url.all_properties)}
 
     response = page_url.get_response()

@@ -209,7 +209,6 @@ class Crawler(object):
             return all_properties
 
         request.settings["crawl_id"] = crawl_id
-        print("setting request")
 
         if self.multi_process:
             data = self.wait_for_response(crawl_id)
@@ -244,10 +243,6 @@ class Crawler(object):
         force = server_request.args.get("force")
 
         request = self.get_request_data(server_request)
-        WebLogger.info("get_all_properties")
-        WebLogger.info(str(request))
-        WebLogger.info(str(request.handler_name))
-        WebLogger.info(str(type(request.handler_name)))
 
         result = self.get_crawl_with_method(request=request, crawl_type=CrawlerContainer.CRAWL_TYPE_GET, force=force)
         return result
