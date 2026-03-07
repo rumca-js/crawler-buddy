@@ -36,8 +36,11 @@ class CrawlerData(object):
         if page_request and page_request.timeout_s is None:
             page_request.timeout_s = WebConfig.get_default_timeout_s()
 
-        # TODO fill precise information
-        if page_request.handler_name is None:
+        # important for crawl to be full of precise information
+        # we will be searching using crawler_name and handler_name
+        # without this information we might find something we do not want
+
+        if page_request and page_request.handler_name is None:
             url = Url(request=page_request)
             handler = url.get_handler()
             if handler is not None:

@@ -219,7 +219,7 @@ class YouTubeVideoHandlerJson(YouTubeVideoHandler):
         
         url = self.get_link_classic()
 
-        self.json_url = self.get_page_url(url = url, crawler_name="YtdlpCrawler")
+        self.json_url = self.build_http_url(url = url, crawler_name="YtdlpCrawler")
         return self.json_url
 
     def get_rd_json_url(self):
