@@ -14,6 +14,17 @@ from src import webtools
 from src.webtools import WebConfig
 
 
+def get_response(link, error_text):
+    response = PageResponseObject(
+        url=link,
+        text=None,
+        status_code=HTTP_STATUS_CODE_SERVER_ERROR,
+        request_url=self.request.url,
+    )
+    response.add_error(error_text)
+    return response
+
+
 def main():
     WebConfig.init()
     WebConfig.use_print_logging()
@@ -24,39 +35,41 @@ def main():
         sys.exit(1)
         return
 
-    request = parser.get_request()
-    request.settings["driver_executable"] = WebConfig.get_default_chromedriver_path()
-
-    selenium_config = WebConfig.get_seleniumfull()
-    driver = WebConfig.get_crawler_from_mapping(request, selenium_config)
-
-    if parser.args.verbose:
-        print("Running request:{} with SeleniumChromeFull".format(request))
-
     response = None
     try:
-        response = driver.run()
+        request = parser.get_request()
+        request.settings["driver_executable"] = WebConfig.get_default_chromedriver_path()
+
+        selenium_config = WebConfig.get_seleniumfull()
+        driver = WebConfig.get_crawler_from_mapping(request, selenium_config)
+
+        if parser.args.verbose:
+            print("Running request:{} with SeleniumChromeFull".format(request))
+
+        try:
+            response = driver.run()
+        except Exception as E:
+            driver.add_error(str(E))
+            response = get_response(parser.args.url, "Error in running driver")
+
+        try:
+            driver.close()
+        except Exception as E:
+            driver.add_error(str(E))
+            response = get_response(parser.args.url, "Error in closing driver")
+
+        if not response:
+            response = driver.response
+
+        if not response:
+            response = get_response(parser.args.url, "Missing response")
+
     except Exception as E:
-        driver.add_error(str(E))
-
-    if not response:
-        print("No response")
-        sys.exit(1)
-
-    try:
-        driver.close()
-    except Exception as E:
-        driver.add_error(str(E))
-
-    if not response:
-        response = driver.response
+        resonse = get_response(parser.args.url, str(E))
 
     if response:
         print(response)
         parser.save(response)
-    else:
-        print("No response")
-        sys.exit(1)
 
 
 main()

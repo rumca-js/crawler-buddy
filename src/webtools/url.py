@@ -111,9 +111,11 @@ class Url(BaseUrl):
 
         # TODO not really sure if we should use crawler interface here
 
+        """
         interface = CrawlerInterface(request.url)
         headers = interface.get_default_headers()
         request.request_headers = headers
+        """
 
         return request
 

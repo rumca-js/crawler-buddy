@@ -16,9 +16,9 @@ from webtoolkit import (
 from src import webtools
 
 
-def get_response(error_text):
+def get_response(link, error_text):
     response = PageResponseObject(
-        self.request.url,
+        url=link,
         text=None,
         status_code=HTTP_STATUS_CODE_SERVER_ERROR,
         request_url=self.request.url,
@@ -72,7 +72,7 @@ def main():
             parser.save(response)
             return
     except Exception as E:
-        resonse = get_response(str(E))
+        resonse = get_response(parser.args.url, str(E))
         print(response)
         parser.save(response)
 

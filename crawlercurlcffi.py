@@ -16,9 +16,9 @@ from webtoolkit import (
 from src import webtools
 
 
-def get_response(error_text):
+def get_response(link, error_text):
     response = PageResponseObject(
-        self.request.url,
+        url=link,
         text=None,
         status_code=HTTP_STATUS_CODE_SERVER_ERROR,
         request_url=self.request.url,
@@ -37,34 +37,37 @@ def main():
         sys.exit(1)
         return
 
-    request = parser.get_request()
-
+    response = None
     try:
+        request = parser.get_request()
+
         driver = webtools.CurlCffiCrawler(request=request)
 
         if parser.args.verbose:
             print("Running request:{} with RequestsCrawler".format(request))
 
-        response = None
         try:
             response = driver.run()
         except Exception as E:
             driver.add_error(str(E))
+            response = get_response(parser.args.url, "Error in running driver")
 
         try:
             driver.close()
         except Exception as E:
             driver.add_error(str(E))
+            response = get_response(parser.args.url, "Error in closing driver")
 
         if not response:
             response = driver.response
 
-        if response:
-            print(response)
-            parser.save(response)
-            return
+        if not response:
+            response = get_response(parser.args.url, "Missing response")
+
     except Exception as E:
-        resonse = get_response(str(E))
+        resonse = get_response(parser.args.url, str(E))
+
+    if response:
         print(response)
         parser.save(response)
 

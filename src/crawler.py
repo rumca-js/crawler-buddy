@@ -85,6 +85,7 @@ class CrawlerTypeGet(object):
 
             response = page_url.get_response()
             all_properties = page_url.get_all_properties(include_social=False)
+
             page_url.close()
         except Exception as E:
             WebLogger.exc(
