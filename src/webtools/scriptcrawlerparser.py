@@ -78,13 +78,17 @@ class ScriptCrawlerParser(object):
 
         r.user_agent = self.args.user_agent
         r.ping = self.args.ping
+
         r.request_headers = self.args.request_headers
         r.settings = self.args.settings
+        r.cookies = self.args.cookies
 
         if not r.settings:
             r.settings = {}
         if not r.cookies:
             r.cookies = {}
+        if not r.request_headers:
+            r.request_headers = {}
 
         return r
 
