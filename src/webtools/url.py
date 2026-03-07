@@ -26,6 +26,7 @@ from webtoolkit import (
     TwitterUrlHandler,
     YouTubeVideoHandler,
     YouTubeChannelHandler,
+    CrawlerInterface,
 )
 
 from .webconfig import WebConfig
@@ -33,6 +34,7 @@ from .handlers import (
     YouTubeVideoHandlerJson,
     YouTubeChannelHandlerJson
 )
+from .cookiemanager import CookieManager
 
 from ..entryrules import EntryRules
 from utils.dateutils import DateUtils
@@ -40,17 +42,23 @@ from utils.dateutils import DateUtils
 
 class UrlRules(object):
     def get_default_request(url):
-        default_request = WebConfig.get_default_request(url)
+        page_request = WebConfig.get_default_request(url)
+        # TODO close crawlwer_type?
 
         browser = EntryRules.get_object().get_browser(url)
         if browser:
-            default_request.crawler_name = browser
-            default_request.crawler_type = None
+            page_request.crawler_name = browser
+            page_request.crawler_type = None
 
-        if default_request.timeout_s is None or default_request.timeout_s == 0:
-            default_request.timeout_s = WebConfig.get_default_timeout_s()
+            script = WebConfig.get_script_from_name(browser)
 
-        return default_request
+            page_request.settings["script"] = script
+            page_request.settings["remote_server"] = "http://127.0.0.1:3000"
+
+        if page_request.timeout_s is None or page_request.timeout_s == 0:
+            page_request.timeout_s = WebConfig.get_default_timeout_s()
+
+        return page_request
 
 
 class Url(BaseUrl):
@@ -96,6 +104,16 @@ class Url(BaseUrl):
 
         if request.timeout_s is None or request.timeout_s == 0:
             request.timeout_s = WebConfig.get_default_timeout_s()
+
+        cookie_manager = CookieManager()
+        cookies = cookie_manager.read(request.url)
+        request.cookies = cookies
+
+        # TODO not really sure if we should use crawler interface here
+
+        interface = CrawlerInterface(request.url)
+        headers = interface.get_default_headers()
+        request.request_headers = headers
 
         return request
 
