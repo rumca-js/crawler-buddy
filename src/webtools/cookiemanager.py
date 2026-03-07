@@ -19,7 +19,7 @@ class CookieManager(object):
 
     def read(self, link):
         if not link:
-            return
+            return {}
 
         location = UrlLocation(link)
         domain_only = location.get_domain_only()
@@ -28,7 +28,7 @@ class CookieManager(object):
             cookies["CONSENT"] = "YES+cb.20210328-17-p0.en+F+678"
             return cookies
 
-        return None
+        return {}
         """
         try:
             location = UrlLocation(link)
@@ -36,7 +36,7 @@ class CookieManager(object):
             return self.read_cookies_domain(domain_only)
         except Exception as E:
             WebLogger.exc(E)
-        return []
+        return {}
         """
 
     def write_cookies_domain(self, domain_only, cookies):
