@@ -34,7 +34,11 @@ from src.views import (
 )
 from src import CrawlerContainer
 from src.webtools import Url
-from utils.systemmonitoring import get_hardware_info, get_memory_info
+from utils.systemmonitoring import (
+    get_hardware_info,
+    get_memory_info,
+    count_files_in_directory,
+)
 
 
 views = Blueprint('views', __name__)
@@ -272,9 +276,12 @@ def info():
     runner = current_app.config["task_runner"]
     threads_size = runner.get_size()
     running_ids_len = len(runner.running_ids)
+    number_of_storage_files = count_files_in_directory("storage")
+
     text += f"<div>Processing Thread: {runner.is_thread_ok()}</div>"
     text += f"<div>Running IDS: {running_ids_len}</div>"
     text += f"<div>Running futures: {runner.get_size()}</div>"
+    text += f"<div>Storage files: {number_of_storage_files}</div>"
 
     process_count = webtools.WebConfig.count_chrom_processes()
     text += "<div>{}:{}</div>".format("Chrome processes", process_count)

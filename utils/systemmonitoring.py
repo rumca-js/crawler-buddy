@@ -140,6 +140,27 @@ def get_hardware_info():
         "net_io_counters": get_net_io_counters(),
     }
 
+
+def count_files_in_directory(directory_path):
+    """
+    Counts the number of files in the given directory (not including subdirectories).
+
+    @param directory_path (str) Path to the directory.
+    @returns int Number of files in the directory.
+    """
+    try:
+        # List all items in the directory
+        items = os.listdir(directory_path)
+        # Filter only files
+        files = [f for f in items if os.path.isfile(os.path.join(directory_path, f))]
+        return len(files)
+    except FileNotFoundError:
+        print(f"Error: The directory '{directory_path}' does not exist.")
+        return 0
+    except PermissionError:
+        print(f"Error: Permission denied to access '{directory_path}'.")
+        return 0
+
 # fmt: on
 
 
