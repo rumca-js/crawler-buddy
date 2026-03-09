@@ -8,6 +8,7 @@ from webtoolkit import (
   response_to_json,
   file_to_request,
   RemoteUrl,
+  RemoteServer,
   WebLogger,
 )
 
@@ -99,22 +100,24 @@ class ScriptCrawlerParser(object):
                 if self.args.crawl_id:
                     crawl_id = self.args.crawl_id
 
-                    self.post(response, "crawl_id={crawl_id}")
+                    self.post(response=response, crawl_id=crawl_id)
                 elif response is not None and response.request is not None:
                     url = response.request.url
                     crawler_name = response.request.crawler_name
                     handler_name = response.request.handler_name
-                    self.post(response, f"url={url}&crawler_name={crawler_name}&handler_name={handler_name}")
+
+                    self.post(response=response,
+                              url=url,
+                              crawler_name=crawler_name,
+                              handler_name=handler_name)
                 else:
                     print("Could not send response")
 
-    def post(self, response, args):
-        response_json = response_to_json(response)
-
+    def post(self, response, crawl_id=None, url=None, crawler_name=None, handler_name=None):
         remote_server = self.args.remote_server
-
-        url = f"{remote_server}/set?{args}"
-        try:
-            response = requests.post(url, json=response_json)
-        except Exception as E:
-            WebLogger.exc(E, str(response_json))
+        server = RemoteServer(remote_server=remote_server)
+        return server.set(response=response,
+                          crawl_id=crawl_id,
+                          url=url,
+                          crawler_name=crawler_name,
+                          handler_name=handler_name)

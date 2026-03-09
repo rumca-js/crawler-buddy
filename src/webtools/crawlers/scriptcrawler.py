@@ -24,6 +24,7 @@ from webtoolkit import (
     HtmlPage,
     PageResponseObject,
     RemoteUrl,
+    RemoteServer,
     CrawlerInterface,
     WebToolsTimeoutException,
     WebLogger,
@@ -197,23 +198,17 @@ class ScriptCrawler(CrawlerInterface):
         crawler_name = self.request.crawler_name
         handler_name = self.request.handler_name
 
-        url = f"{remote_server}/findj?&url={url}&crawler_name={crawler_name}&handler_name={handler_name}"
-        response = requests.get(url)
+        server = RemoteServer(remote_server)
+        json_data = server.findj(url=url, crawler_name=crawler_name, handler_name=handler_name)
 
-        if response.status_code == 200:
-            try:
-                data = response.json()
+        if json_data:
+            url = RemoteUrl(all_properties = json_data)
+            self.response = url.get_response()
 
-                url = RemoteUrl(all_properties = data)
-                self.response = url.get_response()
-
-                return self.response
-
-            except ValueError as E:
-                print("Response content is not valid JSON. {}".format(E))
+            return self.response
         else:
             WebLogger.error(
-                f"Url:{self.request.url}: Failed to fetch data. Status code: {response.status_code}")
+                f"Url:{self.request.url}: Failed to fetch data.")
             
             self.add_error("Failed to fetch data")
 

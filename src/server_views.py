@@ -261,8 +261,11 @@ def info():
     size = current_app.config['crawler_main'].container.get_size()
     records_size = current_app.config['crawler_main'].container.records_size
     time_span = current_app.config['crawler_main'].container.time_cache_m
+    logs_len = len(WebLogger.web_logger.permanent_data)
+
     text += "<div>{}:{}</div>".format("History size", size)
     text += "<div>{}:{}</div>".format("Records size", records_size)
+    text += "<div>{}:{}</div>".format("Logs len", logs_len)
     text += "<div>{}:{}</div>".format("Time cache [m]", time_span)
 
     domain_length = 0

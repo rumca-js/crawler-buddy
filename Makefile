@@ -29,7 +29,8 @@ installsysdeps:
 
 server:
 	rm -rf storage
-	poetry run python script_server.py -k -m
+	#poetry run python script_server.py -k -m
+	poetry run python watchdog.py
 
 # Assumptions:
 #  - python black is in your path
