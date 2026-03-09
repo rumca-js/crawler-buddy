@@ -263,10 +263,25 @@ def info():
     time_span = current_app.config['crawler_main'].container.time_cache_m
     logs_len = len(WebLogger.web_logger.permanent_data)
 
+
     text += "<div>{}:{}</div>".format("History size", size)
     text += "<div>{}:{}</div>".format("Records size", records_size)
     text += "<div>{}:{}</div>".format("Logs len", logs_len)
     text += "<div>{}:{}</div>".format("Time cache [m]", time_span)
+
+    start_time = current_app.config['start_time']
+    time_diff = datetime.now() - start_time
+
+    seconds = time_diff.seconds
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    secs = seconds % 60
+
+    text += "<div>{}:{}</div>".format("Start time", start_time)
+    text += "<div>{}:{}:{}:{}</div>".format("Operation time [HMS]",
+                                      hours,
+                                      minutes,
+                                      seconds)
 
     domain_length = 0
     domain_max_length = 0

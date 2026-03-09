@@ -7,6 +7,8 @@ Access through:
 import socket
 import shutil
 import os
+from datetime import datetime
+
 from src import webtools
 from src.server_init import create_app
 from src.taskrunner import start_runner_thread
@@ -49,6 +51,8 @@ if __name__ == "__main__":
         thread, task_runner = start_runner_thread(container=app.config['crawler_main'].container, max_workers=app.config['configuration'].get_max_workers(), no_executor=False)
         app.config['crawler_main'].set_multi_process()
         app.config['task_runner'] = task_runner
+
+    app.config['start_time'] = datetime.now()
 
     context = None
     if p.args.cert_file and p.args.cert_key:

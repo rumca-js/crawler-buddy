@@ -155,10 +155,10 @@ def count_files_in_directory(directory_path):
         files = [f for f in items if os.path.isfile(os.path.join(directory_path, f))]
         return len(files)
     except FileNotFoundError:
-        print(f"Error: The directory '{directory_path}' does not exist.")
+        #print(f"Error: The directory '{directory_path}' does not exist.")
         return 0
     except PermissionError:
-        print(f"Error: Permission denied to access '{directory_path}'.")
+        #print(f"Error: Permission denied to access '{directory_path}'.")
         return 0
 
 # fmt: on
