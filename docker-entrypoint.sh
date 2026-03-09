@@ -1,4 +1,3 @@
 #!/bin/bash
 
-echo "Starting web server"
-poetry run python script_server.py -m
+poetry run python watchdog.py
