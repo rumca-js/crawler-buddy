@@ -1,5 +1,6 @@
 import time
 import copy
+import gc
 from datetime import datetime, timedelta
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -37,6 +38,7 @@ class TaskRunner(object):
         self.shutdown_flag = False
         self.verbose = verbose
         self.health_date = None
+        self.collect_time = datetime.now()
 
         self.set_thread_ok()
 
@@ -192,7 +194,6 @@ class TaskRunner(object):
 
                         self.fix_leftovers()
 
-
                     memory_info = get_memory_info()
                     if memory_info["memory_percentage"] > 95.0:
                         WebLogger.error("[TaskRunner] Stopping… virtual memory eaten.")
@@ -203,6 +204,11 @@ class TaskRunner(object):
                 # Sleep a bit if no new work appeared
                 if not submitted_any:
                     time.sleep(self.poll_interval)
+
+                collect_diff = datetime.now() - self.collect_time
+                if collect_diff > timedelta(minutes=5):
+                    gc.collect()
+                    self.collect_time = datetime.now()
 
         except Exception as E:
             WebLogger.exc(E, "Exception in TaskRunner")

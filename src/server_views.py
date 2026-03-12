@@ -1,4 +1,6 @@
 from pathlib import Path
+import tracemalloc
+import gc
 from flask import (
     Blueprint,
     request,
@@ -155,6 +157,7 @@ def index():
 
     command_links = []
     command_links.append({"link" : "/info", "name":"Info", "description":"shows configuration"})
+    command_links.append({"link" : "/memory", "name":"Memory", "description":"shows memory state"})
     command_links.append({"link" : "/system", "name":"System monitoring", "description":"system monitoring"})
     command_links.append({"link" : "/about", "name":"About", "description":"About"})
 
@@ -295,11 +298,13 @@ def info():
     threads_size = runner.get_size()
     running_ids_len = len(runner.running_ids)
     number_of_storage_files = count_files_in_directory("storage")
+    no_crawls = current_app.config['crawler_main'].container.get_no_crawls()
 
     text += f"<div>Processing Thread: {runner.is_thread_ok()}</div>"
     text += f"<div>Running IDS: {running_ids_len}</div>"
     text += f"<div>Running futures: {runner.get_size()}</div>"
     text += f"<div>Storage files: {number_of_storage_files}</div>"
+    text += f"<div>Number of crawls: {no_crawls}</div>"
 
     process_count = webtools.WebConfig.count_chrom_processes()
     text += "<div>{}:{}</div>".format("Chrome processes", process_count)
@@ -311,12 +316,36 @@ def info():
     else:
         text += "<div>Chromedriver at {} does not exist".format(chromedriver_path)
 
-    text += "<h2>Memory</h2>"
+    return get_html(id=id, body=text, title="Configuration")
+
+
+@views.route("/memory")
+def memory():
+    id = request.args.get("id")
+    if not current_app.config['configuration'].is_allowed(id):
+        return get_html(id=id, body="Cannot access this view", title="Error")
+
+    text = "<h2>Memory</h2>"
     memory = get_memory_info()
     for key, value in memory.items():
         text += f"<div>{key} {value}</div>"
 
-    return get_html(id=id, body=text, title="Configuration")
+    len_objects = len(gc.get_objects())
+    text += f"<div>Python objects: {len_objects}"
+
+    if current_app.config['configuration'].is_trace():
+        text += "<h2>Trace summary</h2>"
+        traced_memory = tracemalloc.get_traced_memory()[0] / 1024 / 1024
+        text += f"<div>Traced memory[MB]: {traced_memory}"
+
+    text += "<h2>Tracemalloc snapshot use</h2>"
+
+    snapshot = tracemalloc.take_snapshot()
+    top = snapshot.statistics('lineno')
+    for stat in top[:20]:
+        text += f"<div>{stat}</div>"
+
+    return get_html(id=id, body=text, title="Memory")
 
 
 @views.route("/infoj")

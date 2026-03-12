@@ -24,6 +24,7 @@ class Configuration(object):
         self.data["port"] = "3000"
         self.data["max_history_records"] = 200
         self.data["max_number_of_workers"] = 5
+        self.data["trace"] = False
 
         self.crawler_config = None
 
@@ -158,3 +159,9 @@ class Configuration(object):
 
     def get_max_workers(self):
         return self.data.get("max_number_of_workers")
+
+    def set_trace(self):
+        self.data["trace"] = True
+
+    def is_trace(self):
+        return self.data["trace"]

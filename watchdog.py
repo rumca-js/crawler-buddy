@@ -3,6 +3,7 @@ import subprocess
 import time
 
 
+# command = ["poetry", "run", "python", "script_server.py", "-k", "-m", "--trace"]
 command = ["poetry", "run", "python", "script_server.py", "-k", "-m"]
 
 

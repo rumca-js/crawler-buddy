@@ -66,6 +66,7 @@ class CrawlerContainer(object):
         self.time_cache_m = time_cache_m
         self.crawl_index = 0
         self.lock = threading.Lock()           # protects running_ids
+        self.no_history_crawls = 0
 
     def crawl_type_to_str(crawl_type):
         if crawl_type == CrawlerContainer.CRAWL_TYPE_PING:
@@ -249,7 +250,6 @@ class CrawlerContainer(object):
         Do not remove things that are in queue
         """
         cutoff = datetime.now() - timedelta(seconds=self.time_cache_m * 60)
-        previous_length = len(self.container)
 
         result = []
         for crawl_item in reversed(self.container):
@@ -260,10 +260,6 @@ class CrawlerContainer(object):
 
         result.reverse()
         self.container = result
-
-        now_length = self.get_size()
-        if previous_length != now_length:
-            WebLogger.debug("Container: Some entries expired!!!")
 
     def is_expired(self, crawl_item):
         return crawl_item.is_expired()
@@ -307,7 +303,10 @@ class CrawlerContainer(object):
         # request_real does not have crawler_type nor name
         # request is JSON
         # nothing really to close, but maybe some day
-        pass
+        self.no_history_crawls += 1
+
+    def get_no_crawls(self):
+        return self.no_history_crawls + len(self.get_ready_items())
 
     def _match(self, item, crawl_type=None, request=None):
         if item is None:

@@ -251,7 +251,7 @@ class ScriptCrawler(CrawlerInterface):
                 timeout=self.get_timeout_s() + 10,  # add more time for closing browser, etc
             )
         except subprocess.TimeoutExpired as E:
-            WebLogger.debug(E, "Timeout on running script")
+            WebLogger.debug("Timeout on running script {E}")
 
             self.set_timeout_response()
             return self.response
