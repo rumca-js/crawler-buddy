@@ -12,6 +12,7 @@ import sys
 from webtoolkit import (
    RequestsCrawler,
    PageResponseObject,
+   HTTP_STATUS_CODE_SERVER_ERROR,
 )
 from src import webtools
 
@@ -21,7 +22,7 @@ def get_response(link, error_text):
         url=link,
         text=None,
         status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-        request_url=self.request.url,
+        request_url=link,
     )
     response.add_error(error_text)
     return response
@@ -41,31 +42,31 @@ def main():
     try:
         request = parser.get_request()
 
-        driver = webtools.CurlCffiCrawler(request=request)
+        crawler = webtools.CurlCffiCrawler(request=request)
 
         if parser.args.verbose:
             print("Running request:{} with RequestsCrawler".format(request))
 
         try:
-            response = driver.run()
+            response = crawler.run()
         except Exception as E:
-            driver.add_error(str(E))
-            response = get_response(parser.args.url, "Error in running driver")
+            crawler.add_error(str(E))
+            response = get_response(parser.args.url, "Error in running crawler")
 
         try:
-            driver.close()
+            crawler.close()
         except Exception as E:
-            driver.add_error(str(E))
-            response = get_response(parser.args.url, "Error in closing driver")
+            crawler.add_error(str(E))
+            response = get_response(parser.args.url, "Error in closing crawler")
 
         if not response:
-            response = driver.response
+            response = crawler.response
 
         if not response:
             response = get_response(parser.args.url, "Missing response")
 
     except Exception as E:
-        resonse = get_response(parser.args.url, str(E))
+        resonse = get_response(parser.args.url, "CurlCffi exception " + str(E))
 
     if response:
         print(response)

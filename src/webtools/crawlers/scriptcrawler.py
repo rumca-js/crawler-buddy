@@ -30,6 +30,7 @@ from webtoolkit import (
     WebLogger,
     file_to_response,
     request_to_file,
+    request_to_json,
     HTTP_STATUS_UNKNOWN,
     HTTP_STATUS_OK,
     HTTP_STATUS_USER_AGENT,
@@ -126,19 +127,16 @@ class ScriptCrawler(CrawlerInterface):
         crawl_id = self.request.settings.get("crawl_id")
         timeout_s = self.get_timeout_s()
 
+        """
+        TODO ?
         self.makedirs()
         request_file = self.get_request_file()
         if request_file.exists():
             request_file.unlink()
-
         request_to_file(self.request, request_file)
+        """
 
-        if not request_file.exists():
-            WebLogger.error("Request file does not exist")
-            self.add_error("Request file does not exist")
-            time.sleep(1)
-
-        script = self.script + f' --url "{url}" --remote-server="{remote_server}" --timeout={timeout_s} --request-file={request_file}'
+        script = self.script + f' --url "{url}" --remote-server="{remote_server}" --timeout={timeout_s} --request-stdin'
 
         # TODO pass headers and cookies
 
@@ -149,14 +147,19 @@ class ScriptCrawler(CrawlerInterface):
 
         WebLogger.debug("Running CWD:{} via server with script:{}".format(self.cwd, script))
 
+        request_json = request_to_json(self.request)
+
         try:
             p = subprocess.run(
                 script,
                 shell=True,
+                input=json.dumps(request_json),
+                text=True,
                 capture_output=True,
                 cwd=self.cwd,
                 timeout=self.get_timeout_s() + 5,  # add more time for closing browser, etc
             )
+
         except subprocess.TimeoutExpired as E:
             WebLogger.debug(E, "Timeout on running script")
 
@@ -175,12 +178,12 @@ class ScriptCrawler(CrawlerInterface):
 
         if p.returncode != 0:
             if p.stdout:
-                stdout_str = p.stdout.decode()
+                stdout_str = p.stdout
                 if stdout_str != "":
                     WebLogger.error(stdout_str)
 
             if p.stderr:
-                stderr_str = p.stderr.decode()
+                stderr_str = p.stderr
                 if stderr_str and stderr_str != "":
                     WebLogger.error("Url:{}. {}".format(self.request.url, stderr_str))
 

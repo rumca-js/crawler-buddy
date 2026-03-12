@@ -12,6 +12,7 @@ import sys
 from webtoolkit import (
    RequestsCrawler,
    PageResponseObject,
+   HTTP_STATUS_CODE_SERVER_ERROR,
 )
 from src import webtools
 
@@ -21,7 +22,7 @@ def get_response(link, error_text):
         url=link,
         text=None,
         status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-        request_url=self.request.url,
+        request_url=link,
     )
     response.add_error(error_text)
     return response
@@ -40,24 +41,24 @@ def main():
     request = parser.get_request()
 
     try:
-        driver = webtools.HttpMorphCrawler(request=request)
+        crawler = webtools.HttpMorphCrawler(request=request)
 
         if parser.args.verbose:
             print("Running request:{} with RequestsCrawler".format(request))
 
         response = None
         try:
-            response = driver.run()
+            response = crawler.run()
         except Exception as E:
-            driver.add_error(str(E))
+            crawler.add_error(str(E))
 
         try:
-            driver.close()
+            crawler.close()
         except Exception as E:
-            driver.add_error(str(E))
+            crawler.add_error(str(E))
 
         if not response:
-            response = driver.response
+            response = crawler.response
 
         if response:
             print(response)

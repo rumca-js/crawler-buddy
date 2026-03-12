@@ -9,7 +9,11 @@ import time
 import argparse
 import sys
 
-from webtoolkit import response_to_file
+from webtoolkit import (
+   response_to_file,
+   HTTP_STATUS_CODE_SERVER_ERROR,
+)
+
 from src import webtools
 from src.webtools import WebConfig
 
@@ -19,7 +23,7 @@ def get_response(link, error_text):
         url=link,
         text=None,
         status_code=HTTP_STATUS_CODE_SERVER_ERROR,
-        request_url=self.request.url,
+        request_url=link,
     )
     response.add_error(error_text)
     return response

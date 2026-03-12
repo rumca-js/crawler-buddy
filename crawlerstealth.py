@@ -24,7 +24,7 @@ def main():
 
     request = parser.get_request()
 
-    driver = webtools.StealthRequestsCrawler(
+    crawler = webtools.StealthRequestsCrawler(
         request, parser.args.output_file, parser.args.port
     )
 
@@ -33,9 +33,9 @@ def main():
 
     response = None
     try:
-        response = driver.run()
+        response = crawler.run()
     except Exception as E:
-        driver.add_error(str(E))
+        crawler.add_error(str(E))
 
     if not response:
         print("No response")
@@ -46,12 +46,12 @@ def main():
         print(response.get_text())
 
     try:
-        driver.close()
+        crawler.close()
     except Exception as E:
-        driver.add_error(str(E))
+        crawler.add_error(str(E))
 
     if not response:
-        response = driver.response
+        response = crawler.response
 
     if response:
         print(response)

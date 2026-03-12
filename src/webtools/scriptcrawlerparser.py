@@ -1,4 +1,5 @@
 import argparse
+import sys
 import requests
 import json
 
@@ -7,6 +8,7 @@ from webtoolkit import (
   CrawlerInterface,
   response_to_json,
   file_to_request,
+  json_to_request,
   RemoteUrl,
   RemoteServer,
   WebLogger,
@@ -41,8 +43,10 @@ class ScriptCrawlerParser(object):
         self.parser.add_argument("--https-proxy", help="Proxy address")
 
         self.parser.add_argument("--request-file", help="Input request file")
+        self.parser.add_argument("--request-stdin", action="store_true", help="Input request file")
         self.parser.add_argument("--remote-server", help="Remote server")
         self.parser.add_argument("--crawl-id", help="Crawl id")
+
         self.parser.add_argument("-o", "--output-file", help="Response binary file")
 
         self.parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
@@ -61,10 +65,16 @@ class ScriptCrawlerParser(object):
         return True
 
     def get_request(self):
+        if self.args.request_stdin:
+            json_data = json.load(sys.stdin)
+            request = json_to_request(json_data)
+            if request:
+                return request
+
         if self.args.request_file:
-            r = file_to_request(self.args.request_file)
-            if r:
-                return r
+            request = file_to_request(self.args.request_file)
+            if request:
+                return request
 
         r = PageRequestObject(self.args.url)
 
