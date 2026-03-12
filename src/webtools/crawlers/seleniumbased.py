@@ -186,6 +186,7 @@ class SeleniumDriver(CrawlerInterface):
             self.set_timeout_response()
 
         except Exception as E:
+            print("--------Exception-------------")
             str_exc = str(E)
             if str_exc.find("net::ERR_NAME_NOT_RESOLVED") >= 0:
                 self.set_connection_error_response()
@@ -342,7 +343,7 @@ class SeleniumDriver(CrawlerInterface):
 
         cookies = self.read_cookies(domain_only)
         if cookies and len(cookies) > 0:
-            self.goto_page(domain)
+            self.goto_page(domain.url)
             self.apply_cookies(domain_only, cookies)
             self.driver.refresh()
         else:
