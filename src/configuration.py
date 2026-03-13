@@ -2,6 +2,7 @@
 Provides configuration
 """
 import json
+import os
 import logging
 from pathlib import Path
 from src import webtools
@@ -24,6 +25,7 @@ class Configuration(object):
         self.data["port"] = "3000"
         self.data["max_history_records"] = 200
         self.data["max_number_of_workers"] = 5
+        self.data["virtual_memory_percentage_threshold"] = 70
         self.data["trace"] = False
 
         self.crawler_config = None
@@ -31,6 +33,9 @@ class Configuration(object):
         self.read_configuration()
         self.read_crawler_config()
         self.read_version()
+
+        if "CRAWLER_BUDDY_PORT" in os.environ:
+            self.data["port"] = os.environ["CRAWLER_BUDDY_PORT"]
 
     def read_version(self):
         self.__version__ = "0.0.0"
@@ -159,6 +164,9 @@ class Configuration(object):
 
     def get_max_workers(self):
         return self.data.get("max_number_of_workers")
+
+    def get_memory_threshold(self):
+        return self.data.get("virtual_memory_percentage_threshold")
 
     def set_trace(self):
         self.data["trace"] = True

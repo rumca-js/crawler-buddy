@@ -1,30 +1,35 @@
 import time
-import copy
 import gc
+import os
 from datetime import datetime, timedelta
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 
 from webtoolkit import (
   UrlLocation,
   WebLogger,
-  HTTP_STATUS_CODE_EXCEPTION,
 )
 from utils.systemmonitoring import get_memory_info
 
-from .crawler import crawler_builder, get_all_properties__error
-from .crawlercontainer import CrawlerContainer
+from .crawler import crawler_builder
 
 
 class TaskRunner(object):
 
-    def __init__(self, container, max_workers=5, poll_interval=0.1, no_executor=False, verbose=True):
+    def __init__(self,
+                 container,
+                 max_workers=5,
+                 poll_interval=0.1,
+                 no_executor=False,
+                 memory_threshold=70,
+                 verbose=True):
         """
         container: shared list of CrawlItem (updated externally)
         poll_interval: how often to poll container for new items (seconds)
         """
         self.container = container
         self.no_executor = no_executor
+        self.memory_threshold = memory_threshold
 
         if max_workers is None:
             max_workers = 5
@@ -195,8 +200,9 @@ class TaskRunner(object):
                         self.fix_leftovers()
 
                     memory_info = get_memory_info()
-                    if memory_info["memory_percentage"] > 95.0:
+                    if memory_info["memory_percentage"] > self.memory_threshold:
                         WebLogger.error("[TaskRunner] Stopping… virtual memory eaten.")
+                        os.kill(os.getpid(), signal.SIGTERM)
                         break
                 except Exception as E:
                     WebLogger.exc(E, "Exception in TaskRunner")
@@ -205,6 +211,7 @@ class TaskRunner(object):
                 if not submitted_any:
                     time.sleep(self.poll_interval)
 
+                # garbage day, eh?
                 collect_diff = datetime.now() - self.collect_time
                 if collect_diff > timedelta(minutes=5):
                     gc.collect()
@@ -245,13 +252,18 @@ class TaskRunner(object):
         self.executor.shutdown(wait=True, cancel_futures=True)
 
 
-def start_runner_thread(container, max_workers=5, no_executor=False):
+def start_runner_thread(container, configuration, no_executor=False):
     """
     Creates and starts a daemon thread that runs a Runner instance.
     Returns the thread object.
     """
+    max_workers = configuration.get_max_workers()
+    memory_threshold = configuration.get_memory_threshold()
 
-    runner = TaskRunner(container, max_workers=max_workers, no_executor=no_executor)
+    runner = TaskRunner(container,
+                        max_workers=max_workers,
+                        memory_threshold=memory_threshold,
+                        no_executor=no_executor)
 
     thread = threading.Thread(
         target=runner.start,

@@ -41,12 +41,6 @@ class CommandLineParser(object):
         )
 
         self.parser.add_argument(
-            "--trace",
-            action="store_true",
-            help="traces leaks",
-        )
-
-        self.parser.add_argument(
             "-d",
             "--debug",
             help="Debug indication",

@@ -10,6 +10,8 @@
     "default_crawler" : null,
     "host" : "0.0.0.0",
     "port" : 3000,
+    "virtual_memory_percentage_threshold" : 70,
+    "trace" : false,
     "allowed_ids" : [
     ]
 }

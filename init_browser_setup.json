@@ -42,13 +42,6 @@
     }
   },
   {
-    "crawler_name": "HttpMorphCrawler",
-    "crawler_class_name": "ScriptCrawler",
-    "settings": {
-      "timeout_s": 40
-    }
-  },
-  {
     "crawler_name": "YtdlpCrawler",
     "crawler_class_name": "YtdlpCrawler",
     "settings": {
