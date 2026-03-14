@@ -108,7 +108,9 @@ class ScriptCrawler(CrawlerInterface):
     def run_internal(self):
         if self.script is None:
             self.script = self.request.settings.get('script')
-            self.script = "poetry run python " + self.script
+            if self.script is None:
+                self.add_error("Script is None")
+                return
 
         self.hash = self.get_request_hash()
 

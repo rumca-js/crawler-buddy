@@ -25,3 +25,4 @@ from .crawlers import (
 from .scriptcrawlerparser import (
     ScriptCrawlerParser,
 )
+from .requestbuilder import RequestBuilder

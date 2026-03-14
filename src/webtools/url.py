@@ -34,31 +34,8 @@ from .handlers import (
     YouTubeVideoHandlerJson,
     YouTubeChannelHandlerJson
 )
-from .cookiemanager import CookieManager
-
-from ..entryrules import EntryRules
+from .requestbuilder import RequestBuilder
 from utils.dateutils import DateUtils
-
-
-class UrlRules(object):
-    def get_default_request(url):
-        page_request = WebConfig.get_default_request(url)
-        # TODO close crawlwer_type?
-
-        browser = EntryRules.get_object().get_browser(url)
-        if browser:
-            page_request.crawler_name = browser
-            page_request.crawler_type = None
-
-            script = WebConfig.get_script_from_name(browser)
-
-            page_request.settings["script"] = script
-            page_request.settings["remote_server"] = "http://127.0.0.1:3000"
-
-        if page_request.timeout_s is None or page_request.timeout_s == 0:
-            page_request.timeout_s = WebConfig.get_default_timeout_s()
-
-        return page_request
 
 
 class Url(BaseUrl):
@@ -87,37 +64,14 @@ class Url(BaseUrl):
         """
         Returns request for URL
         """
-        request = UrlRules.get_default_request(url)
+        request = RequestBuilder.get_default_request(url)
         return request
 
     def get_request_for_request(self, request):
         """
         Fills necessary fields within request
         """
-        if request.crawler_name and request.crawler_type is None:
-            crawler = WebConfig.get_crawler_from_string(self.request.crawler_name)
-            request.crawler_type = crawler(url=request.url, request=request)
-        if request.crawler_name is None and request.crawler_type is None:
-            default_request = WebConfig.get_default_request(request.url)
-            request.crawler_name = default_request.crawler_name
-            request.crawler_type = default_request.crawler_type
-
-        if request.timeout_s is None or request.timeout_s == 0:
-            request.timeout_s = WebConfig.get_default_timeout_s()
-
-        cookie_manager = CookieManager()
-        cookies = cookie_manager.read(request.url)
-        request.cookies = cookies
-
-        # TODO not really sure if we should use crawler interface here
-
-        """
-        interface = CrawlerInterface(request.url)
-        headers = interface.get_default_headers()
-        request.request_headers = headers
-        """
-
-        return request
+        return RequestBuilder.update_request(request)
 
     def get_handlers(self):
         """

@@ -9,6 +9,8 @@ from src import webtools
 
 
 class Configuration(object):
+    singleton = None
+
     def __init__(self):
         """
         Constructor.
@@ -36,6 +38,11 @@ class Configuration(object):
 
         if "CRAWLER_BUDDY_PORT" in os.environ:
             self.data["port"] = os.environ["CRAWLER_BUDDY_PORT"]
+
+    def get_object():
+        if Configuration.singleton is None:
+            Configuration.singleton = Configuration()
+        return Configuration.singleton
 
     def read_version(self):
         self.__version__ = "0.0.0"
@@ -86,11 +93,11 @@ class Configuration(object):
 
         for item in crawler_config:
             name = item["crawler_name"]
-            crawler = webtools.WebConfig.get_crawler_from_string(name)
-            if not crawler:
+            crawler_class = webtools.WebConfig.get_crawler_class_from_crawler_name(name)
+            if not crawler_class:
                 print(f"Could not find crawler {name}")
                 continue
-            if crawler(url="https://").is_valid():
+            if crawler_class(url="https://").is_valid():
                 self.crawler_config.append(item)
 
         return self.crawler_config
@@ -110,18 +117,8 @@ class Configuration(object):
         """
         Reads particular options from JSON to internal structures
         """
-        self.read_json_config_field(json_config, "debug")
-        self.read_json_config_field(json_config, "respect_robots_txt")
-        self.read_json_config_field(json_config, "ssl_verify")
-        self.read_json_config_field(json_config, "prefer_non_www")
-        self.read_json_config_field(json_config, "use_canonical_links")
-        self.read_json_config_field(json_config, "allowed_ids")
-        self.read_json_config_field(json_config, "default_crawler")
-        self.read_json_config_field(json_config, "bytes_limit")
-        self.read_json_config_field(json_config, "host")
-        self.read_json_config_field(json_config, "port")
-        self.read_json_config_field(json_config, "max_number_of_workers")
-        self.read_json_config_field(json_config, "max_history_records")
+        for field in json_config:
+            self.data[field] = json_config[field]
 
     def read_json_config_field(self, json_config, field):
         """
@@ -136,7 +133,7 @@ class Configuration(object):
         """
         return self.crawler_config
 
-    def get_crawler(self, name=None):
+    def get_browser(self, name=None):
         """
         Returns crawler
         """
@@ -145,6 +142,18 @@ class Configuration(object):
             if name:
                 if name == item["crawler_name"]:
                     return dict(item)
+
+    def get_crawler_class_name(self, crawler_name=None):
+        """
+        Returns crawler
+        """
+        if not crawler_name:
+            return
+
+        config = self.crawler_config
+        for item in config:
+            if crawler_name == item["crawler_name"]:
+                return item.get("crawler_class_name")
 
     def is_allowed(self, id) -> bool:
         """
@@ -173,3 +182,6 @@ class Configuration(object):
 
     def is_trace(self):
         return self.data["trace"]
+
+    def get_default_browser(self):
+        return self.data["default_browser"]

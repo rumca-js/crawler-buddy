@@ -66,12 +66,16 @@ class WebConfig(object):
     def init():
         pass
 
-    def get_default_crawler_name():
+    def get_default_browser_name():
         return "CurlCffiCrawler"
+
+    def get_default_timeout_s():
+        return 300
 
     def get_crawlers_raw():
         """
-        Returns crawler classes
+        Returns crawlers
+        TODO remove - browsers are more important
         """
         crawlers = [
             RequestsCrawler,
@@ -93,13 +97,38 @@ class WebConfig(object):
 
         return crawlers
 
+    def get_crawler_classes_raw():
+        """
+        Returns crawler classes
+        """
+        crawlers = [
+            RequestsCrawler,
+            SeleniumChromeHeadless,  # requires driver location
+            SeleniumChromeFull,  # requires driver location
+            SeleniumUndetected,  # requires driver location
+            SeleniumBase,
+            SeleniumWireFull,
+            StealthRequestsCrawler,
+            CurlCffiCrawler,
+            HttpxCrawler,
+            ScrapyScript,
+            YtdlpCrawler,
+            HttpMorphCrawler,
+            HttpCloakCrawler,
+            ScriptCrawler,
+        ]
+
+        return crawlers
+
     def get_init_crawler_config():
+        return WebConfig.get_config_scripted()
+
+    def get_config_real_browsers():
         """
         Return crawlers configuration
         """
         mapping = []
 
-        """
         mapping.append(WebConfig.get_default_browser_setup(RequestsCrawler))
 
         mapping.append(WebConfig.get_default_browser_setup(StealthRequestsCrawler))
@@ -118,27 +147,30 @@ class WebConfig(object):
         mapping.append(WebConfig.get_default_browser_setup(ScrapyScript))
 
         mapping.append(WebConfig.get_default_browser_setup(SeleniumWireFull, timeout_s=50))
-        """
-        mapping.append(WebConfig.get_scriped_crawler("RequestsCrawler"))
-        mapping.append(WebConfig.get_scriped_crawler("CurlCffiCrawler"))
-        mapping.append(WebConfig.get_scriped_crawler("HttpMorphCrawler"))
-        mapping.append(WebConfig.get_scriped_crawler("SeleniumChromeFull"))
+
+    def get_config_scripted():
+        mapping = []
+
+        mapping.append(WebConfig.get_scriped_browser("RequestsCrawler"))
+        mapping.append(WebConfig.get_scriped_browser("CurlCffiCrawler"))
+        mapping.append(WebConfig.get_scriped_browser("HttpMorphCrawler"))
+        mapping.append(WebConfig.get_scriped_browser("SeleniumChromeFull"))
         mapping.append(WebConfig.get_default_browser_setup(YtdlpCrawler))
 
         return mapping
 
-    def get_default_timeout_s():
-        return 300
+    def get_scriped_browser(crawler_name):
+        script = WebConfig.get_script_from_name(crawler_name)
 
-    def get_scriped_crawler(name):
         return {
-            "crawler_name": name,
+            "crawler_name": crawler_name,
             "crawler_class" : ScriptCrawler,
             "settings": {
+                "script" : script,
             },
         }
 
-    def get_crawler_names():
+    def get_browser_names():
         """
         Returns string representation
         """
@@ -148,41 +180,30 @@ class WebConfig(object):
 
         return str_crawlers
 
-    def get_crawler_from_string(crawler_string):
+    def get_browser(crawler_name):
+        """
+        Returns string representation
+        """
+        for mapping_data in WebConfig.get_init_crawler_config():
+            if mapping_data["crawler_name"] == crawler_name:
+                return mapping_data
+
+    def get_crawler_class_from_crawler_name(crawler_name):
         """
         Returns crawler for input string
         """
-        if not crawler_string:
+        if not crawler_name:
             return
 
         init_mapping_data = WebConfig.get_init_crawler_config()
         for mapping_data in init_mapping_data:
-            if mapping_data["crawler_name"] == crawler_string:
+            if mapping_data["crawler_name"] == crawler_name:
                 return mapping_data["crawler_class"]
 
-    def get_crawler_from_mapping(request, mapping_data):
-        crawler_class = None
-
-        if "crawler" in mapping_data and mapping_data["crawler"]:
-            crawler_class = mapping_data["crawler"]
-
-        if "crawler_name" in mapping_data and mapping_data["crawler_name"]:
-            crawler_class = WebConfig.get_crawler_from_string(mapping_data["crawler_name"])
-
-        if "crawler_class" in mapping_data and mapping_data["crawler_class"]:
-            crawler_class = mapping_data["crawler_class"]
-
-        if crawler_class is None and request:
-            crawler_class = WebConfig.get_crawler_from_string(request.crawler_type)
-
-        if not crawler_class:
-            return
-
-        settings = mapping_data["settings"]
-
-        c = crawler_class(request=request, settings=settings)
-        if c.is_valid():
-            return c
+    def get_crawler_class_from_string(crawler_class_string):
+        for class_type in WebConfig.get_crawler_classes_raw():
+            if class_type.__name__ == crawler_class_string:
+                return class_type
 
     def get_crawlers():
         result = []
@@ -212,23 +233,6 @@ class WebConfig(object):
             script = "crawlerseleniumfull.py"
 
         return script
-
-    def get_default_request(url):
-
-        crawler_data = WebConfig.get_default_crawler(url)
-        if crawler_data:
-            request = PageRequestObject(url)
-
-            name = crawler_data["crawler_name"]
-            script = WebConfig.get_script_from_name(name)
-
-            request.crawler_name = name
-            crawler_class = WebConfig.get_crawler_from_string(request.crawler_name)
-            crawler_class = ScriptCrawler
-            request.crawler_type = crawler_class(url=url, script=script)
-            request.settings["script"] = script
-            request.settings["remote_server"] = "http://127.0.0.1:3000"
-            return request
 
     def use_logger(Logger):
         WebLogger.web_logger = Logger

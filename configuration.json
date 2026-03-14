@@ -12,6 +12,7 @@
     "port" : 3000,
     "virtual_memory_percentage_threshold" : 70,
     "trace" : false,
+    "default_browser" : "CurlCffiCrawler",
     "allowed_ids" : [
     ]
 }

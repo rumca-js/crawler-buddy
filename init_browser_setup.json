@@ -3,42 +3,48 @@
     "crawler_name": "CurlCffiCrawler",
     "crawler_class_name": "ScriptCrawler",
     "settings": {
-      "timeout_s": 40
+      "timeout_s": 40,
+      "script": "poetry run python crawlercurlcffi.py"
     }
   },
   {
     "crawler_name": "RequestsCrawler",
     "crawler_class_name": "ScriptCrawler",
     "settings": {
-      "timeout_s": 20
+      "timeout_s": 20,
+      "script": "poetry run python crawlerrequests.py"
     }
   },
   {
     "crawler_name": "StealthRequestsCrawler",
     "crawler_class_name": "ScriptCrawler",
     "settings": {
-      "timeout_s": 40
+      "timeout_s": 40,
+      "script": "poetry run python crawlerstealth.py"
     }
   },
   {
     "crawler_name": "HttpMorphCrawler",
     "crawler_class_name": "ScriptCrawler",
     "settings": {
-      "timeout_s": 40
+      "timeout_s": 40,
+      "script": "poetry run python crawlerhttpmorph.py"
     }
   },
   {
     "crawler_name": "HttpCloakCrawler",
     "crawler_class_name": "ScriptCrawler",
     "settings": {
-      "timeout_s": 40
+      "timeout_s": 40,
+      "script": "poetry run python crawlerhttpmorph.py"
     }
   },
   {
     "crawler_name": "HttpxCrawler",
     "crawler_class_name": "ScriptCrawler",
     "settings": {
-      "timeout_s": 40
+      "timeout_s": 40,
+      "script": "poetry run python crawlerhttpmorph.py"
     }
   },
   {
@@ -70,7 +76,8 @@
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
       "timeout_s": 60,
-      "delay_s": 10
+      "delay_s": 10,
+      "script": "poetry run python crawlerseleniumfull.py"
     }
   },
   {

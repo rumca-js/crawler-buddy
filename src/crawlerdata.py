@@ -1,7 +1,7 @@
 import os
 import json
 from webtoolkit import WebLogger, json_to_request
-from src.webtools import WebConfig, ScriptCrawler, Url
+from src.webtools import WebConfig, ScriptCrawler, Url, RequestBuilder
 
 from src.entryrules import EntryRules
 
@@ -21,20 +21,15 @@ class CrawlerData(object):
         """
         url = self.request.args.get("url")
 
-        page_request = self.get_request_data_from_request()
+        page_request = self.get_request_data_from_flask_request()
         if not page_request:
             WebLogger.error(
                 "Url:{} Cannot obtain page request".format(url)
             )
             return
 
-        page_request = self.check_rules(url, page_request)
-        page_request = self.fill_crawler_data(url, page_request)
-        page_request = self.get_crawler(url, page_request)
-
-        # TODO one place to keep defaults
-        if page_request and page_request.timeout_s is None:
-            page_request.timeout_s = WebConfig.get_default_timeout_s()
+        page_request = RequestBuilder.update_request(page_request)
+        page_request = self.fill_crawler_data(page_request)
 
         # important for crawl to be full of precise information
         # we will be searching using crawler_name and handler_name
@@ -54,7 +49,7 @@ class CrawlerData(object):
 
         return page_request
 
-    def get_request_data_from_request(self):
+    def get_request_data_from_flask_request(self):
         if "crawler_data" in self.request.args:
             data_str = self.request.args.get("crawler_data")
             data_json = json.loads(data_str)
@@ -70,39 +65,10 @@ class CrawlerData(object):
 
         return page_request
 
-    def check_rules(self, url, page_request):
+    def fill_crawler_data(self, page_request):
         """
-        Use rule - if not specified by args
+        Override settings from third what is specified in configuration
         """
-
-        return page_request
-
-    def fill_crawler_data(self, url, page_request):
-        """
-        order: 
-         - first what is specified by args
-         - second what is specified by browser config (json file)
-         - third what is specified in configuration
-        """
-        if page_request.crawler_name is None or page_request.crawler_name == "":
-            crawler_name = self.entry_rules.get_browser(url)
-            if crawler_name:
-                new_mapping = self.configuration.get_crawler(name=crawler_name)
-                if new_mapping:
-                    crawler_name = new_mapping.get("crawler_name")
-                    if not page_request.crawler_name and crawler_name and page_request.crawler_name != crawler_name:
-                        page_request.crawler_name = crawler_name
-            else:
-                name = self.get_default_crawler_name(url)
-                page_request.crawler_name = crawler_name
-
-        new_mapping = self.configuration.get_crawler(name=page_request.crawler_name)
-        if new_mapping:
-            new_mapping = new_mapping
-
-            if new_mapping:
-                page_request = self.settings_to_request(page_request, new_mapping)
-
         if page_request.ssl_verify is None:
             page_request.ssl_verify = self.configuration.get("ssl_verify")
         if page_request.respect_robots is None:
@@ -129,72 +95,3 @@ class CrawlerData(object):
             page_request.https_proxy = https_proxy
 
         return page_request
-
-    def settings_to_request(self, page_request, crawler_settings):
-        def set_property_if_none(page_request, setting_name, crawler_settings, key_in_settings):
-            if getattr(page_request, setting_name) is None:
-                setting_value = crawler_settings.get("settings", {}).get(key_in_settings)
-                if setting_value is not None:
-                    setattr(page_request, setting_name, setting_value)
-
-        settings = crawler_settings.get("settings", {})
-        set_property_if_none(page_request, 'user_agent', settings, 'User-Agent')
-        set_property_if_none(page_request, 'request_headers', settings, 'request_headers')
-        set_property_if_none(page_request, 'timeout_s', settings, 'timeout_s')
-        set_property_if_none(page_request, 'delay_s', settings, 'delay_s')
-        set_property_if_none(page_request, 'ssl_verify', settings, 'ssl_verify')
-        set_property_if_none(page_request, 'respect_robots', settings, 'respect_robots_txt')
-        set_property_if_none(page_request, 'bytes_limit', settings, 'bytes_limit')
-        set_property_if_none(page_request, 'accept_types', settings, 'accept_types')
-
-        if "driver_executable" in settings:
-            page_request.settings["driver_executable"] = settings["driver_executable"]
-
-        page_request.settings = settings
-
-        return page_request
-
-    def get_crawler(self, url, page_request):
-        name = None
-
-        if page_request.crawler_name and page_request.crawler_name != "":
-            name = page_request.crawler_name
-        else:
-            name = self.get_default_crawler_name(url)
-            if not name:
-                return
-
-        if not name:
-            WebLogger.error("Could not find crawler")
-            return
-
-        crawler = WebConfig.get_crawler_from_string(name)
-        if not crawler:
-            WebLogger.error(f"Could not find crawler {name}")
-            return
-
-        script = WebConfig.get_script_from_name(name)
-
-        if page_request.crawler_name != name:
-            page_request.crawler_name = name
-        page_request.crawler_type = crawler(url=url, script=script)
-        page_request.settings["script"] = script
-        page_request.settings["remote_server"] = "http://127.0.0.1:3000"
-
-        return page_request
-
-    def get_default_crawler_name(self, url):
-        crawler_name = self.entry_rules.get_browser(url)
-        new_mapping = self.configuration.get_crawler(name=crawler_name)
-        if new_mapping:
-            return new_mapping["crawler_name"]
-
-        default_crawler = self.configuration.get("default_crawler")
-        if default_crawler:
-            new_mapping = self.configuration.get_crawler(name=default_crawler)
-            if new_mapping:
-                return new_mapping["crawler_name"]
-
-        new_mapping = WebConfig.get_default_crawler(url)
-        if new_mapping:
-            return new_mapping["crawler_name"]
