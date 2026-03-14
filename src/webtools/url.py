@@ -71,7 +71,8 @@ class Url(BaseUrl):
         """
         Fills necessary fields within request
         """
-        return RequestBuilder.update_request(request)
+        request = RequestBuilder.update_request(request)
+        return request
 
     def get_handlers(self):
         """

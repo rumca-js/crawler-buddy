@@ -218,8 +218,8 @@ class YouTubeVideoHandlerJson(YouTubeVideoHandler):
             return self.json_url
         
         url = self.get_link_classic()
-
         self.json_url = self.build_http_url(url = url, crawler_name="YtdlpCrawler")
+
         return self.json_url
 
     def get_rd_json_url(self):
@@ -362,7 +362,7 @@ class YouTubeVideoHandlerJson(YouTubeVideoHandler):
             if self.yt_text and not self.yt_ob.loads(self.yt_text):
                 return
         except Exception as E:
-            WebLogger.debug(f"YouTube JSON text: {self.yt_text}")
+            # WebLogger.debug(f"YouTube JSON text: {self.yt_text}")
             WebLogger.exc(E)
 
         return self.yt_ob
