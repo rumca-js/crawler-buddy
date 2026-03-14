@@ -358,8 +358,12 @@ class YouTubeVideoHandlerJson(YouTubeVideoHandler):
 
         self.yt_ob = YouTubeJson()
 
-        if self.yt_text and not self.yt_ob.loads(self.yt_text):
-            return
+        try:
+            if self.yt_text and not self.yt_ob.loads(self.yt_text):
+                return
+        except Exception as E:
+            WebLogger.debug(f"YouTube JSON text: {self.yt_text}")
+            WebLogger.exc(E)
 
         return self.yt_ob
 

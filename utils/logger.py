@@ -156,6 +156,9 @@ class PermanentLogger(object):
         print("Stack:")
         print(stack_string)
 
+        if not info_text:
+            info_text = ""
+
         info_text = info_text + "\n" + str(exception_object)
 
         detail_text = error_text + "\n" + stack_string
