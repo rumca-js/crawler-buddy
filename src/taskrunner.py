@@ -1,6 +1,7 @@
 import time
 import gc
 import os
+import signal
 from datetime import datetime, timedelta
 import threading
 from concurrent.futures import ThreadPoolExecutor
