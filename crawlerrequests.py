@@ -31,6 +31,7 @@ def get_response(link, error_text):
 def main():
     webtools.WebConfig.init()
     webtools.WebConfig.use_print_logging()
+    webtools.WebConfig.disable_ssl_warnings()
 
     parser = webtools.ScriptCrawlerParser()
     parser.parse()
@@ -69,12 +70,10 @@ def main():
             response = crawler.response
 
         if response:
-            print(response)
             parser.save(response)
             return
     except Exception as E:
         resonse = get_response(parser.args.url, str(E))
-        print(response)
         parser.save(response)
 
 

@@ -112,7 +112,6 @@ class CurlCffiCrawler(CrawlerInterface):
         impersonate = self.get_impersonate()
 
         proxies = self.request.get_proxies_map()
-        WebLogger.warning("CurlCffiCrawler: {}".format(str(self.request)))
 
         answer = curl_cffi.get(
            self.request.url,

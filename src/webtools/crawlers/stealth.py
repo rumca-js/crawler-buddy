@@ -9,6 +9,7 @@ import urllib.parse
 from webtoolkit import (
     PageResponseObject,
     CrawlerInterface,
+    WebToolsTimeoutException,
     HTTP_STATUS_CODE_CONNECTION_ERROR,
     HTTP_STATUS_CODE_SERVER_ERROR,
     HTTP_STATUS_CODE_EXCEPTION,

@@ -9,7 +9,23 @@ import time
 import argparse
 import sys
 
+from webtoolkit import (
+   RequestsCrawler,
+   PageResponseObject,
+   HTTP_STATUS_CODE_SERVER_ERROR,
+)
 from src import webtools
+
+
+def get_response(link, error_text):
+    response = PageResponseObject(
+        url=link,
+        text=None,
+        status_code=HTTP_STATUS_CODE_SERVER_ERROR,
+        request_url=link,
+    )
+    response.add_error(error_text)
+    return response
 
 
 def main():
@@ -24,41 +40,37 @@ def main():
 
     request = parser.get_request()
 
-    crawler = webtools.StealthRequestsCrawler(
-        request, parser.args.output_file, parser.args.port
-    )
-
-    if parser.args.verbose:
-        print("Running request:{} with Stealth".format(request))
-
-    response = None
     try:
-        response = crawler.run()
+        crawler = webtools.StealthRequestsCrawler(request=request)
+
+        if parser.args.verbose:
+            print("Running request:{} with Stealth".format(request))
+
+        response = None
+        try:
+            response = crawler.run()
+        except Exception as E:
+            crawler.add_error(str(E))
+
+        if not response:
+            print("No response")
+            sys.exit(1)
+
+        try:
+            crawler.close()
+        except Exception as E:
+            crawler.add_error(str(E))
+
+        if not response:
+            response = crawler.response
+
+        if response:
+            parser.save(response)
+        else:
+            sys.exit(1)
     except Exception as E:
-        crawler.add_error(str(E))
-
-    if not response:
-        print("No response")
-        sys.exit(1)
-
-    if parser.args.verbose:
-        print("Contents")
-        print(response.get_text())
-
-    try:
-        crawler.close()
-    except Exception as E:
-        crawler.add_error(str(E))
-
-    if not response:
-        response = crawler.response
-
-    if response:
-        print(response)
+        resonse = get_response(parser.args.url, str(E))
         parser.save(response)
-    else:
-        print("No response")
-        sys.exit(1)
 
 
 main()

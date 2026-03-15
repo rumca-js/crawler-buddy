@@ -29,6 +29,7 @@ from webtoolkit import (
     WebToolsTimeoutException,
     WebLogger,
     file_to_response,
+    json_to_response,
     request_to_file,
     request_to_json,
     HTTP_STATUS_UNKNOWN,
@@ -117,12 +118,87 @@ class ScriptCrawler(CrawlerInterface):
         if not self.is_valid():
             return
 
+        """
+        TODO cleanup
         remote_server = self.request.settings.get("remote_server")
 
         if remote_server:
             return self.run_via_server(remote_server)
         else:
             return self.run_via_file()
+        """
+
+        return self.run_via_stdin_stoud()
+
+    def run_via_stdin_stoud(self):
+        url = self.request.url
+        crawl_id = self.request.settings.get("crawl_id")
+        timeout_s = self.get_timeout_s()
+
+        # TODO pass headers and cookies
+        script = self.script + f' --url "{url}" --timeout={timeout_s} --request-stdin --response-stdout'
+
+        # WebLogger.error("Response:{}".format(self.response_file))
+        # WebLogger.error("CWD:{}".format(self.cwd))
+        # WebLogger.error("maintl:{}".format(self.get_main_path()))
+        # WebLogger.error("script:{}".format(script))
+
+        WebLogger.debug("Running CWD:{} via server with script:{}".format(self.cwd, script))
+
+        request_json = request_to_json(self.request)
+
+        try:
+            p = subprocess.run(
+                script,
+                shell=True,
+                input=json.dumps(request_json),
+                text=True,
+                capture_output=True,
+                cwd=self.cwd,
+                timeout=self.get_timeout_s() + 5,  # add more time for closing browser, etc
+            )
+
+        except subprocess.TimeoutExpired as E:
+            WebLogger.debug(E, "Timeout on running script")
+
+            try:
+                p.kill()
+            except Exception as E:
+                WebLogger.exc(E, "Could not kill process")
+
+            self.set_timeout_response()
+            return self.response
+
+        except ValueError as E:
+            self.set_exception_response(E)
+            WebLogger.exc(E, "Incorrect script call {}".format(script))
+            return self.response
+
+        if p.returncode != 0:
+            if p.stdout:
+                stdout_str = p.stdout
+                if stdout_str != "":
+                    WebLogger.error(stdout_str)
+
+            if p.stderr:
+                stderr_str = p.stderr
+                if stderr_str and stderr_str != "":
+                    WebLogger.error("Url:{}. {}".format(self.request.url, stderr_str))
+
+            WebLogger.error(
+                "Url:{}. Script:'{}'. Return code invalid:{}. Path:{}".format(
+                    self.request.url,
+                    script,
+                    p.returncode,
+                    self.cwd,
+                )
+            )
+            self.add_error("Return code invalid: {}".format(p.returncode))
+
+        json_data = json.loads(p.stdout)
+        response = json_to_response(json_data)
+        self.response = response
+        return self.response
 
     def run_via_server(self, remote_server):
         url = self.request.url
@@ -138,9 +214,8 @@ class ScriptCrawler(CrawlerInterface):
         request_to_file(self.request, request_file)
         """
 
-        script = self.script + f' --url "{url}" --remote-server="{remote_server}" --timeout={timeout_s} --request-stdin'
-
         # TODO pass headers and cookies
+        script = self.script + f' --url "{url}" --remote-server="{remote_server}" --timeout={timeout_s} --request-stdin'
 
         # WebLogger.error("Response:{}".format(self.response_file))
         # WebLogger.error("CWD:{}".format(self.cwd))

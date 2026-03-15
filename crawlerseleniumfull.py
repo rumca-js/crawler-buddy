@@ -76,7 +76,6 @@ def main():
         resonse = get_response(parser.args.url, str(E))
 
     if response:
-        print(response)
         parser.save(response)
 
 

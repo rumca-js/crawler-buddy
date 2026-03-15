@@ -7,6 +7,7 @@ from webtoolkit import (
   PageRequestObject,
   CrawlerInterface,
   response_to_json,
+  response_to_file,
   file_to_request,
   json_to_request,
   RemoteUrl,
@@ -43,25 +44,19 @@ class ScriptCrawlerParser(object):
         self.parser.add_argument("--https-proxy", help="Proxy address")
 
         self.parser.add_argument("--request-file", help="Input request file")
-        self.parser.add_argument("--request-stdin", action="store_true", help="Input request file")
+        self.parser.add_argument("--request-stdin", action="store_true", help="request file is captured from stdin")
+        self.parser.add_argument("--response-stdout", action="store_true", help="response file is outputted to stdout")
+        self.parser.add_argument("--response-file", help="Response binary file")
+
         self.parser.add_argument("--remote-server", help="Remote server")
         self.parser.add_argument("--crawl-id", help="Crawl id")
 
-        self.parser.add_argument("-o", "--output-file", help="Response binary file")
 
         self.parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 
         self.args = self.parser.parse_args()
 
     def is_valid(self):
-        if "output_file" not in self.args:
-            print("Output file not in args")
-            return False
-
-        if self.args.request_file is None and self.args.url is None:
-            print("Url file not in args")
-            return False
-
         return True
 
     def get_request(self):
@@ -104,24 +99,35 @@ class ScriptCrawlerParser(object):
         return r
 
     def save(self, response):
-        if response:
-            if self.args.remote_server:
-                crawl_id = None
-                if self.args.crawl_id:
-                    crawl_id = self.args.crawl_id
+        if response is None:
+            print("Could not send response")
+            return
 
-                    self.post(response=response, crawl_id=crawl_id)
-                elif response is not None and response.request is not None:
-                    url = response.request.url
-                    crawler_name = response.request.crawler_name
-                    handler_name = response.request.handler_name
+        if self.args.response_stdout:
+            response = response_to_json(response)
+            response_string = json.dumps(response)
+            print(response_string)
 
-                    self.post(response=response,
-                              url=url,
-                              crawler_name=crawler_name,
-                              handler_name=handler_name)
-                else:
-                    print("Could not send response")
+        elif self.args.response_file:
+            response_to_file(response, self.args.response_file)
+
+        elif self.args.remote_server:
+            crawl_id = None
+            if self.args.crawl_id:
+                crawl_id = self.args.crawl_id
+
+                self.post(response=response, crawl_id=crawl_id)
+            elif response is not None and response.request is not None:
+                url = response.request.url
+                crawler_name = response.request.crawler_name
+                handler_name = response.request.handler_name
+
+                self.post(response=response,
+                          url=url,
+                          crawler_name=crawler_name,
+                          handler_name=handler_name)
+        else:
+            print("No method to do anything with response file")
 
     def post(self, response, crawl_id=None, url=None, crawler_name=None, handler_name=None):
         remote_server = self.args.remote_server

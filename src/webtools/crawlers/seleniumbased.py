@@ -144,7 +144,6 @@ class SeleniumDriver(CrawlerInterface):
             from selenium.common.exceptions import TimeoutException
         except Exception as E:
             self.add_error(str(E))
-            print(str(E))
             selenium_feataure_enabled = False
 
         self.driver = self.get_driver()
@@ -186,7 +185,6 @@ class SeleniumDriver(CrawlerInterface):
             self.set_timeout_response()
 
         except Exception as E:
-            print("--------Exception-------------")
             str_exc = str(E)
             if str_exc.find("net::ERR_NAME_NOT_RESOLVED") >= 0:
                 self.set_connection_error_response()
@@ -249,7 +247,8 @@ class SeleniumDriver(CrawlerInterface):
             info["status_code"] = self.get_selenium_status_code_from_logs(logs)
             info["headers"] = self.get_selenium_headers_from_logs(logs)
         except Exception as E:
-            print(str(E))
+            self.add_exc(E)
+
         return info
 
     def get_response_logs(self, logs):

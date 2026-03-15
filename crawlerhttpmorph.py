@@ -61,12 +61,10 @@ def main():
             response = crawler.response
 
         if response:
-            print(response)
             parser.save(response)
             return
     except Exception as E:
         resonse = get_response(parser.args.url, str(E))
-        print(response)
         parser.save(response)
 
 main()
