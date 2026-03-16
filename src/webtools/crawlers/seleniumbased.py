@@ -126,7 +126,7 @@ class SeleniumDriver(CrawlerInterface):
                         )
                     )
                     reject_button.click()
-                    print(f"Clicked reject button with text: '{text}'")
+                    # print(f"Clicked reject button with text: '{text}'")
                     break  # Exit the loop after successful click
                 except Exception:
                     continue
@@ -374,7 +374,9 @@ class SeleniumDriver(CrawlerInterface):
         if SeleniumDriver.counter > 0:
             SeleniumDriver.counter -= 1
 
-        WebLogger.debug("Selenium drivers count:{} ".format(SeleniumDriver.counter))
+        if self.verbose:
+            WebLogger.debug("Selenium drivers count:{} ".format(SeleniumDriver.counter))
+
         time.sleep(1)  # give selenium time to close
 
         if SeleniumDriver.counter == 0:
@@ -476,7 +478,6 @@ class SeleniumChromeHeadless(SeleniumDriver):
             return driver
         except Exception as E:
             text = f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}"
-            WebLogger.error(text)
             self.add_error(text)
             return None
 
@@ -566,7 +567,10 @@ class SeleniumChromeFull(SeleniumDriver):
 
         # sometimes two selenium browser clash when accessing user data directory
         self.user_dir = tempfile.mkdtemp()
-        print(f"Using user data dir {self.user_dir}")
+
+        if self.verbose:
+            print(f"Using user data dir {self.user_dir}")
+
         options.add_argument(f"--user-data-dir={self.user_dir}")
 
         # options to enable performance log, to read status code
@@ -604,7 +608,6 @@ class SeleniumChromeFull(SeleniumDriver):
                 #)
 
             text = f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}"
-            WebLogger.error(text)
             self.add_error(text)
             return None
 
@@ -621,7 +624,7 @@ class SeleniumChromeFull(SeleniumDriver):
             from selenium.webdriver.support.ui import WebDriverWait
             from selenium.webdriver.support import expected_conditions as EC
         except Exception as E:
-            print(str(E))
+            # print(str(E))
             selenium_feataure_enabled = False
         return selenium_feataure_enabled
 
@@ -698,7 +701,7 @@ class SeleniumWireFull(SeleniumDriver):
             from selenium.webdriver.support.ui import WebDriverWait
             from selenium.webdriver.support import expected_conditions as EC
         except Exception as E:
-            print(str(E))
+            # print(str(E))
             selenium_feature_enabled = False
 
         from seleniumwire import webdriver as wire_webdriver
@@ -725,10 +728,8 @@ class SeleniumWireFull(SeleniumDriver):
         if self.driver_executable:
             p = Path(self.driver_executable)
             if not p.exists():
-                print(f"Chromedriver executable not found at: {self.driver_executable}")
-                WebLogger.error(
-                    f"Chromedriver executable not found at: {self.driver_executable}"
-                )
+                self.add_error(
+                    f"Chromedriver executable not found at: {self.driver_executable}")
                 return None
             service = Service(executable_path=self.driver_executable)
         else:
@@ -758,7 +759,6 @@ class SeleniumWireFull(SeleniumDriver):
             return driver
         except Exception as e:
             text = f"Failed to initialize WebDriver: {e} Driver location:{self.driver_executable}"
-            WebLogger.error(text)
             self.add_error(text)
             return None
 
