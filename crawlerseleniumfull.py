@@ -10,12 +10,12 @@ import argparse
 import sys
 
 from webtoolkit import (
-   response_to_file,
+   PageResponseObject,
    HTTP_STATUS_CODE_SERVER_ERROR,
 )
 
 from src import webtools
-from src.webtools import WebConfig
+from src.webtools import WebConfig, SeleniumChromeFull
 
 
 def get_response(link, error_text):
@@ -45,37 +45,32 @@ def main():
         request.settings["driver_executable"] = str(WebConfig.get_default_chromedriver_path())
 
         selenium_config = WebConfig.get_seleniumfull()
-        crawler = WebConfig.get_crawler_from_mapping(request, selenium_config)
+        crawler = SeleniumChromeFull(request=request)
 
         if parser.args.verbose:
             print("Running request:{} with SeleniumChromeFull".format(request))
 
-        if not crawler:
-            response = get_response(parser.args.url, "Cannot obtain crawler")
+        try:
+            response = crawler.run()
+        except Exception as E:
+            crawler.add_error(str(E))
 
-        if crawler:
-            try:
-                response = crawler.run()
-            except Exception as E:
-                crawler.add_error(str(E))
-                response = get_response(parser.args.url, "Error in running driver")
+        try:
+            crawler.close()
+        except Exception as E:
+            crawler.add_error(str(E))
+            response = get_response(parser.args.url, "Error in closing driver")
 
-            try:
-                crawler.close()
-            except Exception as E:
-                crawler.add_error(str(E))
-                response = get_response(parser.args.url, "Error in closing driver")
+        if response is None:
+            response = crawler.get_response()
 
-            if not response:
-                response = crawler.get_response()
-
-            if not response:
-                response = get_response(parser.args.url, "Missing response")
+        if response is None:
+            response = get_response(parser.args.url, "Missing response")
 
     except Exception as E:
         resonse = get_response(parser.args.url, str(E))
 
-    if response:
+    if response is not None:
         parser.save(response)
 
 

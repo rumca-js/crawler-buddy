@@ -23,10 +23,10 @@ class WebConfigTest(FakeInternetTestCase):
         memory_increase = self.memory_checker.get_memory_increase()
         self.assertEqual(memory_increase, 0)
 
-    def test_get_crawler_names(self):
-        crawlers = WebConfig.get_crawler_names()
-        self.assertTrue(len(crawlers) > 0)
-        self.assertIn("RequestsCrawler", crawlers)
+    def test_get_browser_names(self):
+        browsers = WebConfig.get_browser_names()
+        self.assertTrue(len(browsers) > 0)
+        self.assertIn("RequestsCrawler", browsers)
 
     def test_get_crawlers(self):
         crawlers = WebConfig.get_crawlers()

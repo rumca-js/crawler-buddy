@@ -28,15 +28,25 @@ class ScriptServerTest(FakeInternetTestCase):
         memory_increase = self.memory_checker.get_memory_increase()
         self.assertTrue(memory_increase < 1) # TODO should be equal 0
 
-    def test_get_crawler(self):
+    def test_get_browser(self):
         # call tested function
-        crawler = Configuration().get_crawler("SeleniumChromeFull")
+        crawler = Configuration().get_browser("SeleniumChromeFull")
+        self.assertTrue(crawler)
+
+    def test_get_class_name(self):
+        # call tested function
+        crawler = Configuration().get_crawler_class_name("ScriptCrawler")
         self.assertTrue(crawler)
 
     def test_get_crawler_config(self):
         # call tested function
         config = Configuration().get_crawler_config()
         self.assertTrue(config)
+
+    def test_get_default_browser(self):
+        # call tested function
+        browser_name = Configuration().get_default_browser()
+        self.assertTrue(browser_name)
 
     def test_is_allowed(self):
         config = Configuration()

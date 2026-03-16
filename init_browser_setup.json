@@ -56,7 +56,7 @@
   },
   {
     "crawler_name": "SeleniumUndetected",
-    "crawler_class_name": "SeleniumUndetected",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
       "timeout_s": 60
@@ -64,7 +64,7 @@
   },
   {
     "crawler_name": "SeleniumChromeHeadless",
-    "crawler_class_name": "SeleniumChromeHeadless",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
       "timeout_s": 60
@@ -72,7 +72,7 @@
   },
   {
     "crawler_name": "SeleniumChromeFull",
-    "crawler_class_name": "SeleniumChromeFull",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
       "timeout_s": 60,
@@ -106,7 +106,7 @@
   },
   {
     "crawler_name": "SeleniumWireFull",
-    "crawler_class_name": "SeleniumWireFull",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
       "timeout_s": 60,
@@ -115,7 +115,7 @@
   },
   {
     "crawler_name": "SeleniumBase",
-    "crawler_class_name": "SeleniumBase",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "timeout_s": 60,
       "delay_s": 10

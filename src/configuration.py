@@ -135,7 +135,7 @@ class Configuration(object):
 
     def get_browser(self, name=None):
         """
-        Returns crawler
+        Returns browser
         """
         config = self.crawler_config
         for item in config:

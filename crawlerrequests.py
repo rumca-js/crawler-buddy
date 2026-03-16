@@ -53,27 +53,21 @@ def main():
         except Exception as E:
             crawler.add_error(str(E))
 
-        if not response:
-            print("No response")
-            sys.exit(1)
-
-        if parser.args.verbose:
-            print("Contents")
-            print(response.get_text())
-
         try:
             crawler.close()
         except Exception as E:
             crawler.add_error(str(E))
 
-        if not response:
-            response = crawler.response
+        if response is None:
+            response = crawler.get_response()
 
-        if response:
-            parser.save(response)
-            return
+        if response is None:
+            response = get_response(parser.args.url, "Missing response")
+
     except Exception as E:
         resonse = get_response(parser.args.url, str(E))
+
+    if response is not None:
         parser.save(response)
 
 
