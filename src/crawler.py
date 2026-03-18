@@ -46,7 +46,7 @@ def get_all_properties__exc(E, error_text):
     stack_lines = traceback.format_stack()
     stack_string = "".join(stack_lines)
 
-    error_full_text = e_str + " " + error_text + " exc text:" + exc_text + " stack:" + stack_lines
+    error_full_text = e_str + " " + error_text + " exc text:" + exc_text + " stack:" + stack_string
 
     all_properties = [{"name": "Response", "data": {
         "status_code" : HTTP_STATUS_CODE_EXCEPTION,
