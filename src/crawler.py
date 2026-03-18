@@ -6,6 +6,7 @@ import psutil
 import json
 from datetime import datetime, timedelta
 import time
+import traceback
 
 from webtoolkit import (
   WebLogger,
@@ -38,6 +39,15 @@ def get_all_properties__error(error_text):
 
 
 def get_all_properties__exc(E, error_text):
+    e_str = str(E)
+
+    exc_text = traceback.format_exc()
+
+    stack_lines = traceback.format_stack()
+    stack_string = "".join(stack_lines)
+
+    error_full_text = e_str + " " + error_text + " exc text:" + exc_text + " stack:" + stack_lines
+
     all_properties = [{"name": "Response", "data": {
         "status_code" : HTTP_STATUS_CODE_EXCEPTION,
         "errors" :  [str(E) + " " + error_text],
