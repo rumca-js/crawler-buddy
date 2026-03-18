@@ -50,7 +50,7 @@ def get_all_properties__exc(E, error_text):
 
     all_properties = [{"name": "Response", "data": {
         "status_code" : HTTP_STATUS_CODE_EXCEPTION,
-        "errors" :  [str(E) + " " + error_text],
+        "errors" :  [error_full_text],
     }}]
     return all_properties
 
