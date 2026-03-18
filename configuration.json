@@ -10,6 +10,7 @@
     "default_crawler" : null,
     "host" : "0.0.0.0",
     "port" : 3000,
+    "scripted_crawlers" : true,
     "virtual_memory_percentage_threshold" : 70,
     "trace" : false,
     "default_browser" : "CurlCffiCrawler",

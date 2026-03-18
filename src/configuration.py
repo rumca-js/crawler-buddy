@@ -28,6 +28,7 @@ class Configuration(object):
         self.data["max_history_records"] = 200
         self.data["max_number_of_workers"] = 5
         self.data["virtual_memory_percentage_threshold"] = 70
+        self.data["scripted_crawlers"] = True
         self.data["trace"] = False
 
         self.crawler_config = None
@@ -79,7 +80,7 @@ class Configuration(object):
         There can be many crawlers with different settings.
         Crawler name needs to be unique, where crawler_class_name does not.
         """
-        path = Path("init_browser_setup.json")
+        path = self.get_browser_file_path()
         if path.exists():
             print(f"Reading crawler config from file {path}")
             with path.open("r") as file:
@@ -101,6 +102,12 @@ class Configuration(object):
                 self.crawler_config.append(item)
 
         return self.crawler_config
+
+    def get_browser_file_path(self):
+        if self.data["scripted_crawlers"]:
+            return Path("init_browser_setup_scripted.json")
+        else:
+            return Path("init_browser_setup.json")
 
     def read_configuration(self):
         """
