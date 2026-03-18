@@ -1,36 +1,42 @@
 [
   {
     "crawler_name": "CurlCffiCrawler",
+    "crawler_class_name": "CurlCffiCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
     "crawler_name": "RequestsCrawler",
+    "crawler_class_name": "RequestsCrawler",
     "settings": {
       "timeout_s": 20
     }
   },
   {
     "crawler_name": "StealthRequestsCrawler",
+    "crawler_class_name": "StealthRequestsCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
     "crawler_name": "HttpMorphCrawler",
+    "crawler_class_name": "HttpMorphCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
     "crawler_name": "HttpCloakCrawler",
+    "crawler_class_name": "HttpCloakCrawler",
     "settings": {
       "timeout_s": 40
     }
   },
   {
     "crawler_name": "HttpxCrawler",
+    "crawler_class_name": "HttpxCrawler",
     "settings": {
       "timeout_s": 40
     }
@@ -60,7 +66,7 @@
   },
   {
     "crawler_name": "SeleniumChromeFull",
-    "crawler_class_name": "ScriptCrawler",
+    "crawler_class_name": "SeleniumChromeFull",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
       "timeout_s": 60,
@@ -69,7 +75,7 @@
   },
   {
     "crawler_name": "CrawleeBeautifulScript",
-    "crawler_class_name": "CrawleeBeautifulScript",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "script": "poetry run python crawleebeautifulsoup.py",
       "timeout_s": 50
@@ -77,7 +83,7 @@
   },
   {
     "crawler_name": "CrawleePlaywrightScript",
-    "crawler_class_name": "CrawleePlaywrightScript",
+    "crawler_class_name": "ScriptCrawler",
     "settings": {
       "script": "poetry run python crawleeplaywright.py",
       "timeout_s": 50
