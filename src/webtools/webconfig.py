@@ -45,7 +45,7 @@ class CrawleePlaywrightScript(ScriptCrawler):
                          script=WebConfig.get_script_path("crawleeplaywright.py"))
 
 
-class ScrapyScript(ScriptCrawler):
+class ScrapyCrawler(ScriptCrawler):
     def __init__(self, url=None, request=None):
         super().__init__(url=url,
                          request=request,
@@ -89,7 +89,7 @@ class WebConfig(object):
             HttpxCrawler,
             CrawleeBeautifulScript,
             CrawleePlaywrightScript,
-            ScrapyScript,
+            ScrapyCrawler,
             YtdlpCrawler,
             HttpMorphCrawler,
             HttpCloakCrawler,
@@ -111,7 +111,7 @@ class WebConfig(object):
             StealthRequestsCrawler,
             CurlCffiCrawler,
             HttpxCrawler,
-            ScrapyScript,
+            ScrapyCrawler,
             YtdlpCrawler,
             HttpMorphCrawler,
             HttpCloakCrawler,
@@ -121,7 +121,7 @@ class WebConfig(object):
         return crawlers
 
     def get_init_crawler_config():
-        return WebConfig.get_config_scripted()
+        return WebConfig.get_config_real_browsers()
 
     def get_config_real_browsers():
         """
@@ -144,9 +144,12 @@ class WebConfig(object):
 
         mapping.append(WebConfig.get_default_browser_setup(CrawleeBeautifulScript))
         mapping.append(WebConfig.get_default_browser_setup(CrawleePlaywrightScript))
-        mapping.append(WebConfig.get_default_browser_setup(ScrapyScript))
+        mapping.append(WebConfig.get_default_browser_setup(ScrapyCrawler))
 
         mapping.append(WebConfig.get_default_browser_setup(SeleniumWireFull, timeout_s=50))
+        mapping.append(WebConfig.get_default_browser_setup(YtdlpCrawler))
+
+        return mapping
 
     def get_config_scripted():
         mapping = []
@@ -154,10 +157,41 @@ class WebConfig(object):
         mapping.append(WebConfig.get_scriped_browser("RequestsCrawler"))
         mapping.append(WebConfig.get_scriped_browser("CurlCffiCrawler"))
         mapping.append(WebConfig.get_scriped_browser("HttpMorphCrawler"))
+        mapping.append(WebConfig.get_scriped_browser("HttpCloakCrawler"))
+        mapping.append(WebConfig.get_scriped_browser("HttpxCrawler"))
+        mapping.append(WebConfig.get_scriped_browser("ScrapyCrawler"))
+        mapping.append(WebConfig.get_scriped_browser("YtdlpCrawler"))
+        mapping.append(WebConfig.get_scriped_browser("CrawleeBeautifulScript"))
+        mapping.append(WebConfig.get_scriped_browser("CrawleePlaywrightScript"))
         mapping.append(WebConfig.get_scriped_browser("SeleniumChromeFull"))
-        mapping.append(WebConfig.get_default_browser_setup(YtdlpCrawler))
 
         return mapping
+
+    def get_script_from_name(name):
+        script = "crawlercurlcffi.py"
+
+        if name == "CurlCffiCrawler":
+            script = "crawlercurlcffi.py"
+        if name == "RequestsCrawler":
+            script = "crawlerrequests.py"
+        if name == "HttpMorphCrawler":
+            script = "crawlerhttpmorph.py"
+        if name == "HttpCloakCrawler":
+            script = "crawlerhttpcloak.py"
+        if name == "StealthRequestsCrawler":
+            script = "crawlerstealth.py"
+        if name == "SeleniumChromeFull":
+            script = "crawlerseleniumfull.py"
+        if name == "ScriptCrawler":
+            script = "cralwerscrapy.py"
+        if name == "YtdlpCrawler":
+            script = "cralwerytdlp.py"
+        if name == "CrawleeBeautifulScript":
+            script = "crawleebeautifulsoup.py"
+        if name == "CrawleePlaywrightScript":
+            script = "crawleeplaywright.py"
+
+        return script
 
     def get_scriped_browser(crawler_name):
         script = WebConfig.get_script_from_name(crawler_name)
@@ -218,21 +252,6 @@ class WebConfig(object):
         for crawler_data in configured_crawlers:
             if crawler_data["crawler_name"] == WebConfig.get_default_crawler_name():
                 return crawler_data
-
-    def get_script_from_name(name):
-        script = "crawlercurlcffi.py"
-        if name == "CurlCffiCrawler":
-            script = "crawlercurlcffi.py"
-        if name == "RequestsCrawler":
-            script = "crawlerrequests.py"
-        if name == "HttpMorphCrawler":
-            script = "crawlerhttpmorph.py"
-        if name == "StealthRequestsCrawler":
-            script = "crawlerstealth.py"
-        if name == "SeleniumChromeFull":
-            script = "crawlerseleniumfull.py"
-
-        return script
 
     def use_logger(Logger):
         WebLogger.web_logger = Logger

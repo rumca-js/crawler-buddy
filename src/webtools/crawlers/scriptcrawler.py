@@ -71,35 +71,33 @@ class ScriptCrawler(CrawlerInterface):
             url=url,
         )
 
+    def get_storage_path(self):
+        path = Path("storage")
+        storage_dir = self.request.settings.get('storage_dir')
+        if storage_dir:
+            path = Path(storage_dir)
+
+        return path
+
     def get_response_file(self):
         from ..webconfig import WebConfig
 
-        if WebConfig.script_responses_directory is not None:
-            response_dir = Path(WebConfig.script_responses_directory)
-        else:
-            response_dir = Path("storage")
+        response_dir = self.get_storage_path()
 
         file_path = self.get_main_path() / response_dir / self.get_response_file_name()
         return file_path
 
     def get_request_file(self):
-        response_dir = Path("storage")
+        response_dir = self.get_storage_path()
 
         file_path = self.get_main_path() / response_dir / self.get_request_file_name()
         return file_path
 
     def makedirs(self):
-        response_dir = Path("storage")
+        response_dir = self.get_storage_path()
+
         path = self.get_main_path() / response_dir
         path.mkdir(parents=True, exist_ok=True)
-
-        """
-        if len(response_file_location.parents) > 1:
-            response_dir = response_file_location.parents[0]
-            WebLogger.debug(str(response_dir))
-            if not response_dir.exists():
-                response_dir.mkdir(parents=True, exist_ok=True)
-        """
 
     def get_main_path(self):
         file_path = os.path.realpath(__file__)
@@ -118,15 +116,13 @@ class ScriptCrawler(CrawlerInterface):
         if not self.is_valid():
             return
 
-        """
-        TODO cleanup
         remote_server = self.request.settings.get("remote_server")
+        run_files = self.request.settings.get("run_files")
 
-        if remote_server:
+        if remote_server and remote_server.strip() != "":
             return self.run_via_server(remote_server)
-        else:
+        elif run_files and run_files.strip() != "":
             return self.run_via_file()
-        """
 
         return self.run_via_stdin_stoud()
 
@@ -135,13 +131,7 @@ class ScriptCrawler(CrawlerInterface):
         crawl_id = self.request.settings.get("crawl_id")
         timeout_s = self.get_timeout_s()
 
-        # TODO pass headers and cookies
         script = self.script + f' --url "{url}" --timeout={timeout_s} --request-stdin --response-stdout'
-
-        # WebLogger.error("Response:{}".format(self.response_file))
-        # WebLogger.error("CWD:{}".format(self.cwd))
-        # WebLogger.error("maintl:{}".format(self.get_main_path()))
-        # WebLogger.error("script:{}".format(script))
 
         WebLogger.debug("Running CWD:{} via server with script:{}".format(self.cwd, script))
 
@@ -201,6 +191,9 @@ class ScriptCrawler(CrawlerInterface):
         return self.response
 
     def run_via_server(self, remote_server):
+        """
+        Not really finished with implementation
+        """
         url = self.request.url
         crawl_id = self.request.settings.get("crawl_id")
         timeout_s = self.get_timeout_s()
@@ -214,13 +207,7 @@ class ScriptCrawler(CrawlerInterface):
         request_to_file(self.request, request_file)
         """
 
-        # TODO pass headers and cookies
         script = self.script + f' --url "{url}" --remote-server="{remote_server}" --timeout={timeout_s} --request-stdin'
-
-        # WebLogger.error("Response:{}".format(self.response_file))
-        # WebLogger.error("CWD:{}".format(self.cwd))
-        # WebLogger.error("maintl:{}".format(self.get_main_path()))
-        # WebLogger.error("script:{}".format(script))
 
         WebLogger.debug("Running CWD:{} via server with script:{}".format(self.cwd, script))
 
@@ -314,12 +301,8 @@ class ScriptCrawler(CrawlerInterface):
         timeout_s = self.get_timeout_s()
         output_file = response_file_location
 
-        script = self.script + f' --url "{url}" --output-file="{output_file}" --timeout={timeout_s} --request-file={request_file}'
+        script = self.script + f' --url "{url}" --response-file="{output_file}" --timeout={timeout_s} --request-file={request_file}'
 
-        # WebLogger.error("Response:{}".format(self.response_file))
-        # WebLogger.error("CWD:{}".format(self.cwd))
-        # WebLogger.error("maintl:{}".format(self.get_main_path()))
-        # WebLogger.error("script:{}".format(script))
         print("Running script:{}".format(script))
 
         try:
@@ -378,16 +361,6 @@ class ScriptCrawler(CrawlerInterface):
 
         return self.response
 
-    def process_input(self):
-        """
-        TODO these three functions below, could be used
-        """
-        if not self.script:
-            self.operating_path = None
-            return
-
-        self.operating_path = self.get_operating_dir()
-
     def get_request_hash(self):
         crawl_id = str(self.request.settings.get("crawl_id"))
         crawler_name = str(self.request.crawler_name)
@@ -404,24 +377,6 @@ class ScriptCrawler(CrawlerInterface):
     def get_request_file_name(self):
         response_file = f"request_{self.hash}.txt"
         return response_file
-
-    def get_operating_dir(self):
-        from ..webconfig import WebConfig
-
-        file_path = os.path.realpath(__file__)
-        full_path = Path(file_path)
-
-        if WebConfig.script_operating_dir is None:
-            operating_path = full_path.parents[2]
-        else:
-            operating_path = Path(WebConfig.script_operating_dir)
-
-        if not operating_path.exists():
-            WebLogger.error("Operating path does not exist: {}".format(operating_path))
-            self.add_error("Operating path does not exist: {}".format(operating_path))
-            return
-
-        return operating_path
 
     def close(self):
         try:

@@ -104,6 +104,12 @@ class CurlCffiCrawler(CrawlerInterface):
         return self.response
 
     def crawl_with_thread_implementation(self, request):
+        """
+        It should use it's own impersonate headers.
+
+        Use
+         - cookies
+        """
         import curl_cffi
         from curl_cffi import requests
         from curl_cffi.requests.exceptions import ConnectionError, Timeout
@@ -118,10 +124,8 @@ class CurlCffiCrawler(CrawlerInterface):
            timeout=self.request.timeout_s,
            verify=self.request.ssl_verify,
            cookies=self.request.cookies,
-           headers=self.request.request_headers,
            proxy=proxies,
            impersonate=impersonate,
-           # stream=True, # TODO
         )
         return answer
 

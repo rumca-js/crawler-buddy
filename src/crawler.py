@@ -96,6 +96,9 @@ class CrawlerTypeGet(object):
             response = page_url.get_response()
             all_properties = page_url.get_all_properties(include_social=False)
 
+            if all_properties is None:
+                all_properties = get_all_properties__error("Cannot obtain GET data")
+
             page_url.close()
         except Exception as E:
             WebLogger.exc(
@@ -125,20 +128,14 @@ class CrawlerTypeSocialData(object):
             page_url = webtools.Url(url)
             all_properties = page_url.get_social_properties()
 
-            # TODO how to handle it?
-
             if all_properties is None:
-                all_properties = get_all_properties__too_many_requests("Cannot obtain social data")
+                all_properties = get_all_properties__error("Cannot obtain social data")
 
             page_url.close()
         except Exception as E:
             WebLogger.exc(
                 E, info_text="Exception when calling socialj {}".format(url)
             )
-            all_properties = [{"name": "Response", "data": {
-                "status_code" : HTTP_STATUS_CODE_EXCEPTION,
-                "errors" :  [str(E)],
-            }}]
             all_properties = get_all_properties__exc(E, "Cannot obtain social data")
 
         self.container.update(crawl_id=self.crawl_item.crawl_id, data=all_properties)

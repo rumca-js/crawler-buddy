@@ -214,7 +214,7 @@ class SeleniumDriver(CrawlerInterface):
 
     def process_response(self):
         """
-        TODO - if webpage changes link, it should also update it in this object
+        Prepares response
         """
 
         page_source = self.driver.page_source
@@ -231,7 +231,7 @@ class SeleniumDriver(CrawlerInterface):
             headers = info["headers"]
 
         self.response = PageResponseObject(
-            self.driver.current_url,
+            self.driver.current_url, # page could have changed url
             text=page_source,
             status_code=status_code,
             headers=headers,
@@ -368,8 +368,7 @@ class SeleniumDriver(CrawlerInterface):
                 self.driver.close()
                 closed = True
         except Exception as E:
-            WebLogger.error(str(E))  # TODO
-            WebLogger.debug(str(E))
+            self.add_exc(E)
 
         if SeleniumDriver.counter > 0:
             SeleniumDriver.counter -= 1
@@ -387,8 +386,7 @@ class SeleniumDriver(CrawlerInterface):
                         WebLogger.warning("Selenium driver quit")
                         self.driver.quit()
                 except Exception as E:
-                    WebLogger.error(str(E))  # TODO
-                    WebLogger.debug(str(E))
+                    self.add_exc(E)
 
                 time.sleep(1)
 
@@ -399,8 +397,7 @@ class SeleniumDriver(CrawlerInterface):
             try:
                 shutil.rmtree(self.user_dir, ignore_errors=True)
             except Exception as E:
-                WebLogger.error(str(E))  # TODO
-                WebLogger.debug(str(E))
+                self.add_exc(E)
 
         self.user_dir = None
         self.driver = None
@@ -802,13 +799,14 @@ class SeleniumBase(CrawlerInterface):
 
     def __init__(
         self,
-        request=None,
         url=None,
-        driver_executable=None,
-        settings=None,
+        request=None,
+        driver_executable=None
     ):
-        """ Constructor TODO can it be removed? """
+        self.driver_executable = driver_executable
+
         super().__init__(
+            url=url,
             request=request,
         )
 

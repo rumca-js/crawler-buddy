@@ -93,6 +93,9 @@ class HttpMorphCrawler(CrawlerInterface):
         return self.response
 
     def crawl_with_thread_implementation(self, request):
+        """
+        Http morph uses it's own headers
+        """
         import httpmorph
 
         answer = httpmorph.get(
@@ -100,9 +103,6 @@ class HttpMorphCrawler(CrawlerInterface):
             timeout=self.request.timeout_s,
             verify=self.request.ssl_verify,
             #cookies=self.request.cookies,
-            #impersonate="chrome",
-            #headers=headers,
-            # stream=True, # TODO
         )
         return answer
 

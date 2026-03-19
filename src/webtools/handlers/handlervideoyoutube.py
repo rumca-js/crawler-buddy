@@ -23,7 +23,6 @@ from webtoolkit import DefaultUrlHandler, YouTubeVideoHandler, HandlerInterface
 class YouTubeVideoHandlerJson(YouTubeVideoHandler):
     """
     YouTube JSON enabled video handler.
-    TODO Rename to YouTubeVideoHandlerYtdlp
     """
 
     def __init__(self, url, request=None, url_builder=None):
@@ -374,11 +373,11 @@ class YouTubeVideoHandlerJson(YouTubeVideoHandler):
         if self.html_url is not None:
             self.streams[self.html_url.get_url()] = (
                 self.html_url.get_response()
-            )  # TODO this should be response object
+            )
         if self.return_url is not None:
             self.streams[self.return_url.get_url()] = (
                 self.return_url.get_response()
-            )  # TODO this should be response object
+            )
 
         for key in self.channel_sources_urls:
             self.streams[key] = self.channel_sources_urls[key].get_response()

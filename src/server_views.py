@@ -247,7 +247,9 @@ def index():
 @views.route("/info")
 def info():
     id = request.args.get("id")
-    if not current_app.config['configuration'].is_allowed(id):
+    configuration = current_app.config['configuration']
+
+    if not configuration.is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
     text = """
@@ -295,14 +297,19 @@ def info():
     text += f"<div>Domain_length {domain_length}/{domain_max_length}</div>"
 
     runner = current_app.config["task_runner"]
-    threads_size = runner.get_size()
-    running_ids_len = len(runner.running_ids)
-    number_of_storage_files = count_files_in_directory("storage")
+    threads_size = 0
+    running_ids_len = 0
+    if runner:
+        threads_size = runner.get_size()
+        running_ids_len = len(runner.running_ids)
+
+    number_of_storage_files = count_files_in_directory(str(configuration.get_storage_path()))
     no_crawls = current_app.config['crawler_main'].container.get_no_crawls()
 
-    text += f"<div>Processing Thread: {runner.is_thread_ok()}</div>"
-    text += f"<div>Running IDS: {running_ids_len}</div>"
-    text += f"<div>Running futures: {runner.get_size()}</div>"
+    if runner:
+        text += f"<div>Processing Thread: {runner.is_thread_ok()}</div>"
+        text += f"<div>Running IDS: {running_ids_len}</div>"
+        text += f"<div>Running futures: {runner.get_size()}</div>"
     text += f"<div>Storage files: {number_of_storage_files}</div>"
     text += f"<div>Number of crawls: {no_crawls}</div>"
 
@@ -681,20 +688,6 @@ def rssifyr():
         properties = page_url.get_properties()
         entries = page_url.get_entries()
 
-        """
-        TODO - if no entries are here, then use 'feeds from link'
-        create request
-
-        if not entries or len(entries) == 0:
-            if "feeds" in properties:
-                for feed in properties["feeds"]:
-                    all_properties = current_app.config['crawler_main'].get_crawl_properties(
-                        feed, crawler_data
-                    )
-                    if all_properties:
-                        break
-        """
-
     return Response(rssify(url, all_properties), mimetype="application/rss+xml")
 
 
@@ -817,7 +810,6 @@ def scandomainsj():
 
 @views.route("/headers", methods=["GET"])
 def headers():
-    # TODO implement
     id = request.args.get("id")
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -953,8 +945,6 @@ def linkj():
     properties["link_request"] = page_url.request_url
     properties["link_canonical"] = page_url.get_canonical_url()
 
-    # TODO maybe we could add support for canonical links, maybe we could try reading fast, via requests?
-
     return jsonify(properties)
 
 
@@ -982,8 +972,6 @@ def link():
         page_url.get_canonical_url(), page_url.get_canonical_url()
     )
 
-    # TODO maybe we could add support for canonical links, maybe we could try reading fast, via requests?
-
     return get_html(id=id, body=text, title="Error")
 
 
@@ -1004,8 +992,6 @@ def feedsj():
 
     for feed in page_url.get_feeds():
         properties["feeds"].append(feed)
-
-    # TODO maybe we could add support for canonical links, maybe we could try reading fast, via requests?
 
     return jsonify(properties)
 
@@ -1029,8 +1015,6 @@ def feeds():
     for feed in page_url.get_feeds():
         text += '<div>Feed: <a href="{}">{}</a></div>'.format(feed, feed)
 
-    # TODO maybe we could add support for canonical links, maybe we could try reading fast, via requests?
-
     return get_html(id=id, body=text, title="Error")
 
 
@@ -1051,8 +1035,6 @@ def archivesj():
 
     for archive_link in page_url.get_urls_archive():
         properties["links"].append(archive_link)
-
-    # TODO maybe we could add support for canonical links, maybe we could try reading fast, via requests?
 
     return jsonify(properties)
 

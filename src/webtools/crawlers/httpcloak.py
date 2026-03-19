@@ -84,6 +84,10 @@ class HttpCloakCrawler(CrawlerInterface):
             return self.response
 
     def build_requests(self):
+        """
+        Http cloak uses own methods of cloaking.
+        We do not modify headers.
+        """
         import httpcloak
 
         self.update_request()
@@ -92,33 +96,8 @@ class HttpCloakCrawler(CrawlerInterface):
             answer = httpcloak.get(
                 url=self.request.url,
                 timeout=self.request.timeout_s,
-                #verify=self.request.ssl_verify,
-                #cookies=self.request.cookies,
-                #impersonate="chrome",
-                #headers=headers,
-                # stream=True, # TODO
             )
             return answer
-
-            """
-            except httpcloak.ConnectionError as E:
-                self.response = PageResponseObject(
-                    self.request.url,
-                    text=None,
-                    status_code=HTTP_STATUS_CODE_CONNECTION_ERROR,
-                    request_url=self.request.url,
-                )
-                self.add_error("Url:{} Cannot create request".format(str(E)))
-
-            except httpcloak.Timeout as E:
-                self.response = PageResponseObject(
-                    self.request.url,
-                    text=None,
-                    status_code=HTTP_STATUS_CODE_TIMEOUT,
-                    request_url=self.request.url,
-                )
-                self.add_error("Url:{} Timeout".format(str(E)))
-            """
 
         except Exception as E:
             self.response = PageResponseObject(

@@ -141,7 +141,6 @@ def get_entry_html(id, crawl_data):
 
     if response:
         status_code = response.get_status_code()
-        # TODO maybe create a better API
         status_code_text = status_code_to_text(status_code)
 
         charset = response.get_encoding()

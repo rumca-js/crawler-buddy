@@ -100,7 +100,7 @@ class StealthRequestsCrawler(CrawlerInterface):
             timeout=self.request.timeout_s,
             verify=self.request.ssl_verify,
             proxies=proxies,
-            # stream=True,   # TODO does not work with it
+            # stream=True,   # stealth does not work with it
         )
         return answer
 

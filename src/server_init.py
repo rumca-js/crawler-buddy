@@ -19,7 +19,9 @@ def create_app():
 
     # Initialize components
     WebLogger.web_logger = PermanentLogger()
+    print("Creating configuration")
     configuration = Configuration()
+    print("Creating crawler")
     crawler_main = Crawler()
     task_runner = None
 

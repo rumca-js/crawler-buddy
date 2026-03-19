@@ -51,14 +51,6 @@ class RequestBuilder(object):
 
         request.crawler_type = None
 
-        """
-        script = WebConfig.get_script_from_name(browser)
-
-        # TODO
-        page_request.settings["script"] = script
-        page_request.settings["remote_server"] = "http://127.0.0.1:3000"
-        """
-
         if request.crawler_name and request.crawler_type is None:
             if request.crawler_type is None:
                 configuration = Configuration.get_object()
@@ -122,8 +114,13 @@ class RequestBuilder(object):
 
         remote_server = settings.get("remote_server")
         if not remote_server:
-            # TODO copy from configuraiont
-            settings["remote_server"] = "http://127.0.0.1:3000"
+            configuration = Configuration.get_object()
+            settings["remote_server"] = configuration.get_remote_server()
+
+        storage_dir = settings.get("storage_dir")
+        if not storage_dir:
+            configuration = Configuration.get_object()
+            settings["storage_dir"] = str(configuration.get_storage_path())
 
         page_request.settings = settings
 

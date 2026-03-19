@@ -17,6 +17,7 @@ from commandlineparser import CommandLineParser
 
 
 if __name__ == "__main__":
+    print("Creating app")
     app = create_app()
     
     p = CommandLineParser()
@@ -31,12 +32,10 @@ if __name__ == "__main__":
     port = app.config['configuration'].get("port")
     host = app.config['configuration'].get("host")
 
-    # TODO configurated
-    path = "storage"
-    if os.path.exists(path):
-        shutil.rmtree(path)
+    storage_path = app.config['configuration'].get_storage_path()
+    if storage_path.exists():
+        shutil.rmtree(str(path))
 
-    # TODO?
     socket.setdefaulttimeout(100)
 
     if p.args.kill_processes and webtools.WebConfig.count_chrom_processes() > 0:
@@ -51,6 +50,7 @@ if __name__ == "__main__":
     tracemalloc.start()
 
     if p.args.multi_process:
+        print("Staring task runner thread")
         thread, task_runner = start_runner_thread(container=app.config['crawler_main'].container,
                                                   configuration=app.config['configuration'],
                                                   no_executor=False)

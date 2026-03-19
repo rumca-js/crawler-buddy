@@ -104,7 +104,6 @@ class HttpxCrawler(CrawlerInterface):
                 proxy=proxy,
                 cookies=self.request.cookies,
                 follow_redirects=True,
-                # stream=True, # TODO
             )
             return answer
 

@@ -23,13 +23,15 @@ class Configuration(object):
         self.data["prefer_non_www"] = False  # TODO use that
         self.data["debug"] = True  # TODO use that
         self.data["default_crawler"] = None
-        self.data["host"] = "127.0.0.1"
+        self.data["host"] = "0.0.0.0"
         self.data["port"] = "3000"
+        self.data["remote_server_ip"] = None
         self.data["max_history_records"] = 200
         self.data["max_number_of_workers"] = 5
         self.data["virtual_memory_percentage_threshold"] = 70
         self.data["scripted_crawlers"] = True
         self.data["trace"] = False
+        self.data["storage_dir"] = "storage"
 
         self.crawler_config = None
 
@@ -192,3 +194,14 @@ class Configuration(object):
 
     def get_default_browser(self):
         return self.data["default_browser"]
+
+    def get_storage_path(self):
+        if self.data["storage_dir"] and self.data["storage_dir"] != "":
+            return Path(self.data["storage_dir"])
+
+    def get_remote_server(self):
+        remote_server_ip = self.data["remote_server_ip"]
+        port = self.data["port"]
+
+        if remote_server_ip and remote_server_ip.strip() != "" and port:
+            return f"http://{remote_server_ip}:{port}"

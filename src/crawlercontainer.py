@@ -142,7 +142,6 @@ class CrawlerContainer(object):
         for item in reversed(self.container):
             if item.crawl_id == crawl_id:
                 item.data = data
-                # item.timestamp = datetime.now() # TODO we do not want to change 'start date'
                 return True
         return False
 
@@ -185,11 +184,9 @@ class CrawlerContainer(object):
     def remove(self, crawl_id):
         """
         Removes crawl at index
-        @returns index
-
-        #TODO should it release memory from request / response?
+        @returns true if removed
         """
-        last_found = False
+        found_crawl_id = False
 
         result = []
 
@@ -197,11 +194,11 @@ class CrawlerContainer(object):
             if crawl_data.crawl_id != crawl_id:
                 result.append(crawl_data)
             else:
-                last_found = True
+                found_crawl_id = True
 
         self.container = result
 
-        return last_found
+        return found_crawl_id
 
     def clear(self):
         """
@@ -340,24 +337,12 @@ class CrawlerContainer(object):
         if input_request and "handler_name" not in input_request:
             input_request["handler_name"]=None
 
-        """
-        TODO
-        if input_request["crawler_name"] and one_request["crawler_name"] != input_request["crawler_name"]:
-            return False
-        if input_request["handler_name"] and one_request["handler_name"] != input_request["handler_name"]:
-            return False
-        """
         if one_request["crawler_name"] != input_request["crawler_name"]:
             return False
         if one_request["handler_name"] != input_request["handler_name"]:
             return False
         if one_request["url"] != input_request["url"]:
             return False
-
-        """
-        if one_request and input_request and one_request == input_request:
-            return True
-        """
 
         if one_request is None and input_request is None:
             return True
