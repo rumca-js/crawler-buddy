@@ -41,7 +41,7 @@ class HttpCloakCrawler(CrawlerInterface):
                 self.request.url,
                 status_code=answer.status_code,
                 request_url=self.request.url,
-                headers=answer.headers,
+                #headers=answer.headers,
             )
             if not self.is_response_valid():
                 return self.response
@@ -55,7 +55,7 @@ class HttpCloakCrawler(CrawlerInterface):
                 binary=content,
                 status_code=answer.status_code,
                 request_url=self.request.url,
-                headers=answer.headers,
+                #headers=answer.headers,
             )
 
             return self.response
@@ -67,7 +67,7 @@ class HttpCloakCrawler(CrawlerInterface):
                 text=text,
                 status_code=answer.status_code,
                 request_url=self.request.url,
-                headers=answer.headers,
+                #headers=answer.headers,
             )
 
         elif answer:
@@ -77,7 +77,7 @@ class HttpCloakCrawler(CrawlerInterface):
                 text=None,
                 status_code=answer.status_code,
                 request_url=self.request.url,
-                headers=answer.headers,
+                # headers=answer.headers,
             )
 
         if self.response:

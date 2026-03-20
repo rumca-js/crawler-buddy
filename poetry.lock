@@ -46,14 +46,14 @@ files = [
 
 [[package]]
 name = "attrs"
-version = "25.4.0"
+version = "26.1.0"
 description = "Classes Without Boilerplate"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "attrs-25.4.0-py3-none-any.whl", hash = "sha256:adcf7e2a1fb3b36ac48d97835bb6d8ade15b8dcce26aba8bf1d14847b57a3373"},
-    {file = "attrs-25.4.0.tar.gz", hash = "sha256:16d5969b87f0859ef33a48b35d55ac1be6e42ae49d5e853b597db70c35c57e11"},
+    {file = "attrs-26.1.0-py3-none-any.whl", hash = "sha256:c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309"},
+    {file = "attrs-26.1.0.tar.gz", hash = "sha256:d03ceb89cb322a8fd706d4fb91940737b6642aa36998fe130a9bc96c985eff32"},
 ]
 
 [[package]]
@@ -915,6 +915,21 @@ groups = ["main"]
 files = [
     {file = "hpack-4.1.0-py3-none-any.whl", hash = "sha256:157ac792668d995c657d93111f46b4535ed114f0c9c8d672271bbec7eae1b496"},
     {file = "hpack-4.1.0.tar.gz", hash = "sha256:ec5eca154f7056aa06f196a557655c5b009b382873ac8d1e66e79e87535f1dca"},
+]
+
+[[package]]
+name = "httpcloak"
+version = "1.6.1"
+description = "Browser fingerprint emulation HTTP client with HTTP/1.1, HTTP/2, and HTTP/3 support"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "httpcloak-1.6.1-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:a088807ce867e57714d8b1b796decc4ac1d2e6aa8e7775a502e6d920e70ca69c"},
+    {file = "httpcloak-1.6.1-py3-none-macosx_11_0_arm64.whl", hash = "sha256:9696f0f49252e7b1f404376aede34d501b90dce170849060161363219941f958"},
+    {file = "httpcloak-1.6.1-py3-none-manylinux_2_17_aarch64.whl", hash = "sha256:ab3fe55367405364a69fc181a73297018e42d4f1cfc11ebcf97fbbb4ac716622"},
+    {file = "httpcloak-1.6.1-py3-none-manylinux_2_17_x86_64.whl", hash = "sha256:b82aabfe952a83efb8bfe1290b49e6199931f932befa420a34d7217ce4a5c308"},
+    {file = "httpcloak-1.6.1-py3-none-win_amd64.whl", hash = "sha256:2780971796480ea0d3d178c0c78468c3461bf3951f37a632b165f0c196e46edf"},
 ]
 
 [[package]]
@@ -2929,14 +2944,14 @@ files = [
 
 [[package]]
 name = "webtoolkit"
-version = "0.1.40"
+version = "0.1.42"
 description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "webtoolkit-0.1.40-py3-none-any.whl", hash = "sha256:3a186990f26da3a4bda7bd1259dea0fd92b399830443f2e608b7bafde7a2ae66"},
-    {file = "webtoolkit-0.1.40.tar.gz", hash = "sha256:d0ed0842fa57afa74826d80eee365a3f2ff99ba366b699a9f78f255a45b97609"},
+    {file = "webtoolkit-0.1.42-py3-none-any.whl", hash = "sha256:68bd4b24ab23e118386f396b021d8927932bec578b27f30524bd43d76d302c95"},
+    {file = "webtoolkit-0.1.42.tar.gz", hash = "sha256:056b972091caec301c3392cacebccb08870ca12599e7a1d94be44d1c03d89ef2"},
 ]
 
 [package.dependencies]
@@ -3310,4 +3325,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "f872925c7caeaeb7746c9e79fe44e64ceeb89783ced3a32c18a3b9335d7e571c"
+content-hash = "eb804efa0ec8e746d150d6dd810de16357248ea49bcecfe19367ecae52388fd9"
