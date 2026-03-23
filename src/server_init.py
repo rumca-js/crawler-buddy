@@ -6,6 +6,7 @@ from utils import PermanentLogger
 from src.configuration import Configuration
 from src.crawler import Crawler
 from src.server_views import views
+from src.crawlercontaineralchemy import CrawlerContainerAlchemy
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,6 +30,7 @@ def create_app():
     app.config['configuration'] = configuration
     app.config['crawler_main'] = crawler_main
     app.config['task_runner'] = task_runner
+    app.config['container'] = CrawlerContainerAlchemy()
     
     # Register blueprints
     app.register_blueprint(views)
