@@ -61,8 +61,8 @@ class CrawlerTypeGet(object):
         self.crawl_item = crawl_item
 
     def run(self):
-        url = self.crawl_item.request_real.url
-        request = self.crawl_item.request
+        request = self.crawl_item.get_request()
+        url = request.url
 
         try:
             # TODO
@@ -83,8 +83,8 @@ class CrawlerTypeGet(object):
         return all_properties
 
     def run_internal(self, url, request=None):
-        url = self.crawl_item.get_url()
-        request = self.crawl_item.request_real
+        request = self.crawl_item.get_request()
+        url = request.url
 
         page_url = webtools.Url(url=url, request=request)
         page_url.request.settings["crawl_id"] = self.crawl_item.crawl_id

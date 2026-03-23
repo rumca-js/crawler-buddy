@@ -16,11 +16,13 @@ class RequestBuilder(object):
         page_request = PageRequestObject(url)
         page_request = RequestBuilder.update_crawler_name(page_request)
         page_request = RequestBuilder.update_request_ext(page_request)
+
         return page_request
 
     def update_request(page_request):
         page_request = RequestBuilder.update_crawler_name(page_request)
         page_request = RequestBuilder.update_request_ext(page_request)
+
         return page_request
 
     def update_crawler_name(request):

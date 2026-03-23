@@ -3,7 +3,7 @@ import threading
 
 from datetime import datetime
 from collections import OrderedDict
-from webtoolkit import WebLogger, request_to_json, copy_request
+from webtoolkit import WebLogger, request_to_json, copy_request, json_to_request
 from src.webtools import WebConfig
 
 
@@ -14,8 +14,8 @@ class CrawlItem(object):
         self.timestamp = datetime.now()
         self.data = data
         self.request = request_to_json(request)
-
-        self.request_real = copy_request(request)
+        self.request["crawler_type"] = None
+        self.request["handler_type"] = None
 
     def __str__(self):
         data = "No"
@@ -23,8 +23,13 @@ class CrawlItem(object):
             data = "Yes"
         return f"{self.crawl_id} {self.crawl_type} {self.timestamp} {self.crawler_name} {self.url} Data:{data}"
 
+    def get_request(self):
+        return json_to_request(self.request)
+
     def get_url(self):
-        return self.request_real.url
+        real_request = json_to_request(self.request)
+
+        return real_request.url
 
     def is_response(self):
         return self.data is not None
@@ -297,9 +302,6 @@ class CrawlerContainer(object):
         self.container = result
 
     def close_item(self, crawl_item):
-        # request_real does not have crawler_type nor name
-        # request is JSON
-        # nothing really to close, but maybe some day
         self.no_history_crawls += 1
 
     def get_no_crawls(self):

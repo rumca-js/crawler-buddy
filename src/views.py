@@ -107,10 +107,12 @@ def get_entry_html(id, crawl_data):
     text = ""
 
     crawl_type = crawl_data.crawl_type
-    url = crawl_data.request_real.url
     timestamp = crawl_data.timestamp
     crawl_id = crawl_data.crawl_id
     all_properties = crawl_data.data
+
+    request = crawl_data.get_request()
+    url = request.url
 
     if not id:
         id = ""
@@ -124,7 +126,6 @@ def get_entry_html(id, crawl_data):
       <a href="{remove_link}">Remove</a>\n
       """
 
-    request = crawl_data.request_real
     response = None
     status_code = 0
     status_code_text = "No status"
@@ -187,11 +188,11 @@ def get_crawl_data(id, crawl_data):
     text = ""
 
     crawl_type = crawl_data.crawl_type
-    url = crawl_data.request_real.url
     timestamp = crawl_data.timestamp
     crawl_id = crawl_data.crawl_id
 
-    request = crawl_data.request_real
+    request = crawl_data.get_request()
+    url = request.url
 
     find_link = "/findj?id={}&index={}".format(id, str(crawl_id))
     remove_link = "/removej?id={}&index={}".format(id, str(crawl_id))
