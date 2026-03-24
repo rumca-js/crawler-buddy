@@ -95,6 +95,8 @@ class CrawlerContainerAlchemy:
             # 1: crawl_id match
             if crawl_id is not None:
                 conditions.append(CrawlHistoryJson.crawl_id == crawl_id)
+                record = query.filter(or_(*conditions)).first()
+                return record
 
             # 2: (url AND crawler_name AND handler_name)
             if request:
@@ -106,7 +108,10 @@ class CrawlerContainerAlchemy:
             if not conditions:
                 raise ValueError( "Provide crawl_id or request with url, crawler_name, and handler" )
 
-            record = query.filter(or_(*conditions)).first()
+            if crawl_type:
+                conditions.append(CrawlHistoryJson.crawl_type == crawl_type)
+
+            record = query.filter(and_(*conditions)).first()
             return record
 
     def update_by_url(self, url: str, new_json: dict):
