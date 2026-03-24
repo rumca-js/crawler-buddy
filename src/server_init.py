@@ -22,15 +22,15 @@ def create_app():
     WebLogger.web_logger = PermanentLogger()
     print("Creating configuration")
     configuration = Configuration()
-    print("Creating crawler")
-    crawler_main = Crawler()
     task_runner = None
 
     # Store components in app config
     app.config['configuration'] = configuration
-    app.config['crawler_main'] = crawler_main
     app.config['task_runner'] = task_runner
+    print("Creating container")
     app.config['container'] = CrawlerContainerAlchemy()
+    print("Creating crawler")
+    app.config['crawler_main'] = Crawler(container=app.config['container'])
     
     # Register blueprints
     app.register_blueprint(views)

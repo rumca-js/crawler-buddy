@@ -154,7 +154,7 @@ class Crawler(object):
     """
     Crawler
     """
-    def __init__(self):
+    def __init__(self, container=None):
         """ Constructor """
         self.configuration = Configuration()
         self.multi_process = False
@@ -166,7 +166,7 @@ class Crawler(object):
 
         row_size = self.configuration.get("max_history_records")
 
-        self.container = CrawlerContainer(records_size = row_size)
+        self.container = container
 
         self.data = CrawlerData(self.configuration)
 
