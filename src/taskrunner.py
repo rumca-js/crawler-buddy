@@ -58,7 +58,7 @@ class TaskRunner(object):
         """Actual crawl logic here."""
         try:
             if self.verbose:
-                WebLogger.debug(f"[RUN]  {item.request_real.url}")
+                WebLogger.debug(f"[RUN]  {item.get_request()}")
 
             crawl = crawler_builder(container=self.container, crawl_item=item)
 
@@ -66,7 +66,7 @@ class TaskRunner(object):
                 crawl.run()
 
             if self.verbose:
-                WebLogger.debug(f"[DONE] {item.request_real.url}")
+                WebLogger.debug(f"[DONE] {item.get_request()}")
 
             return item.crawl_id
         except Exception as E:
@@ -94,7 +94,7 @@ class TaskRunner(object):
             self.run_item(crawl_item)
         else:
             with self.lock:
-                WebLogger.info("Running: {}".format(crawl_item.request_real.url))
+                WebLogger.info("Running: {}".format(crawl_item.get_request().url))
 
                 future = self.executor.submit(self.run_item, crawl_item)
                 future.add_done_callback(self._on_done)
@@ -135,8 +135,11 @@ class TaskRunner(object):
         return True
 
     def is_selenium_both(self, one, two):
-        if one.request_real and one.request_real.crawler_name and one.request_real.crawler_name.find("Selenium"):
-              if two.request_real and two.request_real.crawler_name and two.request_real.crawler_name.find("Selenium") >= 0:
+        one_request = one.get_request()
+        two_request = two.get_request()
+
+        if one_request and one_request.crawler_name and one_request.crawler_name.find("Selenium"):
+              if two_request and two_request.crawler_name and two_request.crawler_name.find("Selenium") >= 0:
                   return True
 
         return False
@@ -204,6 +207,8 @@ class TaskRunner(object):
                         break
                 except Exception as E:
                     WebLogger.exc(E, "Exception in TaskRunner")
+
+                self.container.trim_size()
 
                 # Sleep a bit if no new work appeared
                 if not submitted_any:

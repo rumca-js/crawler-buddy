@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, DateTime, func, and_, or_, event
+from sqlalchemy import create_engine, Column, Integer, DateTime, func, and_, or_, event, select
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.types import JSON
 import os
@@ -25,6 +25,12 @@ class CrawlHistoryJson(Base):
 
     def get_request(self):
         return json_to_request(self.request)
+
+    def is_response(self):
+        return self.data is not None
+
+    def is_expired(self):
+        return False
 
 
 class CrawlerContainerAlchemy:
@@ -135,18 +141,24 @@ class CrawlerContainerAlchemy:
         #if not isinstance(data, dict):
         #    raise TypeError("new_json must be a dict")
 
-        with self.Session() as session:
-            record = (
-                session.query(CrawlHistoryJson)
-                .filter(CrawlHistoryJson.crawl_id == crawl_id)
-                .first()
-            )
-            if not record:
-                return False
+        try:
+            with self.Session() as session:
+                record = (
+                    session.query(CrawlHistoryJson)
+                    .filter(CrawlHistoryJson.crawl_id == crawl_id)
+                    .first()
+                )
+                if not record:
+                    return False
 
-            record.data = data
-            session.commit()
-            return True
+                record.data = data
+                session.commit()
+                return True
+        except Exception as E:
+            with open("debug.txt", "w") as fh:
+                fh.write(str(data))
+
+            raise E
 
     def remove_by_url(self, url: str):
         with self.Session() as session:
