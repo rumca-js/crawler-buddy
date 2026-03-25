@@ -7,6 +7,7 @@ from src.configuration import Configuration
 from src.crawler import Crawler
 from src.server_views import views
 from src.crawlercontaineralchemy import CrawlerContainerAlchemy
+from src.crawlercontainer import CrawlerContainer
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,8 +28,14 @@ def create_app():
     # Store components in app config
     app.config['configuration'] = configuration
     app.config['task_runner'] = task_runner
-    print("Creating container")
-    app.config['container'] = CrawlerContainerAlchemy()
+
+    if configuration.is_db_history_container():
+        print("Creating DB container")
+        app.config['container'] = CrawlerContainerAlchemy()
+    else:
+        print("Creating RAM container")
+        app.config['container'] = CrawlerContainer()
+
     print("Creating crawler")
     app.config['crawler_main'] = Crawler(container=app.config['container'])
     

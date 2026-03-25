@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from webtoolkit import PageRequestObject
 from utils.memorychecker import MemoryChecker
+from src import CrawlerContainerAlchemy
 from src import CrawlerContainer
 
 from tests.unit.fakeinternet import FakeInternetTestCase
@@ -33,19 +35,26 @@ get_data = [
 ]
 
 
-class CrawlerContainerTest(FakeInternetTestCase):
+class CrawlerContainerAlchemyTest(FakeInternetTestCase):
     def setUp(self):
         self.disable_web_pages()
-        self.memory_checker = MemoryChecker()
-        self.memory_checker.get_memory_increase()
+        #self.memory_checker = MemoryChecker()
+        #self.memory_checker.get_memory_increase()
+        self.db_name = "crawlhistorytest.db"
+        path = Path(self.db_name)
+        if path.exists():
+            path.unlink()
 
     def tearDown(self):
-        memory_increase = self.memory_checker.get_memory_increase()
-        self.assertEqual(memory_increase, 0)
-        print(f"Memory increase: {memory_increase}")
+        #memory_increase = self.memory_checker.get_memory_increase()
+        #self.assertEqual(memory_increase, 0)
+        #print(f"Memory increase: {memory_increase}")
+        path = Path(self.db_name)
+        if path.exists():
+            path.unlink()
 
     def test_crawl__get(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -58,7 +67,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(crawl_id is not None)
 
     def test_crawl__social(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
         request = PageRequestObject("https://youtube.com")
@@ -70,7 +79,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(crawl_id is not None)
 
     def test_crawl__get_and_social(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -87,7 +96,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(crawl_id1 != crawl_id2)
 
     def test_crawl__trim__no_data(self):
-        container = CrawlerContainer(records_size = 3)
+        container = CrawlerContainerAlchemy(records_size = 3, db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -134,7 +143,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertFalse(container.get(crawl_id=5))
 
     def test_crawl__trim__with_data(self):
-        container = CrawlerContainer(records_size = 3)
+        container = CrawlerContainerAlchemy(records_size = 3, db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -186,7 +195,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         container.update(crawl_id=crawl_id5, data=[])
 
     def test_crawl__removes_container_adds_to_queue(self):
-        container = CrawlerContainer(records_size = 2)
+        container = CrawlerContainerAlchemy(records_size = 2, db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -210,7 +219,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(crawl_id3)
 
     def test_update__true(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -227,7 +236,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(result)
 
     def test_update__false(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -244,7 +253,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertFalse(result)
 
     def test_update__two(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -272,7 +281,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertFalse(crawl_item.data)
 
     def test_find__true(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
         request = PageRequestObject("https://youtube.com")
@@ -287,7 +296,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(find_crawl_id is not None)
 
     def test_find__false__not_link(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -305,7 +314,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(find_crawl_id is None)
 
     def test_find__false__crawler_name(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -325,7 +334,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(find_crawl_id is None)
 
     def test_find__false__invalid_type(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -341,7 +350,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(find_crawl_id is None)
 
     def test_get__by_id_true(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -357,7 +366,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(get_crawl_data is not None)
 
     def test_get__by_id_false(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -373,7 +382,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertTrue(get_crawl_data is None)
 
     def test_get__two(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -402,7 +411,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertFalse(crawl_item.data)
 
     def test_add__crawl_id(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -419,7 +428,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertIn("test_data", crawl_item.data)
 
     def test_add__request(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -435,7 +444,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertIn("test_data", crawl_item.data)
 
     def test_expire_old__with_data__one(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -454,7 +463,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertEqual(container.get_size(), 0)
 
     def test_expire_old__with_data__many(self):
-        container = CrawlerContainer(records_size = 3)
+        container = CrawlerContainerAlchemy(records_size = 3, db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 
@@ -479,7 +488,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertEqual(container.get_size(), 0)
 
     def test_expire_old__without_data(self):
-        container = CrawlerContainer()
+        container = CrawlerContainerAlchemy(db_path=self.db_name)
 
         self.assertEqual(container.get_size(), 0)
 

@@ -213,13 +213,14 @@ class CrawlerContainer(object):
 
     def get(self, crawl_id=None, crawl_type=None, request=None) -> CrawlItem | None:
         """Get crawl item by ID if not expired."""
-        if not crawl_id and request:
-            crawl_id = self.find(crawl_type=crawl_type, request=request)
-
-        if crawl_id:
+        if crawl_id is not None:
             for item in reversed(self.container):
                 if item.crawl_id == crawl_id:
                     return item
+
+        if crawl_id is None and request:
+            crawl_id = self.find(crawl_type=crawl_type, request=request)
+
         return None
 
     def leave(self, crawl_id):
@@ -291,14 +292,15 @@ class CrawlerContainer(object):
         """
         one_found = False
         result = []
-        for crawl_item in reversed(self.container):
+        #for crawl_item in reversed(self.container):
+        for crawl_item in self.container:
             if crawl_item.is_response():
                 if not one_found:
                     self.close_item(crawl_item)
                     one_found = True
                     continue
             result.append(crawl_item)
-        result.reverse()
+        #result.reverse()
         self.container = result
 
     def close_item(self, crawl_item):

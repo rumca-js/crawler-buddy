@@ -11,6 +11,7 @@ from src.webtools import (
 from src.crawler import Crawler
 from src.entryrules import EntryRules
 from src.configuration import Configuration
+from src.crawlercontainer import CrawlerContainer
 from utils.memorychecker import MemoryChecker
 
 from tests.unit.fakeinternet import FakeInternetTestCase, MockRequestCounter
@@ -268,7 +269,8 @@ class CrawlerTest(FakeInternetTestCase):
         page_url.close()
 
     def test_get_all_properties(self):
-        crawler = Crawler()
+        container = CrawlerContainer()
+        crawler = Crawler(container=container)
 
         test_url = "https://linkedin.com"
 
@@ -285,7 +287,8 @@ class CrawlerTest(FakeInternetTestCase):
         self.assertEqual(crawler.container.get_size(), 1)
 
     def test_get_all_properties__from_history(self):
-        crawler = Crawler()
+        container = CrawlerContainer()
+        crawler = Crawler(container=container)
 
         test_url = "https://linkedin.com"
 

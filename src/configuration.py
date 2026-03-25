@@ -32,6 +32,7 @@ class Configuration(object):
         self.data["scripted_crawlers"] = True
         self.data["trace"] = False
         self.data["storage_dir"] = "storage"
+        self.data["history_container_db"] = False
 
         self.crawler_config = None
 
@@ -205,3 +206,6 @@ class Configuration(object):
 
         if remote_server_ip and remote_server_ip.strip() != "" and port:
             return f"http://{remote_server_ip}:{port}"
+
+    def is_db_history_container(self):
+        return self.data["history_container_db"]

@@ -38,9 +38,9 @@ class CrawlerContainerAlchemy:
     Maintains history of crawls in SQLite database.
     """
 
-    def __init__(self, db_path="crawlhistory.db"):
+    def __init__(self, records_size=200, db_path="crawlhistory.db"):
         db_exists = os.path.exists(db_path)
-        self.records_size = 200
+        self.records_size = records_size
 
         self.engine = create_engine(f"sqlite:///{db_path}", echo=False)
 
@@ -61,10 +61,22 @@ class CrawlerContainerAlchemy:
         if request:
             request["crawler_type"] = None
             request["handler_type"] = None
+
+            if request.get("crawler_name") is None:
+                request["crawler_name"] = ""
+            if request.get("handler_name") is None:
+                request["handler_name"] = ""
+
         return request
 
     def crawl(self, crawl_type, request: dict):
         request = self._request_to_json(request)
+
+        if self.get_size() >= self.records_size:
+            self.remove_one_history()
+
+        if self.get_size() >= self.records_size:
+            return
 
         if not isinstance(request, dict):
             raise TypeError("request must be a dict")
@@ -77,6 +89,21 @@ class CrawlerContainerAlchemy:
             session.commit()
 
             return record.crawl_id
+
+    def remove_one_history(self):
+        with self.Session() as session:
+            record = (
+                session.query(CrawlHistoryJson)
+                .filter(CrawlHistoryJson.data.is_not(None))
+                .order_by(CrawlHistoryJson.timestamp.asc())
+                .first()
+            )
+            if not record:
+                return False
+
+            session.delete(record)
+            session.commit()
+            return True
 
     def get_by_url(self, url: str):
         with self.Session() as session:
