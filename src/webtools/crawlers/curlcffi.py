@@ -124,6 +124,7 @@ class CurlCffiCrawler(CrawlerInterface):
            timeout=self.request.timeout_s,
            verify=self.request.ssl_verify,
            cookies=self.request.cookies,
+           # headers=headers,
            proxy=proxies,
            impersonate=impersonate,
         )

@@ -56,6 +56,17 @@ class EntryRules(object):
             if re.search(rule_url_pattern, url):
                 return True
 
+    def get_rules_for(self, link):
+        rules = []
+        for rule in self.entry_rules["entryrules"]:
+            if self.is_url_hit(rule, link) and rule["browser"]:
+                rules.append(rule)
+
+        return rules
+
+    def get_rules(self):
+        return self.entry_rules["entryrules"]
+
     def get_rule_urls(self, rule_url):
         """
         Returns URLs used by the rule

@@ -39,6 +39,15 @@
         {
             "id": 5,
             "enabled": true,
+            "rule_url": ".*raw\\.githubusercontent\\.com.*",
+            "rule_name": "githubusercontent",
+            "block": false,
+            "auto_tag": "",
+            "browser": "RequestsCrawler"
+        },
+        {
+            "id": 6,
+            "enabled": true,
             "rule_url": ".*youtube\\.com.*",
             "rule_name": "youtube",
             "block": false,

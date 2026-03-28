@@ -34,7 +34,7 @@ from src.views import (
     rssify,
     get_html,
 )
-from src import CrawlerContainer
+from src import CrawlerContainer, EntryRules
 from src.webtools import Url
 from utils.systemmonitoring import (
     get_hardware_info,
@@ -159,6 +159,7 @@ def index():
     command_links.append({"link" : "/info", "name":"Info", "description":"shows configuration"})
     command_links.append({"link" : "/memory", "name":"Memory", "description":"shows memory state"})
     command_links.append({"link" : "/system", "name":"System monitoring", "description":"system monitoring"})
+    command_links.append({"link" : "/entry-rules", "name":"Entry rules", "description":"shows entry rules"})
     command_links.append({"link" : "/about", "name":"About", "description":"About"})
 
     operational_links = []
@@ -1081,7 +1082,6 @@ def queue():
     size = current_app.config['crawler_main'].container.get_size()
 
     text = ""
-
     text += "<h1>Queue</h1>\n"
 
     items = current_app.config['crawler_main'].container.get_queued_items()
@@ -1092,6 +1092,31 @@ def queue():
         text += display_queue(items)
 
     return get_html(id=id, body=text, title="Queue")
+
+
+@views.route("/entry-rules")
+def entry_rules():
+    id = request.args.get("id")
+    configuration = current_app.config['configuration']
+
+    link = request.args.get("link")
+    entry_rules = EntryRules.get_object()
+
+    text = ""
+
+    if link:
+        rules = entry_rules.get_rules_for(link=link)
+        text += f"<h1>Link entry rules</h1>\n"
+        text += f"<div>Link: {link}</div>\n"
+        for rule in rules:
+            text += f"<div>{rule}</div>\n"
+
+    text += f"<h1>Entry rules</h1>\n"
+    for rule in entry_rules.get_rules():
+        text += f"<div>{rule}</div>\n"
+
+    return get_html(id=id, body=text, title="Entry rules")
+
 
 
 @views.route("/about", methods=["GET"])
