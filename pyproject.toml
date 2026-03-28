@@ -3,7 +3,7 @@
 
 [tool.poetry]
 name = "crawler-buddy"
-version = "6.1.37"
+version = "6.1.38"
 description = "Internet Crawler"
 authors = ["Iwan Grozny <renegat@renegat0x0.ddns.net>"]
 license = "GPL3"
@@ -12,7 +12,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 python-dateutil = "^2.8.2"
-yt-dlp = "^2025.10.22"
+yt-dlp = "^2026.3.17"
 beautifulsoup4 = "^4.13.5"
 lxml = "^5.3.0"
 brutefeedparser="^0.10.8"
@@ -25,7 +25,7 @@ sqlalchemy="*"
 
 # Enable and crawlers as needed
 
-curl-cffi="^0.13.0"
+curl-cffi="^0.14.0"
 
 # [Requests]
 requests = "^2.32.5"
@@ -48,8 +48,8 @@ stealth-requests = "^2.0.4"
 # [Httpx]
 httpx = "^0.28.1"
 
-httpmorph="^0.2.5"
-httpcloak="*"
+httpmorph="^0.2.8"
+httpcloak="1.6.1"
 # botasaurus = "*"
 #
 # [scrapy]
