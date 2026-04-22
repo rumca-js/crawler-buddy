@@ -12,7 +12,7 @@
         {
             "id": 2,
             "enabled": true,
-            "rule_url": ".*://x\\.com.*, .*://twitter\\.com.*, .*politico\\.com.*, .*geekwire\\.com.*, securityweek\\.com.*, .*phys\\.org.*, .*wsj\\.com.*",
+            "rule_url": ".*://x\\.com.*, .*://twitter\\.com.*, .*politico\\.com.*, .*geekwire\\.com.*, securityweek\\.com.*, .*phys\\.org.*, .*wsj\\.com.*, .*fb.com/feed.*",
             "rule_name": "media",
             "block": false,
             "auto_tag": "",
