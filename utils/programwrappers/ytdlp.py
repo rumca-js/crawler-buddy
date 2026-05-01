@@ -26,6 +26,8 @@ class YTDLP(YouTubeDownloader):
 
         cmds = [
             "yt-dlp",
+            #"--js-runtimes", "node",  # work for rspberry pi that does not work
+            "--extractor-args", "youtube:player_client=android",  # fix for rapberry pi that works
             "-o",
             file_name,
             "-x",
@@ -51,7 +53,12 @@ class YTDLP(YouTubeDownloader):
         return proc
 
     def download_video(self, file_name):
-        cmds = ["yt-dlp", "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4", self._url]
+        cmds = ["yt-dlp",
+                #"--js-runtimes", "node",  # work for rspberry pi that does not work
+                "--extractor-args", "youtube:player_client=android",  # fix for rapberry pi that works
+                "-f",
+                "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4",
+                self._url]
 
         proc = subprocess.run(
             cmds, cwd=self._cwd, capture_output=True, timeout=self.timeout_s
@@ -66,8 +73,9 @@ class YTDLP(YouTubeDownloader):
         return proc
 
     def download_data(self, path=None):
-        # cmds = ["yt-dlp", "--dump-json", "--max-downloads", "1", str(self._url)]
         cmds = ["yt-dlp",
+                #"--js-runtimes", "node",  # work for rspberry pi that does not work
+                "--extractor-args", "youtube:player_client=android",  # fix for rapberry pi that works
                 "--dump-json",
                 #"--retries", "3",
                 #"-t", "sleep",
@@ -141,7 +149,11 @@ class YTDLP(YouTubeDownloader):
         """
 
         p = subprocess.run(
-            ["yt-dlp", "-j", "--flat-playlist", self._url],
+            ["yt-dlp",
+             #"--js-runtimes", "node",  # work for rspberry pi that does not work
+             "--extractor-args", "youtube:player_client=android",  # fix for rapberry pi that works
+             "-j",
+             "--flat-playlist", self._url],
             capture_output=True,
             timeout=self.timeout_s,
         )

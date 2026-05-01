@@ -25,7 +25,7 @@ install:
 	poetry run playwright install
 
 installsysdeps:
-	apt -y install wget id3v2 chromium-chromedriver xvfb
+	apt -y install wget id3v2 chromium-chromedriver xvfb nodejs npm
 
 server:
 	rm -rf storage
