@@ -46,7 +46,7 @@ RUN poetry run playwright install
 # Copy Application
 COPY . /app
 
-RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg id3v2 wget xvfb gnupg ca-certificates
+RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --no-install-recommends ffmpeg id3v2 wget xvfb gnupg ca-certificates nodejs npm
 
 
 ENV CHROMEDRIVER_DIR=/usr/bin
