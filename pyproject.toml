@@ -3,7 +3,7 @@
 
 [tool.poetry]
 name = "crawler-buddy"
-version = "6.1.44"
+version = "6.1.45"
 description = "Internet Crawler"
 authors = ["Iwan Grozny <renegat@renegat0x0.ddns.net>"]
 license = "GPL3"
@@ -20,7 +20,7 @@ pytz = "^2024.2"
 psutil="*"
 flask="^3.1.3"
 url-cleaner="*"
-webtoolkit="^0.1.50"
+webtoolkit="^0.1.52"
 sqlalchemy="^2.0.49"
 
 # Enable and crawlers as needed
@@ -28,10 +28,10 @@ sqlalchemy="^2.0.49"
 curl-cffi="^0.15.0"
 
 # [Requests]
-requests = "^2.32.5"
+requests = "^2.34.2"
 
 # [Selenium]
-selenium="^4.43.0"
+selenium="^4.44.0"
 selenium-wire="*"
 # chardet = "^5.2.0" # does not work with some RSS sources
 # psycopg2 = "*"
@@ -40,7 +40,7 @@ undetected-chromedriver = "^3.5.5"
 
 # [Crawlee]
 crawlee="^1.6.2"
-playwright="^1.58.0"
+playwright="^1.60.0"
 
 # [Stealth requests]
 stealth-requests = "^2.0.6"
