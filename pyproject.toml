@@ -39,7 +39,7 @@ pyvirtualdisplay = "^3.0"
 undetected-chromedriver = "^3.5.5"
 
 # [Crawlee]
-crawlee="^1.6.2"
+crawlee="^1.7.2"
 playwright="^1.60.0"
 
 # [Stealth requests]
@@ -49,7 +49,7 @@ stealth-requests = "^2.0.6"
 httpx = "^0.28.1"
 
 httpmorph="^0.2.8"
-httpcloak="1.6.1"
+httpcloak="1.6.7"
 # botasaurus = "*"
 #
 # [scrapy]
