@@ -43,7 +43,7 @@ if __name__ == "__main__":
         webtools.WebConfig.kill_chrom_processes()
         print("Killing chrome processes DONE")
         
-    if p.args.kill_processes and webtools.WebConfig.kill_xvfb_processes() > 0:
+    if p.args.kill_processes and webtools.WebConfig.count_xvfb_processes() > 0:
         print("Killing xvfb processes")
         webtools.WebConfig.kill_xvfb_processes()
         print("Killing xvfb processes DONE")
