@@ -339,7 +339,12 @@ def memory():
         text += f"<div>{key} {value}</div>"
 
     len_objects = len(gc.get_objects())
-    text += f"<div>Python objects: {len_objects}"
+    text += f"<div>Python GC objects: {len_objects}"
+
+    snapshot = tracemalloc.take_snapshot()
+
+    total_bytes = sum(stat.size for stat in snapshot.statistics('traceback'))
+    text += f"<div>Total memory in snapshot: {total_bytes / 10**6:.2f} MB</div>"
 
     if current_app.config['configuration'].is_trace():
         text += "<h2>Trace summary</h2>"
@@ -348,7 +353,6 @@ def memory():
 
     text += "<h2>Tracemalloc snapshot use</h2>"
 
-    snapshot = tracemalloc.take_snapshot()
     top = snapshot.statistics('lineno')
     for stat in top[:20]:
         text += f"<div>{stat}</div>"

@@ -283,11 +283,11 @@ class Crawler(object):
             except Exception as E:
                 WebLogger.exc(E)
 
-            time.sleep(1)
-
             if datetime.now() - start_time > self.get_timeout_timedelta():
                 WebLogger.error(f"URL:{crawl_url}: Timeout on waiting for response")
                 return
+
+            time.sleep(10)
 
     def set_multi_process(self):
         self.multi_process = True

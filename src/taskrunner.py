@@ -20,7 +20,7 @@ class TaskRunner(object):
     def __init__(self,
                  container,
                  max_workers=5,
-                 poll_interval=0.1,
+                 poll_interval=1,
                  no_executor=False,
                  memory_threshold=70,
                  verbose=True):
