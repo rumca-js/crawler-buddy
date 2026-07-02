@@ -38,9 +38,12 @@ class CrawlerContainerAlchemy:
     Maintains history of crawls in SQLite database.
     """
 
-    def __init__(self, records_size=200, db_path="crawlhistory.db"):
+    def __init__(self, time_cache_m=10, records_size=500, db_path="crawlhistory.db"):
         db_exists = os.path.exists(db_path)
+
         self.records_size = records_size
+        self.no_history_crawls = 0
+        self.time_cache_m = time_cache_m
 
         self.engine = create_engine(f"sqlite:///{db_path}", echo=False)
 
@@ -72,6 +75,9 @@ class CrawlerContainerAlchemy:
     def crawl(self, crawl_type, request: dict):
         request = self._request_to_json(request)
 
+        self.expire_old()
+        self.trim_size()
+
         if self.get_size() >= self.records_size:
             self.remove_one_history()
 
@@ -89,6 +95,37 @@ class CrawlerContainerAlchemy:
             session.commit()
 
             return record.crawl_id
+
+    def add(self, crawl_type=None, request=None, data=None, crawl_id=None):
+        item_updated = False
+        if crawl_id:
+            crawl_item = self.get(crawl_id=crawl_id)
+            if crawl_item:
+                self.update(crawl_id, data)
+                item_updated = True
+
+        crawl_item = self.get(request=request)
+        if crawl_item:
+            self.update(crawl_item.crawl_id, data)
+            item_updated = True
+
+        if not item_updated:
+            with self.lock:
+                self.crawl_index += 1
+                crawl_id = self.crawl_index
+
+                with self.Session() as session:
+                    record = CrawlHistoryJson(crawl_id=crawl_id, crawl_type=crawl_type, request=request, data=data)
+                    session.add(record)
+                    session.commit()
+
+                    return record.crawl_id
+
+        self.expire_old()
+        self.trim_size()
+
+        if crawl_item:
+            return crawl_item.crawl_id
 
     def remove_one_history(self):
         with self.Session() as session:
@@ -132,13 +169,13 @@ class CrawlerContainerAlchemy:
                 return record
 
             # 2: (url AND crawler_name AND handler_name)
-            if request:
+            if request is not None:
                 conditions.append( and_(
                     CrawlHistoryJson.request["url"].as_string() == request["url"],
                     CrawlHistoryJson.request["crawler_name"].as_string() == request["crawler_name"],
                     CrawlHistoryJson.request["handler_name"].as_string() == request["handler_name"]))
 
-            if not conditions:
+            if conditions is []:
                 raise ValueError( "Provide crawl_id or request with url, crawler_name, and handler" )
 
             if crawl_type:
@@ -147,8 +184,8 @@ class CrawlerContainerAlchemy:
             record = query.filter(and_(*conditions)).first()
             return record
 
-    def update_by_url(self, url: str, new_json: dict):
-        if not isinstance(new_json, dict):
+    def update_by_url(self, url: str, new_json: dict, timestamp=None):
+        if new_json and not isinstance(new_json, dict):
             raise TypeError("new_json must be a dict")
 
         with self.Session() as session:
@@ -161,10 +198,14 @@ class CrawlerContainerAlchemy:
                 return False
 
             record.data = new_json
+            if timestamp:
+                record.timestamp = timestamp
+            else:
+                record.timestamp = datetime.now()
             session.commit()
             return True
 
-    def update(self, crawl_id, data: dict):
+    def update(self, crawl_id, data: dict, timestamp=None):
         #if not isinstance(data, dict):
         #    raise TypeError("new_json must be a dict")
 
@@ -179,6 +220,12 @@ class CrawlerContainerAlchemy:
                     return False
 
                 record.data = data
+
+                if timestamp:
+                    record.timestamp = timestamp
+                else:
+                    record.timestamp = datetime.now()
+
                 session.commit()
                 return True
         except Exception as E:
@@ -222,9 +269,12 @@ class CrawlerContainerAlchemy:
 
     def trim_size(self):
         with self.Session() as session:
-            # Subquery: get IDs of the newest 200 records
+            cutoff = datetime.now() - timedelta(seconds=self.time_cache_m * 60)
+
+            # Subquery: get IDs of the newest 200 records (or do not have response)
             subquery = (
                 session.query(CrawlHistoryJson.crawl_id)
+                .filter(or_(CrawlHistoryJson.timestamp >= cutoff, CrawlHistoryJson.data.is_(None)))
                 .order_by(CrawlHistoryJson.timestamp.desc())
                 .limit(self.records_size)
                 .subquery()
@@ -239,6 +289,20 @@ class CrawlerContainerAlchemy:
 
             session.commit()
             return deleted
+
+    def expire_old(self):
+        """
+        Remove entries older than the time_cache window.
+        Do not remove things that are in queue
+        """
+        cutoff = datetime.now() - timedelta(seconds=self.time_cache_m * 60)
+
+        with self.Session() as session:
+            rows = session.query(CrawlHistoryJson).filter(and_(CrawlHistoryJson.timestamp < cutoff, CrawlHistoryJson.data.is_not(None))).order_by(CrawlHistoryJson.timestamp.asc())
+
+            for row in rows:
+                session.delete(row)
+                session.commit()
 
     def get_size(self):
         """returns count of the table"""
@@ -268,3 +332,6 @@ class CrawlerContainerAlchemy:
 
     def get_no_crawls(self):
         return self.get_size()
+
+    def close_item(self, crawl_item):
+        self.no_history_crawls += 1

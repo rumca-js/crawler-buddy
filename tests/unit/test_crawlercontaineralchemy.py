@@ -158,14 +158,14 @@ class CrawlerContainerAlchemyTest(FakeInternetTestCase):
         self.assertEqual(container.get_size(), 1)
         self.assertTrue(crawl_id1)
         self.assertTrue(container.get(crawl_id=1))
-        container.update(crawl_id=crawl_id1, data=[])
+        container.update(crawl_id=crawl_id1, data=[{"test" : "someting"}])
 
         crawl_id2 = container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request2)
         self.assertEqual(container.get_size(), 2)
         self.assertTrue(crawl_id2)
         self.assertTrue(container.get(crawl_id=1))
         self.assertTrue(container.get(crawl_id=2))
-        container.update(crawl_id=crawl_id2, data=[])
+        container.update(crawl_id=crawl_id2, data=[{"test" : "someting"}])
 
         crawl_id3 = container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request3)
         self.assertEqual(container.get_size(), 3)
@@ -173,7 +173,7 @@ class CrawlerContainerAlchemyTest(FakeInternetTestCase):
         self.assertTrue(container.get(crawl_id=1))
         self.assertTrue(container.get(crawl_id=2))
         self.assertTrue(container.get(crawl_id=3))
-        container.update(crawl_id=crawl_id3, data=[])
+        container.update(crawl_id=crawl_id3, data=[{"test" : "someting"}])
 
         crawl_id4 = container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request4)
         self.assertEqual(container.get_size(), 3)
@@ -182,7 +182,7 @@ class CrawlerContainerAlchemyTest(FakeInternetTestCase):
         self.assertTrue(container.get(crawl_id=2))
         self.assertTrue(container.get(crawl_id=3))
         self.assertTrue(container.get(crawl_id=4))
-        container.update(crawl_id=crawl_id4, data=[])
+        container.update(crawl_id=crawl_id4, data=[{"test" : "someting"}])
 
         crawl_id5 = container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request5)
         self.assertEqual(container.get_size(), 3)
@@ -192,7 +192,7 @@ class CrawlerContainerAlchemyTest(FakeInternetTestCase):
         self.assertTrue(container.get(crawl_id=3))
         self.assertTrue(container.get(crawl_id=4))
         self.assertTrue(container.get(crawl_id=5))
-        container.update(crawl_id=crawl_id5, data=[])
+        container.update(crawl_id=crawl_id5, data=[{"test" : "someting"}])
 
     def test_crawl__removes_container_adds_to_queue(self):
         container = CrawlerContainerAlchemy(records_size = 2, db_path=self.db_name)
@@ -418,12 +418,14 @@ class CrawlerContainerAlchemyTest(FakeInternetTestCase):
         request = PageRequestObject("https://youtube.com")
 
         crawl_id = container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
+        self.assertTrue(crawl_id is not None)
 
         data = {"test_data" : "OK"}
 
         container.add(crawl_id=crawl_id, data=data)
 
         crawl_item = container.get(crawl_id=crawl_id)
+        self.assertTrue(crawl_item)
         self.assertTrue(crawl_item.data)
         self.assertIn("test_data", crawl_item.data)
 
@@ -440,6 +442,7 @@ class CrawlerContainerAlchemyTest(FakeInternetTestCase):
         container.add(request=request, data=data)
 
         crawl_item = container.get(crawl_id=crawl_id)
+        self.assertTrue(crawl_item)
         self.assertTrue(crawl_item.data)
         self.assertIn("test_data", crawl_item.data)
 
@@ -453,9 +456,8 @@ class CrawlerContainerAlchemyTest(FakeInternetTestCase):
 
         self.assertEqual(container.get_size(), 1)
 
-        for item in container.container:
-            item.timestamp = datetime.now() - timedelta(minutes=10000)
-            item.data = []  # we have the data
+        container.update_by_url("https://youtube.com", new_json={}, timestamp = datetime.now() - timedelta(minutes=10000)
+)
 
         # call tested function
         container.expire_old()
@@ -478,9 +480,11 @@ class CrawlerContainerAlchemyTest(FakeInternetTestCase):
 
         self.assertEqual(container.get_size(), 3)
 
-        for item in container.container:
-            item.timestamp = datetime.now() - timedelta(minutes=10000)
-            item.data = []  # we have the data
+        timestamp = datetime.now() - timedelta(minutes=10000)
+        container.update_by_url("https://youtube.com/1", new_json={}, timestamp = timestamp)
+        container.update_by_url("https://youtube.com/2", new_json={}, timestamp = timestamp)
+        container.update_by_url("https://youtube.com/3", new_json={}, timestamp = timestamp)
+        container.update_by_url("https://youtube.com/4", new_json={}, timestamp = timestamp)
 
         # call tested function
         container.expire_old()
@@ -497,9 +501,9 @@ class CrawlerContainerAlchemyTest(FakeInternetTestCase):
 
         self.assertEqual(container.get_size(), 1)
 
-        for item in container.container:
-            item.timestamp = datetime.now() - timedelta(minutes=10000)
-            item.data = None  # we don't have the data
+        timestamp = datetime.now() - timedelta(minutes=10000)
+        status = container.update_by_url("https://youtube.com", new_json=None, timestamp = timestamp)
+        self.assertTrue(status)
 
         # call tested function
         container.expire_old()

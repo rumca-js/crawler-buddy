@@ -21,7 +21,7 @@ class CrawlItem(object):
         data = "No"
         if self.data is not None:
             data = "Yes"
-        return f"{self.crawl_id} {self.crawl_type} {self.timestamp} {self.crawler_name} {self.url} Data:{data}"
+        return f"{self.crawl_id} {self.crawl_type} {self.timestamp} {self.request} Data:{data}"
 
     def get_request(self):
         return json_to_request(self.request)
@@ -144,9 +144,12 @@ class CrawlerContainer(object):
         if data is None:
             return
 
-        for item in reversed(self.container):
+        for key, item in reversed(list(enumerate(self.container))):
             if item.crawl_id == crawl_id:
-                item.data = data
+                self.container[key].data = data
+                self.container[key].timestamp = datetime.now()
+                #item.data = data
+                #item.timestamp = datetime.now()
                 return True
         return False
 

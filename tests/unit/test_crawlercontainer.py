@@ -425,12 +425,18 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         request = PageRequestObject("https://youtube.com")
         crawl_id = container.crawl(crawl_type=CrawlerContainer.CRAWL_TYPE_GET, request=request)
+        self.assertTrue(crawl_id is not None)
 
         data = {"test_data" : "OK"}
 
-        container.add(request=request, data=data)
+        add_id = container.add(request=request, data=data)
+        self.assertTrue(add_id is not None)
+
+        for element in container.container:
+            print(element)
 
         crawl_item = container.get(crawl_id=crawl_id)
+        self.assertTrue(crawl_item)
         self.assertTrue(crawl_item.data)
         self.assertIn("test_data", crawl_item.data)
 

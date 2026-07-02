@@ -16,6 +16,7 @@
     "storage_dir" : "storage",
     "history_container_db" : false,
     "default_browser" : "CurlCffiCrawler",
+    "time_cache_minutes" : 10,
     "allowed_ids" : [
     ]
 }

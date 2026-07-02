@@ -33,6 +33,7 @@ class Configuration(object):
         self.data["trace"] = False
         self.data["storage_dir"] = "storage"
         self.data["history_container_db"] = False
+        self.data["time_cache_minutes"] = 10
 
         self.crawler_config = None
 

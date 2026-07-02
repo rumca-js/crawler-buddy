@@ -9,22 +9,6 @@ class CommandLineParser(object):
         self.parser = argparse.ArgumentParser(description="Remote server options")
 
         self.parser.add_argument(
-            "-l",
-            "--history-length",
-            default=200,
-            type=int,
-            help="Length of history",
-        )
-
-        self.parser.add_argument(
-            "-t",
-            "--time-cache-minutes",
-            default=10,
-            type=int,
-            help="Time cache in minutes",
-        )
-
-        self.parser.add_argument(
             "-k",
             "--kill-processes",
             default=False,

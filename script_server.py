@@ -23,10 +23,12 @@ if __name__ == "__main__":
     p = CommandLineParser()
     p.parse()
 
-    history_length = p.args.history_length
+    history_length = app.config['configuration'].get("max_history_records")
+    time_cache_minutes = app.config['configuration'].get("time_cache_minutes")
+
     if history_length:
         app.config['crawler_main'].container.set_records_size(history_length)
-    if p.args.time_cache_minutes:
+    if time_cache_minutes:
         app.config['crawler_main'].container.set_time_cache(p.args.time_cache_minutes)
 
     port = app.config['configuration'].get("port")
