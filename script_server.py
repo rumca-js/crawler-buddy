@@ -29,7 +29,7 @@ if __name__ == "__main__":
     if history_length:
         app.config['crawler_main'].container.set_records_size(history_length)
     if time_cache_minutes:
-        app.config['crawler_main'].container.set_time_cache(p.args.time_cache_minutes)
+        app.config['crawler_main'].container.set_time_cache(time_cache_minutes)
 
     port = app.config['configuration'].get("port")
     host = app.config['configuration'].get("host")
