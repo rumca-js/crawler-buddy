@@ -324,7 +324,7 @@ def info():
     else:
         text += "<div>Chromedriver at {} does not exist".format(chromedriver_path)
 
-    return get_html(id=id, body=text, title="Configuration")
+    return get_html(id=id, body=text, title="Info")
 
 
 @views.route("/memory")

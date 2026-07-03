@@ -221,10 +221,18 @@ class CrawlerContainerTest(FakeInternetTestCase):
         self.assertEqual(container.get_size(), 1)
         self.assertTrue(crawl_id is not None)
 
+        time_before_function_call = datetime.now()
+
         # call tested function
         result = container.update(crawl_id=crawl_id, data=get_data)
+
         self.assertEqual(container.get_size(), 1)
         self.assertTrue(result)
+
+        element = container.get(request=request)
+        self.assertTrue(element)
+        self.assertEqual(element.data, get_data)
+        self.assertTrue(element.timestamp > time_before_function_call)
 
     def test_update__false(self):
         container = CrawlerContainer()
@@ -412,6 +420,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         data = {"test_data" : "OK"}
 
+        # call tested function
         container.add(crawl_id=crawl_id, data=data)
 
         crawl_item = container.get(crawl_id=crawl_id)
@@ -429,6 +438,7 @@ class CrawlerContainerTest(FakeInternetTestCase):
 
         data = {"test_data" : "OK"}
 
+        # call tested function
         add_id = container.add(request=request, data=data)
         self.assertTrue(add_id is not None)
 

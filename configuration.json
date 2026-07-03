@@ -3,7 +3,7 @@
     "logging_level" : 10,
     "ssl_verify" : true,
     "max_number_of_workers" : 5,
-    "max_history_records" : 200,
+    "max_history_records" : 400,
     "use_canonical_links" : true,
     "prefer_non_www" : false,
     "debug" : true,

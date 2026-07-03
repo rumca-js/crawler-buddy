@@ -1,9 +1,12 @@
+import threading
+import os
+
 from sqlalchemy import create_engine, Column, Integer, DateTime, func, and_, or_, event, select
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.types import JSON
-import os
+
+from webtoolkit import request_to_json, json_to_request, PageRequestObject
 from .crawlercontainer import *
-from webtoolkit import request_to_json, json_to_request
 
 
 Base = declarative_base()
@@ -39,6 +42,9 @@ class CrawlerContainerAlchemy:
     """
 
     def __init__(self, time_cache_m=10, records_size=500, db_path="crawlhistory.db"):
+        self.lock = threading.Lock()           # protects running_ids
+        self.crawl_index = 0
+
         db_exists = os.path.exists(db_path)
 
         self.records_size = records_size
@@ -60,17 +66,21 @@ class CrawlerContainerAlchemy:
         Base.metadata.create_all(self.engine)
 
     def _request_to_json(self, request):
-        request = request_to_json(request)
-        if request:
-            request["crawler_type"] = None
-            request["handler_type"] = None
+        request_new = request_to_json(request)
+        if request_new:
+            #request_new["crawler_type"] = None
+            #request_new["handler_type"] = None
 
-            if request.get("crawler_name") is None:
-                request["crawler_name"] = ""
-            if request.get("handler_name") is None:
-                request["handler_name"] = ""
+            if request.crawler_name is None:
+                request_new["crawler_name"] = ""
+            else:
+                request_new["crawler_name"] = request.crawler_name
+            if request.handler_name is None:
+                request_new["handler_name"] = ""
+            else:
+                request_new["handler_name"] = request.handler_name
 
-        return request
+        return request_new
 
     def crawl(self, crawl_type, request: dict):
         request = self._request_to_json(request)
@@ -97,6 +107,9 @@ class CrawlerContainerAlchemy:
             return record.crawl_id
 
     def add(self, crawl_type=None, request=None, data=None, crawl_id=None):
+        if request and isinstance(request, PageRequestObject):
+            request = self._request_to_json(request)
+
         item_updated = False
         if crawl_id:
             crawl_item = self.get(crawl_id=crawl_id)
@@ -104,10 +117,11 @@ class CrawlerContainerAlchemy:
                 self.update(crawl_id, data)
                 item_updated = True
 
-        crawl_item = self.get(request=request)
-        if crawl_item:
-            self.update(crawl_item.crawl_id, data)
-            item_updated = True
+        if not item_updated:
+            crawl_item = self.get(request=request)
+            if crawl_item:
+                self.update(crawl_item.crawl_id, data)
+                item_updated = True
 
         if not item_updated:
             with self.lock:
@@ -155,7 +169,8 @@ class CrawlerContainerAlchemy:
         return record.crawl_id if record else None
 
     def get(self, crawl_id=None, crawl_type=None, request=None):
-        request = self._request_to_json(request)
+        if request and isinstance(request, PageRequestObject):
+            request = self._request_to_json(request)
 
         with self.Session() as session:
             query = session.query(CrawlHistoryJson)
