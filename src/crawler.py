@@ -241,7 +241,8 @@ class Crawler(object):
         force = server_request.args.get("force")
 
         request = self.get_request_data(server_request)
-        request.client_id = str(server_request.remote_addr)
+        if not request.client_id:
+            request.client_id = str(server_request.remote_addr)
 
         result = self.get_crawl_with_method(request=request, crawl_type=CrawlerContainer.CRAWL_TYPE_SOCIALDATA, force=force)
 
@@ -252,7 +253,8 @@ class Crawler(object):
         force = server_request.args.get("force")
 
         request = self.get_request_data(server_request)
-        request.client_id = str(server_request.remote_addr)
+        if not request.client_id:
+            request.client_id = str(server_request.remote_addr)
 
         result = self.get_crawl_with_method(request=request, crawl_type=CrawlerContainer.CRAWL_TYPE_GET, force=force)
         return result

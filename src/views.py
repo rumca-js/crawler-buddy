@@ -111,7 +111,16 @@ def get_entry_html(id, crawl_data):
     crawl_id = crawl_data.crawl_id
     all_properties = crawl_data.data
 
+    crawler_name = ""
+    handler_name = ""
+    client_id = ""
+
     request = crawl_data.get_request()
+    if request:
+        crawler_name = request.crawler_name
+        handler_name = request.handler_name
+        client_id = request.client_id
+
     url = request.url
 
     if not id:
@@ -121,7 +130,7 @@ def get_entry_html(id, crawl_data):
 
     timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
-    text += f"""<a href="{find_link}"><h2 style="margin-bottom:0px">[{timestamp_str}] {url}</h2>
+    text += f"""<a href="{find_link}"><h2 style="margin-bottom:0px">[{timestamp_str}] {url} from {client_id}</h2>
       </a>
       <a href="{remove_link}">Remove</a>\n
       """
@@ -132,8 +141,6 @@ def get_entry_html(id, crawl_data):
     charset = ""
     content_length = ""
     content_type = ""
-    crawler_name = ""
-    handler_name = ""
     crawl_type_str = CrawlerContainer.crawl_type_to_str(crawl_type)
 
     if all_properties:
@@ -147,10 +154,6 @@ def get_entry_html(id, crawl_data):
         charset = response.get_encoding()
         content_length = response.get_content_length()
         content_type = response.get_content_type()
-
-    if request:
-        crawler_name = request.crawler_name
-        handler_name = request.handler_name
 
     color = ""
     try:
