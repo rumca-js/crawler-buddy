@@ -116,6 +116,10 @@ class YouTubeVideoHandlerJson(YouTubeVideoHandler):
         """
         Returns author
         """
+        author = super().get_author()
+        if author is not None:
+            return author
+
         if self.yt_ob:
             return self.get_channel_name()
 
@@ -123,6 +127,9 @@ class YouTubeVideoHandlerJson(YouTubeVideoHandler):
         """
         Returns album
         """
+        album = super().get_album()
+        if album is not None:
+            return album
         return None
 
     def get_upload_date(self):
@@ -153,6 +160,10 @@ class YouTubeVideoHandlerJson(YouTubeVideoHandler):
         """
         Returns channel name
         """
+        channel_name = super().get_channel_name()
+        if channel_name is not None:
+            return channel_name
+
         if self.yt_ob:
             return self.yt_ob.get_channel_name()
 
@@ -160,6 +171,10 @@ class YouTubeVideoHandlerJson(YouTubeVideoHandler):
         """
         Returns channel url
         """
+        channel_url = super().get_channel_url()
+        if channel_url is not None:
+            return channel_url
+
         if self.yt_ob:
             return self.yt_ob.get_channel_url()
 
