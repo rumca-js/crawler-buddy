@@ -57,6 +57,7 @@ class Configuration(object):
             wh = line.find("version")
             if wh >= 0:
                 self.__version__ = line[11:-1]
+                break
 
     def is_set(self, name) -> bool:
         """

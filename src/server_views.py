@@ -180,21 +180,21 @@ def index():
     mgmt_links.append({"link" : "/debug", "name":"Debug", "description":"debug information"})
 
     api_links = []
-    api_links.append({"link" : "/getj", "name":"Get", "description":"Crawl data: page text, status"})
-    api_links.append({"link" : "/socialj", "name":"Social data", "description":"Social data, likes, dislikes"})
-    api_links.append({"link" : "/linkj", "name":"Links", "description":"link information"})
-    api_links.append({"link" : "/archivesj", "name":"Archive links", "description":"links to archives, digital libraries"})
-    api_links.append({"link" : "/feedsj", "name":"Feeds", "description":"feeds information"})
-    api_links.append({"link" : "/pingj", "name":"Ping", "description":"Ping response"})
-    api_links.append({"link" : "/scanlinksj", "name":"Scan links", "description":"links scan"})
-    api_links.append({"link" : "/scandomainsj", "name":"Scan domains", "description":"Links domain scan"})
+    api_links.append({"link" : "/api/get", "name":"Get", "description":"Crawl data: page text, status"})
+    api_links.append({"link" : "/api/social", "name":"Social data", "description":"Social data, likes, dislikes"})
+    api_links.append({"link" : "/api/link", "name":"Links", "description":"link information"})
+    api_links.append({"link" : "/api/archives", "name":"Archive links", "description":"links to archives, digital libraries"})
+    api_links.append({"link" : "/api/feeds", "name":"Feeds", "description":"feeds information"})
+    api_links.append({"link" : "/api/ping", "name":"Ping", "description":"Ping response"})
+    api_links.append({"link" : "/api/scanlinks", "name":"Scan links", "description":"links scan"})
+    api_links.append({"link" : "/api/scandomains", "name":"Scan domains", "description":"Links domain scan"})
     api_links.append({"link" : "/contentsr", "name":"Contents response", "description":"returns page contents, as if read by a browser"})
     api_links.append({"link" : "/rssifyr", "name":"RSSifyr", "description":"returns information, readable by feed clients"})
-    api_links.append({"link" : "/findj", "name":"Find in history", "description":"returns information about history entry"})
-    api_links.append({"link" : "/historyj", "name":"History", "description":"History"})
-    api_links.append({"link" : "/clearj", "name":"Clear history", "description":"remove all history entries"})
-    api_links.append({"link" : "/removej", "name":"Remove history", "description":"remove one history entry"})
-    api_links.append({"link" : "/infoj", "name":"Info", "description":"Crawling capabilities information"})
+    api_links.append({"link" : "/api/find", "name":"Find in history", "description":"returns information about history entry"})
+    api_links.append({"link" : "/api/history", "name":"History", "description":"History"})
+    api_links.append({"link" : "/api/clear", "name":"Clear history", "description":"remove all history entries"})
+    api_links.append({"link" : "/api/remove", "name":"Remove history", "description":"remove one history entry"})
+    api_links.append({"link" : "/api/info", "name":"Info", "description":"Crawling capabilities information"})
 
     # fmt: on
 
@@ -360,8 +360,8 @@ def memory():
     return get_html(id=id, body=text, title="Memory")
 
 
-@views.route("/infoj")
-def infoj():
+@views.route("/api/info")
+def api_info():
     id = request.args.get("id")
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -411,8 +411,8 @@ def history():
     return get_html(id=id, body=text, title="History")
 
 
-@views.route("/historyj")
-def historyj():
+@views.route("/api/history")
+def api_history():
     id = request.args.get("id")
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -548,7 +548,7 @@ def find():
     page_request = get_requests(request)
 
     if not page_request:
-        form_html = get_crawling_form("Find", "/findj", id)
+        form_html = get_crawling_form("Find", "/api/find", id)
 
         return get_html(id=id, body=form_html, title="Find")
     else:
@@ -570,8 +570,8 @@ def find():
         return get_html(id=id, body=entry_text, title=url)
 
 
-@views.route("/findj", methods=["GET"])
-def findj():
+@views.route("/api/find", methods=["GET"])
+def api_find():
     id = request.args.get("id")
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -606,8 +606,8 @@ def findj():
     return jsonify(all_properties)
 
 
-@views.route("/removej", methods=["GET"])
-def removej():
+@views.route("/api/remove", methods=["GET"])
+def api_remove():
     id = request.args.get("id")
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -623,8 +623,8 @@ def removej():
     return jsonify({"success": False, "error": "Could not remove"}), 400
 
 
-@views.route("/clearj", methods=["GET"])
-def clearj():
+@views.route("/api/clear", methods=["GET"])
+def api_clear():
     id = request.args.get("id")
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -639,13 +639,13 @@ def get():
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-    form_text = get_crawling_form("Get JSON information", "/getj", id)
+    form_text = get_crawling_form("Get JSON information", "/api/get", id)
 
     return get_html(id=id, body=form_text, title="Get")
 
 
-@views.route("/getj", methods=["GET"])
-def getj():
+@views.route("/api/get", methods=["GET"])
+def api_get():
     id = request.args.get("id")
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -743,13 +743,13 @@ def scanlinks():
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-    form_text = get_crawling_form("Scan for links", "/scanlinksj", id)
+    form_text = get_crawling_form("Scan for links", "/api/scanlinks", id)
 
     return get_html(id=id, body=form_text, title="Get")
 
 
-@views.route("/scanlinksj", methods=["GET"])
-def scanlinksj():
+@views.route("/api/scanlinks", methods=["GET"])
+def api_scanlinks():
     id = request.args.get("id")
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -781,13 +781,13 @@ def scandomains():
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
 
-    form_text = get_crawling_form("Scan for domains", "/scandomainsj", id)
+    form_text = get_crawling_form("Scan for domains", "/api/scandomains", id)
 
     return get_html(id=id, body=form_text, title="Get")
 
 
-@views.route("/scandomainsj", methods=["GET"])
-def scandomainsj():
+@views.route("/api/scandomains", methods=["GET"])
+def api_scandomains():
     id = request.args.get("id")
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -838,7 +838,7 @@ def social():
     url = request.args.get("url")
 
     if not url:
-        form_html = get_link_form("Find social information", "socialj", id)
+        form_html = get_link_form("Find social information", "api/social", id)
         return get_html(id=id, body=form_html, title="Social")
 
     page_url = webtools.Url(url)
@@ -851,8 +851,8 @@ def social():
     return get_html(id=id, body=text, title="Social")
 
 
-@views.route("/socialj", methods=["GET"])
-def socialj():
+@views.route("/api/social", methods=["GET"])
+def api_social():
     """
     Dynamic, social data.
     Thumbs up, etc.
@@ -883,7 +883,7 @@ def ping():
     url = request.args.get("url")
 
     if not url:
-        form_html = get_link_form("Find ping information", "pingj", id)
+        form_html = get_link_form("Find ping information", "api/ping", id)
         return get_html(id=id, body=form_html, title="Social")
 
     page_url = webtools.Url(url)
@@ -895,8 +895,8 @@ def ping():
     return get_html(id=id, body=text, title="Social")
 
 
-@views.route("/pingj", methods=["GET"])
-def pingj():
+@views.route("/api/ping", methods=["GET"])
+def api_ping():
     """
     Dynamic, social data.
     Thumbs up, etc.
@@ -932,8 +932,8 @@ def pingj():
     return jsonify({"status": False})
 
 
-@views.route("/linkj", methods=["GET"])
-def linkj():
+@views.route("/api/link", methods=["GET"])
+def api_link():
     id = request.args.get("id")
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -962,7 +962,7 @@ def link():
     url = request.args.get("url")
 
     if not url:
-        form_html = get_link_form("Get link information", "/linkj", id)
+        form_html = get_link_form("Get link information", "/api/link", id)
         return get_html(id=id, body=form_html, title="Feeds")
 
     page_url = webtools.Url(url)
@@ -980,8 +980,8 @@ def link():
     return get_html(id=id, body=text, title="Error")
 
 
-@views.route("/feedsj", methods=["GET"])
-def feedsj():
+@views.route("/api/feeds", methods=["GET"])
+def api_feeds():
     id = request.args.get("id")
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")
@@ -1010,7 +1010,7 @@ def feeds():
     url = request.args.get("url")
 
     if not url:
-        form_html = get_link_form("Find feeds information", "feedsj", id)
+        form_html = get_link_form("Find feeds information", "api/feeds", id)
         return get_html(id=id, body=form_html, title="Feeds")
 
     page_url = webtools.Url(url)
@@ -1023,8 +1023,8 @@ def feeds():
     return get_html(id=id, body=text, title="Error")
 
 
-@views.route("/archivesj", methods=["GET"])
-def archivesj():
+@views.route("/api/archives", methods=["GET"])
+def api_archives():
     id = request.args.get("id")
     if not current_app.config['configuration'].is_allowed(id):
         return get_html(id=id, body="Cannot access this view", title="Error")

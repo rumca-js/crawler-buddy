@@ -125,8 +125,8 @@ def get_entry_html(id, crawl_data):
 
     if not id:
         id = ""
-    find_link = "/findj?id={}&index={}".format(id, str(crawl_id))
-    remove_link = "/removej?id={}&index={}".format(id, str(crawl_id))
+    find_link = "/api/find?id={}&index={}".format(id, str(crawl_id))
+    remove_link = "/api/remove?id={}&index={}".format(id, str(crawl_id))
 
     timestamp_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -197,8 +197,8 @@ def get_crawl_data(id, crawl_data):
     request = crawl_data.get_request()
     url = request.url
 
-    find_link = "/findj?id={}&index={}".format(id, str(crawl_id))
-    remove_link = "/removej?id={}&index={}".format(id, str(crawl_id))
+    find_link = "/api/find?id={}&index={}".format(id, str(crawl_id))
+    remove_link = "/api/remove?id={}&index={}".format(id, str(crawl_id))
 
     crawl_type = CrawlerContainer.crawl_type_to_str(crawl_type)
     crawler_name = ""

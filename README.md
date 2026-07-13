@@ -19,42 +19,46 @@ The Crawling Server is an HTTP-based web crawler that delivers data in an easily
 Main Available Endpoints:
  - GET / - Provides index page
  - GET /info - Displays information about available crawlers.
- - GET /infoj - Similar to /info, but explicitly returns the information, in JSON format.
  - GET /system - Information about system.
- - GET /history - Displays the crawl history.
- - GET /historyj - Displays the crawl history, in JSON format.
  - GET /debug - debug information
-
-Endpoints:
- - GET /get - form for getj Endpoint.
- - GET /getj - Crawls a specified page. Returns JSON
- - GET /contents - form for contentsr Endpoint
- - GET /contentsr - Returns contents of URL, and status code as is
- - GET /feeds - form for finding feeds for the specified URL
- - GET /feedsj - feeds information JSON
- - GET /social - form for social information
- - GET /socialj - Provides social information about a specified URL, thumbs up, view counts.
- - GET /link - form for link information
- - GET /linkj - Provides link information - canonical links, etc.
- - GET /ping - form for checking page status, if it is up, or not
- - GET /pingj - JSON response for ping
- - GET /archivesj - Provides archives links (to web archive etc)
- - GET /rssify - form for RSS contents
- - GET /rssifyr - returns RSS data for link
- - GET /scanlinksj - Provides JSON data with links present in the page
- - GET /scandomainsj - Provides JSON data with domains present in the page
 
 Operation Endpoints:
 
+ - GET /history - Displays the crawl history.
  - GET /queue - Displays information about the current queue.
- - GET /removej - removes history entry
- - GET /clearj - clears history, removes all history entries
- - GET /find - form for findj Endpoint.
- - GET /findj - Retrieves the last crawl information for a specified URL.
+ - GET /find - form for api/find Endpoint.
+
+Forms:
+ - GET /get - form for api/get Endpoint.
+ - GET /contents - form for contentsr Endpoint
+ - GET /feeds - form for finding feeds for the specified URL
+ - GET /social - form for social information
+ - GET /link - form for link information
+ - GET /ping - form for checking page status, if it is up, or not
+ - GET /rssify - form for RSS contents
+
+Contents:
+ - GET /contentsr - Returns contents of URL, and status code as is
+ - GET /rssifyr - returns RSS data for link
+
+API:
+ - GET /api/info - Similar to /info, but explicitly returns the information, in JSON format.
+ - GET /api/ping - JSON response for ping
+ - GET /api/get - Crawls a specified page. Returns JSON
+ - GET /api/feeds - feeds information JSON
+ - GET /api/link - Provides link information - canonical links, etc.
+ - GET /api/social - Provides social information about a specified URL, thumbs up, view counts.
+ - GET /api/history - Displays the crawl history, in JSON format.
+ - GET /api/find - Retrieves the last crawl information for a specified URL.
     - Query parameter: url (string).
     - Response: Returns JSON with the last crawl details.
+ - GET /api/scanlinks - Provides JSON data with links present in the page
+ - GET /api/scandomains - Provides JSON data with domains present in the page
+ - GET /api/archives - Provides archives links (to web archive etc)
+ - GET /api/clear - clears history, removes all history entries
+ - GET /api/remove - removes history entry
 
-## /getj request
+## /api/get request
 
 The getj Entpoint request arguments
 
@@ -74,7 +78,7 @@ settings is a dict, with settings:
  - driver_executable (string): string to driver executable. Useful for selenium
  - script (string): string informing which script should be used. Useful if ScriptCrawler is used
 
-## /getj response
+## /api/get response
 
 Fields:
 

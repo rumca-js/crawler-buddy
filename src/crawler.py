@@ -71,7 +71,7 @@ class CrawlerTypeGet(object):
         except Exception as E:
             WebLogger.exc(
                 E,
-                info_text="Exception when calling getj {} {}".format(url, request),
+                info_text="Exception when calling GET {} {}".format(url, request),
             )
             all_properties = get_all_properties__exc(E, "Cannot obtain GET information")
 
@@ -102,7 +102,7 @@ class CrawlerTypeGet(object):
             page_url.close()
         except Exception as E:
             WebLogger.exc(
-                E, info_text="Exception when calling getj {}".format(url)
+                E, info_text="Exception when calling GET {}".format(url)
             )
             all_properties = get_all_properties__exc(E, "Cannot obtain GET information")
 
@@ -134,7 +134,7 @@ class CrawlerTypeSocialData(object):
             page_url.close()
         except Exception as E:
             WebLogger.exc(
-                E, info_text="Exception when calling socialj {}".format(url)
+                E, info_text="Exception when calling SOCIAL {}".format(url)
             )
             all_properties = get_all_properties__exc(E, "Cannot obtain social data")
 
