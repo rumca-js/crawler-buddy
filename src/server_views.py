@@ -424,16 +424,20 @@ def api_history():
 
     for crawl_data in reversed(current_app.config['crawler_main'].container.get_ready_items()):
         crawl_type = crawl_data.crawl_type
-        url = crawl_data.url
         timestamp = crawl_data.timestamp
         crawl_id = crawl_data.crawl_id
         all_properties = crawl_data.data
+
+        page_request = crawl_data.get_request()
+        url = None
+        if page_request:
+            url = page_request.url
 
         if crawl_type != CrawlerContainer.CRAWL_TYPE_GET:
             continue
 
         json_history.append(
-            {"datetime": datetime, "url": url, "properties": all_properties}
+            {"datetime": timestamp, "url": str(url), "properties": all_properties}
         )
 
     return jsonify(json_history)

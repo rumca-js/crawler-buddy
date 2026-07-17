@@ -16,10 +16,9 @@ from src.taskrunner import start_runner_thread
 from commandlineparser import CommandLineParser
 
 
-if __name__ == "__main__":
-    print("Creating app")
-    app = create_app()
-    
+app = create_app()
+
+def main():
     p = CommandLineParser()
     p.parse()
 
@@ -81,3 +80,7 @@ if __name__ == "__main__":
         app.run(debug=True, host=host, port=port, threaded=True)
 
     webtools.WebConfig.stop_display()
+
+
+if __name__ == "__main__":
+    main()

@@ -7,6 +7,7 @@ from webtoolkit.tests.fakeresponse import FlaskRequest
 from src.views import get_entry_html
 from src.webtools import Url
 from src.crawlercontainer import CrawlerContainer, CrawlItem
+from script_server import app
 
 
 class ViewsTest(FakeInternetTestCase):
@@ -27,3 +28,8 @@ class ViewsTest(FakeInternetTestCase):
 
         html = get_entry_html("", crawl_data)
         self.assertTrue(html)
+
+    def test_api_history(self):
+        client = app.test_client()
+        response = client.get("/api/history")
+        self.assertEqual(response.status_code, 200)
