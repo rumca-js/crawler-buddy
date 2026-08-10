@@ -50,7 +50,7 @@
   },
   {
     "crawler_name": "SeleniumUndetected",
-    "crawler_class_name": "ScriptCrawler",
+    "crawler_class_name": "SeleniumUndetected",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
       "timeout_s": 60
@@ -58,7 +58,7 @@
   },
   {
     "crawler_name": "SeleniumChromeHeadless",
-    "crawler_class_name": "ScriptCrawler",
+    "crawler_class_name": "SeleniumChromeHeadless",
     "settings": {
       "driver_executable": "/usr/bin/chromedriver",
       "timeout_s": 60
