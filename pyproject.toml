@@ -3,7 +3,7 @@
 
 [tool.poetry]
 name = "crawler-buddy"
-version = "6.2.2"
+version = "6.2.1"
 description = "Internet Crawler"
 authors = ["Iwan Grozny <renegat@renegat0x0.ddns.net>"]
 license = "GPL3"
@@ -31,7 +31,7 @@ curl-cffi="^0.16.0"
 requests = "^2.34.2"
 
 # [Selenium]
-selenium="^4.46.0"
+selenium="4.38.0"
 selenium-wire="*"
 # chardet = "^5.2.0" # does not work with some RSS sources
 # psycopg2 = "*"
