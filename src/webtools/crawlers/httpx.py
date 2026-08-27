@@ -32,7 +32,7 @@ class HttpxCrawler(CrawlerInterface):
 
             if answer:
                 self.response = PageResponseObject(
-                    self.request.url,
+                    url=self.request.url,
                     status_code=answer.status_code,
                     request_url=self.request.url,
                     headers=answer.headers,
@@ -46,7 +46,7 @@ class HttpxCrawler(CrawlerInterface):
 
             if answer and content:
                 self.response = PageResponseObject(
-                    self.request.url,
+                    url=self.request.url,
                     binary=content,
                     status_code=answer.status_code,
                     request_url=self.request.url,
@@ -55,7 +55,7 @@ class HttpxCrawler(CrawlerInterface):
 
             elif text:
                 self.response = PageResponseObject(
-                    self.request.url,
+                    url=self.request.url,
                     binary=None,
                     text=text,
                     status_code=answer.status_code,
@@ -65,7 +65,7 @@ class HttpxCrawler(CrawlerInterface):
 
             elif answer:
                 self.response = PageResponseObject(
-                    self.request.url,
+                    url=self.request.url,
                     binary=None,
                     text=None,
                     status_code=answer.status_code,

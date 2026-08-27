@@ -51,7 +51,7 @@ class CurlCffiCrawler(CrawlerInterface):
 
             if answer and content:
                 self.response = PageResponseObject(
-                    self.request.url,
+                    url=answer.url,
                     binary=content,
                     status_code=answer.status_code,
                     request_url=self.request.url,
@@ -60,7 +60,7 @@ class CurlCffiCrawler(CrawlerInterface):
 
             elif text:
                 self.response = PageResponseObject(
-                    self.request.url,
+                    url=self.request.url,
                     binary=None,
                     text=text,
                     status_code=answer.status_code,
@@ -70,7 +70,7 @@ class CurlCffiCrawler(CrawlerInterface):
 
             elif answer:
                 self.response = PageResponseObject(
-                    self.request.url,
+                    url=answer.url,
                     binary=None,
                     text=None,
                     status_code=answer.status_code,

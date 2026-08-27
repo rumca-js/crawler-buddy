@@ -46,7 +46,7 @@ class StealthRequestsCrawler(CrawlerInterface):
 
             if answer and content:
                 self.response = PageResponseObject(
-                    self.request.url,
+                    url=answer.url,
                     binary=content,
                     status_code=answer.status_code,
                     request_url=self.request.url,
@@ -59,7 +59,7 @@ class StealthRequestsCrawler(CrawlerInterface):
 
             elif answer and text:
                 self.response = PageResponseObject(
-                    self.request.url,
+                    url=answer.url,
                     binary=None,
                     text=text,
                     status_code=answer.status_code,
@@ -69,7 +69,7 @@ class StealthRequestsCrawler(CrawlerInterface):
 
             elif answer:
                 self.response = PageResponseObject(
-                    self.request.url,
+                    url=answer.url,
                     binary=None,
                     text=None,
                     status_code=answer.status_code,
