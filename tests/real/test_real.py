@@ -154,7 +154,6 @@ class TestUrl(unittest.TestCase):
 
         self.assertTrue(response.is_valid())
 
-    """
     def test_youtube_video(self):
         handler, response = self.call_url(url = "https://www.youtube.com/watch?v=9yanqmc01ck")
 
@@ -209,7 +208,6 @@ class TestUrl(unittest.TestCase):
         self.assertTrue(len(handler.get_entries()) > 0)
 
         self.assertTrue(response.is_valid())
-    """
 
     def test_github(self):
         handler, response = self.call_url(url = "https://www.github.com/rumca-js/Internet-Places-Database")
