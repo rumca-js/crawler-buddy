@@ -96,16 +96,16 @@ class HttpxCrawler(CrawlerInterface):
         if self.request.https_proxy:
             proxy = self.request.https_proxy
 
-            answer = httpx.get(
-                self.request.url,
-                timeout=self.request.timeout_s,
-                verify=self.request.ssl_verify,
-                headers=self.request.request_headers,
-                proxy=proxy,
-                cookies=self.request.cookies,
-                follow_redirects=True,
-            )
-            return answer
+        answer = httpx.get(
+            url=self.request.url,
+            timeout=self.request.timeout_s,
+            verify=self.request.ssl_verify,
+            headers=self.request.request_headers,
+            proxy=proxy,
+            cookies=self.request.cookies,
+            follow_redirects=True,
+        )
+        return answer
 
     def update_request(self):
         self.request.timeout_s = self.get_timeout_s()
