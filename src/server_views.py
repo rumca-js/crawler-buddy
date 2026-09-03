@@ -731,14 +731,16 @@ def contentsr():
     page_url.responses = {"Default" : RemoteServer.get_response(page_url.all_properties)}
 
     response = page_url.get_response()
+    contents_text = ""
     if response:
         status_code = response.get_status_code()
-        content_type = response.get_contents_type()
+        content_type = response.get_content_type()
+        contents_text = response.get_text()
     else:
         status_code = 600
         content_type = "text/html"
 
-    return Response(contents, status=status_code, mimetype=content_type)
+    return Response(contents_text, status=status_code, mimetype=content_type)
 
 
 @views.route("/scanlinks", methods=["GET"])
