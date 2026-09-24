@@ -35,6 +35,9 @@ class CrawlHistoryJson(Base):
     def is_expired(self):
         return False
 
+    def get_time_diff(self):
+        return datetime.now() - self.timestamp
+
 
 class CrawlerContainerAlchemy:
     """

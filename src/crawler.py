@@ -14,6 +14,7 @@ from webtoolkit import (
   UrlLocation,
   HTTP_STATUS_CODE_EXCEPTION,
   HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+  HTTP_STATUS_CODE_SERVER_DATA_NOT_READY,
 )
 
 from src import webtools
@@ -25,6 +26,14 @@ from src import CrawlerData
 def get_all_properties__too_many_requests(error_text):
     all_properties = [{"name": "Response", "data": {
         "status_code" : HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+        "errors" :  [error_text],
+    }}]
+    return all_properties
+
+
+def get_all_properties__data_not_ready(error_text):
+    all_properties = [{"name": "Response", "data": {
+        "status_code" : HTTP_STATUS_CODE_SERVER_DATA_NOT_READY,
         "errors" :  [error_text],
     }}]
     return all_properties
@@ -204,7 +213,7 @@ class Crawler(object):
                     data = self.wait_for_response(things.crawl_id)
                     if data:
                         return data
-                    return get_all_properties__too_many_requests("Not yet ready")
+                    return get_all_properties__data_not_ready("Not yet ready")
 
                 return things.data
 
@@ -222,14 +231,14 @@ class Crawler(object):
             data = self.wait_for_response(crawl_id)
             if data:
                 return data
-            all_properties = get_all_properties__too_many_requests("Data are not yet ready. Waiting for crawl response")
+            all_properties = get_all_properties__data_not_ready("Data are not yet ready. Waiting for crawl response")
         else:
             crawl_item = self.container.get(crawl_id)
             crawl = crawler_builder(self.container, crawl_item)
             data = crawl.run()
             if data:
                 return data
-            all_properties = get_all_properties__too_many_requests("Data are not yet ready. Waiting for crawl response")
+            all_properties = get_all_properties__data_not_ready("Data are not yet ready. Waiting for crawl response")
         return all_properties
 
     def is_supported(self, url):

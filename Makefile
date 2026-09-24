@@ -32,6 +32,10 @@ server:
 	#poetry run python script_server.py -k -m
 	poetry run python watchdog.py
 
+cache-server:
+	# rm -f crawlhistory.db
+	poetry run python crawlcache.py --host 192.168.0.200 --port 3000
+
 # Assumptions:
 #  - python black is in your path
 # Black should use gitignore files to ignore refactoring
