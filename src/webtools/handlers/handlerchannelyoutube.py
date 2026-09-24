@@ -24,7 +24,11 @@ class YouTubeChannelHandlerJson(YouTubeChannelHandler):
         )
 
     def get_json_data(self):
-        self.get_response()
+        response = self.get_response()
+        # if rss returns invalid, no point in downloading anything
+        if not response.is_valid():
+            return self.social_data
+
         entries = self.get_entries()
         for entry in entries:
             u = self.build_default_url(entry["link"])
