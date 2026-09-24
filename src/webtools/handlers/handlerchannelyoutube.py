@@ -4,6 +4,8 @@ Provides handling for YouTube channel.
 Can read channel followers count.
 """
 import traceback
+import re
+import json
 
 from webtoolkit import YouTubeChannelHandler
 
@@ -24,6 +26,20 @@ class YouTubeChannelHandlerJson(YouTubeChannelHandler):
         )
 
     def get_json_data(self):
+        from utils.programwrappers import ytdlp
+
+        yt = ytdlp.YTDLP(self.url)
+        text = yt.get_followers_count()
+        if text:
+            try:
+                self.social_data["followers_count"] = int(text)
+            except Exception as E:
+                pass
+
+        return self.social_data
+
+        """
+    def get_json_data(self):
         response = self.get_response()
         # if rss returns invalid, no point in downloading anything
         if not response.is_valid():
@@ -39,7 +55,7 @@ class YouTubeChannelHandlerJson(YouTubeChannelHandler):
                 self.social_data["followers_count"] = json.get_followers_count()
                 return self.social_data
 
-        return self.social_data
+        """
 
     def get_followers_count(self):
         """

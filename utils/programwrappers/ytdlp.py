@@ -167,6 +167,36 @@ class YTDLP(YouTubeDownloader):
         json = json.loads(json_text)
         return json
 
+    def get_followers_count(self, path=None):
+        cmds = ["yt-dlp",
+                "--playlist-items", "1",
+                "--print", "channel_follower_count",
+                str(self._url)]
+
+        proc = subprocess.run(cmds, capture_output=True, timeout=self.timeout_s)
+
+        self.returncode = proc.returncode
+        self.stdout = self.get_output_ignore(proc)
+        self.stderr = self.get_error_ignore(proc)
+
+        # return code 101 is returned due to --max-downloads limit
+        # everything is fine
+
+        if proc.returncode != 0 and proc.returncode != 101:
+            print(
+                "yt-dlp problem. Url:{}. Return code:{}\nOut:{}\nErr:{}".format(
+                    self._url, proc.returncode, self.stdout, self.stderr
+                )
+            )
+            return None
+
+        self._json_data = self.stdout.strip()
+
+        if path is not None:
+            path.write_text(self._json_data)
+
+        return self._json_data
+
     def is_valid(self):
         # return code 101 is returned due to --max-downloads limit
         # everything is fine
