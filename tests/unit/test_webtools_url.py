@@ -397,10 +397,41 @@ class UrlTest(FakeInternetTestCase):
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 1)
 
-    def test_get_all_properties__youtube_channel__advanced(self):
+    def test_get_all_properties__youtube_channel__feeds(self):
         MockRequestCounter.mock_page_requests = 0
 
         test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=UCXuqSBlHAE6Xw-yeJA0Tunw"
+        channel_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
+
+        url = Url(test_link)
+
+        url.get_response()
+
+        # call tested function
+        all_properties = url.get_all_properties()
+        self.assertTrue(len(all_properties) > 0)
+
+        properties_section = RemoteServer.read_properties_section("Properties", all_properties)
+        self.assertTrue(properties_section)
+
+        self.assertIn("title", properties_section)
+        self.assertIn("link", properties_section)
+        self.assertIn("feeds", properties_section)
+
+        self.assertEqual(properties_section["link"], test_link)
+        self.assertEqual(properties_section["link_request"], test_link)
+
+        entries_section = RemoteServer.read_properties_section("Entries", all_properties)
+        self.assertTrue(entries_section)
+        self.assertTrue(len(entries_section) > 0)
+
+        # +1 HTML +1 RSS
+        self.assertEqual(MockRequestCounter.mock_page_requests, 2)
+
+    def test_get_all_properties__youtube_channel__channel(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
         channel_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
 
         url = Url(test_link)
@@ -864,7 +895,7 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         urls = url.get_urls()
 
-        self.assertEqual(len(urls), 2)
+        self.assertEqual(len(urls), 3)
         self.assertEqual(urls["link"], test_link)
         self.assertEqual(urls["link_request"], test_link)
         self.assertNotIn("link_canonical", urls)
@@ -883,7 +914,7 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         urls = url.get_urls()
 
-        self.assertEqual(len(urls), 3)
+        self.assertEqual(len(urls), 4)
         self.assertEqual(urls["link"], test_link)
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_canonical_link)
@@ -898,7 +929,7 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         urls = url.get_urls()
 
-        self.assertEqual(len(urls), 2)
+        self.assertEqual(len(urls), 3)
         self.assertEqual(urls["link"], "https://www.reddit.com/r/searchengines/.rss")
         self.assertEqual(urls["link_request"], "https://www.reddit.com/r/searchengines/.rss")
         self.assertNotIn("link_canonical", urls)
@@ -915,7 +946,7 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         urls = url.get_urls()
 
-        self.assertEqual(len(urls), 2)
+        self.assertEqual(len(urls), 3)
         self.assertEqual(urls["link"], "https://corridordigital.com")
         self.assertEqual(urls["link_request"], "https://www.youtube.com/redirect?event=lorum&redir_token=ipsum&q=https%3A%2F%2Fcorridordigital.com%2F&v=LeB9DcFT810")
         self.assertNotIn("link_canonical", urls)
@@ -933,7 +964,7 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         urls = url.get_urls()
 
-        self.assertEqual(len(urls), 3)
+        self.assertEqual(len(urls), 4)
         self.assertEqual(urls["link"], test_link)
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_link)
@@ -950,7 +981,7 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         urls = url.get_urls()
 
-        self.assertEqual(len(urls), 3)
+        self.assertEqual(len(urls), 4)
         self.assertEqual(urls["link"], test_link)
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_link)
@@ -968,7 +999,7 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         urls = url.get_urls()
 
-        self.assertEqual(len(urls), 3)
+        self.assertEqual(len(urls), 4)
         self.assertEqual(urls["link"], test_link)
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_canonical_link)
@@ -985,7 +1016,7 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         urls = url.get_urls()
 
-        self.assertEqual(len(urls), 3)
+        self.assertEqual(len(urls), 4)
         self.assertEqual(urls["link"], test_link)
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_link)
@@ -1003,14 +1034,32 @@ class UrlTest(FakeInternetTestCase):
         # call tested function
         urls = url.get_urls()
 
-        self.assertEqual(len(urls), 3)
+        self.assertEqual(len(urls), 4)
         self.assertEqual(urls["link"], test_link)
         self.assertEqual(urls["link_request"], test_link)
         self.assertEqual(urls["link_canonical"], test_canonical_link)
 
         self.assertEqual(MockRequestCounter.mock_page_requests, 0)
 
-    def test_get_social_properties__youtube(self):
+    def test_get_social_properties__youtube_channel(self):
+        MockRequestCounter.mock_page_requests = 0
+
+        test_link = "https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw"
+
+        url = Url(test_link)
+
+        self.assertEqual(MockRequestCounter.mock_page_requests, 0)
+
+        # call tested function
+        properties = url.get_social_properties()
+
+        self.assertIn("followers_count", properties)
+        self.assertTrue(properties["followers_count"])
+
+        # RSS + HTML + video
+        self.assertEqual(MockRequestCounter.mock_page_requests, 3)
+
+    def test_get_social_properties__youtube_video(self):
         MockRequestCounter.mock_page_requests = 0
 
         test_link = "https://m.youtube.com/watch?v=1234"
