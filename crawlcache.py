@@ -32,6 +32,11 @@ from src.views import (
 
 
 """
+TODO - use queue. next requests should add to queue
+"""
+
+
+"""
 TODO duplicated
 """
 def display_history(history_items):
@@ -138,7 +143,8 @@ parser.parse()
 
 
 # TODO define 1 day
-container = CrawlerContainerAlchemy(records_size=parser.args.max_rows)
+HOUR_M = 60
+container = CrawlerContainerAlchemy(records_size=parser.args.max_rows, time_cache_m=HOUR_M)
 
 
 @app.route("/")
