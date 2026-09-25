@@ -13,6 +13,10 @@ Base = declarative_base()
 
 
 class CrawlHistoryJson(Base):
+    """
+      timestamp_created - timestamp when request was created
+      timestamp - timestamp of response
+    """
     __tablename__ = "crawl_history"
 
     crawl_id = Column(Integer, primary_key=True)
@@ -20,6 +24,7 @@ class CrawlHistoryJson(Base):
     request = Column(JSON, nullable=False)
     data = Column(JSON, nullable=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    timestamp_created = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     def get_url(self):
         request = json_to_request(self.request)
@@ -46,7 +51,6 @@ class CrawlerContainerAlchemy:
 
     def __init__(self, time_cache_m=10, records_size=500, db_path="crawlhistory.db"):
         self.lock = threading.Lock()           # protects running_ids
-        self.crawl_index = 0
 
         db_exists = os.path.exists(db_path)
 
@@ -128,11 +132,8 @@ class CrawlerContainerAlchemy:
 
         if not item_updated:
             with self.lock:
-                self.crawl_index += 1
-                crawl_id = self.crawl_index
-
                 with self.Session() as session:
-                    record = CrawlHistoryJson(crawl_id=crawl_id, crawl_type=crawl_type, request=request, data=data)
+                    record = CrawlHistoryJson(crawl_type=crawl_type, request=request, data=data)
                     session.add(record)
                     session.commit()
 
@@ -335,12 +336,12 @@ class CrawlerContainerAlchemy:
     def get_queued_items(self):
         """return records without data (null)"""
         with self.Session() as session:
-            return session.query(CrawlHistoryJson).filter(CrawlHistoryJson.data.is_(None)).all()
+            return session.query(CrawlHistoryJson).filter(CrawlHistoryJson.data.is_(None)).order_by(CrawlHistoryJson.timestamp_created.asc()).all
 
     def get_ready_items(self):
         """return records with data (not null)"""
         with self.Session() as session:
-            return session.query(CrawlHistoryJson).filter(CrawlHistoryJson.data.is_not(None)).all()
+            return session.query(CrawlHistoryJson).filter(CrawlHistoryJson.data.is_not(None)).order_by(CrawlHistoryJson.timestamp_created.desc()).all()
 
     def set_time_cache(self, time_cache_m):
         self.time_cache_m = time_cache_m

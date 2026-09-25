@@ -9,8 +9,13 @@ from src.webtools import WebConfig
 
 class CrawlItem(object):
     def __init__(self, crawl_id, crawl_type, request, data=None):
+        """
+        timestamp_created - timestamp when request was created
+        timestamp - timestamp of response
+        """
         self.crawl_id = crawl_id
         self.crawl_type = crawl_type
+        self.timestamp_created = datetime.now()
         self.timestamp = datetime.now()
         self.data = data
         self.request = request_to_json(request)

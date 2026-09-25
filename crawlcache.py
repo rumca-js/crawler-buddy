@@ -33,8 +33,10 @@ from src.views import (
 
 """
 TODO - use queue. next requests should add to queue
+TODO - provide name
 """
 
+client_id = "CrawlCache"
 
 """
 TODO duplicated
@@ -194,6 +196,11 @@ def api_ping():
 
 @app.route("/api/get")
 def api_get():
+    """
+    Multiple clients can connect here. Multiple clients may call remote url.
+    Remote url is expected to handle parallel requests.
+    When we receive data, the last one is expected to update the data.
+    """
     data = CrawlerData(configuration=configuration)
     data.set_request(request)
     page_request = data.get_request_data()
@@ -205,14 +212,16 @@ def api_get():
     row = container.get(request=page_request)
     if row:
         time_diff = row.get_time_diff()
-        if time_diff.total_seconds() < 3600:
+        if time_diff.total_seconds() < HOUR_M*60:
             all_properties = row.data
 
     if not all_properties:
-        remote_url = RemoteUrl(url=page_request.url, remote_server_location=REMOTE_LOCATION)
+        remote_url = RemoteUrl(url=page_request.url, remote_server_location=REMOTE_LOCATION, client_id=client_id)
         response = remote_url.get_response()
 
-        while response and response.get_status_code() == HTTP_STATUS_CODE_SERVER_DATA_NOT_READY:
+        while response and (
+                response.get_status_code() == HTTP_STATUS_CODE_SERVER_DATA_NOT_READY or
+                response.get_status_code() == HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS):
             response = remote_url.get_response()
 
         all_properties = remote_url.get_all_properties()
@@ -224,6 +233,11 @@ def api_get():
 
 @app.route("/api/social")
 def api_social():
+    """
+    Multiple clients can connect here. Multiple clients may call remote url.
+    Remote url is expected to handle parallel requests.
+    When we receive data, the last one is expected to update the data.
+    """
     data = CrawlerData(configuration=configuration)
     data.set_request(request)
     page_request = data.get_request_data()
@@ -235,14 +249,16 @@ def api_social():
     row = container.get(request=page_request)
     if row:
         time_diff = row.get_time_diff()
-        if time_diff.total_seconds() < 3600:
+        if time_diff.total_seconds() < HOUR_M*60:
             all_properties = row.data
 
     if not all_properties:
-        remote_url = RemoteUrl(url=page_request.url, remote_server_location=REMOTE_LOCATION)
+        remote_url = RemoteUrl(url=page_request.url, remote_server_location=REMOTE_LOCATION, client_id=client_id)
         response = remote_url.get_response()
 
-        while response and response.get_status_code() == HTTP_STATUS_CODE_SERVER_DATA_NOT_READY:
+        while response and (
+                response.get_status_code() == HTTP_STATUS_CODE_SERVER_DATA_NOT_READY or
+                response.get_status_code() == HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS):
             response = remote_url.get_response()
 
         all_properties = remote_url.get_social_properties()

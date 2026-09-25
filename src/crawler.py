@@ -163,7 +163,7 @@ class Crawler(object):
     """
     Crawler
     """
-    def __init__(self, container=None):
+    def __init__(self, container=None, wait_for_responses=True):
         """ Constructor """
         self.configuration = Configuration()
         self.multi_process = False
@@ -178,6 +178,7 @@ class Crawler(object):
         self.container = container
 
         self.data = CrawlerData(self.configuration)
+        self.wait_for_responses_flag = wait_for_responses
 
     def get_request_data(self, request):
         self.data.set_request(request)
@@ -210,9 +211,10 @@ class Crawler(object):
             things = self.container.get(crawl_type=crawl_type, request=request)
             if things:
                 if things.data is None:
-                    data = self.wait_for_response(things.crawl_id)
-                    if data:
-                        return data
+                    if self.wait_for_responses_flag:
+                        data = self.wait_for_response(things.crawl_id)
+                        if data:
+                            return data
                     return get_all_properties__data_not_ready("Not yet ready")
 
                 return things.data
@@ -228,9 +230,10 @@ class Crawler(object):
         request.settings["crawl_id"] = crawl_id
 
         if self.multi_process:
-            data = self.wait_for_response(crawl_id)
-            if data:
-                return data
+            if self.wait_for_responses_flag:
+                data = self.wait_for_response(crawl_id)
+                if data:
+                    return data
             all_properties = get_all_properties__data_not_ready("Data are not yet ready. Waiting for crawl response")
         else:
             crawl_item = self.container.get(crawl_id)
@@ -272,6 +275,9 @@ class Crawler(object):
         """
         Waits until response is obtained.
         crawl_item.data is "all properties".
+
+        We keep client up to request timeout.
+        Though queue might be long, at it may be a long time to obtain data.
         The client can disconnect if he wants to in the meantime.
         
         @note Flask server could keep that request forever.
@@ -280,6 +286,7 @@ class Crawler(object):
         """
         crawl_url = None
         start_time = datetime.now()
+        wait_time_s = self.get_timeout_timedelta()
 
         while True:
             try:
@@ -288,19 +295,23 @@ class Crawler(object):
                     WebLogger.debug(f"Request was removed ID:{crawl_id}")
                     return
 
-                crawl_url = crawl_item.get_url()
-
                 if crawl_item.data is not None:
                     return crawl_item.data
 
+                request = crawl_item.get_request()
+                if request:
+                    if request.timeout_s and request.timeout_s > 0:
+                        wait_time_s = request.timeout_s
+
+                if datetime.now() - start_time > wait_time_s
+                    crawl_url = crawl_item.get_url()
+                    WebLogger.error(f"URL:{crawl_url}: Timeout on waiting for response")
+                    return
+
+                time.sleep(10)
             except Exception as E:
                 WebLogger.exc(E)
-
-            if datetime.now() - start_time > self.get_timeout_timedelta():
-                WebLogger.error(f"URL:{crawl_url}: Timeout on waiting for response")
                 return
-
-            time.sleep(10)
 
     def set_multi_process(self):
         self.multi_process = True
