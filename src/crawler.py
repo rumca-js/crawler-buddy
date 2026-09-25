@@ -303,7 +303,7 @@ class Crawler(object):
                     if request.timeout_s and request.timeout_s > 0:
                         wait_time_s = request.timeout_s
 
-                if datetime.now() - start_time > wait_time_s
+                if datetime.now() - start_time > wait_time_s:
                     crawl_url = crawl_item.get_url()
                     WebLogger.error(f"URL:{crawl_url}: Timeout on waiting for response")
                     return
