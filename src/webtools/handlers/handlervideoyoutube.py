@@ -394,8 +394,8 @@ class YouTubeVideoHandlerJson(YouTubeVideoHandler):
                 self.return_url.get_response()
             )
 
-        for key in self.channel_sources_urls:
-            self.streams[key] = self.channel_sources_urls[key].get_response()
+        for key in self.all_urls_to_fetch:
+            self.streams[key] = self.all_urls_to_fetch[key].get_response()
 
         return self.streams
 
